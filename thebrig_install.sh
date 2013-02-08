@@ -19,3 +19,5 @@ FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
 # Place the path (of the current directory) within a file for the intial
 # run of the extension
 cat FULL_PATH > /tmp/thebrig.tmp
+
+bin/sh FULL_PATH/bin/jail_start.sh
