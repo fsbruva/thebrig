@@ -41,10 +41,12 @@
 require("auth.inc");
 require("guiconfig.inc");
 
-if (isset($_GET['uuid']))
-	$uuid = $_GET['uuid'];
-if (isset($_POST['uuid']))
-	$uuid = $_POST['uuid'];
+// This determines if the edit operation was because of a jail creation or a jail edit
+if (isset($_GET['name']))  
+	// This indicates that an existing jail was selected, with its name as 'name'
+	$j_name = $_GET['name'];
+if (isset($_POST['name']))
+	$j_name = $_POST['name'];
 
 $pgtitle = array(gettext("Access"), gettext("Users"), isset($uuid) ? gettext("Edit") : gettext("Add"));
 
