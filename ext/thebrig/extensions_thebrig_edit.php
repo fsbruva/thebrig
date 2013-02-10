@@ -107,10 +107,13 @@ if ($_POST) {
 		$jail['extraoptions'] = $_POST['extraoptions'];
 		$jail['desc'] = $_POST['desc'];
 		
+		// This determines if it was an update or a new jail
 		if (isset($uuid) && (FALSE !== $cnid)) {
+			// Copies newly modified properties over the old
 			$a_jail[$cnid] = $jail;
 			$mode = UPDATENOTIFY_MODE_MODIFIED;
 		} else {
+			// Copies the first jail into $a_jail
 			$a_jail[] = $jail;
 			$mode = UPDATENOTIFY_MODE_NEW;
 		}
@@ -123,7 +126,7 @@ if ($_POST) {
 	}
 }
 
-// Get next rule number.
+// Get next jail number.
 function get_next_jailnumber() {
 	global $config;
 
@@ -133,7 +136,7 @@ function get_next_jailnumber() {
 	$a_jails = $config['thebrig']['jail'];
 	if (false !== array_search_ex(strval($jailno), $a_jails, "jailno")) {
 		do {
-			$jailno += 10; // Increase rule number until a unused one is found.
+			$jailno += 10; // Increase jail number until a unused one is found.
 		} while (false !== array_search_ex(strval($jailno), $a_jails, "jailno"));
 	}
 
