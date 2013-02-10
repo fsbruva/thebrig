@@ -41,22 +41,27 @@
 require("auth.inc");
 require("guiconfig.inc");
 
-// This determines if the edit operation was because of a jail creation or a jail edit
-if (isset($_GET['name']))  
-	// This indicates that an existing jail was selected, with its name as 'name'
-	$j_name = $_GET['name'];
-if (isset($_POST['name']))
-	$j_name = $_POST['name'];
+// This determines if the page was arrived at because of an edit (the UUID of the jail)
+// was passed to the page) or for a new creation.
+if (isset($_GET['uuid']))
+	// Use the existing jail's UUID
+	$uuid = $_GET['uuid'];
+if (isset($_POST['uuid']))
+	// Use the new jail's UUID
+	$uuid = $_POST['uuid'];
 
-$pgtitle = array(gettext("Access"), gettext("Users"), isset($uuid) ? gettext("Edit") : gettext("Add"));
+// Page title
+$pgtitle = array(gettext("TheBrig"), gettext("Jail"), isset($uuid) ? gettext("Edit") : gettext("Add"));
 
-if (!isset($config['access']['user']) || !is_array($config['access']['user']))
-	$config['access']['user'] = array();
+// This checks if the current XML config has a sectino for jails, or if it's an array
+if (!isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail']))
+	// If the array doesn't exist, it is created.
+	$config['thebrig']['jail'] = array();
 
-array_sort_key($config['access']['user'], "login");
-$a_user = &$config['access']['user'];
-$a_user_system = system_get_user_list();
-$a_group = system_get_group_list();
+// This sorts thebrig's configuration array by the jailno
+array_sort_key($config['thebrig']['jail'], "jailno");
+// This identifies the jail section of the XML, but does so by reference.
+$a_jail = &$config['thebrig']['jail'];
 
 if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_user, "uuid")))) {
 	$pconfig['uuid'] = $a_user[$cnid]['uuid'];
