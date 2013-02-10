@@ -1,43 +1,6 @@
 <?php
 /*
-	access_users_edit.php
-	
-	Part of NAS4Free (http://www.nas4free.org).
-	Copyright (C) 2012 by NAS4Free Team <info@nas4free.org>.
-	All rights reserved.
-
-	Portions of freenas (http://www.freenas.org).
-	Copyright (C) 2005-2011 by Olivier Cochard <olivier@freenas.org>.
-	All rights reserved.
-	
-	Portions of m0n0wall (http://m0n0.ch/wall).
-	Copyright (C) 2003-2006 Manuel Kasper <mk@neon1.net>.
-	All rights reserved.	
-
-	Redistribution and use in source and binary forms, with or without
-	modification, are permitted provided that the following conditions are met: 
-
-	1. Redistributions of source code must retain the above copyright notice, this
-	   list of conditions and the following disclaimer. 
-	2. Redistributions in binary form must reproduce the above copyright notice,
-	   this list of conditions and the following disclaimer in the documentation
-	   and/or other materials provided with the distribution. 
-
-	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-	The views and conclusions contained in the software and documentation are those
-	of the authors and should not be interpreted as representing official policies, 
-	either expressed or implied, of the NAS4Free Project.
-*/
+	*/
 require("auth.inc");
 require("guiconfig.inc");
 
@@ -63,30 +26,47 @@ array_sort_key($config['thebrig']['jail'], "jailno");
 // This identifies the jail section of the XML, but does so by reference.
 $a_jail = &$config['thebrig']['jail'];
 
-if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_user, "uuid")))) {
-	$pconfig['uuid'] = $a_user[$cnid]['uuid'];
-	$pconfig['login'] = $a_user[$cnid]['login'];
-	$pconfig['fullname'] = $a_user[$cnid]['fullname'];
-	$pconfig['password'] = $a_user[$cnid]['password'];
-	$pconfig['passwordconf'] = $pconfig['password'];
-	$pconfig['userid'] = $a_user[$cnid]['id'];
-	$pconfig['primarygroup'] = $a_user[$cnid]['primarygroup'];
-	$pconfig['group'] = !empty($a_user[$cnid]['group']) ? $a_user[$cnid]['group'] : array();
-	$pconfig['shell'] = $a_user[$cnid]['shell'];
-	$pconfig['homedir'] = $a_user[$cnid]['homedir'];
-	$pconfig['userportal'] = isset($a_user[$cnid]['userportal']);
-} else {
+// This checks that the $uuid variable is set, and that the 
+// attempt to determine the index of the jail config that has the same 
+// uuid as the page was entered with
+if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))) {
+	$pconfig['uuid'] = $a_jail[$cnid]['uuid'];
+	$pconfig['enable'] = isset($a_jail[$cnid]['enable']);
+	$pconfig['jailno'] = $a_jail[$cnid]['jailno'];
+	$pconfig['jailname'] = $a_jail[$cnid]['jailname'];
+	$pconfig['if'] = $a_jail[$cnid]['if'];
+	$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
+	$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
+	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
+	$pconfig['devfs_enable'] = isset($a_jail[$cnid]['devfs_enable']);
+	$pconfig['proc_enable'] = isset($a_jail[$cnid]['proc_enable']);
+	$pconfig['fdescfs_enable'] = isset($a_jail[$cnid]['fdescfs_enable']);
+	$pconfig['devfsrules'] = $a_jail[$cnid]['devfsrules'];
+	$pconfig['afterstart0'] = $a_jail[$cnid]['afterstart0'];
+	$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
+	$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
+	$pconfig['extraoptions'] = $a_jail[$cnid]['extraoptions'];
+	$pconfig['desc'] = $a_jail[$cnid]['desc'];
+}
+// In this case, the $uuid isn't set (this is a new jail) 
+else {
 	$pconfig['uuid'] = uuid();
-	$pconfig['login'] = "";
-	$pconfig['fullname'] = "";
-	$pconfig['password'] = "";
-	$pconfig['passwordconf'] = "";
-	$pconfig['userid'] = get_nextuser_id();
-	$pconfig['primarygroup'] = $a_group['guest'];
-	$pconfig['group'] = array();
-	$pconfig['shell'] = "nologin";
-	$pconfig['homedir'] = "";
-	$pconfig['userportal'] = FALSE;
+	$pconfig['enable'] = false;
+	$pconfig['jailno'] = get_next_jailnumber();
+	$pconfig['jailname'] = "";
+	$pconfig['if'] = "";
+	$pconfig['ipaddr'] = "";
+	$pconfig['subnet'] = "32";
+	$pconfig['jail_mount'] = false;
+	$pconfig['devfs_enable'] = false;
+	$pconfig['proc_enable'] = false;
+	$pconfig['fdescfs_enable'] = false;
+	$pconfig['devfsrules'] = "";
+	$pconfig['afterstart0'] = "";
+	$pconfig['afterstart1'] = "";
+	$pconfig['exec_stop'] = "";
+	$pconfig['extraoptions'] = "";
+	$pconfig['desc'] = "";
 }
 
 if ($_POST) {
@@ -94,118 +74,70 @@ if ($_POST) {
 	$pconfig = $_POST;
 
 	if (isset($_POST['Cancel']) && $_POST['Cancel']) {
-		header("Location: access_users.php");
+		header("Location: extensions_thebrig.php");
 		exit;
 	}
 
-	$reqdfields = explode(" ", "login fullname primarygroup userid shell");
-	$reqdfieldsn = array(gettext("Name"), gettext("Full Name"), gettext("Primary Group"), gettext("User ID"), gettext("Shell"));
-	$reqdfieldst = explode(" ", "string string numeric numeric string");
-
-	do_input_validation($_POST, $reqdfields, $reqdfieldsn, $input_errors);
-	do_input_validation_type($_POST, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
-
-	// Check for valid login name.
-	if (($_POST['login'] && !is_validlogin($_POST['login']))) {
-		$input_errors[] = gettext("The login name contains invalid characters.");
-	}
-	if (($_POST['login'] && strlen($_POST['login']) > 16)) {
-		$input_errors[] = gettext("The login name is limited to 16 characters.");
+	// Input validation.
+	// Validate if jail number is unique.
+	$index = array_search_ex($_POST['jailno'], $a_jail, "jailno");
+	if (FALSE !== $index) {
+		if (!((FALSE !== $cnid) && ($a_rule[$cnid]['uuid'] === $a_rule[$index]['uuid']))) {
+			$input_errors[] = gettext("The unique jail number is already used.");
+		}
 	}
 
-	if (($_POST['login'] && in_array($_POST['login'], $reservedlogin))) {
-		$input_errors[] = gettext("The login name is a reserved login name.");
-	}
-
-	// Check for valid Full name.
-	if (($_POST['fullname'] && !is_validdesc($_POST['fullname']))) {
-		$input_errors[] = gettext("The full name contains invalid characters.");
-	}
-
-	// Check for name conflicts. Only check if user is created.
-	if (!(isset($uuid) && (FALSE !== $cnid)) && ((is_array($a_user_system) && array_key_exists($_POST['login'], $a_user_system)) ||
-		(false !== array_search_ex($_POST['login'], $a_user, "login")))) {
-		$input_errors[] = gettext("This user already exists in the user list.");
-	}
-
-	// Check for a password mismatch.
-	if ($_POST['password'] != $_POST['passwordconf']) {
-		$input_errors[] = gettext("Password don't match.");
-	}
-
-	// Check if primary group is also selected in additional group.
-	if (isset($_POST['group']) && is_array($_POST['group']) && in_array($_POST['primarygroup'], $_POST['group'])) {
-		$input_errors[] = gettext("Primary group is also selected in additional group.");
-	}
-
-	// Check additional group count. Max=15 (Primary+14) 
-	if (isset($_POST['group']) && is_array($_POST['group']) && count($_POST['group']) > 14) {
-		$input_errors[] = gettext("There are too many additional groups.");
-	}
-
-	// Validate if ID is unique. Only check if user is created.
-	if (!(isset($uuid) && (FALSE !== $cnid)) && (false !== array_search_ex($_POST['userid'], $a_user, "id"))) {
-		$input_errors[] = gettext("The unique user ID is already used.");
-	}
-
-	// Check Webserver document root if auth is required
-	if (isset($config['websrv']['enable'])
-	    && isset($config['websrv']['authentication']['enable'])
-	    && !is_dir($config['websrv']['documentroot'])) {
-		$input_errors[] = gettext("Webserver document root is missing.");
-	}
-
-	if (empty($input_errors)) {
-		$user = array();
-		$user['uuid'] = $_POST['uuid'];
-		$user['login'] = $_POST['login'];
-		$user['fullname'] = $_POST['fullname'];
-		$user['password'] = $_POST['password'];
-		$user['shell'] = $_POST['shell'];
-		$user['primarygroup'] = $_POST['primarygroup'];
-		if (isset($_POST['group']) && is_array($_POST['group']))
-			$user['group'] = $_POST['group'];
-		$user['homedir'] = $_POST['homedir'];
-		$user['id'] = $_POST['userid'];
-		$user['userportal'] = isset($_POST['userportal']) ? true : false;
-
+	if ( empty( $input_errors )) {
+		$jail = array();
+		$jail['uuid'] = $_POST['uuid'];
+		$jail['enable'] = isset($_POST['enable']) ? true : false;
+		$jail['jailno'] = $_POST['jailno'];
+		$jail['jailname'] = $_POST['jailname'];
+		$jail['if'] = $_POST['if'];
+		$jail['ipaddr'] = $_POST['ipaddr'];
+		$jail['subnet'] = $_POST['subnet'];
+		$jail['devfsrules'] = $_POST['dst'];
+		$jail['jail_mount'] = isset($_POST['jail_mount']) ? true : false;
+		$jail['devfs_enable'] = isset($_POST['devfs_enable']) ? true : false;
+		$jail['proc_enable'] = isset($_POST['proc_enable']) ? true : false;
+		$jail['fdescfs_enable'] = isset($_POST['fdescfs_enable']) ? true : false;
+		$jail['afterstart0'] = $_POST['afterstart0'];
+		$jail['afterstart1'] = $_POST['afterstart1'];
+		$jail['exec_stop'] = $_POST['exec_stop'];
+		$jail['extraoptions'] = $_POST['extraoptions'];
+		$jail['desc'] = $_POST['desc'];
+		
 		if (isset($uuid) && (FALSE !== $cnid)) {
-			$a_user[$cnid] = $user;
+			$a_jail[$cnid] = $jail;
 			$mode = UPDATENOTIFY_MODE_MODIFIED;
 		} else {
-			$a_user[] = $user;
+			$a_jail[] = $jail;
 			$mode = UPDATENOTIFY_MODE_NEW;
 		}
-
-		updatenotify_set("userdb_user", $mode, $user['uuid']);
+		
+		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-
-		header("Location: access_users.php");
+		
+		header("Location: extensions_thebrig.php");
 		exit;
 	}
 }
 
-// Get next user id.
-// Return next free user id.
-function get_nextuser_id() {
+// Get next rule number.
+function get_next_jailnumber() {
 	global $config;
 
-	// Get next free user id.
-	exec("/usr/sbin/pw nextuser", $output);
-	$output = explode(":", $output[0]);
-	$id = intval($output[0]);
+	// Set starting jail number
+	$ruleno = 10;
 
-	// Check if id is already in usage. If the user did not press the 'Apply'
-	// button 'pw' did not recognize that there are already several new users
-	// configured because the user db is not updated until 'Apply' is pressed.
-	$a_user = $config['access']['user'];
-	if (false !== array_search_ex(strval($id), $a_user, "id")) {
+	$a_jails = $config['thebrig']['jail'];
+	if (false !== array_search_ex(strval($jailno), $a_jails, "jailno")) {
 		do {
-			$id++; // Increase id until a unused one is found.
-		} while (false !== array_search_ex(strval($id), $a_user, "id"));
+			$jailno += 10; // Increase rule number until a unused one is found.
+		} while (false !== array_search_ex(strval($jailno), $a_jails, "jailno"));
 	}
 
-	return $id;
+	return $jailno;
 }
 ?>
 <?php include("fbegin.inc");?>
@@ -220,20 +152,30 @@ function get_nextuser_id() {
 	</tr>
 	<tr>
 		<td class="tabcont">
-			<form action="access_users_edit.php" method="post" name="iform" id="iform">
-				<?php if (!empty($nogroup_errors)) print_input_errors($nogroup_errors); ?>
-				<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
-				<table width="100%" border="0" cellpadding="6" cellspacing="0">
-					<?php html_inputbox("login", gettext("Name"), $pconfig['login'], gettext("Login name of user."), true, 20, isset($uuid) && (FALSE !== $cnid));?>
-					<?php html_inputbox("fullname", gettext("Full Name"), $pconfig['fullname'], gettext("User full name."), true, 20);?>
-					<?php html_passwordconfbox("password", "passwordconf", gettext("Password"), $pconfig['password'], $pconfig['passwordconf'], gettext("User password."), true);?>
-					<?php html_inputbox("userid", gettext("User ID"), $pconfig['userid'], gettext("User numeric id."), true, 20, isset($uuid) && (FALSE !== $cnid));?>
-					<?php html_combobox("shell", gettext("Shell"), $pconfig['shell'], array("nologin" => "nologin", "scponly" => "scponly", "sh" => "sh",  "csh" => "csh", "tcsh" => "tcsh", "bash" => "bash"), gettext("The user's login shell."), true);?>
-					<?php $grouplist = array(); foreach ($a_group as $groupk => $groupv) { $grouplist[$groupv] = $groupk; } ?>
-					<?php html_combobox("primarygroup", gettext("Primary group"), $pconfig['primarygroup'], $grouplist, gettext("Set the account's primary group to the given group."), true);?>
-					<?php html_listbox("group", gettext("Additional group"), !empty($pconfig['group']) ? $pconfig['group'] : array(), $grouplist, gettext("Set additional group memberships for this account.")."<br />".gettext("Note: Ctrl-click (or command-click on the Mac) to select and deselect groups."));?>
-					<?php html_filechooser("homedir", gettext("Home directory"), $pconfig['homedir'], gettext("Enter the path to the home directory of that user. Leave this field empty to use default path /mnt."), $g['media_path'], false, 60);?>
-					<?php html_checkbox("userportal", gettext("User portal"), !empty($pconfig['userportal']) ? true : false, gettext("Grant access to the user portal."), "", false);?>
+      <form action="extensions_thebrig_edit.php" method="post" name="iform" id="iform">
+      	<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
+        <table width="100%" border="0" cellpadding="6" cellspacing="0">
+        	<?php html_titleline_checkbox("enable", gettext("Jail start on boot"), !empty($pconfig['enable']) ? true : false, gettext("Enable"));?>
+        	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
+			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15);?>
+			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
+			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
+			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
+			<?php html_separator();?>
+			<?php html_titleline(gettext("Mount"));?>
+			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable"), "");?>
+			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use for enable master devfs to jail over fstab"), "", false);?>
+			<?php html_inputbox("devfsrules", gettext("Devfs ruleset name"), $pconfig['devfsrules'], gettext("usually you want <i>devfsrules_jail</i>"), false, 30);?>
+			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
+			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
+			<?php html_separator();?>
+			<?php html_titleline(gettext("Commands"));?>
+			<?php html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>
+			<?php html_inputbox("afterstart1", gettext("User command 1"), $pconfig['afterstart1'], gettext("command to execute after the one for starting the jail."), false, 50);?>
+			<?php html_inputbox("exec_stop", gettext("User command stop"), $pconfig['exec_stop'], gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
+			<?php html_inputbox("extraoptions", gettext("Options. "), $pconfig['extraoptions'], gettext("Add to rc.conf.local"), false, 40);?>
+			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
+				
 				</table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" />
