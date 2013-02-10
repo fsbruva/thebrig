@@ -10,7 +10,7 @@ folder within /usr/local/www folder, as well as populate it with the needed php 
 script does this by examining the location it was executed from, and dynamically copies and
 creates the necessary symlinks. 
 
-The installation of this would be accomplished by running a script (as yet unwritten) that would 
+The installation of this would be accomplished by running thebrig_install script that would 
 be run from the desired desination folder. The script would fetch the tarball of the necessary 
 files, extract them to the current directory, and create a file /tmp/thebrig.tmp that contains
 the current path. Upon the extension's first run, this data would be read by the webgui, and 
