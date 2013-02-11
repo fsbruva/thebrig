@@ -13,33 +13,23 @@ $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 $today = date("d.m.Y.G:i:s");
 $mess = "clear";
 
-if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) { $config['thebrig'] = array(); } // declare thebrig tag
+//if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) { $config['thebrig'] = array(); } // declare thebrig tag
 if (!isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail'])) 	$config['thebrig']['jail'] = array(); // declare list jails
 
 // sent to page data from config.xml
-if ( isset($config['thebrig']['enable'] ) ) { $pconfig['enable'] = $config['thebrig']['enable'] ; }
-else { 	$pconfig['enable'] = false ; }
-	
+$pconfig['enable'] = isset( $config['thebrig']['enable'] ); 
 $pconfig['rootdir'] = $config['thebrig']['rootdir'];
-
-if ( isset($config['thebrig']['parastart'] ) ) { $pconfig['parastart'] = $config['thebrig']['parastart'] ; }
-else {	$pconfig['parastart'] = false ; }
-
-if ( isset($config['thebrig']['sethostname'] ) ) { $pconfig['sethostname'] = isset($config['thebrig']['sethostname']); }
-else { $pconfig['sethostname'] = false ; }
-
-if ( isset($config['thebrig']['unixiproute'] ) ) {  $pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); }
-else { 	$pconfig['unixiproute'] = false ; }
-
-if ( isset($config['thebrig']['systenv'] ) ) { $pconfig['systenv'] = isset($config['thebrig']['systenv']); }
-else { $pconfig['systenv'] = false ; }
+$pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ;
+$pconfig['sethostname'] = isset($config['thebrig']['sethostname']); 
+$pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
+$pconfig['systenv'] = isset($config['thebrig']['systenv']); 
 
 if ($_POST) {
 	
-	$config['thebrig']['parastart'] = $_POST['parastart'];
-	$config['thebrig']['sethostname'] = $_POST['sethostname'] ;
-	$config['thebrig']['unixiproute'] = $_POST['unixiproute'] ;
-	$config['thebrig']['systenv'] = $_POST['systenv'] ;
+	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
+	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
+	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
+	$config['thebrig']['systenv'] = isset ( $_POST['systenv'] );
 
 	//write_config();
 
@@ -54,11 +44,14 @@ if ($_POST) {
 	if ($retval == 0) {
 		updatenotify_delete("thebrig");
 	}
-}
+} // end of $_POST
 array_sort_key($config['thebrig']['jail'], "jailno");
 $a_jail = &$config['thebrig']['jail'];
+// This is what we do when we return to this page from the "edit" page
 if (isset($_GET['act']) && $_GET['act'] === "del") {
+	// If we want to delete the jail, and the uuid is "all"
 	if ($_GET['uuid'] === "all") {
+		// Make a separate notification event for each jail
 		foreach ($a_jail as $jailk => $jailv) {
 			updatenotify_set("thebrig", UPDATENOTIFY_MODE_DIRTY, $a_jail[$jailk]['uuid']);
 		}
