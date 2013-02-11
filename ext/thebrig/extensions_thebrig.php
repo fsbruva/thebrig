@@ -5,7 +5,7 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
-equire_once("XML/Serializer.php");
+require_once("XML/Serializer.php");
 require_once("XML/Unserializer.php");
 
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
@@ -14,24 +14,32 @@ $today = date("d.m.Y.G:i:s");
 $mess = "clear";
 
 if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) { $config['thebrig'] = array(); } // declare thebrig tag
-if (!isset($config['thebrig']['jails']) || !is_array($config['thebrig']['jails'])) 	$config['thebrig']['jails'] = array(); // declare list jails
+if (!isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail'])) 	$config['thebrig']['jail'] = array(); // declare list jails
 
 // sent to page data from config.xml
-$pconfig['enable'] = isset($config['thebrig']['enable']);
+if ( isset($config['thebrig']['enable'] ) ) { $pconfig['enable'] = $config['thebrig']['enable'] ; }
+else { 	$pconfig['enable'] = false ; }
+	
 $pconfig['rootdir'] = $config['thebrig']['rootdir'];
-$pconfig['parastart'] = isset($config['thebrig']['parastart']);
-$pconfig['sethostname'] = isset($config['thebrig']['sethostname']);
-$pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']);
-$pconfig['systenv'] = isset($config['thebrig']['systenv']);
+
+if ( isset($config['thebrig']['parastart'] ) ) { $pconfig['parastart'] = $config['thebrig']['parastart'] ; }
+else {	$pconfig['parastart'] = false ; }
+
+if ( isset($config['thebrig']['sethostname'] ) ) { $pconfig['sethostname'] = isset($config['thebrig']['sethostname']); }
+else { $pconfig['sethostname'] = false ; }
+
+if ( isset($config['thebrig']['unixiproute'] ) ) {  $pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); }
+else { 	$pconfig['unixiproute'] = false ; }
+
+if ( isset($config['thebrig']['systenv'] ) ) { $pconfig['systenv'] = isset($config['thebrig']['systenv']); }
+else { $pconfig['systenv'] = false ; }
 
 if ($_POST) {
-	$pconfig = $_POST;
-
-	$config['thebrig']['enable'] = isset($_POST['enable']) ? true : false;
-	$config['thebrig']['parastart'] = isset($_POST['parastart']);
-	$config['thebrig']['sethostname'] = isset($_POST['sethostname']);
-	$config['thebrig']['unixiproute'] = isset($_POST['unixiproute']);
-	$config['thebrig']['systenv'] = isset($_POST['systenv']);
+	
+	$config['thebrig']['parastart'] = $_POST['parastart'];
+	$config['thebrig']['sethostname'] = $_POST['sethostname'] ;
+	$config['thebrig']['unixiproute'] = $_POST['unixiproute'] ;
+	$config['thebrig']['systenv'] = $_POST['systenv'] ;
 
 	//write_config();
 
@@ -91,6 +99,20 @@ function enable_change(enable_change) {
 //-->
 </script>
 <!--------  This is view ------->
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+	<tr><td class="tabnavtbl">
+		<ul id="tabnav">
+			<li class="tabact">
+				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
+			</li>
+			<li class="tabinact">
+				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
+			</li>
+		</ul>
+	</td></tr>
+
+	<tr><td class="tabcont">
 <form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
 	<table width="100%" border="0" cellpadding="0" cellspacing="0">
 		<tr>
@@ -100,7 +122,14 @@ function enable_change(enable_change) {
 				<?php if ($savemsg) print_info_box($savemsg);?>
 				<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 				<table width="100%" border="0" cellpadding="6" cellspacing="0">
-					<?php html_titleline_checkbox("enable", gettext("TheBrigs"), !empty($pconfig['enable']) ? true : false, gettext("Enable"), "enable_change(false)");?>
+					<tr><td colspan="2" valign="top" class="optsect_t">
+						<table border="0" cellspacing="0" cellpadding="0" width="100%">
+							<tr><td class="optsect_s"><strong><?=_THEBRIG_TITLE; ?></strong></td>
+								<td align="right" class="optsect_s">
+								</td>
+							</tr>
+				</table>
+			</td></tr>
 					<tr>
 						<td width="15%" valign="top" class="vncell"><?=gettext("Jails");?></td>
 						<td width="85%" class="vtable">
