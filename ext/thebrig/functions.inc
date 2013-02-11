@@ -57,13 +57,24 @@ function thebrig_populate ($new_location, $old_location) {
 	// First we need to see if old location has a directory tree. If it does, we chould clean up after
 	// ourselves. This involves moving the php and .inc files. Then, the creation of the directory structure
 	// and startup scripts can progress normally
-	if ( is_dir ( $old_location )) {
-		mwexec("/bin/mv {$old_location}/ext {$new_location}/");	// moves the web stuff
-		mwexec( "/bin/mv {$old_location}/bin {$new_location}/");	// moves the binaries
+	if ( is_dir ( $old_location ) {
+		if (  ! strcmp ( $old_location , $new_location )  {
+			// This indicates that we are actually MOVING the folder, not just clicking save
+			mwexec(	"/bin/mv {$old_location}/ext {$new_location}/");	// moves the web stuff
+			mwexec( "/bin/mv {$old_location}/bin {$new_location}/");	// moves the binaries
+			mwexec( "/bin/rm -r {$old_location}");	// remove the old directory
+			}
+		// Preapare the new folder for use. 
+
+
+		// ALEXY!!!! YOURE CODE GOES HERE!!!!!!!!!!!!
+
+
+		//
 		mkdir ( "{$new_location}/conf");
 		mkdir ( "{$new_location}/work");
 		touch ( "${new_location}/conf/jail_start" );	
-		mwexec( "/bin/rm -r {$old_location}");	// moves the binaries
+		
 		// This section finds and unsets the startup command for the extension (code from slimserver install)
 		$i = 0;
 		if (is_array($config['rc']['postinit']['cmd'])) {
