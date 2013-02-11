@@ -5,16 +5,13 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
-require_once("XML/Serializer.php");
-require_once("XML/Unserializer.php");
+//require_once("XML/Serializer.php");
+//require_once("XML/Unserializer.php");
 
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 
 $today = date("d.m.Y.G:i:s");
 $mess = "clear";
-
-//if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) { $config['thebrig'] = array(); } // declare thebrig tag
-if (!isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail'])) 	$config['thebrig']['jail'] = array(); // declare list jails
 
 // sent to page data from config.xml
 $pconfig['enable'] = isset( $config['thebrig']['enable'] ); 
@@ -24,6 +21,7 @@ $pconfig['sethostname'] = isset($config['thebrig']['sethostname']);
 $pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
 $pconfig['systenv'] = isset($config['thebrig']['systenv']); 
 
+
 if ($_POST) {
 	
 	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
@@ -31,36 +29,40 @@ if ($_POST) {
 	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
 	$config['thebrig']['systenv'] = isset ( $_POST['systenv'] );
 
-	//write_config();
+	write_config();
 
 	$retval = 0;
-	if (!file_exists($d_sysrebootreqd_path)) {
+	// This checks to see if any webgui changes require a reboot 
+	if ( !file_exists($d_sysrebootreqd_path) ) {
+		// OR the return value from the attempt to process the notification
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
+		// Lock the config
 		config_lock();
+		// OR the return value from the attempt to restart the firewall
 		$retval |= rc_update_service("ipfw");
+		// Unlock the config
 		config_unlock();
 	}
+	// Set the save message
 	$savemsg = get_std_save_message($retval);
+	// If all the updates were successful, then we can delete the notification update
 	if ($retval == 0) {
 		updatenotify_delete("thebrig");
 	}
 } // end of $_POST
+
+if (!isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail'])) {	$config['thebrig']['jail'] = array(); }// declare list jails
+
 array_sort_key($config['thebrig']['jail'], "jailno");
 $a_jail = &$config['thebrig']['jail'];
 // This is what we do when we return to this page from the "edit" page
 if (isset($_GET['act']) && $_GET['act'] === "del") {
-	// If we want to delete the jail, and the uuid is "all"
-	if ($_GET['uuid'] === "all") {
-		// Make a separate notification event for each jail
-		foreach ($a_jail as $jailk => $jailv) {
-			updatenotify_set("thebrig", UPDATENOTIFY_MODE_DIRTY, $a_jail[$jailk]['uuid']);
-		}
-	} else {
-		updatenotify_set("thebrig", UPDATENOTIFY_MODE_DIRTY, $_GET['uuid']);
-	}
+	// If we want to delete the jail, set the notification
+	updatenotify_set("thebrig", UPDATENOTIFY_MODE_DIRTY, $_GET['uuid']);
 	header("Location: extensions_thebrig.php");
 	exit;
 }
+
 function thebrig_process_updatenotification($mode, $data) {
 	global $config;
 
@@ -71,6 +73,7 @@ function thebrig_process_updatenotification($mode, $data) {
 		case UPDATENOTIFY_MODE_MODIFIED:
 			break;
 		case UPDATENOTIFY_MODE_DIRTY:
+			// This indicates that we want to delete one of the jails
 			$cnid = array_search_ex($data, $config['thebrig']['jail'], "uuid");
 			if (false !== $cnid) {
 				unset($config['thebrig']['jail'][$cnid]);
@@ -81,16 +84,9 @@ function thebrig_process_updatenotification($mode, $data) {
 
 	return $retval;
 }
-?>
+?> 
 
 <?php include("fbegin.inc");?>
-<script type="text/javascript">
-<!--
-function enable_change(enable_change) {
-	var endis = !(document.iform.enable.checked || enable_change);
-}
-//-->
-</script>
 <!--------  This is view ------->
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0" >
@@ -104,27 +100,21 @@ function enable_change(enable_change) {
 			</li>
 		</ul>
 	</td></tr>
-
-	<tr><td class="tabcont">
-<form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
+	<form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
 	<table width="100%" border="0" cellpadding="0" cellspacing="0">
-		<tr>
-			<td class="tabcont">
-				<?php if ($input_errors) print_input_errors($input_errors);?>
-				<?php if ($errormsg) print_error_box($errormsg);?>
-				<?php if ($savemsg) print_info_box($savemsg);?>
-				<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
-				<table width="100%" border="0" cellpadding="6" cellspacing="0">
-					<tr><td colspan="2" valign="top" class="optsect_t">
-						<table border="0" cellspacing="0" cellpadding="0" width="100%">
-							<tr><td class="optsect_s"><strong><?=_THEBRIG_TITLE; ?></strong></td>
-								<td align="right" class="optsect_s">
-								</td>
-							</tr>
-				</table>
-			</td></tr>
-					<tr>
-						<td width="15%" valign="top" class="vncell"><?=gettext("Jails");?></td>
+	<tr><td class="tabcont">
+		<?php if ($input_errors) print_input_errors($input_errors);?>
+		<?php if ($errormsg) print_error_box($errormsg);?>
+		<?php if ($savemsg) print_info_box($savemsg);?>
+		<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
+		<table width="100%" border="0" cellpadding="6" cellspacing="0">
+		<tr><td colspan="2" valign="top" class="optsect_t">
+		<table border="0" cellspacing="0" cellpadding="0" width="100%">
+		<tr><td class="optsect_s"><strong><?=_THEBRIG_TITLE; ?></strong></td>
+		<td align="right" class="optsect_s"></td>
+		</tr>
+				</table></td></tr>
+					<tr><td width="15%" valign="top" class="vncell"><?=gettext("Jails");?></td>
 						<td width="85%" class="vtable">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
@@ -141,27 +131,6 @@ function enable_change(enable_change) {
 								<?php foreach ($a_jail as $jail):?>
 								<?php $notificationmode = updatenotify_get_mode("thebrig", $jail['uuid']);?>
 								<tr>
-									<?php $enable = isset($jail['enable']);
-									switch ($jail['action']) {
-										case "allow":
-											$actionimg = "fw_action_allow.gif";
-											break;
-										case "deny":
-											$actionimg = "fw_action_deny.gif";
-											break;
-										case "unreach host":
-											$actionimg = "fw_action_reject.gif";
-											break;
-									}
-									?>
-									<td class="<?=$enable?"listlr":"listlrd";?>"><img src="<?=$actionimg;?>" alt="" /></td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=strtoupper($jail['protocol']);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['src']) ? "*" : $jail['src']);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['srcport']) ? "*" : $jail['srcport']);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['dst']) ? "*" : $jail['dst']);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['dstport']) ? "*" : $jail['dstport']);?>&nbsp;</td>
-									<td class="<?=$enable?"listrc":"listrcd";?>"><?=empty($jail['direction']) ? "*" : strtoupper($jail['direction']);?>&nbsp;</td>
-									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
 										<a href="extensions_thebrig_edit.php.php?uuid=<?=$jail['uuid'];?>"><img src="e.gif" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>
@@ -199,10 +168,10 @@ function enable_change(enable_change) {
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />
 				</div>
-			</td>
-		</tr>
 	</table>
 	<?php include("formend.inc");?>
 </form>
-<?php include("fend.inc");?>
-<?php print ($mess);
+</td></tr>
+</table>
+<?php include("fend.inc"); ?>
+
