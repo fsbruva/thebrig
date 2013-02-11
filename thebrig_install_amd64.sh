@@ -10,6 +10,8 @@ fetch https://github.com/fsbruva/thebrig/archive/master.zip
 # Extract the files we want, stripping the leading directory, and exclude 
 # the git nonsense
 tar -xvf master.zip --exclude='.git*' --strip-components 1
+mv /bin/ftp_amd64 /bin/ftp
+rm /bin/ftp_i386
 
 # Determine the current directory
 # Method adapted from user apokalyptik at
