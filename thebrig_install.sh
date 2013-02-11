@@ -22,4 +22,4 @@ BRIG_ROOT=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
 # run of the extension
 echo $BRIG_ROOT > /tmp/thebrig.tmp
 
-bin/sh FULL_PATH/bin/jail_start.sh
+/bin/sh $BRIG_ROOT/bin/jail_start.sh
