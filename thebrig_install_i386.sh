@@ -10,8 +10,8 @@ fetch https://github.com/fsbruva/thebrig/archive/master.zip
 # Extract the files we want, stripping the leading directory, and exclude 
 # the git nonsense
 tar -xvf master.zip --exclude='.git*' --strip-components 1
-mv /bin/ftp_i386 /bin/ftp
-rm /bin/ftp_amd64
+mv bin/ftp_i386 bin/ftp
+rm bin/ftp_amd64
 
 # Determine the current directory
 # Method adapted from user apokalyptik at
@@ -24,4 +24,4 @@ BRIG_ROOT=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
 # run of the extension
 echo $BRIG_ROOT > /tmp/thebrig.tmp
 
-bin/sh FULL_PATH/bin/jail_start.sh
+/bin/sh $BRIG_ROOT/bin/jail_start.sh
