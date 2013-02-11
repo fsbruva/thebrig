@@ -4,6 +4,7 @@
 	if ($config['system']['language'] == 'en_US') {
 		define(_THEBRIG_TITLE, "TheBrig");
 		define(_THEBRIG_NOT_INSTALLED, "Something went awry with TheBrig's installation. Please attempt to re-install");
+		define(_THEBRIG_NOT_CONFIRMED, "It appears you just finished installing TheBrig! <br>Please confirm the install location by visiting the <a href='/extensions_thebrig_config.php'>Rudimentary Config</a> page and click \"Save\".");
 		define(_THEBRIG_INSTALL, "Install the jail tarball");
 		define(_THEBRIG_DONT_CHANGE, "Keep existing - don't change");
 		define(_THEBRIG_MAINTENANCE, "Maintenance");
@@ -24,20 +25,28 @@
 		define(_THEBRIG_CURRENT_TB, "Existing Tarballs");
 		define(_THEBRIG_OFFICIAL_TB, "Official FreeBSD Flavor");
 		define(_THEBRIG_CUSTOM_TB, "Custom Flavor (Homegrown)");
+		define(_THEBRIG_PARTIAL_TB, "Official FreeBSD (in progress)");
 		define(_THEBRIG_NO_TB, "There are no tarballs available. Please choose some archives and download them using the button below.<br><br>");
 		define(_THEBRIG_NO_CUST_TB, "There are no custom tarballs available. This is an advanced feature, so don't worry about it.<br><br>");
+		define(_THEBRIG_NO_PART_TB, "There are no partial tarballs. This indicates there are no downloads in progress.<br><br>Or, if you recently fetched a tarball, you will need to refresh this page to have it show up in the list of existing tarballs.");
 		define(_THEBRIG_DELETE_TB, "Delete Selected Tarballs");
 		define(_THEBRIG_DELETE_ERROR, "You selected deletion without naming files.");
 		define(_THEBRIG_REMOTE_TB, "Remote Tarballs");
+		define(_THEBRIG_REMOTE_AVAIL, "Available Tarballs");
+		define(_THEBRIG_REMOTE_ACTIVE, "Active Downloads");
+		define(_THEBRIG_REMOTE_INST, "The ftp server has not been queried (yet). Press the \"Query\" button below to begin the download process.<br><br>");
+		define(_THEBRIG_TB_WAIT, "Updating in 1 second...");
 		define(_THEBRIG_CONF_TB, "Do you really want to delete these tarball(s)?");
 		define(_THEBRIG_FTPQUERY, "Click the query button to get info about available tarballs." );
 		define(_THEBRIG_QUERYBTN, "Query!" );
-		define(_THEBRIG_CHECK_NETWORKING, "There seems to be a networking issue. I can't reach ftp.freebsd.org. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>. If networking is working, then ensure the ftp binary is present.");
+		define(_THEBRIG_CHECK_NETWORKING, "There seems to be a networking issue. I can't reach ftp.freebsd.org. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>. If networking is working, then ensure the ftp binary is present.<br>Alternatively, try it again to see if there was some transient network problem.");
 		define(_THEBRIG_FETCH, "Fetch!");
 		define(_THEBRIG_FETCH_ERROR, "You selected to fetch without selecting any files.");
 		define(_THEBRIG_DELETE_FAIL, "Could not delete file: ");
 		define(_SRVSLIM_VERSION, 'SlimNAS Version ' . _SRVSLIM_VERSION_NR);
 		define(_THEBRIG_MATCH_ERROR, "There seem to be no matching releases for your kernel. See the documentation regarding kernel/jail binary mismatch");
+		define(_THEBRIG_INFO_TB, "The selected packages will be downloaded as a background job. Please check back in a few moments.");
+		
 		define(_SRVSLIM_MODULE_VERSION_CONFLICT, "Warning - the Logitech Media Server version you're trying to run is not compatible with this SlimNAS version. If you encounter problems running it, please update SlimNAS or revert to a compatible Logitech Media Server. Thanks for your understanding.");
 		define(_SRVSLIM_NO_SLIMNAS, "There's no updated SlimNAS package available for installation.");
 		define(_SRVSLIM_UPDATE_SLIMNAS, "Update SlimNAS<br>(<a href='http://www.herger.net/SlimNAS' target='_blank'>check for new version</a>)");

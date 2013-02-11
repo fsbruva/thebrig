@@ -1,85 +1,5 @@
 <?php
 
-
-// function slimserver_initfolders($killpidfile) {
-// 	global $config;
-
-// 	if (!is_dir($config['slimserver']['rootfolder'])) {
-// 		return;
-// 	}
-
-// 	if (!is_dir("{$config['slimserver']['rootfolder']}/etc")) {
-// 		mkdir("{$config['slimserver']['rootfolder']}/etc");
-// 	}
-
-// 	if (!is_dir("{$config['slimserver']['rootfolder']}/etc/squeezebox")) {
-// 		mkdir("{$config['slimserver']['rootfolder']}/etc/squeezebox");
-// 	}
-
-// 	if (!is_dir("{$config['slimserver']['rootfolder']}/var")) {
-// 		mkdir("{$config['slimserver']['rootfolder']}/var");
-// 	}
-
-// 	if (!is_dir("{$config['slimserver']['rootfolder']}/var/squeezebox")) {
-// 		mkdir("{$config['slimserver']['rootfolder']}/var/squeezebox");
-// 	}
-
-// 	if (!is_dir("{$config['slimserver']['rootfolder']}/var/squeezebox/Logs")) {
-// 		mkdir("{$config['slimserver']['rootfolder']}/var/squeezebox/Logs");
-// 	}
-
-// 	if (!is_dir("{$config['slimserver']['rootfolder']}/var/squeezebox/Cache")) {
-// 		mkdir("{$config['slimserver']['rootfolder']}/var/squeezebox/Cache");
-// 	}
-
-// 	if (!is_dir("/usr/local/www/ext")) {
-// 		mkdir("/usr/local/www/ext");
-// 	}
-
-// 	if (!is_dir("/usr/local/www/ext/slimserver")) {
-// 		mkdir("/usr/local/www/ext/slimserver");
-// 	}
-
-
-// 	mwexec("/usr/sbin/chown -R www:wheel {$config['slimserver']['rootfolder']}/squeezebox");
-// 	mwexec("/usr/sbin/chown -R www:wheel {$config['slimserver']['rootfolder']}/var");
-// 	mwexec("/usr/sbin/chown -R www:wheel {$config['slimserver']['rootfolder']}/etc");
-// 	mwexec("/bin/chmod -R a+w {$config['slimserver']['rootfolder']}");
-// 	mwexec("/bin/chmod -R g+w /ftmp");
-// 	mwexec("/bin/chmod -R g+w /tmp");
-
-// 	mwexec("/bin/cp -R -f {$config['slimserver']['rootfolder']}/usr/www/*.inc /usr/local/www/ext/slimserver/");
-// 	mwexec("/bin/cp -R -f {$config['slimserver']['rootfolder']}/usr/www/*.php /usr/local/www/");
-// }
-
-// function slimserver_register() {
-// 	global $config;
-
-// 	$i = 0;
-	
-// 	if (is_array($config['rc']['postinit']['cmd'])) {
-// 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-// 			if (preg_match('/services_slimserver_init\.php/', $config['rc']['postinit']['cmd'][$i]))
-// 				break;
-// 		}
-// 	}
-
-// 	$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php -f {$config['slimserver']['rootfolder']}/usr/www/services_slimserver_init.php";
-
-
-// 	$i = 0;
-// 	if (is_array($config['rc']['shutdown']['cmd'])) {
-// 		for ($i; $i < count($config['rc']['shutdown']['cmd']); $i++) {
-// 			if (preg_match('/services_slimserver_stop\.php/', $config['rc']['shutdown']['cmd'][$i]))
-// 				break;
-// 		}
-// 	}
-
-// 	$config['rc']['shutdown']['cmd'][$i] = "/usr/local/bin/php -f {$config['slimserver']['rootfolder']}/usr/www/services_slimserver_stop.php";
-
-// 	write_config();
-// }
-
 function thebrig_unregister() {
  	global $config;
  	
@@ -127,12 +47,6 @@ function thebrig_unregister() {
  	mwexec("/bin/chmod -R 777 {$brigroot}");
 } // end of thebrig_unregister function
 
-function get_download_info($filePath , $feedURL) {
-	exec("fetch -o" . $filePath . " " . $feedURL , $result);
-	return implode("\n", $result);
-}
-
-
 // Function name: 	thebrig_populate
 // Inputs: 			none
 // Outputs: 		logical result of the creation of the proper directory structure in the install folder
@@ -144,14 +58,12 @@ function thebrig_populate ($new_location, $old_location) {
 	// ourselves. This involves moving the php and .inc files. Then, the creation of the directory structure
 	// and startup scripts can progress normally
 	if ( is_dir ( $old_location )) {
-		//mkdir("{$new_location}/ext" );		// Creates the new home for the web stuff
-		//mkdir("{$new_location}/bin" );		// Creates the new home for the binaries 
-		mwexec("/bin/mv -f {$old_location}/ext {$new_location}/");	// moves the web stuff
-		mwexec( "/bin/mv -r {$old_location}/bin {$new_location}/");	// moves the binaries
+		mwexec("/bin/mv {$old_location}/ext {$new_location}/");	// moves the web stuff
+		mwexec( "/bin/mv {$old_location}/bin {$new_location}/");	// moves the binaries
 		mkdir ( "{$new_location}/conf");
 		mkdir ( "{$new_location}/work");
 		touch ( "${new_location}/conf/jail_start" );	
-		rmdir( $old_location );
+		mwexec( "/bin/rm -r {$old_location}");	// moves the binaries
 		// This section finds and unsets the startup command for the extension (code from slimserver install)
 		$i = 0;
 		if (is_array($config['rc']['postinit']['cmd'])) {
@@ -175,7 +87,7 @@ function thebrig_populate ($new_location, $old_location) {
 	// update the value of the postinit command.
 	$config['rc']['postinit']['cmd'][$i] = "/bin/sh {$new_location}/bin/thebrig_start.sh";
 	// update all the symbolic links and such by executing the startup script from the new location
-	mwexec("/bin/sh {$new_location}/bin/thebrig_start.sh");
+	//mwexec("/bin/sh {$new_location}/bin/thebrig_start.sh");
 }	// end of thebrig_populate()
 
 // Function name: 	check_thebrig
@@ -189,7 +101,7 @@ function check_thebrig() {
 	return file_exists($config['thebrig']['rootfolder'] . "/conf/jail_start");
 }
 
-// Function name: 	radio_filename_list
+// Function name: 	thebrig_radio_list
 // Inputs: 			file_list			array of filenames with suffix to create list for
 // Outputs: 		installFiles		html formatted block with a radio next to each file
 // Description:		This function creates an html code block with the files listed on the right
@@ -208,23 +120,81 @@ function thebrig_radio_list ($file_list) {
 	return $installFiles ;
 }
 
-// Function name: 	radio_checkbox_list
+// Function name: 	thebrig_checkbox_list
 // Inputs: 			file_list			array of filenames with suffix to create list for
-// Outputs: 		installFiles		html formatted block with a radio next to each file
+// Outputs: 		installFiles		html formatted block with a checkbox next to each file
 // Description:		This function creates an html code block with the files listed on the right
-//					and radio buttons next to each on the left.
+//					and checkboxes next to each on the left.
 function thebrig_checkbox_list ($file_list) {
 	global $config ;
-	// This function
 	$installFiles = "";
-	if (is_dir($config['thebrig']['rootfolder'])) {
-		foreach ( $file_list as $file) {
-			$file = str_replace($config['thebrig']['rootfolder'] . "/work/", "", $file);
-			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value=\"$file\"> "
-			. str_replace("work/", "", $file)
-			. "  " . "<br/>";
-		} // end of completed folder, filename, suffix creation
-	} 
+	if ( is_dir($config['thebrig']['rootfolder']) && count( $file_list ) > 0 ) {
+		// Since we will be moving through the entirety of the $file_list array, we need a separate index counter, $i, 
+		// which will start at 0. 
+		$i = 0;
+		// We will now figure out how many files we have. This number divided by 3 and rounded down
+		// will tell us how many complete (two entry) rows in the table. Thus, we will run one loop to take care of each
+		// complete row.
+		$installFiles .= "<table border=\"0\" cellpadding=\"1\" width=\"100%\">";
+		for ( $k = 1 ; $k <= floor( ( count( $file_list ) ) / 3 ) ; $k++ ) {
+			$installFiles .= "<tr>";
+				// This code removes the pesky path data from the globbed file list, then creates
+				// an html checkbox entry for the file, and increments to the next index (i) 
+				// This code is repeated for the other two columns.
+				// Left Column
+			$installFiles .= "<td width=\"33%\">" ;
+			$file = str_replace( "{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
+			. " {$file} ";
+			$i++;
+			$installFiles .= "</td>";
+			// Middle Column
+			$installFiles .= "<td width=\"33%\">" ;
+			$file = str_replace( "{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
+			.  " {$file} ";
+			$i++;
+			// Right Column - with a minor change - it is the end of a row, so we have a new line
+			$installFiles .= "<td width=\"33%\">" ;
+			$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
+			.  " {$file}";
+			$i++ ; 
+			$installFiles .= "</td>";
+			$installFiles .= "</tr>";
+		} // end of row creation
+		// This if statement checks if the remainder of the total list of files divided by 3 is at least 1, meaning
+		// there are one or two entries in the bottom, incomplete row.
+		if ( count( $file_list ) % 3 >= 1 ) {
+			// This code removes the pesky path data from the globbed file list, then creates
+			// an html checkbox entry for the file, and increments to the next index (i)
+			$installFiles .= "<tr>";
+			$installFiles .= "<td width=\"33%\">" ;
+			$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
+			.  " {$file} ";
+			$i++ ;
+			$installFiles .= "</td>";
+			// This if statement checks if the remainder of the total list of files divided by 3 is 2, meaning
+			// there are two entries in the bottom, incomplete row.
+			if ( count( $file_list ) % 3 == 2 ) {
+				// This code removes the pesky path data from the globbed file list, then creates
+				// an html checkbox entry for the file, and increments to the next index (i)
+				$installFiles .= "<td width=\"33%\">" ;
+				$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+				$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
+				.  " {$file}";
+				$i++ ;
+				$installFiles .= "</td>";
+			} // end if filecount % 3 = 2
+			// There is only one entry in the bottom row, so we need to finish the line
+			else {
+				$installFiles .= "</tr>";
+			} // end else
+		} // end if filecount % 3 >= 1
+		// End the table
+		$installFiles .= "</table>" ;
+	} // end if root folder is a valid directory & there are at least some files
 	return $installFiles ;
 }
 
@@ -236,18 +206,82 @@ function thebrig_checkbox_list ($file_list) {
 //					and radio buttons next to each on the left.
 function thebrig_tarball_list ($contains , $exclude='') {
 	global $config ;
-	// This function
+	// This function creates a list of tarballs that match a certain filename pattern
 	$installFiles = "";
-	if (is_dir($config['thebrig']['rootfolder'])) {
-		$raw_list = glob($config['thebrig']['rootfolder'] . "/work/" . $contains . ".{txz,tgz}", GLOB_BRACE);
+	if ( is_dir( $config['thebrig']['rootfolder'] )) {
+		$raw_list = glob("{$config['thebrig']['rootfolder']}/work/{$contains}.{txz,tgz}", GLOB_BRACE);
 		$file_list = array_unique( $raw_list );
 		if ( $exclude ) {
 			foreach ( $exclude as $search_pattern ) {
-				$file_list = preg_grep( "/" . $search_pattern . "/" , $file_list , PREG_GREP_INVERT );
+				$file_list = preg_grep( "/{$search_pattern}/" , $file_list , PREG_GREP_INVERT );
 			}
 		}
 	} // end of verifying rootfolder as valid location
 	return $file_list ;
+}
+
+// Function name: 	thebrig_dl_list
+// Inputs: 			file_list			array of filenames with suffix to create list for, with each filename
+//										consisting of _partial_{filesize}.
+// Outputs: 		partFiles			html formatted block with a status bar next to each file
+// Description:		This function creates an html code block with the each of the files listed in file_list
+//					and then a progress bar indicating how much it has downloaded. This is accomplished when
+// 					the fetch operation first determines the file's size, and appends it as part of the file's name.
+//					Thus, the data needed to determine download progress is already with the file.
+function thebrig_dl_list ( $file_list ) {
+global $config ;
+	$partFiles = "";
+	if ( is_dir($config['thebrig']['rootfolder']) && count( $file_list ) > 0 ) {
+		// We will now figure out how many files we have. This number divided by 3 and rounded down
+		// will tell us how many complete (two entry) rows in the table. Thus, we will run one loop to take care of each
+		// complete row.
+		$partFiles .= "";
+		for ( $k = 0 ; $k < ( count( $file_list ) ) ; $k++ ) {
+			// This code removes the pesky path data from the globbed file list, as well as removing the "partial_{filesize}"
+			// It also converts all the underscores to spaces. This cleaned filename is then placed in the cell and the cell closed
+			$cleanfile = str_replace( "{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$k]);
+			// We find the index of the start of "_partial_". This is used to figure out where the size is.
+			$partIndex = strripos($cleanfile , "_partial_");
+			// We can now infer where the {filesize} starts, by adding 9 to the partIndex (length of _partial_)
+			$sizeIndex = $partIndex + 9;
+			// We also find the index of the start of the file suffix, to figure out where the end of the size lives.
+			$suffixIndex = strripos($cleanfile , ".");
+			// Now we can use where the number starts and the suffix begins to determine how many characters the filesize
+			$sizeLength = $suffixIndex - $sizeIndex;
+			// Now we extract the string starting at the start of the size, and going for as many characters are the filesize
+			// string is. Then, we convert this string of numbers to an integer.
+			$targetSize = intval ( substr( $cleanfile , $sizeIndex , $sizeLength ) ) ;
+			// We also need to convert the filesizes to MiB for subsequent display
+			$nicetargetSize = round( $targetSize / 1048576 , 2);
+			// Obtain the current filesize from the OS
+			$currentSize = filesize( $file_list[$k] );
+			
+			// Begin the first row, and first cell
+			$partFiles .= "<tr><td width=\"25%\" class=\"vncellt\">";
+			// Chop off everything after the first _ of _partial_ in the filename
+			$cleanfile = substr( $cleanfile , 0 , $partIndex ) ;
+			// Replace the hyphen with a space
+			$cleanfile = str_replace( "-" , " ", $cleanfile ) ;
+			// end the cell
+			$partFiles .= "{$cleanfile}</td>";
+
+			// Now we start building the right column, the one witht the progress bar
+			$partFiles .= "<td width=\"75%\" class=\"listr\">" ;
+			$pct_done = floor( $currentSize * 100 / $targetSize ) ;
+			$pct_rem = 100 - $pct_done;
+			
+			$partFiles .= "<img src=\"bar_left.gif\" class=\"progbarl\" alt>";
+			$partFiles .= "<img src=\"bar_blue.gif\" name=\"file{$k}u\" id=\"file{$k}u\" width=\"{$pct_done}px\" class=\"progbarcf\" alt>";
+			$partFiles .= "<img src=\"bar_gray.gif\" name=\"file{$k}f\" id=\"file{$k}f\" width=\"{$pct_rem}px\" class=\"progbarc\" alt>";
+			$partFiles .= "<img src=\"bar_right.gif\" class=\"progbarr\" alt>";
+			$partFiles .= "<input style=\"padding: 0; border: 0;\" size=\"30\" name=\"file{$k}\" id=\"file{$k}\" value=\"{$pct_done}% of {$nicetargetSize}MiB\">";
+			//$partFiles .= $pct_done ;
+			
+			$partFiles .= "</td>" ;
+			$partFiles .= "</tr>";
+		} // end of row creation
+	} // end if root folder is a valid directory & there are at least some files
+	return $partFiles ;
 }
 
 // Function name: 	thebrig_menu_list
@@ -257,7 +291,7 @@ function thebrig_tarball_list ($contains , $exclude='') {
 function thebrig_menu_list ( $list , $list_name , $chosen ) {
 	global $config ;
 	// This function
-	$menu = "<select name =\"$list_name\">";
+	$menu = "<select name =\"{$list_name}\" id=\"{$list_name}_menu\">";
 	// Build the select box one list item at a time
 	foreach ( $list as $element) {
 		// Check if the currently inspected element of the array 

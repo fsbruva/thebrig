@@ -1,4 +1,3 @@
-#!/usr/local/bin/php
 <?php
 require("auth.inc");
 require("guiconfig.inc");
@@ -7,6 +6,10 @@ require_once("ext/thebrig/functions.inc");
 	
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE) ;
+
+if ( !isset( $config['thebrig']['rootfolder']) ) {
+	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
+} // end of elseif
 
 if ($_POST) {
 	unset( $input_errors ) ; // clear out the input errors array
@@ -173,11 +176,17 @@ if ($_POST) {
 		} // end of if for "delete"
 				
 		elseif ( isset( $_POST['fetch'] ) && $_POST['fetch'] ) {
-			$files_get = $_POST['formPackages'] ;
-			foreach ( $files_get as $file ) {
-				
-			}
-			
+			$pack_get = $_POST['formPackages'] ;
+			$arch_get = $_POST['formArch'] ;
+			$rel_get = $_POST['formRelease'] ;
+			// This loop runs for each of the selected pacakages
+			foreach ( $pack_get as $pack_name ) {
+				// This code builds the command string with the appropriate architecture, release & package name.
+				$c_string = "/bin/sh {$config['thebrig']['rootfolder']}/bin/thebrig_fetch.sh {$arch_get} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}/work >/dev/null &";
+				// Carries out the fetching operation in the background
+				exec( $c_string , $output, $return);
+			}// end of for loop
+					
 		} // end of elseif for "fetch"
 	}
 }
@@ -198,10 +207,14 @@ elseif ($savemsg) print_info_box($savemsg);
 function disable_buttons() {
 	document.iform.Submit.disabled = true;
 	document.iform.submit();}
+var auto_refresh = setInterval(
+		function()
+		{
+		$('#loaddiv').load('extensions_thebrig_download.php');
+		}, 5000);
 </script>
 
-
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" >
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabinact">
@@ -250,14 +263,15 @@ function disable_buttons() {
 			} // end of else (there are currently no valid install files
 			?>
 			</td></tr>
-				<!-- The first td of this row is the box in the top row, far left. -->
+
+			<!-- The first td of this row is the box in the top row, far left. -->
 		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_CUSTOM_TB; ?></td>
 		<!-- The next td is the larger box to the right, which contains the text box and info --> 
 		<td width="78%" class="vtable">
 			<?php
 			// This obtains a list of files that match the criteria (named anything *, excluding FreeBSD)
 			// within the /work folder.
-			$file_list = thebrig_tarball_list( "*" , array( "FreeBSD" ) );
+			$file_list = thebrig_tarball_list( "*" , array( "FreeBSD"  ) );
 			// This filelist is then used to generate html code with checkboxes
 			$installLib = thebrig_checkbox_list( $file_list );
 			if ( $installLib ) {  // If the array exists and has a size, then display that html code
@@ -275,16 +289,16 @@ function disable_buttons() {
 			</td>
 		</tr>
 
-		<!--  These next two rows merely output some space between the upper and lower tables -->
+		<!--  These next two rows merely output some space between the upper and middle tables -->
 		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
 		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
 			
-		<!-- This is the table to allow the user to uninstall TheBrig from N4F -->
+		<!-- This is the table to allow the user to download remote tarballs -->
 		<tr><td colspan="2" valign="top" class="optsect_t">
 			<div class="optsect_s"><strong><?=_THEBRIG_REMOTE_TB;?></strong></div></td></tr>
 			
 		<!-- This is the row beneath the title -->
-		<tr><td width="22%" valign="top" class="vncellreq">&nbsp;</td>
+		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_REMOTE_AVAIL ?></td>
 			<td width="78%" class="vtable">
 			
 			<?php 
@@ -292,45 +306,68 @@ function disable_buttons() {
 				// This means we have successfully queried the ftp server, and so can thus display some
 				// info to the user about their download options.
 				echo "Release: " ;
+				// This calls the menu list creation function to build the html object (dropdown box). This object is named formRelease, and is
+				// populated with the listing of available releases ( in array $result ). The default selected item is the release that matches
+				// the current release of Nas4free
 				$rel_menu = thebrig_menu_list( $result , "formRelease" , $rel ) ;
-				echo $rel_menu ;
-				echo "   Arch: " ;
+				echo $rel_menu ; // Output the menu as html text
+				echo "   Arch: " ;  // Output the text for the architecture
+				// This calls the menu list creation function to build the html object (dropdown box) named formArch, populated with the two options:
+				// amd64 and i386. The default selected item is the release that matches the current release of Nas4free
 				$arch_menu = thebrig_menu_list( array( "amd64", "i386"), "formArch" , $arch ) ;
-				echo $arch_menu ;
+				//echo $arch_menu ;
 				echo "<br/>" ;
+				// Builds the checkboxes of available tarballs. There is no real reason for games or any of the other tarballs to be downloaded, 
+				// so they are not even an option.
 				$availFiles = "<input type=\"checkbox\" name=\"formPackages[]\" value= \"base\"> base.tbz" ;
-				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"docs\"> docs.tbz"
-				. "<input type=\"checkbox\" name=\"formPackages[]\" value= \"src\"> src.tbz" 
-				. ""
-				. "<br/>" ;
+				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"src\"> src.tbz" ;
+				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"doc\"> doc.tbz" ;
+				if ( $arch == "amd64") {
+				$availFiles .=  "<input type=\"checkbox\" name=\"formPackages[]\" value= \"lib32\" id=\"lib32_box\">lib32.tbz" ;
+				}
+				$availFiles .=  "" ;
+				$availFiles .=  "<br/>" ;
 				echo $availFiles;
 			} // end of the if to check that the query button was clicked
-			
-			?>
-			
+			else {
+				// This means we haven't talked to the FTP server, so we should display some informative message to the 
+				// user.
+				echo sprintf( _THEBRIG_REMOTE_INST );
+				 }?>			
 			</td>
 		</tr>
-			
-		
 		<tr>
-		<td width="22%" valign="top">
-			<?php 
-			if ( !isset( $config['thebrig']['ftpquery']) ) {
-				?> <input name="ftpquery" type="submit" class="formbtn" value="<?=_THEBRIG_QUERYBTN;?>" onClick="disable_buttons();">
-			</td>
-			<?php 
-			} ?>
-			<!-- This is the Query button -->
-				
+			<!-- This is the empty left column-->
+			<td width="22%" valign="top"> </td>
 			<td width="78%">
 			<!-- This is the Fetch button, which is dependent upon a successful ftp server query -->
 			<?php 
-			if ( isset($config['thebrig']['ftpquery']) ){
-				?><input name="fetch" type="submit" class="formbtn" value="<?=_THEBRIG_FETCH;?>" onClick="disable_buttons();">
+			if ( isset($config['thebrig']['ftpquery']) ){ ?>
+				<input name="fetch" type="submit" class="formbtn" value="<?=_THEBRIG_FETCH;?>" onClick="return confirm('<?=_THEBRIG_INFO_TB;?>')">
 			<?php
+			} else { ?>
+				<!-- This is the Query button, which is displayed if we haven't yet queried the ftp server -->
+				<input name="ftpquery" type="submit" class="formbtn" value="<?=_THEBRIG_QUERYBTN;?>" onClick="disable_buttons();">
+				<?php
 			} ?>
 			</td>
 		</tr>
+				<!--  These next two rows merely output some space between the middle and lower tables -->
+		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
+		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
+		
+		<!-- This is the table to allow the user to download remote tarballs -->
+		<tr><td colspan="2" valign="top" class="optsect_t">
+			<div class="optsect_s"><strong><?=_THEBRIG_REMOTE_ACTIVE;?></strong></div></td></tr>
+			
+				<!-- The first td of this row is the box in the top row, far left. -->
+		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_PARTIAL_TB; ?></td>
+		<!-- The next td is the larger box to the right, which contains the text box and info --> 
+		<td width="78%" class="vtable">
+		<!-- This creates a div named loaddiv, which is dynamically update by an ajax, jquery function -->
+		<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_download.php");</script></div>
+			</td></tr>
+		
 	</table>
 	<?php include("formend.inc");?>
 </form>
