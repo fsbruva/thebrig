@@ -16,7 +16,7 @@ if [ ! -z $1 ]; then
         echo "Attempting to create a new destination directory....."
         mkdir -p $BRIG_ROOT || exerr "ERROR: Could not create directory!"
     fi
-    cd $BRIG_ROOT
+    cd $BRIG_ROOT || exerr "ERROR: Could not access install directory!"
 else
 # We are here because the user did not specify an alternate location. Thus, we should use the 
 # current directory as the root.
@@ -36,7 +36,7 @@ fi
 
 # Fetch the master branch as a zip file
 echo "Retrieving the most recent version of TheBrig"
-fetch https://github.com/fsbruva/thebrig/archive/master.zip
+fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
