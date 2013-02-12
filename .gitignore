@@ -6,6 +6,8 @@
 .project
 .metadata
 #bin/
+conf/
+work/
 tmp/
 *.tmp
 *.bak
