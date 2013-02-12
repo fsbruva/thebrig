@@ -57,20 +57,14 @@ function thebrig_populate ($new_location, $old_location) {
 	// First we need to see if old location has a directory tree. If it does, we chould clean up after
 	// ourselves. This involves moving the php and .inc files. Then, the creation of the directory structure
 	// and startup scripts can progress normally
-	if ( is_dir ( $old_location ) {
-		if (  ! strcmp ( $old_location , $new_location )  {
-			// This indicates that we are actually MOVING the folder, not just clicking save
-			mwexec(	"/bin/mv {$old_location}/ext {$new_location}/");	// moves the web stuff
+	if ( is_dir ( $old_location )) {
+		// This indicates that the folders are actually different
+		if ( ! strcmp ( $old_location , $new_location ) ){
+			mwexec("/bin/mv {$old_location}/ext {$new_location}/");	// moves the web stuff
 			mwexec( "/bin/mv {$old_location}/bin {$new_location}/");	// moves the binaries
-			mwexec( "/bin/rm -r {$old_location}");	// remove the old directory
-			}
-		// Preapare the new folder for use. 
-
-
-		// ALEXY!!!! YOURE CODE GOES HERE!!!!!!!!!!!!
-
-
-		//
+			mwexec( "/bin/rm -r {$old_location}");	// removes the old directory
+		}
+		
 		mkdir ( "{$new_location}/conf");
 		mkdir ( "{$new_location}/work");
 		touch ( "${new_location}/conf/jail_start" );	
