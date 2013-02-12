@@ -15,9 +15,8 @@ if [ ! -z $1 ]; then
     if [ ! -d $BRIG_ROOT ]; then
         echo "Attempting to create a new destination directory....."
         mkdir -p $BRIG_ROOT || exerr "ERROR: Could not create directory!"
-    else
-        cd $BRIG_ROOT
     fi
+    cd $BRIG_ROOT
 else
 # We are here because the user did not specify an alternate location. Thus, we should use the 
 # current directory as the root.
@@ -33,15 +32,16 @@ fi
 
 # This is the script to initially install thebrig
 # It first fetches the zip of the most recent version from github
-# and then extracts it
+# and then extracts it.
 
 # Fetch the master branch as a zip file
+echo "Retrieving the most recent version of TheBrig"
 fetch https://github.com/fsbruva/thebrig/archive/master.zip
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
-tar -qxvf master.zip --exclude='.git*' --strip-components 1
+tar -xvf master.zip --exclude='.git*' --strip-components 1
 
 # Get rid of the tarball
 rm master.zip
@@ -65,4 +65,4 @@ echo $BRIG_ROOT > /tmp/thebrig.tmp
 # Copy all the requisite files to be used into the /usr/local/www folders as needed
 /bin/sh $BRIG_ROOT/bin/thebrig_start.sh
 
-echo "Congratulations! You should see a new tab under \" Extensions\"!"
+echo "Congratulations! Refresh see a new tab under \" Extensions\"!"
