@@ -1,5 +1,6 @@
 <?php
 /*
+ * extensions_thebrig_edit.php
 	*/
 require("auth.inc");
 require("guiconfig.inc");
@@ -15,8 +16,9 @@ if (isset($_POST['uuid']))
 
 // Page title
 $pgtitle = array(gettext("TheBrig"), gettext("Jail"), isset($uuid) ? gettext("Edit") : gettext("Add"));
+$snid = "jail60"; // what is this for?
 
-// This checks if the current XML config has a sectino for jails, or if it's an array
+// This checks if the current XML config has a section for jails, or if it's an array
 if (!isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail']))
 	// If the array doesn't exist, it is created.
 	$config['thebrig']['jail'] = array();
@@ -80,6 +82,8 @@ if ($_POST) {
 
 	// Input validation.
 	// Validate if jail number is unique.
+	// Alexey - why do we care about the jail number or the uuid?
+	// Why not use the name?
 	$index = array_search_ex($_POST['jailno'], $a_jail, "jailno");
 	if (FALSE !== $index) {
 		if (!((FALSE !== $cnid) && ($a_rule[$cnid]['uuid'] === $a_rule[$index]['uuid']))) {
