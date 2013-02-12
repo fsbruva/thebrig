@@ -73,7 +73,7 @@ function thebrig_process_updatenotification($mode, $data) {
 		case UPDATENOTIFY_MODE_MODIFIED:
 			break;
 		case UPDATENOTIFY_MODE_DIRTY:
-			// This indicates that we want to delete one of the jails
+			// This indicates that we want to delete one or more of the jails
 			$cnid = array_search_ex($data, $config['thebrig']['jail'], "uuid");
 			if (false !== $cnid) {
 				unset($config['thebrig']['jail'][$cnid]);
