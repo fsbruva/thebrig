@@ -1,22 +1,35 @@
 #!/bin/sh
 
-# The first argument will be the path that the user wants to be the root folder.
-# If this directory does not exist, it is created
-BRIG_ROOT=$1
-
-
 # define our bail out shortcut function anytime there is an error - display the error message, then exit
 # returning 1.
 exerr () { echo -e "$*" >&2 ; exit 1; }
 
-# This checks if the supplied argument is a directory. If it is not
-# then we will try to create it
-if [ ! -d $BRIG_ROOT ]; then
-    echo "Attempting to create a new destination directory....."
-    mkdir -p $BRIG_ROOT || exerr "ERROR: Could not create directory!"
+# This first checks to see that the user has supplied an argument
+if [ ! -z $1 ]; then
+    # The first argument will be the path that the user wants to be the root folder.
+    # If this directory does not exist, it is created
+    BRIG_ROOT=$1    
+    
+    # This checks if the supplied argument is a directory. If it is not
+    # then we will try to create it
+    if [ ! -d $BRIG_ROOT ]; then
+        echo "Attempting to create a new destination directory....."
+        mkdir -p $BRIG_ROOT || exerr "ERROR: Could not create directory!"
+    else
+        cd $BRIG_ROOT
+    fi
+else
+# We are here because the user did not specify an alternate location. Thus, we should use the 
+# current directory as the root.
+
+    # Determine the current directory
+    # Method adapted from user apokalyptik at
+    # http://hintsforums.macworld.com/archive/index.php/t-73839.html
+    STAT=$(procstat -f $$ | grep -E "/"$(basename $0)"$")
+    FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
+    BRIG_ROOT=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
 fi
 
-cd $BRIG_ROOT
 
 # This is the script to initially install thebrig
 # It first fetches the zip of the most recent version from github
