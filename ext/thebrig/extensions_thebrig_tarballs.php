@@ -182,7 +182,7 @@ if ($_POST) {
 			// This loop runs for each of the selected pacakages
 			foreach ( $pack_get as $pack_name ) {
 				// This code builds the command string with the appropriate architecture, release & package name.
-				$c_string = "/bin/sh {$config['thebrig']['rootfolder']}/bin/thebrig_fetch.sh {$arch_get} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}/work >/dev/null &";
+				$c_string = "/bin/sh {$config['thebrig']['rootfolder']}/bin/thebrig_fetch.sh {$arch} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}/work >/dev/null &";
 				// Carries out the fetching operation in the background
 				exec( $c_string , $output, $return);
 			}// end of for loop
@@ -311,11 +311,6 @@ var auto_refresh = setInterval(
 				// the current release of Nas4free
 				$rel_menu = thebrig_menu_list( $result , "formRelease" , $rel ) ;
 				echo $rel_menu ; // Output the menu as html text
-				echo "   Arch: " ;  // Output the text for the architecture
-				// This calls the menu list creation function to build the html object (dropdown box) named formArch, populated with the two options:
-				// amd64 and i386. The default selected item is the release that matches the current release of Nas4free
-				$arch_menu = thebrig_menu_list( array( "amd64", "i386"), "formArch" , $arch ) ;
-				//echo $arch_menu ;
 				echo "<br/>" ;
 				// Builds the checkboxes of available tarballs. There is no real reason for games or any of the other tarballs to be downloaded, 
 				// so they are not even an option.
@@ -323,7 +318,7 @@ var auto_refresh = setInterval(
 				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"src\"> src.tbz" ;
 				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"doc\"> doc.tbz" ;
 				if ( $arch == "amd64") {
-				$availFiles .=  "<input type=\"checkbox\" name=\"formPackages[]\" value= \"lib32\" id=\"lib32_box\">lib32.tbz" ;
+					$availFiles .=  "<input type=\"checkbox\" name=\"formPackages[]\" value= \"lib32\" id=\"lib32_box\">lib32.tbz" ;
 				}
 				$availFiles .=  "" ;
 				$availFiles .=  "<br/>" ;
