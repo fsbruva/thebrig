@@ -28,7 +28,7 @@ if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebri
 	// If the thing pulled from the .tmp file is an actual directory, do some stuff
 	if ( is_dir( $config['thebrig']['rootfolder'] ) ) {
 		write_config();		// write the config so it survives reboot
-		thebrig_populate( $config['rootfolder'] , $config['thebrig']['rootfolder'] );
+		thebrig_populate( $config['thebrig']['rootfolder'] , $config['thebrig']['rootfolder'] );
 		unlink_if_exists("/tmp/thebrig.tmp");  // deletes the .tmp file (if it was there)
 	}
 	else {

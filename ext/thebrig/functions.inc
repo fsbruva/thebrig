@@ -63,6 +63,7 @@ function thebrig_populate ($new_location, $old_location) {
 			mwexec("/bin/mv {$old_location}/ext {$new_location}/");	// moves the web stuff
 			mwexec( "/bin/mv {$old_location}/bin {$new_location}/");	// moves the binaries
 			mwexec( "/bin/rm -r {$old_location}");	// removes the old directory
+			
 		}
 		
 		mkdir ( "{$new_location}/conf");

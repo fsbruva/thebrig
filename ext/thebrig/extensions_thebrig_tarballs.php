@@ -115,8 +115,10 @@ if ($_POST) {
 				if ( strpos($raw, "total") === false && strpos( $raw , "-R") !== false ) {
 					// Use a regular expression method to parse the columns, based on white space
 					$line = preg_split( "/[\s]+/" , $raw ) ;
-					// The name of the directory is the 8th (starting at 0) column
-					$result[$k] = $line[8] ;
+					if ( intval( $line[8][0] >= 9 ) ) {
+						// The name of the directory is the 8th (starting at 0) column
+						$result[$k] = $line[8];
+					} // end of test for verion 9 or higher
 				}
 				$k++ ; // Increment the counter
 			} // end while loop used to extract stuff from the stream
