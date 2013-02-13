@@ -10,6 +10,10 @@ require_once("ext/thebrig/functions.inc");
 
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 
+if ( !isset( $config['thebrig']['rootfolder']) ) {
+	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
+} // end of elseif
+
 $today = date("d.m.Y.G:i:s");
 $mess = "clear";
 
