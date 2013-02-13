@@ -47,13 +47,19 @@ else if ( !isset( $config['thebrig']['rootfolder']) ) {
 if ($_POST) {
 	unset($input_errors);
 	$pconfig = $_POST;
+	 
+	 // Convert after filechoicer
 
+	if (strlen($pconfig['rootfolder']) > 8 && $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] == "/") {
+		$pconfig['rootfolder'] = substr($pconfig['rootfolder'], 0, strlen($pconfig['rootfolder'])-1);}
+	
 	/* input validation */
 	$reqdfields = array();
 	$reqdfieldsn = array();
 	$reqdfields = array_merge($reqdfields, explode(" ", "rootfolder"));
 	$reqdfieldsn = array_merge($reqdfieldsn, array( _THEBRIG_ROOT ));
-
+    
+	
 	//do_input_validation($_POST, $reqdfields, $reqdfieldsn, &$input_errors);
 	
 	// This first check to make sure that the supplied folder actually exists. If it does not
@@ -157,14 +163,15 @@ function disable_buttons() {
 			</table>
 		</td></tr>
 
-		<!-- The first td of this row is the box in the top row, far left. -->
+		<!-- The first td of this row is the box in the top row, far left.
 		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_ROOT; ?></td>
-		<!-- The next td is the larger box to the right, which contains the text box and info --> 
+		 The next td is the larger box to the right, which contains the text box and info 
 		<td width="78%" class="vtable">
 			<input name="rootfolder" type="text" class="formfld" id="rootfolder" size="50" value="<?=htmlspecialchars($pconfig['rootfolder']);?>"><br/>
 			<span class="vexpl"><?=_THEBRIG_ROOT_DESC ;?></span>
-		</td></tr>
-
+		</td></tr>  -->
+<?php html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
+						
 
 		<!--  These next two rows merely output some space between the upper and lower tables -->
 		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
