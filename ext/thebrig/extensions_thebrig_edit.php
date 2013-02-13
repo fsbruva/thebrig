@@ -4,6 +4,8 @@
 	*/
 require("auth.inc");
 require("guiconfig.inc");
+require_once("ext/thebrig/lang.inc");
+require_once("ext/thebrig/functions.inc");
 
 // This determines if the page was arrived at because of an edit (the UUID of the jail)
 // was passed to the page) or for a new creation.
@@ -149,15 +151,16 @@ function get_next_jailnumber() {
 ?>
 <?php include("fbegin.inc");?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
-	<tr>
-		<td class="tabnavtbl">
-			<ul id="tabnav">
-				<li class="tabact"><a href="access_users.php" title="<?=gettext("Reload page");?>"><span><?=gettext("Users");?></span></a></li>
-				<li class="tabinact"><a href="access_users_groups.php"><span><?=gettext("Groups");?></span></a></li>
-			</ul>
-		</td>
-	</tr>
-	<tr>
+	<tr><td class="tabnavtbl">
+		<ul id="tabnav">
+			<li class="tabact">
+				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
+			</li>
+			<li class="tabinact">
+				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
+			</li>
+		</ul>
+	</td></tr>
 		<td class="tabcont">
       <form action="extensions_thebrig_edit.php" method="post" name="iform" id="iform">
       	<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
