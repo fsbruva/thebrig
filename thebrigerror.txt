@@ -1,3 +1,0 @@
-/mnt/poolie/thebrig/bin/ftp: not found
-/mnt/poolie/thebrig/bin/ftp: not found
-/mnt/poolie/thebrig/bin/ftp: not found

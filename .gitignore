@@ -1,4 +1,12 @@
 #################
+## TheBrig
+#################
+conf/
+work/
+thebrig_error.txt
+
+
+#################
 ## Eclipse
 #################
 
@@ -6,8 +14,7 @@
 .project
 .metadata
 #bin/
-conf/
-work/
+
 tmp/
 *.tmp
 *.bak
