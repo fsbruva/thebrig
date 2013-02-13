@@ -49,12 +49,12 @@ rm master.zip
 # Rename some files we have so there is only one bin/ftp
 if [ `uname -p` = "amd64" ]; then
     echo "Renaming 64 bit ftp binary"
-    mv bin/ftp_amd64 bin/ftp
-    rm bin/ftp_i386
+    mv conf/bin/ftp_amd64 conf/bin/ftp
+    rm conf/bin/ftp_i386
 else
     echo "Renaming 32 bit ftp binary"
-    mv bin/ftp_i386 bin/ftp
-    rm bin/ftp_amd64
+    mv conf/bin/ftp_i386 conf/bin/ftp
+    rm conf/bin/ftp_amd64
 fi
 
 # Place the path (of the current directory) within a file for the intial
@@ -63,6 +63,6 @@ touch /tmp/thebrig.tmp
 echo $BRIG_ROOT > /tmp/thebrig.tmp
 
 # Copy all the requisite files to be used into the /usr/local/www folders as needed
-/bin/sh $BRIG_ROOT/bin/thebrig_start.sh
+/bin/sh $BRIG_ROOT/conf/bin/thebrig_start.sh
 
-echo "Congratulations! Refresh see a new tab under \" Extensions\"!"
+echo "Congratulations! Refresh to see a new tab under \" Extensions\"!"
