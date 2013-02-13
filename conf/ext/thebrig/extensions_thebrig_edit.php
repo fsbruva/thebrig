@@ -123,7 +123,7 @@ if ($_POST) {
 			$mode = UPDATENOTIFY_MODE_MODIFIED;
 		} else {
 			// Copies the first jail into $a_jail
-			$a_jail[] = $jail;
+			$a_jail[("cell" . $jail['jailno'])] = $jail;
 			$mode = UPDATENOTIFY_MODE_NEW;
 		}
 		
