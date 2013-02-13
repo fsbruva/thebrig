@@ -21,12 +21,12 @@ function thebrig_unregister() {
  	
  	// First, glob all the php files from the extensions folder into an array of fully pathed filenames
  	// and work through them one at a time as file. 
- 	foreach ( glob( "{$brigroot}/ext/thebrig/*.php" ) as $file ) {
+ 	foreach ( glob( "{$brigroot}/conf/ext/thebrig/*.php" ) as $file ) {
  			// Carry out the string replacement operation. For each file, search for the string 
  			//"{$brigroot}/ext/thebrig" and replace it with /usr/local/www. This will create a 
  			// string that has a fully pathed filename for the extension's webpages (which are 
  			// actually symbolic links we need to destroy.
- 		$file = str_replace("{$brigroot}/ext/thebrig", "/usr/local/www", $file);
+ 		$file = str_replace("{$brigroot}/conf/ext/thebrig", "/usr/local/www", $file);
  			// only carry out the delete if it is a symbolic link (in case users have customised their own)
  		if ( is_link( $file ) ) {
  			unlink( $file ); 	// remove the ymbolic link
@@ -60,13 +60,10 @@ function thebrig_populate ($new_location, $old_location) {
 	if ( is_dir ( $old_location )) {
 		// This indicates that the folders are actually different
 		if ( ! strcmp ( $old_location , $new_location ) ){
-			mwexec("/bin/mv {$old_location}/ext {$new_location}/");	// moves the web stuff
-			mwexec( "/bin/mv {$old_location}/bin {$new_location}/");	// moves the binaries
+			mwexec("/bin/mv {$old_location}/conf {$new_location}/");	// moves the conf
 			mwexec( "/bin/rm -r {$old_location}");	// removes the old directory
-			
 		}
-		
-		mkdir ( "{$new_location}/conf");
+
 		mkdir ( "{$new_location}/work");
 		touch ( "${new_location}/conf/jail_start" );	
 		
@@ -91,7 +88,7 @@ function thebrig_populate ($new_location, $old_location) {
 		} // end of for loop
 	} // end of array if statment
 	// update the value of the postinit command.
-	$config['rc']['postinit']['cmd'][$i] = "/bin/sh {$new_location}/bin/thebrig_start.sh";
+	$config['rc']['postinit']['cmd'][$i] = "/bin/sh {$new_location}/conf/bin/thebrig_start.sh";
 	// update all the symbolic links and such by executing the startup script from the new location
 	//mwexec("/bin/sh {$new_location}/bin/thebrig_start.sh");
 }	// end of thebrig_populate()
