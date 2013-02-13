@@ -1,7 +1,8 @@
 #################
 ## TheBrig
 #################
-conf/
+conf/jail_start
+conf/bin/ftp
 work/
 thebrig_error.txt
 
