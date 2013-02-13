@@ -53,7 +53,7 @@ if ($_POST) {
 			) ;
 		
 		//Define the command string used to open an ftp connection based on the specified parameters
-		$cmd_str = $config['thebrig']['rootfolder'] . "/bin/ftp -a ftp://" . $ftp_server . $ftp_path ;
+		$cmd_str = $config['thebrig']['rootfolder'] . "/conf/bin/ftp -a ftp://" . $ftp_server . $ftp_path ;
 		
 		// Define an ftp resource stream by running the specified command, using the descriptor spec and
 		// placing the process's IO within pipes. The environment and other_options parameter are NULL.		
@@ -184,7 +184,7 @@ if ($_POST) {
 			// This loop runs for each of the selected pacakages
 			foreach ( $pack_get as $pack_name ) {
 				// This code builds the command string with the appropriate architecture, release & package name.
-				$c_string = "/bin/sh {$config['thebrig']['rootfolder']}/bin/thebrig_fetch.sh {$arch} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}/work >/dev/null &";
+				$c_string = "/bin/sh {$config['thebrig']['rootfolder']}/conf/bin/thebrig_fetch.sh {$arch} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}/work >/dev/null &";
 				// Carries out the fetching operation in the background
 				exec( $c_string , $output, $return);
 			}// end of for loop
