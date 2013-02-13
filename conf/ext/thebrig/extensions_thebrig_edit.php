@@ -46,6 +46,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['proc_enable'] = isset($a_jail[$cnid]['proc_enable']);
 	$pconfig['fdescfs_enable'] = isset($a_jail[$cnid]['fdescfs_enable']);
 	$pconfig['devfsrules'] = $a_jail[$cnid]['devfsrules'];
+	$pconfig['fstab'] = $a_jail[$cnid]['fstab'];
 	$pconfig['afterstart0'] = $a_jail[$cnid]['afterstart0'];
 	$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
 	$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
@@ -66,6 +67,7 @@ else {
 	$pconfig['proc_enable'] = false;
 	$pconfig['fdescfs_enable'] = false;
 	$pconfig['devfsrules'] = "";
+	$pconfig['fstab'] = "";
 	$pconfig['afterstart0'] = "";
 	$pconfig['afterstart1'] = "";
 	$pconfig['exec_stop'] = "";
@@ -107,6 +109,7 @@ if ($_POST) {
 		$jail['devfs_enable'] = isset($_POST['devfs_enable']) ? true : false;
 		$jail['proc_enable'] = isset($_POST['proc_enable']) ? true : false;
 		$jail['fdescfs_enable'] = isset($_POST['fdescfs_enable']) ? true : false;
+		$jail['fstab'] = $_POST['fstab'];
 		$jail['afterstart0'] = $_POST['afterstart0'];
 		$jail['afterstart1'] = $_POST['afterstart1'];
 		$jail['exec_stop'] = $_POST['exec_stop'];
@@ -137,12 +140,12 @@ function get_next_jailnumber() {
 	global $config;
 
 	// Set starting jail number
-	$ruleno = 10;
+	$jailno = 1;
 
 	$a_jails = $config['thebrig']['jail'];
 	if (false !== array_search_ex(strval($jailno), $a_jails, "jailno")) {
 		do {
-			$jailno += 10; // Increase jail number until a unused one is found.
+			$jailno += 1; // Increase jail number until a unused one is found.
 		} while (false !== array_search_ex(strval($jailno), $a_jails, "jailno"));
 	}
 
@@ -178,6 +181,7 @@ function get_next_jailnumber() {
 			<?php html_inputbox("devfsrules", gettext("Devfs ruleset name"), $pconfig['devfsrules'], gettext("usually you want <i>devfsrules_jail</i>"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
+			<?php html_textarea("fstab", gettext("fstab"), !empty($pconfig['fstab']) ? $pconfig['fstab'] : "", sprintf(gettext(" This will be added to fstab ")), false, 65, 5, false, false);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Commands"));?>
 			<?php html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>

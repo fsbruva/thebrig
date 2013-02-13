@@ -123,21 +123,44 @@ function thebrig_process_updatenotification($mode, $data) {
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td width="4%" class="listhdrlr">&nbsp;</td>
-									<td width="15%" class="listhdrr"><?=gettext("Name");?></td>
-									<td width="5%" class="listhdrr"><?=gettext("Status");?></td>
-									<td width="5%" class="listhdrr"><?=gettext("ID");?></td>
+									<td width="10%" class="listhdrr"><?=gettext("Name");?></td>
+									<td width="5%" class="listhdrr"><?=gettext("Interface");?></td>
+									<td width="10%" class="listhdrr"><?=gettext("Start on boot");?></td>
 									<td width="10%" class="listhdrr"><?=gettext("IP");?></td>
-									<td width="15%" class="listhdrr"><?=gettext("Hostname");?></td>
-									<td width="20%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?></td>
-									<td width="16%" class="listhdrr"><?=gettext("Start on boot");?></td>
-									<td width="10%" class="list"></td>
+									<td width="12%" class="listhdrr"><?=gettext("Hostname");?></td>
+									<td width="15%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?></td>
+									<td width="19%" class="listhdrr"><?=gettext("Start on boot");?></td>
+									<td width="15%" class="list"></td>
 								</tr>
-								<?php foreach ($a_jail as $jail):?>
+																<?php foreach ($a_jail as $jail):?>
 								<?php $notificationmode = updatenotify_get_mode("thebrig", $jail['uuid']);?>
 								<tr>
+									<?php $enable = isset($jail['enable']);
+									switch ($jail['action']) {
+										case "allow":
+											$actionimg = "fw_action_allow.gif";
+											break;
+										case "deny":
+											$actionimg = "fw_action_deny.gif";
+											break;
+										case "unreach host":
+											$actionimg = "fw_action_reject.gif";
+											break;
+									}
+									?>
+									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['jailno']) ? "*" : $jail['jailno']);?>&nbsp;</td>
+									
+									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['jailname']);?>&nbsp;</td>
+									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['if']) ? "*" : $jail['if']);?>&nbsp;</td>
+									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(empty($jail['enable']) ? "YES" : "NO");?></td>
+									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['ipaddr'] . " / " . $jail['subnet']) ;?>&nbsp;</td>
+									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($jail['jailname'] . "." . $config[system][domain]);?>&nbsp;</td>
+									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($config['thebrig']['rootfolder'] . "/" . $jail['jailname']);?>&nbsp;</td>
+									
+									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
-										<a href="extensions_thebrig_edit.php.php?uuid=<?=$jail['uuid'];?>"><img src="e.gif" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>
+										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="e.gif" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>
 										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>" onclick="return confirm('<?=gettext("Do you really want to delete this jail?");?>')"><img src="x.gif" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>
 									</td>
 									<?php else:?>
