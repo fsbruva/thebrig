@@ -59,7 +59,7 @@ function thebrig_populate ($new_location, $old_location)
 	// ourselves. This involves moving the php and .inc files. Then, the creation of the directory structure
 	// and startup scripts can progress normally
 	if ( $new_location === $old_location )  {return 2; exit;}
-	if ( disk_free_space ( $new_location ) > 2000000000) 
+	if ( disk_free_space ( $new_location ) > 4000000000) 
 	{   mwexec ( "mkdir {$new_location}/work") ;
 		mwexec ( "cp -R {$old_location}/conf {$new_location}/") ; // I create cp temporary.
 		$fp = fopen("{$new_location}/conf/jail_start", "w+");

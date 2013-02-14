@@ -101,8 +101,7 @@ if ($_POST) {
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 			// a jail at the old location. Call thebrig_populate, which will move all the web stuff and create the 
 			// directory tree
-			$newfolder123 = $pconfig['rootfolder'];
-			$oldfolder123 = $config['thebrig']['rootfolder'] ;
+
 			if (thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] ) == 2) $input_errors[] = " You want destroy jail?";
 			elseif (thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] ) == 1) $input_errors[] = " You must to buy new harddisk!";
 			else {
@@ -205,8 +204,4 @@ function disable_buttons() {
 </form>
 </td></tr>
 </table>
-<?php echo $newfolder123; echo "*   *";
- echo $oldfolder123; ?>
-<?php
-	include("fend.inc");
-?>
+<?php 	include("fend.inc"); ?>

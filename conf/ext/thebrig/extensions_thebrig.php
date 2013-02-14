@@ -17,8 +17,6 @@ if ( !isset( $config['thebrig']['rootfolder']) ) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
 } // end of elseif
 
-$today = date("d.m.Y.G:i:s");
-$mess = "clear";
 
 // sent to page data from config.xml
 $pconfig['glenable'] = isset( $config['thebrig']['glenable'] ); 
