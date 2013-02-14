@@ -61,12 +61,9 @@ function thebrig_populate ($new_location, $old_location) {
 		// This indicates that the folders are actually different
 		if ( strcmp ( $old_location , $new_location ) ){
 			mwexec("/bin/mv {$old_location}/conf {$new_location}/");	// moves the conf
-			mwexec( "/bin/rm -r {$old_location}");	// removes the old directory
-		}
+			mwexec( "/bin/rm -r {$old_location}");
+		}	// removes the old directory }
 
-		mkdir ( "{$new_location}/work");
-		touch ( "${new_location}/conf/jail_start" );	
-		
 		// This section finds and unsets the startup command for the extension (code from slimserver install)
 		$i = 0;
 		if (is_array($config['rc']['postinit']['cmd'])) {
@@ -76,6 +73,10 @@ function thebrig_populate ($new_location, $old_location) {
 			 	}	// end for		
 		} // end if (is array)
 	} // end if
+
+	mwexec( "/bin/mkdir -p {$new_location}/work");
+	mwexec( "/usr/bin/touch -p ${new_location}/conf/jail_start");
+
 	// This will search the startup commands to find the appropriate index to place thebrig's startup script command
 	$i = 0;
 	// Don't want to attempt array operations if there are no postinit commands.
@@ -83,14 +84,14 @@ function thebrig_populate ($new_location, $old_location) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
 			// This loops through all the post init command script entries, and if it finds thebrig_start.sh (placed by hand), 
 			// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
-			if (preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
+			if ( preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
 				break;
 		} // end of for loop
 	} // end of array if statment
 	// update the value of the postinit command.
 	$config['rc']['postinit']['cmd'][$i] = "/bin/sh {$new_location}/conf/bin/thebrig_start.sh";
 	// update all the symbolic links and such by executing the startup script from the new location
-	//mwexec("/bin/sh {$new_location}/bin/thebrig_start.sh");
+	//mwexec("/bin/sh {$new_location}/conf/bin/thebrig_start.sh");
 }	// end of thebrig_populate()
 
 // Function name: 	check_thebrig
@@ -325,4 +326,3 @@ function get_nice_filesize ($file) {
 		return "$dsize KB";
 	}
 }
-?>
