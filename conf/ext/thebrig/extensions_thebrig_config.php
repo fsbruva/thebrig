@@ -65,12 +65,12 @@ if ($_POST) {
 	
 	// This first check to make sure that the supplied folder actually exists. If it does not
 	// then the user should be alerted. No changes will be made.
-	if ( !is_dir( $pconfig['rootfolder'] && !isset($pconfig['remove']) ) ) {
+	if ( !is_dir( $pconfig['rootfolder'] ) ) {
 		$input_errors[] = _THEBRIG_NONEXISTENT_FOLDER;
 	}
 	// We also need to be able to write to the folder, so lets check that. The webgui runs as root, so this 
 	// condition is highly suspect, but needs to be covered.
-	elseif ( !is_writable( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ){
+	elseif ( !is_writable( $pconfig['rootfolder'] ) ){
 		$input_errors[] = _THEBRIG_NOTWRITABLE_FOLDER;
 	}
 	// We also need to see if there is enough space on the target disk.
