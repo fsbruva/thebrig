@@ -13,7 +13,7 @@ cd /usr/local/www
 for file in /usr/local/www/ext/thebrig/*.php
 do
 	# Check if the link is alredy there
-	if [  -e "${file##*/}" ]
+	if [ -e "${file##*/}" ]; then
 		rm "${file##*/}"
 	fi
 	# Create link
