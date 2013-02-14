@@ -179,7 +179,6 @@ if ($_POST) {
 				
 		elseif ( isset( $_POST['fetch'] ) && $_POST['fetch'] ) {
 			$pack_get = $_POST['formPackages'] ;
-			$arch_get = $_POST['formArch'] ;
 			$rel_get = $_POST['formRelease'] ;
 			// This loop runs for each of the selected pacakages
 			foreach ( $pack_get as $pack_name ) {
@@ -371,6 +370,4 @@ var auto_refresh = setInterval(
 </td></tr>
 </table>
 
-<?php
-	include("fend.inc");
-?>
+<?php include("fend.inc"); ?>
