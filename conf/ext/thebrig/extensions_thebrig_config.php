@@ -163,14 +163,13 @@ function disable_buttons() {
 			</table>
 		</td></tr>
 
-		<!-- The first td of this row is the box in the top row, far left.
+		<!-- The first td of this row is the box in the top row, far left.-->
 		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_ROOT; ?></td>
-		 The next td is the larger box to the right, which contains the text box and info 
+		 <!-- The next td is the larger box to the right, which contains the text box and info -->
 		<td width="78%" class="vtable">
 			<input name="rootfolder" type="text" class="formfld" id="rootfolder" size="50" value="<?=htmlspecialchars($pconfig['rootfolder']);?>"><br/>
 			<span class="vexpl"><?=_THEBRIG_ROOT_DESC ;?></span>
-		</td></tr>  -->
-<?php html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
+		</td></tr>  <?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
 						
 
 		<!--  These next two rows merely output some space between the upper and lower tables -->
@@ -194,12 +193,7 @@ function disable_buttons() {
 			 	<input name="Submit" type="submit" class="formbtn" value="<?=_THEBRIG_SAVE;?>" onClick="disable_buttons();">
 			</td>
 		</tr>
-	</table>
-	<?php include("formend.inc");?>
+	</table><?php include("formend.inc");?>
 </form>
 </td></tr>
-</table>
-
-<?php
-	include("fend.inc");
-?>
+</table><?php include("fend.inc");?>
