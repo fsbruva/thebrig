@@ -39,7 +39,8 @@ if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebri
 } // end if (no folder), but a tmp file
 // This indicates that the xml config doesn't know where the folder is, and there is no temp file
 // created as part of an installation. Alert the user and ask them to re-run the install
-else if ( !isset( $config['thebrig']['rootfolder']) ) {
+// The other issue is that somehow a bad root folder value got written to the XML config.
+else if ( !isset( $config['thebrig']['rootfolder']) || !is_dir ( $config['thebrig']['rootfolder'])) {
 	$input_errors[] = _THEBRIG_NOT_INSTALLED;
 } // end of elseif
 
@@ -72,6 +73,11 @@ if ($_POST) {
 	elseif ( !is_writable( $pconfig['rootfolder'] ) ){
 		$input_errors[] = _THEBRIG_NOTWRITABLE_FOLDER;
 	}
+	// We also need to see if there is enough space on the target disk.
+	elseif ( disk_free_space ( $new_location ) < 2000000000) {
+		$input_errors[] = "There is not enough space on the target disk!";
+	}
+	
 	// The folder supplied by the user is a valid folder, so we can continue our input validations
 	else {
 		// brig_search is an array containing all the files within the root/conf that start with fstab.
@@ -101,16 +107,9 @@ if ($_POST) {
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 			// a jail at the old location. Call thebrig_populate, which will move all the web stuff and create the 
 			// directory tree
-
-			if (thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] ) == 2) $input_errors[] = " You want destroy jail?";
-			elseif (thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] ) == 1) $input_errors[] = " You must to buy new harddisk!";
-			else {
-			unset($input_errors); 
+			thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] );
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			write_config(); // Write the config to disk
-			}
-			
-			
 		}
 		// Whatever we did, we did it successfully
 		$retval = 0;
