@@ -52,30 +52,40 @@ function thebrig_unregister() {
 // Outputs: 		logical result of the creation of the proper directory structure in the install folder
 // Description:		This function allows the installation (or movement of) the installation folder and
 //					directory tree
-function thebrig_populate ($new_location, $old_location) {
+function thebrig_populate ($new_location, $old_location) 
+{
 	global $config ;
 	// First we need to see if old location has a directory tree. If it does, we chould clean up after
 	// ourselves. This involves moving the php and .inc files. Then, the creation of the directory structure
 	// and startup scripts can progress normally
+	// First we need to see if there is enough space in the new location
+	if ( disk_free_space ( $new_location ) < 4000000000) {return 1; exit;}
+	
+	// Create the work directory
+	mwexec ( "mkdir -p {$new_location}/work") ;
+	// Create the jail_start script
+	mwexec ( "echo \"#!/bin/sh\" > {$new_location}/conf/jail_start") ;
+	mwexec ( "/bin/chmod 755 {$new_location}/conf/jail_start") ;
+	
+	// $old_location should never not be a directory
 	if ( is_dir ( $old_location )) {
+	
 		// This indicates that the folders are actually different
 		if ( strcmp ( $old_location , $new_location ) ){
 			mwexec("/bin/mv {$old_location}/conf {$new_location}/");	// moves the conf
 			mwexec( "/bin/rm -r {$old_location}");
-		}	// removes the old directory }
-
-		// This section finds and unsets the startup command for the extension (code from slimserver install)
-		$i = 0;
-		if (is_array($config['rc']['postinit']['cmd'])) {
-			for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-				if (preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
-					unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
-			 	}	// end for		
-		} // end if (is array)
-	} // end if
-
-	mwexec( "/bin/mkdir -p {$new_location}/work");
-	mwexec( "/usr/bin/touch -p ${new_location}/conf/jail_start");
+		}	// moves data from and removes the old directory 
+	} // end if old location is a directory
+	else { return 2 ; exit; }
+	
+	// This section finds and unsets the startup command for the extension (code borrowed from slimserver install)
+	$i = 0;
+	if (is_array($config['rc']['postinit']['cmd'])) {
+		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
+			if (preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
+				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
+		 	}	// end for		
+	} // end if (is array)
 
 	// This will search the startup commands to find the appropriate index to place thebrig's startup script command
 	$i = 0;
@@ -92,6 +102,7 @@ function thebrig_populate ($new_location, $old_location) {
 	$config['rc']['postinit']['cmd'][$i] = "/bin/sh {$new_location}/conf/bin/thebrig_start.sh";
 	// update all the symbolic links and such by executing the startup script from the new location
 	//mwexec("/bin/sh {$new_location}/conf/bin/thebrig_start.sh");
+	return 0;
 }	// end of thebrig_populate()
 
 // Function name: 	check_thebrig

@@ -129,7 +129,7 @@ if ($_POST) {
 		
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-		
+		mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}");
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
@@ -181,7 +181,7 @@ function get_next_jailnumber() {
 			<?php html_inputbox("devfsrules", gettext("Devfs ruleset name"), $pconfig['devfsrules'], gettext("usually you want <i>devfsrules_jail</i>"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
-			<?php html_textarea("fstab", gettext("fstab"), !empty($pconfig['fstab']) ? $pconfig['fstab'] : "", sprintf(gettext(" This will be added to fstab ")), false, 65, 5, false, false);?>
+			<?php html_textarea("fstab", gettext("fstab"), !empty($pconfig['fstab']) ? $pconfig['fstab'] : "devfs /mnt/data/jail/proto/dev devfs rw 0 0", sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Commands"));?>
 			<?php html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>
