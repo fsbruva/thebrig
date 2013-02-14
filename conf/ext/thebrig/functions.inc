@@ -59,7 +59,7 @@ function thebrig_populate ($new_location, $old_location) {
 	// and startup scripts can progress normally
 	if ( is_dir ( $old_location )) {
 		// This indicates that the folders are actually different
-		if ( ! strcmp ( $old_location , $new_location ) ){
+		if ( strcmp ( $old_location , $new_location ) ){
 			mwexec("/bin/mv {$old_location}/conf {$new_location}/");	// moves the conf
 			mwexec( "/bin/rm -r {$old_location}");	// removes the old directory
 		}
