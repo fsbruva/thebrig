@@ -58,8 +58,6 @@ function thebrig_populate ($new_location, $old_location)
 	// First we need to see if old location has a directory tree. If it does, we chould clean up after
 	// ourselves. This involves moving the php and .inc files. Then, the creation of the directory structure
 	// and startup scripts can progress normally
-	// First we need to see if there is enough space in the new location
-	if ( disk_free_space ( $new_location ) < 4000000000) {return 1; exit;}
 	
 	// Create the work directory
 	mwexec ( "mkdir -p {$new_location}/work") ;
@@ -76,8 +74,7 @@ function thebrig_populate ($new_location, $old_location)
 			mwexec( "/bin/rm -r {$old_location}");
 		}	// moves data from and removes the old directory 
 	} // end if old location is a directory
-	else { return 2 ; exit; }
-	
+
 	// This section finds and unsets the startup command for the extension (code borrowed from slimserver install)
 	$i = 0;
 	if (is_array($config['rc']['postinit']['cmd'])) {
