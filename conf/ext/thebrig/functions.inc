@@ -42,6 +42,11 @@ function thebrig_unregister() {
  	// Check to see if the folder is a folder, then remove it
  	if ( is_dir( "/usr/local/www/ext/thebrig" ) ) {
  		rmdir( "/usr/local/www/ext/thebrig" );
+ 		# This counts the number of entries in the ext directory. If it is less than or equal to 2,
+ 		# the directory is empty, and can be removed (see http://www.php.net/manual/en/function.scandir.php)
+ 		if ( count( scandir( "/usr/local/www/ext" ) ) <= 2 ){
+ 			rmdir( "/usr/local/www/ext" );
+ 		}
  	}
 	// Make the former root folder writeable by all, so that it can be easily deleted.
  	mwexec("/bin/chmod -R 777 {$brigroot}");
