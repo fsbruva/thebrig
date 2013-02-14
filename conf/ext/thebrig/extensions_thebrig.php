@@ -88,9 +88,8 @@ function thebrig_process_updatenotification($mode, $data) {
 
 	return $retval;
 }
-?> 
 
-<?php include("fbegin.inc");?>
+include("fbegin.inc");?>
 <!--------  This is view ------->
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0" >
