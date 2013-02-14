@@ -9,7 +9,13 @@ BRIG_ROOT=$(dirname $FULL_PATH | sed 's|/bin||')
 
 cp $BRIG_ROOT/ext/thebrig/* /usr/local/www/ext/thebrig
 cd /usr/local/www
+# For each of the php files in the extensions folder
 for file in /usr/local/www/ext/thebrig/*.php
 do
-ln -s "$file" "${file##*/}"
+	# Check if the link is alredy there
+	if [  -e "$file" ]
+		rm "$file"
+	fi
+	# Create link
+	ln -s "$file" "${file##*/}"
 done
