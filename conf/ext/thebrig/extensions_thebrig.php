@@ -115,6 +115,10 @@ include("fbegin.inc");?>
 		
 						
 		<td class="tabcont">
+		<?php if ($input_errors) print_input_errors($input_errors);?>
+		<?php if ($errormsg) print_error_box($errormsg);?>
+		<?php if ($savemsg) print_info_box($savemsg);?>
+		<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 			<table width="100%" border="0" cellpadding="0" cellspacing="0">
 				<tr><?php html_titleline(gettext("On-line view"));?></tr>
 				<tr>
@@ -179,10 +183,6 @@ include("fbegin.inc");?>
 	<form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
 	<table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabcont">
-		<?php if ($input_errors) print_input_errors($input_errors);?>
-		<?php if ($errormsg) print_error_box($errormsg);?>
-		<?php if ($savemsg) print_info_box($savemsg);?>
-		<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<tr><td colspan="2" valign="top" class="optsect_t">
 		<table border="0" cellspacing="0" cellpadding="0" width="100%">
