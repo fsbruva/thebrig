@@ -105,8 +105,8 @@ $remtemp = exec ("rm /tmp/tempfile"); ?>
 								<td width="18%" valign="top" class="vncellreq"><center><?php 
 								echo $jail_root_dir ."/" . $n2_jail;
 								 ?></center></td>
-								
-	<td width="20%" valign="top" class="vncellreq"><center><input type="submit" class="formbtn" <?php If(is_file($file_id)): ?><name="jailstop" value="stop" ><?php else:?><name="jailstart" value="start" ><?php endif;?> 
+								 								
+	<td width="20%" valign="top" class="vncellreq"><center><input type="submit" class="formbtn" <?php If(is_file($file_id)): ?> ><name="jailstop" value="stop" ><?php else:?><name="jailstart" value="start" ><?php endif;?> 
 										</center>
 								</td>
 							</tr><?php endforeach;?>
