@@ -7,6 +7,10 @@ require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
 
+//I check install.
+if ( !is_dir ( $config['thebrig']['rootfolder']."/work") ) { 
+	$input_errors[] = _THEBRIG_NOT_CONFIRMED;  header ("Location: /extension_thebrig_config.php"); // May be replace previos if ???
+	}
 // This determines if the page was arrived at because of an edit (the UUID of the jail)
 // was passed to the page) or for a new creation.
 if (isset($_GET['uuid']))
@@ -75,6 +79,12 @@ else {
 	$pconfig['desc'] = "";
 }
 
+$myrelease = exec("/usr/bin/uname -r");
+	$myarch = exec("/usr/bin/uname -p");
+	$mysystem = exec("/usr/bin/uname -s");
+	$myfile = $config['thebrig']['rootfolder'] . "/work/" . $mysystem ."-" . $myarch . "-" . $myrelease . "-base.txz";
+	if (!is_file($myfile)) { header("Location: extensions_thebrig_tarballs.php"); }
+{}
 if ($_POST) {
 	unset($input_errors);
 	$pconfig = $_POST;
@@ -130,6 +140,15 @@ if ($_POST) {
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
 		mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}");
+		//extract tarball into jail
+		if (isset($_POST['exractbin']) ) {
+		$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$mysystem."-".$myarch."-".$myrelease."-base.txz -C ". $config['thebrig']['rootfolder']."/".$jail['jailname']."/";
+		$commandresolv = "cp /etc/resolv.conf ".$config['thebrig']['rootfolder']."/".$jail['jailname']."/etc/";
+		
+		mwexec ($commandextract);
+		mwexec ($commandresolv);
+		
+		}
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
@@ -189,7 +208,9 @@ function get_next_jailnumber() {
 			<?php html_inputbox("exec_stop", gettext("User command stop"), $pconfig['exec_stop'], gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
 			<?php html_inputbox("extraoptions", gettext("Options. "), $pconfig['extraoptions'], gettext("Add to rc.conf.local"), false, 40);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
-				
+			<?php html_separator();?>
+			<?php html_checkbox("exractbin", gettext("Extract binaries"), $pconfig['exractbin'], "If you wan't extract binaries now check it", "", false);?>
+			
 				</table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" />
@@ -199,6 +220,7 @@ function get_next_jailnumber() {
 				<?php include("formend.inc");?>
 			</form>
 		</td>
+	
 	</tr>
 </table>
 <?php include("fend.inc");?>
