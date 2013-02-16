@@ -28,6 +28,14 @@ $pconfig['systenv'] = isset($config['thebrig']['systenv']);
 
 
 if ($_POST) {
+	// insert into pconfig changes
+	$pconfig['glenable'] = isset( $_POST['glenable'] ); 
+	$rootfolder = $config['thebrig']['rootfolder'];
+	$pconfig['parastart'] = isset( $_POST['parastart'] ) ;
+	$pconfig['sethostname'] = isset($_POST['sethostname']); 
+	$pconfig['unixiproute'] = isset($_POST['unixiproute']); 
+	$pconfig['systenv'] = isset($_POST['systenv']);
+	
 	$config['thebrig']['glenable'] = isset( $_POST['glenable'] );
 	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
 	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
@@ -105,7 +113,7 @@ var auto_refresh = setInterval(
 		}, 5000);
 </script>
 <!--------  This is view ------->
-
+<form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
 <table width="100%" border="0" cellpadding="0" cellspacing="0" >
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
@@ -130,18 +138,23 @@ var auto_refresh = setInterval(
 				<tr><?php html_titleline(gettext("On-line view"));?></tr>
 				<tr> <!----  import table and check from another page --->
 					<td class="shadow">
+					<?php if ( !isset( $config['thebrig']['rootfolder']) ) : ?>
+					<a title="<?=gettext("Configure TheBrig please in first");?>
+					<?php else:?>
 					<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_check.php");</script></div>
+					<?php endif;?>
 					</td>
 				</tr>
 			</table>
 		</td>
 	</tr>
-	<form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
+	
 	<table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabcont">
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<tr><td colspan="2" valign="top" class="optsect_t">
 		<table border="0" cellspacing="0" cellpadding="0" width="100%">
+		
 		<tr><?php html_titleline_checkbox("glenable", gettext("<strong>TheBrig config</strong>"), !empty($pconfig['glenable']) ? true : false, gettext("Enable") );?>
 	
 		<td align="right" class="optsect_s"></td>
@@ -225,10 +238,10 @@ var auto_refresh = setInterval(
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />
 				</div>
 	</table>
-	<?php include("formend.inc");?>
-</form>
+	
 </td></tr>
-
+<?php include("formend.inc");?>
+</form>
 </table>
 <?php include("fend.inc"); ?>
 
