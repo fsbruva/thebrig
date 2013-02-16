@@ -90,13 +90,20 @@ function thebrig_process_updatenotification($mode, $data) {
 	return $retval;
 }
 
-// this line need for analystic from host
-$jail_root_dir = $config['thebrig']['rootfolder'];
-$list = exec("ls -F {$jail_root_dir} | grep / | sed 's/\///g' | grep -v work | grep -v conf > /tmp/tempfile"); 
-$jails =  file("/tmp/tempfile");  
-$remtemp = exec ("rm /tmp/tempfile");
+
 
 include("fbegin.inc");?>
+<!----- This make "live table" ------>
+<script language="JavaScript">
+function disable_buttons() {
+	document.iform.Submit.disabled = true;
+	document.iform.submit();}
+var auto_refresh = setInterval(
+		function()
+		{
+		$('#loaddiv').load('extensions_thebrig_check.php');
+		}, 5000);
+</script>
 <!--------  This is view ------->
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0" >
@@ -121,60 +128,9 @@ include("fbegin.inc");?>
 		<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 			<table width="100%" border="0" cellpadding="0" cellspacing="0">
 				<tr><?php html_titleline(gettext("On-line view"));?></tr>
-				<tr>
+				<tr> <!----  import table and check from another page --->
 					<td class="shadow">
-					
-						<table width="100%" border="0" cellpadding="5" cellspacing="0">
-						
-							<tr><td width="10%" class="listhdrlr"><?=gettext("Jail");?></td>
-								<td width="12%" class="listhdrc"><?=gettext("Built");?></td>
-								<td width="5%" class="listhdrc"><?=gettext("Status");?></td>
-								<td width="5%" class="listhdrc"><?=gettext("ID");?></td>
-								<td width="15%" class="listhdrc"><?=gettext("Jail ip");?></td>
-								<td width="15%" class="listhdrc"><?=gettext("Jail hostname");?></td>
-								<td width="18%" class="listhdrc"><?=gettext("Path to jail");?></td>
-								
-								<td width="20%" class="listhdrc"><?=gettext("Action");?></td>
-							</tr>
-							<?php foreach ($jails as $n_jail):?>
-							<tr><td width="10%" valign="top" class="vncellreq"><center><?php print $n_jail;?></center></td>
-								<td width="12%" valign="top" class="vncellreq">
-								<?php $n2_jail = rtrim($n_jail); if (!is_dir( (($jail_root_dir ."/" . $n2_jail . "/" ."var/run")))) {echo '<img src="'.'status_disabled.png'.'">';} 
-								else {
-								echo '<img src="'.'status_enabled.png'.'">';
-								if (is_dir($jail_root_dir ."/" . $n2_jail . "/usr/ports/Mk")) {echo " + ports ";} else {echo "";}
-								if (is_dir($jail_root_dir ."/" . $n2_jail . "/usr/src/sys")) {echo "+ src";} else {echo "";}
-								}
-								?>								
-								</td>
-								<td width="5%" valign="top" class="vncellreq"><center><?php $n1_jail = rtrim($n_jail); $file_id = "/var/run/jail_{$n1_jail}.id"; 
-										If(is_file($file_id)): ?>
-											<a title="<?=gettext("Running");?>"><img src="status_enabled.png" border="0" alt="" /></a>
-											<?php else:?>
-											<a title="<?=gettext("Stopped");?>"><img src="status_disabled.png" border="0" alt="" /></a>
-										<?php endif;?></center>
-								</td>
-						
-								<td width="5%" valign= "top" class="vncellreq"><center><?php $n2_jail = rtrim($n_jail); $file_id = "/var/run/jail_{$n2_jail}.id";
-										If(is_file($file_id)) { $jail_id = file_get_contents($file_id); print $jail_id; } else {echo "stopped";}; ?></center></td>
-								<td width="15%" valign="top" class="vncellreq"><center><?php $n2_jail = rtrim($n_jail); $file_id = "/var/run/jail_{$n2_jail}.id";
-										If(is_file($file_id)) { $jail_ls = exec ("/usr/sbin/jls -j '{$n2_jail}'"); 
-											$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls); 
-											$item = explode (" ",$jail_ls1); print $item[2]; } else {echo "stopped";}; ?> </center></td>
-								<td width="15%" valign="top" class="vncellreq"><center><?php $n3_jail = rtrim($n_jail); $file_id = "/var/run/jail_{$n3_jail}.id";
-										If(is_file($file_id)) { $jail_ls = exec ("/usr/sbin/jls -j '{$n2_jail}'"); 
-											$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls); 
-											$item = explode (" ",$jail_ls1); print $item[3]; } else {echo "stopped";}; ?></center></td>
-								<td width="18%" valign="top" class="vncellreq"><center><?php 
-								echo $jail_root_dir ."/" . $n2_jail;
-								 ?></center></td>
-								
-	<td width="20%" valign="top" class="vncellreq"><center><input type="submit" class="formbtn" <?php If(is_file($file_id)): ?><name="jailstop" value="stop"><?php else:?><name="jailstart" value="start"><?php endif;?> 
-										</center>
-								</td>
-							</tr><?php endforeach;?>
-						</table>
-					
+					<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_check.php");</script></div>
 					</td>
 				</tr>
 			</table>
