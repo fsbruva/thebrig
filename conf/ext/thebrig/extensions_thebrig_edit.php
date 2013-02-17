@@ -9,7 +9,7 @@ require_once("ext/thebrig/functions.inc");
 
 //I check install.
 if ( !is_dir ( $config['thebrig']['rootfolder']."/work") ) { 
-	$input_errors[] = _THEBRIG_NOT_CONFIRMED;  header ("Location: /extension_thebrig_config.php"); // May be replace previos if ???
+	$input_errors[] = _THEBRIG_NOT_CONFIRMED;  // May be replace previos if ???
 	}
 // This determines if the page was arrived at because of an edit (the UUID of the jail)
 // was passed to the page) or for a new creation.
@@ -21,13 +21,27 @@ if (isset($_POST['uuid']))
 	$uuid = $_POST['uuid'];
 
 // Page title
-$pgtitle = array(gettext("TheBrig"), gettext("Jail"), isset($uuid) ? gettext("Edit") : gettext("Add"));
+$pgtitle = array(_THEBRIG_TITLE, _THEBRIG_JAIL, isset($uuid) ? _THEBRIG_EDIT : _THEBRIG_ADD );
 $snid = "jail60"; // what is this for?
 
 // This checks if the current XML config has a section for jails, or if it's an array
-if (!isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail']))
+if ( !isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail']) )
 	// If the array doesn't exist, it is created.
 	$config['thebrig']['jail'] = array();
+
+// This determines if the requisite tarballs exist in  work
+$tar_check = thebrig_tarball_check();
+
+// Since 1 gets added if there is no base, then we know if the result is odd, 
+// we need a base tarball 
+if ( $tar_check % 2 == 1 ) 
+	$input_errors[] = _THEBRIG_NO_BASE ;
+	
+// Since 32 gets added if there is no lib32, this lets us know we need one
+if ( $tar_check > 31 ) 
+	$input_errors[] = _THEBRIG_NO_LIB32 ;
+
+
 
 // This sorts thebrig's configuration array by the jailno
 array_sort_key($config['thebrig']['jail'], "jailno");
@@ -36,7 +50,7 @@ $a_jail = &$config['thebrig']['jail'];
 
 // This checks that the $uuid variable is set, and that the 
 // attempt to determine the index of the jail config that has the same 
-// uuid as the page was entered with
+// uuid as the page was entered with is not empty
 if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))) {
 	$pconfig['uuid'] = $a_jail[$cnid]['uuid'];
 	$pconfig['enable'] = isset($a_jail[$cnid]['enable']);
@@ -45,6 +59,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['if'] = $a_jail[$cnid]['if'];
 	$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
 	$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
+	$pconfig['rootfolder'] = $a_jail[$cnid]['rootfolder'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['devfs_enable'] = isset($a_jail[$cnid]['devfs_enable']);
 	$pconfig['proc_enable'] = isset($a_jail[$cnid]['proc_enable']);
@@ -57,15 +72,16 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['extraoptions'] = $a_jail[$cnid]['extraoptions'];
 	$pconfig['desc'] = $a_jail[$cnid]['desc'];
 }
-// In this case, the $uuid isn't set (this is a new jail) 
+// In this case, the $uuid isn't set (this is a new jail), so set some default values
 else {
 	$pconfig['uuid'] = uuid();
 	$pconfig['enable'] = false;
-	$pconfig['jailno'] = get_next_jailnumber();
+	$pconfig['jailno'] = thebrig_get_next_jailnumber();
 	$pconfig['jailname'] = "";
 	$pconfig['if'] = "";
 	$pconfig['ipaddr'] = "";
 	$pconfig['subnet'] = "32";
+	$pconfig['rootfolder']="";
 	$pconfig['jail_mount'] = false;
 	$pconfig['devfs_enable'] = false;
 	$pconfig['proc_enable'] = false;
@@ -79,12 +95,11 @@ else {
 	$pconfig['desc'] = "";
 }
 
-$myrelease = exec("/usr/bin/uname -r");
+	$myrelease = exec("/usr/bin/uname -r");
 	$myarch = exec("/usr/bin/uname -p");
 	$mysystem = exec("/usr/bin/uname -s");
 	$myfile = $config['thebrig']['rootfolder'] . "/work/" . $mysystem ."-" . $myarch . "-" . $myrelease . "-base.txz";
-	if (!is_file($myfile)) { header("Location: extensions_thebrig_tarballs.php"); }
-{}
+
 if ($_POST) {
 	unset($input_errors);
 	$pconfig = $_POST;
@@ -95,15 +110,48 @@ if ($_POST) {
 	}
 
 	// Input validation.
-	// Validate if jail number is unique.
+	// Validate if jail number is unique in order to reorder the jails (if necessary)
 	// Alexey - why do we care about the jail number or the uuid?
 	// Why not use the name?
+	
+	// a_jail is the list of all jails, sorted by their jail number
+	
+	// Index is the location within a_jail that has the same jailnumber as the one just entered
 	$index = array_search_ex($_POST['jailno'], $a_jail, "jailno");
-	if (FALSE !== $index) {
-		if (!((FALSE !== $cnid) && ($a_rule[$cnid]['uuid'] === $a_rule[$index]['uuid']))) {
-			$input_errors[] = gettext("The unique jail number is already used.");
-		}
-	}
+	// for each jail? How can i determine the loop control variables?
+
+	if ( FALSE !== $index ) {
+		// If $index is not null, then there is a number conflict (the jail number use in $POST conflicts
+		// with a currently configured jail's number. The jail that has the conflict is jail $index
+		
+		// So, starting with that jail, running through all the rest, their jail number needs to be incremented
+		// by one, to allow for the insertion of the newest jail
+		if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))){
+			// This indicates that we are editing an existing jail, with a uuid field that matches $uuid
+			if ( $cnid < $index ){
+				// This indicates that a list item has been made later
+				// We need to move all the the ones that follow the old location earlier by one, up
+				// to and including the conflict
+				for ( $i = $cnid+1; $i <= $index ; $i++ ){
+					$a_jail[$i]['jailno'] -= 1;
+				} // end for
+			} // end $cnid < $index
+			elseif ( $cnid > $index ) {
+				// This indicates that a list item has been made earlier 
+				// We need to move all the list items (starting with the conflict) later by one, up to
+				// the currently edited jail's id
+				for ( $i = $index; $i < $cnid ; $i++ ){
+					$a_jail[$i]['jailno'] += 1;
+				} // end for loop
+			} // end elseif
+		} // end of editing existing jail
+		else {
+			// This indicates we are creating a new jail
+			for ( $i = $index; $i < count( $a_jail ); $i++ ){
+				$a_jail[$i]['jailno'] += 1;
+			} // end of for loop
+		} // end of else (we're adding a new jail
+	} // end of jail number conflict
 
 	if ( empty( $input_errors )) {
 		$jail = array();
@@ -114,6 +162,7 @@ if ($_POST) {
 		$jail['if'] = $_POST['if'];
 		$jail['ipaddr'] = $_POST['ipaddr'];
 		$jail['subnet'] = $_POST['subnet'];
+		$jail['rootfolder'] = $_POST['rootfolder'];
 		$jail['devfsrules'] = $_POST['dst'];
 		$jail['jail_mount'] = isset($_POST['jail_mount']) ? true : false;
 		$jail['devfs_enable'] = isset($_POST['devfs_enable']) ? true : false;
@@ -134,18 +183,30 @@ if ($_POST) {
 		} else {
 			// Copies the first jail into $a_jail
 			$a_jail[("cell" . $jail['jailno'])] = $jail;
+			// In this case, the default jail location will be used
+			if ( !isset( $jail['rootfolder'] )) {
+				mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['name']}") ;
+				$jail['rootfolder'] = $config['thebrig']['rootfolder']/$jail['name'] ;
+			}
+			
+			$commandresolv = "cp /etc/resolv.conf {$jail['root']}/etc/";
+			mwexec ($commandresolve);
+			
+			$commandtime = "cp {$jail['root']}/usr/share/zoneinfo/{$config['system']['timezone']} {$jail['root']}/etc/localtime";
+			mwexec ($commandtime);
+			
 			$mode = UPDATENOTIFY_MODE_NEW;
 		}
 		
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-		mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}");
+		
 		//extract tarball into jail
 		if (isset($_POST['exractbin']) ) {
 		$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$mysystem."-".$myarch."-".$myrelease."-base.txz -C ". $config['thebrig']['rootfolder']."/".$jail['jailname']."/";
-		$commandresolv = "cp /etc/resolv.conf ".$config['thebrig']['rootfolder']."/".$jail['jailname']."/etc/";
 		
-		mwexec ($commandextract);
+		
+		
 		mwexec ($commandresolv);
 		
 		}
@@ -155,7 +216,7 @@ if ($_POST) {
 }
 
 // Get next jail number.
-function get_next_jailnumber() {
+function thebrig_get_next_jailnumber() {
 	global $config;
 
 	// Set starting jail number
@@ -167,7 +228,6 @@ function get_next_jailnumber() {
 			$jailno += 1; // Increase jail number until a unused one is found.
 		} while (false !== array_search_ex(strval($jailno), $a_jails, "jailno"));
 	}
-
 	return $jailno;
 }
 ?>
@@ -193,6 +253,7 @@ function get_next_jailnumber() {
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
+			<?php html_inputbox("jailroot", gettext("Jail root"), $pconfig['rootfolder'], gettext("The jail's  home."), false, 15);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable"), "");?>
