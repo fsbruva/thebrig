@@ -106,8 +106,14 @@ $remtemp = exec ("rm /tmp/tempfile"); ?>
 								echo $jail_root_dir ."/" . $n2_jail;
 								 ?></center></td>
 								 								
-	<td width="20%" valign="top" class="vncellreq"><center><input type="submit" class="formbtn" <?php If(is_file($file_id)): ?> ><name="jailstop" value="stop" ><?php else:?><name="jailstart" value="start" ><?php endif;?> 
-										</center>
+	<td width="20%" valign="top" class="vncellreq"><?php $n2_jail = rtrim($n_jail); 
+	if (!is_file($file_id)) 
+	{ echo '<center><a href="extensions_thebrig.php?name='.$n2_jail.'&action=start"><img src="ext/thebrig/on_small.png" title="Jail start" border="0" alt="Jail start" /></a></center>';} 
+	else { echo '<center><a href="extensions_thebrig.php?name='.$n2_jail.'&action=stop"><img src="ext/thebrig/off_small.png" title="Jail stop" border="0" alt="Jail stop" /></a></center>';} 
+	
+?>
+
+										
 								</td>
 							</tr><?php endforeach;?>
 													

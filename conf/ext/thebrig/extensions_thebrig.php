@@ -6,11 +6,19 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
-require_once("XML/Serializer.php");
-require_once("XML/Unserializer.php");
-
-
-
+// require_once("XML/Serializer.php");
+// require_once("XML/Unserializer.php");
+if (isset($_GET['name'])) {
+	
+	$actjailname = $_GET['name'];	
+$jailnameexec=$_GET['name'];
+$jailnamecmd=$_GET['action'];
+// I use command touch and rm for simulation only.  When we make jail working, we replace command on /etc/rc.d/jail $action $name.
+// #################!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if ($jailnamecmd == "start") { $jailcommand="touch /var/run/jail_".$jailnameexec.".id";}
+else { $jailcommand="rm /var/run/jail_".$jailnameexec.".id";}
+mwexec($jailcommand);
+}
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 
 if ( !isset( $config['thebrig']['rootfolder']) ) {
@@ -42,6 +50,7 @@ if ($_POST) {
 	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
 	$config['thebrig']['systenv'] = isset ( $_POST['systenv'] );
 	$config['thebrig']['rootfolder'] = $rootfolder;
+	
 	write_config();
 
 	$retval = 0;
@@ -235,7 +244,7 @@ var auto_refresh = setInterval(
 					</tr>
 				</table>
 				<div id="submit">
-					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />
+					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save");?>" />
 				</div>
 	</table>
 	
