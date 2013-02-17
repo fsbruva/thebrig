@@ -137,7 +137,7 @@ function thebrig_tarball_check () {
 	if ( $myarch == "amd64" ){
 		$lib_search = thebrig_tarball_list("FreeBSD*lib32") ;
 		// This indicates that there are no lib32 tarballs in work/
-		if ( count( $libsearch ) == 0 ){
+		if ( count( $lib_search ) == 0 ){
 			$result += 32 ;
 		} // End if count
 	} // end if amd
