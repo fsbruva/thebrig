@@ -315,11 +315,11 @@ var auto_refresh = setInterval(
 				echo "<br/>" ;
 				// Builds the checkboxes of available tarballs. There is no real reason for games or any of the other tarballs to be downloaded, 
 				// so they are not even an option.
-				$availFiles = "<input type=\"checkbox\" name=\"formPackages[]\" value= \"base\"> base.tbz" ;
-				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"src\"> src.tbz" ;
-				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"doc\"> doc.tbz" ;
+				$availFiles = "<input type=\"checkbox\" name=\"formPackages[]\" value= \"base\"> base.txz" ;
+				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"src\"> src.txz" ;
+				$availFiles .= "<input type=\"checkbox\" name=\"formPackages[]\" value= \"doc\"> doc.txz" ;
 				if ( $arch == "amd64") {
-					$availFiles .=  "<input type=\"checkbox\" name=\"formPackages[]\" value= \"lib32\" id=\"lib32_box\">lib32.tbz" ;
+					$availFiles .=  "<input type=\"checkbox\" name=\"formPackages[]\" value= \"lib32\" id=\"lib32_box\">lib32.txz" ;
 				}
 				$availFiles .=  "" ;
 				$availFiles .=  "<br/>" ;
