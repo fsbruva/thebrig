@@ -186,7 +186,7 @@ if ($_POST) {
 			// In this case, the default jail location will be used
 			if ( !isset( $jail['rootfolder'] )) {
 				mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['name']}") ;
-				$jail['rootfolder'] = $config['thebrig']['rootfolder']/$jail['name'] ;
+				$jail['rootfolder'] = "{$config['thebrig']['rootfolder']}/{$jail['name']}" ;
 			}
 			
 			$commandresolv = "cp /etc/resolv.conf {$jail['root']}/etc/";
@@ -253,7 +253,7 @@ function thebrig_get_next_jailnumber() {
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
-			<?php html_inputbox("jailroot", gettext("Jail root"), $pconfig['rootfolder'], gettext("The jail's  home."), false, 15);?>
+			<?php html_inputbox("jailroot", gettext("Jail root"), $pconfig['rootfolder'], gettext("Other location."), false, 15);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable"), "");?>
