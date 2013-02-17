@@ -4,7 +4,7 @@ function thebrig_unregister() {
  	global $config;
  	
  	$i = 0;
- 	if (is_array($config['rc']['postinit']['cmd'])) {
+ 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
  		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
  			if (preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
  				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
@@ -60,29 +60,28 @@ function thebrig_unregister() {
 function thebrig_populate ($new_location, $old_location) 
 {
 	global $config ;
-	// First we need to see if old location has a directory tree. If it does, we chould clean up after
-	// ourselves. This involves moving the php and .inc files. Then, the creation of the directory structure
-	// and startup scripts can progress normally
+
+	// Error checking prior to entry into this function guarantees $old_location will always be a directory
+
+	// This indicates that the folders are actually different
+	if ( strcmp ( $old_location , $new_location ) ){
+		mwexec("/bin/mv {$old_location}/conf {$new_location}/");	// moves the conf
+		mwexec("/bin/mv {$old_location}/work {$new_location}/");	// moves the work folder
+		mwexec( "/bin/rm -r {$old_location}");						// get rid of the old folder
+	}	// moves data from and removes the old directory 
 	
-	// Create the work directory
-	mwexec ( "mkdir -p {$new_location}/work") ;
-	// Create the jail_start script
+	// Create the work directory if it doesn't already exist
+	if ( ! is_dir ( "{$new_location}/work" ) ) {
+		mwexec ( "mkdir -p {$new_location}/work") ;
+	}
+	
+	// Start the creation of the jail_start script
 	mwexec ( "echo \"#!/bin/sh\" > {$new_location}/conf/jail_start") ;
 	mwexec ( "/bin/chmod 755 {$new_location}/conf/jail_start") ;
-	
-	// $old_location should never not be a directory
-	if ( is_dir ( $old_location )) {
-	
-		// This indicates that the folders are actually different
-		if ( strcmp ( $old_location , $new_location ) ){
-			mwexec("/bin/mv {$old_location}/conf {$new_location}/");	// moves the conf
-			mwexec( "/bin/rm -r {$old_location}");
-		}	// moves data from and removes the old directory 
-	} // end if old location is a directory
 
 	// This section finds and unsets the startup command for the extension (code borrowed from slimserver install)
 	$i = 0;
-	if (is_array($config['rc']['postinit']['cmd'])) {
+	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
 			if (preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
 				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
@@ -92,8 +91,8 @@ function thebrig_populate ($new_location, $old_location)
 	// This will search the startup commands to find the appropriate index to place thebrig's startup script command
 	$i = 0;
 	// Don't want to attempt array operations if there are no postinit commands.
-	if ( is_array( $config['rc']['postinit']['cmd'] ) ) {
-		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
+	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
+		for ($i; $i < count( $config['rc']['postinit']['cmd'] ); $i++) {
 			// This loops through all the post init command script entries, and if it finds thebrig_start.sh (placed by hand), 
 			// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
 			if ( preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
@@ -117,6 +116,72 @@ function check_thebrig() {
 		// The presence of /conf/jail_start is an analogue for the installation
 	return file_exists($config['thebrig']['rootfolder'] . "/conf/jail_start");
 }
+
+// Function name: 	thebrig_tarball_check
+// Inputs: 			none
+// Outputs: 		integer result based on the 
+// Description:		This function evaluates whether or not the required tarballs are present
+function thebrig_tarball_check () {
+	global $config ;
+	$result = 0 ;
+	// The first thing we need to check for is the requisite official tarballs
+	$myarch = exec("/usr/bin/uname -p");
+	
+	$base_search = thebrig_tarball_list("FreeBSD*base") ;
+	// This indicates there are 0 base tarballs in the folder
+	if ( count( $base_search ) == 0 ){
+		$result += 1;
+	}
+	
+	// There needs to be a lib32 tarball if Nas4free is 64 bit
+	if ( $myarch == "amd64" ){
+		$lib_search = thebrig_tarball_list("FreeBSD*lib32") ;
+		// This indicates that there are no lib32 tarballs in work/
+		if ( count( $libsearch ) == 0 ){
+			$result += 32 ;
+		} // End if count
+	} // end if amd
+	
+	// It is also possible to build a jail with a custom tarball, so we search for all the tarballs that are not 
+	// "official"
+	$cust_search = thebrig_tarball_list( "*" , array( "FreeBSD"  ) ) ;
+	if ( count ( $cust_search ) > 0 ) {
+		$result = 0;
+	}
+	return $result ;
+	
+}
+
+// Function name: 	thebrig_tarball_list
+// Inputs: 			file_list			array of filenames with suffix to create list for
+//					exclude				Optional array used to remove certain results
+// Outputs: 		file_list			html formatted block with a radio next to each file
+// Description:		This function creates an html code block with the files listed on the right
+//					and radio buttons next to each on the left.
+function thebrig_tarball_list ($contains , $exclude='') {
+	global $config ;
+	// This function creates a list of tarballs that match a certain filename pattern
+	$installFiles = "";
+	if ( is_dir( $config['thebrig']['rootfolder'] )) {
+		$raw_list = glob("{$config['thebrig']['rootfolder']}/work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip}", GLOB_BRACE);
+		$file_list = array_unique( $raw_list );
+		if ( $exclude ) {
+			foreach ( $exclude as $search_pattern ) {
+				$file_list = preg_grep( "/{$search_pattern}/" , $file_list , PREG_GREP_INVERT );
+			}
+		}
+	} // end of verifying rootfolder as valid location
+	return $file_list ;
+}
+
+
+// Function name: 	thebrig_name_check
+// Inputs: 			none
+// Outputs: 		integer result based on the proposed jail name
+// Description:		This function evaluates whether or not the provided jail name is 
+// 					a duplicate, or if it has illegal characters within it.
+
+
 
 // Function name: 	thebrig_radio_list
 // Inputs: 			file_list			array of filenames with suffix to create list for
@@ -215,27 +280,6 @@ function thebrig_checkbox_list ($file_list) {
 	return $installFiles ;
 }
 
-// Function name: 	thebrig_tarball_list
-// Inputs: 			file_list			array of filenames with suffix to create list for
-//					exclude				Optional array used to remove certain results
-// Outputs: 		file_list			html formatted block with a radio next to each file
-// Description:		This function creates an html code block with the files listed on the right
-//					and radio buttons next to each on the left.
-function thebrig_tarball_list ($contains , $exclude='') {
-	global $config ;
-	// This function creates a list of tarballs that match a certain filename pattern
-	$installFiles = "";
-	if ( is_dir( $config['thebrig']['rootfolder'] )) {
-		$raw_list = glob("{$config['thebrig']['rootfolder']}/work/{$contains}.{txz,tgz}", GLOB_BRACE);
-		$file_list = array_unique( $raw_list );
-		if ( $exclude ) {
-			foreach ( $exclude as $search_pattern ) {
-				$file_list = preg_grep( "/{$search_pattern}/" , $file_list , PREG_GREP_INVERT );
-			}
-		}
-	} // end of verifying rootfolder as valid location
-	return $file_list ;
-}
 
 // Function name: 	thebrig_dl_list
 // Inputs: 			file_list			array of filenames with suffix to create list for, with each filename
