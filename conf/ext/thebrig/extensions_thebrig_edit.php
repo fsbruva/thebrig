@@ -182,8 +182,8 @@ if ($_POST) {
 			$mode = UPDATENOTIFY_MODE_MODIFIED;
 		} else {
 			// Copies the first jail into $a_jail
-			//$a_jail[("cell" . $jail['jailno'])] = $jail;
-			$a_jail[] = $jail;
+			$a_jail[("cell" . $jail['jailno'])] = $jail;
+			//$a_jail[] = $jail;
 			// In this case, the default jail location will be used
 			if ( !isset( $jail['rootfolder'] )) {
 				mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['name']}") ;
