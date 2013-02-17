@@ -1,13 +1,19 @@
 <?php
-	define(_SRVSLIM_VERSION_NR, 'v2.2');
+	define(_THEBRIG_VERSION_NBR, 'v0.5');
 
-	if ($config['system']['language'] == 'en_US') {
+	if ($config['system']['language'] == 'en_US') { }
+	
 		define(_THEBRIG_TITLE, "TheBrig");
 		define(_THEBRIG_NOT_INSTALLED, "Something went awry with TheBrig's installation. Please attempt to re-install");
 		define(_THEBRIG_NOT_CONFIRMED, "It appears you just finished installing TheBrig! <br>Please confirm the install location by visiting the <a href='/extensions_thebrig_config.php'>Rudimentary Config</a> page and click \"Save\".");
 		define(_THEBRIG_INSTALL, "Install the jail tarball");
 		define(_THEBRIG_DONT_CHANGE, "Keep existing - don't change");
 		define(_THEBRIG_MAINTENANCE, "Maintenance");
+		define(_THEBRIG_JAIL, "Jail" );
+		define(_THEBRIG_EDIT, "Edit" );
+		define(_THEBRIG_ADD, "Add" );
+		define(_THEBRIG_NO_BASE, "Creating a jail requires at least one \"base\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
+		define(_THEBRIG_NO_LIB32, "As this is 64 bit Nas4free, creating a jail requires at least one \"lib32\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
 		define(_THEBRIG_BASIC_CONFIG, "Rudimentary Config");
 		define(_THEBRIG_JAILS, "Current Jails");
 		define(_THEBRIG_SETTINGS_BASIC, "Basic Settings");
@@ -21,7 +27,6 @@
 		define(_THEBRIG_EXTN, "Extensions");
 		define(_THEBRIG_TARBALL_MGMT, "Tarball Management");
 		define(_THEBRIG_NOTWRITABLE_FOLDER, "Either the old or new folder is not writable!");
-		define(_SRVSLIM_FAILED_DESC, "Logitech Media Server is not available. Please note that it might take a minute or more for the service to be available after a restart. Please refresh this page to check the status again.");
 		define(_THEBRIG_CURRENT_TB, "Existing Tarballs");
 		define(_THEBRIG_OFFICIAL_TB, "Official FreeBSD Flavor");
 		define(_THEBRIG_CUSTOM_TB, "Custom Flavor (Homegrown)");
@@ -43,9 +48,13 @@
 		define(_THEBRIG_FETCH, "Fetch!");
 		define(_THEBRIG_FETCH_ERROR, "You selected to fetch without selecting any files.");
 		define(_THEBRIG_DELETE_FAIL, "Could not delete file: ");
-		define(_SRVSLIM_VERSION, 'SlimNAS Version ' . _SRVSLIM_VERSION_NR);
+		define(_THEBRIG_VERSION, 'TheBrig Version ' . _THEBRIG_VERSION_NBR);
 		define(_THEBRIG_MATCH_ERROR, "There seem to be no matching releases for your kernel. See the documentation regarding kernel/jail binary mismatch");
 		define(_THEBRIG_INFO_TB, "The selected packages will be downloaded as a background job. Please check back in a few moments.");
+		define(_THEBRIG_JAIL_PARALLEL, "Start all jails in parallel");
+		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
+		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
+		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
 		
 		define(_SRVSLIM_MODULE_VERSION_CONFLICT, "Warning - the Logitech Media Server version you're trying to run is not compatible with this SlimNAS version. If you encounter problems running it, please update SlimNAS or revert to a compatible Logitech Media Server. Thanks for your understanding.");
 		define(_SRVSLIM_NO_SLIMNAS, "There's no updated SlimNAS package available for installation.");
@@ -55,8 +64,4 @@
 		
 		
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
-	}
-	else {
-		
-	}
 ?>
