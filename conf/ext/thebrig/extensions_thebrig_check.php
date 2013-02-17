@@ -110,7 +110,6 @@ $remtemp = exec ("rm /tmp/tempfile"); ?>
 	if (!is_file($file_id)) 
 	{ echo '<center><a href="extensions_thebrig.php?name='.$n2_jail.'&action=start"><img src="ext/thebrig/on_small.png" title="Jail start" border="0" alt="Jail start" /></a></center>';} 
 	else { echo '<center><a href="extensions_thebrig.php?name='.$n2_jail.'&action=stop"><img src="ext/thebrig/off_small.png" title="Jail stop" border="0" alt="Jail stop" /></a></center>';} 
-	
 ?>
 
 										
