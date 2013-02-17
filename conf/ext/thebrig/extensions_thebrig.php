@@ -9,7 +9,7 @@ require_once("ext/thebrig/functions.inc");
 // require_once("XML/Serializer.php");
 // require_once("XML/Unserializer.php");
 if (isset($_GET['name'])) {
-	
+
 	$actjailname = $_GET['name'];	
 $jailnameexec=$_GET['name'];
 $jailnamecmd=$_GET['action'];
@@ -50,7 +50,6 @@ if ($_POST) {
 	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
 	$config['thebrig']['systenv'] = isset ( $_POST['systenv'] );
 	$config['thebrig']['rootfolder'] = $rootfolder;
-	
 	write_config();
 
 	$retval = 0;
@@ -244,7 +243,7 @@ var auto_refresh = setInterval(
 					</tr>
 				</table>
 				<div id="submit">
-					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save");?>" />
+					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />
 				</div>
 	</table>
 	
