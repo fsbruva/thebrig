@@ -204,7 +204,7 @@ var auto_refresh = setInterval(
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['if']) ? "*" : $jail['if']);?>&nbsp;</td>
 									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(empty($jail['enable']) ? "YES" : "NO");?></td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['ipaddr'] . " / " . $jail['subnet']) ;?>&nbsp;</td>
-									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($jail['jailname'] . "." . $config[system][domain]);?>&nbsp;</td>
+									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($jail['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($config['thebrig']['rootfolder'] . "/" . $jail['jailname']);?>&nbsp;</td>
 									
 									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
