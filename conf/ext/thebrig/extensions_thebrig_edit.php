@@ -162,7 +162,7 @@ if ($_POST) {
 		$jail['if'] = $_POST['if'];
 		$jail['ipaddr'] = $_POST['ipaddr'];
 		$jail['subnet'] = $_POST['subnet'];
-		$jail['rootfolder'] = $_POST['rootfolder'];
+		
 		$jail['devfsrules'] = $_POST['dst'];
 		$jail['jail_mount'] = isset($_POST['jail_mount']) ? true : false;
 		$jail['devfs_enable'] = isset($_POST['devfs_enable']) ? true : false;
@@ -185,31 +185,24 @@ if ($_POST) {
 			$a_jail[("cell" . $jail['jailno'])] = $jail;
 			
 			// In this case, the default jail location will be used
-			if ( !isset( $jail['rootfolder'] )) {
-				mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}") ;
-				$jail['rootfolder'] = "{$config['thebrig']['rootfolder']}/{$jail['jailname']}" ;
-			}
 			
-			$commandresolv = "cp /etc/resolv.conf {$jail['root']}/etc/";
-			mwexec ($commandresolve);
 			
-			$commandtime = "cp {$jail['root']}/usr/share/zoneinfo/{$config['system']['timezone']} {$jail['root']}/etc/localtime";
-			mwexec ($commandtime);
+			
 			
 			$mode = UPDATENOTIFY_MODE_NEW;
 		}
 		
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-		
+		mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}") ;
 		//extract tarball into jail
 		if (isset($_POST['exractbin']) ) {
 		$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$mysystem."-".$myarch."-".$myrelease."-base.txz -C ". $config['thebrig']['rootfolder']."/".$jail['jailname']."/";
-		
-		
-		
+		$commandresolv = "cp /etc/resolv.conf {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/";
+		$commandtime = "cp {$config['thebrig']['rootfolder']}/{$jail['jailname']}/usr/share/zoneinfo/{$config['system']['timezone']} {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/localtime";
+		mwexec ($commandextract);
 		mwexec ($commandresolv);
-		
+		mwexec ($commandtime);
 		}
 		header("Location: extensions_thebrig.php");
 		exit;
@@ -255,7 +248,7 @@ function thebrig_get_next_jailnumber() {
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
 			<?php html_checkbox("enable", gettext("Jail start on boot"),			!empty($pconfig['enable']) ? true : false, gettext("Enable"), "");?>
-			<?php html_inputbox("jailroot", gettext("Jail root"), $pconfig['rootfolder'], gettext("Other location."), false, 15);?>
+			
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable"), "");?>
