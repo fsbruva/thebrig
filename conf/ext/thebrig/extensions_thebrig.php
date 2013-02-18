@@ -57,7 +57,7 @@ if ($_POST) {
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
 		// Lock the config
 		config_lock();
-		// OR the return value from the attempt to restart the firewall
+		// OR the return value from the attempt to restart the firewall.. Hmmmm  I don't understand this if...
 		$retval |= rc_update_service("ipfw");
 		// Unlock the config
 		config_unlock();
@@ -76,8 +76,14 @@ array_sort_key($config['thebrig']['jail'], "jailno");
 $a_jail = &$config['thebrig']['jail'];
 // This is what we do when we return to this page from the "edit" page
 if (isset($_GET['act']) && $_GET['act'] === "del") {
+	// Prevent create archive for jail files into thebrig rootfolder with name <jailname>.tgz
+	$jail2delete = $_GET['name'];
+	mwexec("tar cvzf {$config['thebrig']['rootfolder']}/{$jail2delete}.tgz {$config['thebrig']['rootfolder']}/{$jail2delete}/");
+	mwexec("chflags -R noschg {$config['thebrig']['rootfolder']}/{$jail2delete}");
+	mwexec("rm -rf {$config['thebrig']['rootfolder']}/{$jail2delete}");
 	// If we want to delete the jail, set the notification
 	updatenotify_set("thebrig", UPDATENOTIFY_MODE_DIRTY, $_GET['uuid']);
+	
 	header("Location: extensions_thebrig.php");
 	exit;
 }
@@ -194,7 +200,7 @@ var auto_refresh = setInterval(
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
 										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="e.gif" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>
-										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>" onclick="return confirm('<?=gettext("Do you really want to delete this jail?");?>')"><img src="x.gif" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>
+										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return confirm('<?=gettext("Do you really want to delete this jail? I will archive file just in case. It can be removed later. ");?>')"><img src="x.gif" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>
 									</td>
 									<?php else:?>
 									<td valign="middle" nowrap="nowrap" class="list">
@@ -233,6 +239,7 @@ var auto_refresh = setInterval(
 </td></tr>
 <?php include("formend.inc");?>
 </form>
+<?php print $mess; ?>
 </table>
 <?php include("fend.inc"); ?>
 

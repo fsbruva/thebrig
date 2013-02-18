@@ -186,8 +186,8 @@ if ($_POST) {
 			
 			// In this case, the default jail location will be used
 			if ( !isset( $jail['rootfolder'] )) {
-				mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['name']}") ;
-				$jail['rootfolder'] = "{$config['thebrig']['rootfolder']}/{$jail['name']}" ;
+				mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}") ;
+				$jail['rootfolder'] = "{$config['thebrig']['rootfolder']}/{$jail['jailname']}" ;
 			}
 			
 			$commandresolv = "cp /etc/resolv.conf {$jail['root']}/etc/";
