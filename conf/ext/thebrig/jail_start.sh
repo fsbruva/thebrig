@@ -14,7 +14,6 @@ $celljail = array();
 $out_jail = array(); 
 $file = "/mnt/data/thebrig/conf/rc.conf.local";
 $handle=fopen($file, "w");
-fwrite ($handle, "jail_enable=\"YES\"\n");
 If (isset($config['thebrig']['parastart'])) { fwrite ($handle, "jail_parallel_start=\"YES\"\n");} else {fwrite($handle, "jail_parallel_start=\"NO\"\n");}
 If (isset($config['thebrig']['sethostname'])) { fwrite ($handle, "jail_set_hostname_allow=\"YES\"\n");} else {fwrite($handle, "jail_set_hostname_allow=\"NO\"\n");}
 If (isset($config['thebrig']['unixiproute'])) { fwrite ($handle, "jail_socket_unixiproute_only=\"YES\"\n");} else {fwrite($handle, "jail_socket_unixiproute_only=\"NO\"\n");}
@@ -23,7 +22,8 @@ If (isset($config['thebrig']['systenv'])) { fwrite ($handle, "jail_sysvipc_allow
 // with this trick I can make simple loop for write config
 $i=1;
 foreach ($testarray as $key => $values) { $celljail[$i] = $values; $i = $i+1;}
-for ($i = 1; $i <= $jaills; $i++) {  
+for ($i = 1; $i <= $jaills; $i++) 
+{  
 		$out_jail = $celljail[$i];
 		fwrite ($handle, "##{$k}###########{$out_jail['jailname']}####{$out_jail['desc']}#####\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_rootdir=\"{$config['thebrig']['rootfolder']}/{$out_jail['jailname']}\"\n");

@@ -27,7 +27,6 @@ if ( !isset( $config['thebrig']['rootfolder']) ) {
 
 
 // sent to page data from config.xml
-$pconfig['glenable'] = isset( $config['thebrig']['glenable'] ); 
 $rootfolder = $config['thebrig']['rootfolder'];
 $pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ;
 $pconfig['sethostname'] = isset($config['thebrig']['sethostname']); 
@@ -37,14 +36,13 @@ $pconfig['systenv'] = isset($config['thebrig']['systenv']);
 
 if ($_POST) {
 	// insert into pconfig changes
-	$pconfig['glenable'] = isset( $_POST['glenable'] ); 
+
 	$rootfolder = $config['thebrig']['rootfolder'];
 	$pconfig['parastart'] = isset( $_POST['parastart'] ) ;
 	$pconfig['sethostname'] = isset($_POST['sethostname']); 
 	$pconfig['unixiproute'] = isset($_POST['unixiproute']); 
 	$pconfig['systenv'] = isset($_POST['systenv']);
 	
-	$config['thebrig']['glenable'] = isset( $_POST['glenable'] );
 	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
 	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
 	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
@@ -163,7 +161,7 @@ var auto_refresh = setInterval(
 		<tr><td colspan="2" valign="top" class="optsect_t">
 		<table border="0" cellspacing="0" cellpadding="0" width="100%">
 		
-		<tr><?php html_titleline_checkbox("glenable", gettext("<strong>TheBrig config</strong>"), !empty($pconfig['glenable']) ? true : false, gettext("Enable") );?>
+		<tr><?php html_titleline(gettext("<strong>TheBrig config</strong>"));?>
 	
 		<td align="right" class="optsect_s"></td>
 		</tr>
@@ -185,28 +183,13 @@ var auto_refresh = setInterval(
 																<?php foreach ($a_jail as $jail):?>
 								<?php $notificationmode = updatenotify_get_mode("thebrig", $jail['uuid']);?>
 								<tr>
-									<?php $enable = isset($jail['enable']);
-									switch ($jail['action']) {
-										case "allow":
-											$actionimg = "fw_action_allow.gif";
-											break;
-										case "deny":
-											$actionimg = "fw_action_deny.gif";
-											break;
-										case "unreach host":
-											$actionimg = "fw_action_reject.gif";
-											break;
-									}
-									?>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['jailno']) ? "*" : $jail['jailno']);?>&nbsp;</td>
-									
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['jailname']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['if']) ? "*" : $jail['if']);?>&nbsp;</td>
 									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(empty($jail['enable']) ? "YES" : "NO");?></td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['ipaddr'] . " / " . $jail['subnet']) ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($jail['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($config['thebrig']['rootfolder'] . "/" . $jail['jailname']);?>&nbsp;</td>
-									
 									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
