@@ -12,7 +12,7 @@ $testarray = $config['thebrig']['jail'];
 $jaills =  count($testarray);
 $celljail = array();
 $out_jail = array(); 
-$file = "/mnt/data/thebrig/conf/rc.conf.local";
+$file = "/etc/rc.conf.local";
 $handle=fopen($file, "w");
 If (isset($config['thebrig']['parastart'])) { fwrite ($handle, "jail_parallel_start=\"YES\"\n");} else {fwrite($handle, "jail_parallel_start=\"NO\"\n");}
 If (isset($config['thebrig']['sethostname'])) { fwrite ($handle, "jail_set_hostname_allow=\"YES\"\n");} else {fwrite($handle, "jail_set_hostname_allow=\"NO\"\n");}
@@ -36,7 +36,7 @@ for ($i = 1; $i <= $jaills; $i++)
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_stop=\"{$out_jail['exec_stop']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n");
-		$fstabfile= "/mnt/data/thebrig/conf/fstab.{$out_jail['jailname']}";
+		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
 		$handle1 = fopen($fstabfile, "w");
 		fwrite ($handle1, "{$out_jail['fstab']}");
 		fclose($handle1);

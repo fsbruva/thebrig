@@ -13,11 +13,7 @@ if (isset($_GET['name'])) {
 	$actjailname = $_GET['name'];	
 $jailnameexec=$_GET['name'];
 $jailnamecmd=$_GET['action'];
-// I use command touch and rm for simulation only.  When we make jail working, we replace command on /etc/rc.d/jail $action $name.
-// #################!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if ($jailnamecmd == "start") { $jailcommand="touch /var/run/jail_".$jailnameexec.".id";}
-else { $jailcommand="rm /var/run/jail_".$jailnameexec.".id";}
-mwexec($jailcommand);
+mwexec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}");
 }
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 
