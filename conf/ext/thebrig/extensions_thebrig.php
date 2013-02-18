@@ -188,7 +188,7 @@ var auto_refresh = setInterval(
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['jailno']) ? "*" : $jail['jailno']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['jailname']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['if']) ? "*" : $jail['if']);?>&nbsp;</td>
-									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(empty($jail['enable']) ? "YES" : "NO");?></td>
+									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(isset($jail['enable']) ? "YES" : "NO");?></td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['ipaddr'] . " / " . $jail['subnet']) ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($jail['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($config['thebrig']['rootfolder'] . "/" . $jail['jailname']);?>&nbsp;</td>
@@ -202,9 +202,9 @@ var auto_refresh = setInterval(
 									<td valign="middle" nowrap="nowrap" class="list">
 										<img src="del.gif" border="0" alt="" />
 									</td>
-									<?php endif;?>
+									<?php endif;?>									
 								</tr>
-								<?php endforeach;?>
+								<?php endforeach; ?>
 								<tr>
 									<td class="list" colspan="8"></td>
 									<td class="list">
