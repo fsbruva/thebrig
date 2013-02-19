@@ -1,6 +1,6 @@
 #!/bin/sh
 #thebrig_start.sh - Copyright Matthew Kempe 2012
-mkdir -p /usr/local/www/ext/thebrig
+mkdir -p /usr/local/www/ext/thebrig/ 
 
 # Method adapted from user apokalyptik at http://hintsforums.macworld.com/archive/index.php/t-73839.html
 STAT=$(procstat -f $$ | grep -E "/"$(basename $0)"$")
