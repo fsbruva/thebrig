@@ -226,6 +226,36 @@ function thebrig_get_next_jailnumber() {
 }
 ?>
 <?php include("fbegin.inc");?>
+<script type="text/javascript">
+<!--
+$(document).ready(function () {
+	showElementById('devfs_enable_tr','hide');
+	showElementById('devfsrules_tr','hide');
+	showElementById('proc_enable_tr','hide');
+	showElementById('fdescfs_enable_tr','hide');
+	showElementById('fstab_tr','hide');
+});
+
+function mount_enable_change() {
+	switch (document.iform.jail_mount.checked) {
+		case false:
+			showElementById('devfs_enable_tr','hide');
+			showElementById('devfsrules_tr','hide');
+			showElementById('proc_enable_tr','hide');
+			showElementById('fdescfs_enable_tr','hide');
+			showElementById('fstab_tr','hide');
+			break;
+		case true:
+			showElementById('devfs_enable_tr','show');
+			showElementById('devfsrules_tr','show');
+			showElementById('proc_enable_tr','show');
+			showElementById('fdescfs_enable_tr','show');
+			showElementById('fstab_tr','show');
+			break;
+	}
+}
+// -->
+</script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
@@ -251,7 +281,7 @@ function thebrig_get_next_jailnumber() {
 			
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
-			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable"), "");?>
+ 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable")," " ," ","mount_enable_change()");?>
 			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use for enable master devfs to jail over fstab"), "", false);?>
 			<?php html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
