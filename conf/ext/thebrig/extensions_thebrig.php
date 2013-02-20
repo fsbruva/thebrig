@@ -66,10 +66,10 @@ if ($_POST) {
 	}
 } // end of $_POST
 
-if (!isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail'])) {	$config['thebrig']['jail'] = array(); }// declare list jails
+if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content'])) {	$config['thebrig']['content'] = array(); }// declare list jails
 
-array_sort_key($config['thebrig']['jail'], "jailno");
-$a_jail = &$config['thebrig']['jail'];
+array_sort_key($config['thebrig']['content'], "jailno");
+$a_jail = &$config['thebrig']['content'];
 // This is what we do when we return to this page from the "edit" page
 if (isset($_GET['act']) && $_GET['act'] === "del") {
 	// Prevent create archive for jail files into thebrig rootfolder with name <jailname>.tgz
@@ -98,9 +98,9 @@ function thebrig_process_updatenotification($mode, $data) {
 			break;
 		case UPDATENOTIFY_MODE_DIRTY:
 			// This indicates that we want to delete one or more of the jails
-			$cnid = array_search_ex($data, $config['thebrig']['jail'], "uuid");
+			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
 			if (false !== $cnid) {
-				unset($config['thebrig']['jail'][$cnid]);
+				unset($config['thebrig']['content'][$cnid]);
 				write_config();
 			}
 			break;
