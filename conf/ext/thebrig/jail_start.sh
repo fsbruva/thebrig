@@ -8,10 +8,7 @@ include ("config.inc");
 $testarray = array();
 $startonboot ="";
 // copy part of config in temporary array
-$testarray = $config['thebrig']['jail']; 
-$jaills =  count($testarray);
-$celljail = array();
-$out_jail = array(); 
+$testarray = $config['thebrig']['content']; 
 $file = "/etc/rc.conf.local";
 $handle=fopen($file, "w");
 If (isset($config['thebrig']['parastart'])) { fwrite ($handle, "jail_parallel_start=\"YES\"\n");} else {fwrite($handle, "jail_parallel_start=\"NO\"\n");}
@@ -20,11 +17,8 @@ If (isset($config['thebrig']['unixiproute'])) { fwrite ($handle, "jail_socket_un
 If (isset($config['thebrig']['systenv'])) { fwrite ($handle, "jail_sysvipc_allow=\"YES\"\n");} else {fwrite($handle, "jail_sysvipc_allow=\"NO\"\n");}
 // I explode multi array to small arrays and replace tag [cell(n)] to [number] number is 1,2,3,4... 
 // with this trick I can make simple loop for write config
-$i=1;
-foreach ($testarray as $key => $values) { $celljail[$i] = $values; $i = $i+1;}
-for ($i = 1; $i <= $jaills; $i++) 
-{  
-		$out_jail = $celljail[$i];
+array_sort_key($testarray, "jailno");
+foreach ($testarray as $out_jail ) {
 		fwrite ($handle, "##{$k}###########{$out_jail['jailname']}####{$out_jail['desc']}#####\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_rootdir=\"{$config['thebrig']['rootfolder']}/{$out_jail['jailname']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_hostname=\"{$out_jail['jailname']}.{$config['system']['domain']}\"\n");
@@ -45,8 +39,9 @@ for ($i = 1; $i <= $jaills; $i++)
 		If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
 		If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
 		If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
-		If (isset($out_jail['enable'])) {$startonboot = $startonboot.$out_jail['jailname']." ";} else {$startonboot = $startonboot;}
+		If (isset($out_jail['enable'])) {$startonboot = "{$startonboot} {$out_jail['jailname']}";} else {$startonboot = $startonboot;}
 	}
+$startonboot = ltrim( $startonboot );
 fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
 fclose($handle);
 ?>
