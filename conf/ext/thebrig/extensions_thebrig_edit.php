@@ -27,9 +27,9 @@ $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_JAIL, isset($uuid) ? _THEBRIG_EDIT : _
 $snid = "jail60"; // what is this for?
 
 // This checks if the current XML config has a section for jails, or if it's an array
-if ( !isset($config['thebrig']['jail']) || !is_array($config['thebrig']['jail']) )
+if ( !isset($config['thebrig']['content']) || !is_array($config['thebrig']['content']) )
 	// If the array doesn't exist, it is created.
-	$config['thebrig']['jail'] = array();
+	$config['thebrig']['content'] = array();
 
 // This determines if the requisite tarballs exist in  work
 $tar_check = thebrig_tarball_check();
@@ -46,9 +46,9 @@ if ( $tar_check > 31 )
 
 
 // This sorts thebrig's configuration array by the jailno
-array_sort_key($config['thebrig']['jail'], "jailno");
+array_sort_key($config['thebrig']['content'], "jailno");
 // This identifies the jail section of the XML, but does so by reference.
-$a_jail = &$config['thebrig']['jail'];
+$a_jail = &$config['thebrig']['content'];
 
 // This checks that the $uuid variable is set, and that the 
 // attempt to determine the index of the jail config that has the same 
@@ -252,7 +252,7 @@ if ($_POST) {
 			$mode = UPDATENOTIFY_MODE_MODIFIED;
 		} else {
 			// Copies the first jail into $a_jail
-			$a_jail[("cell" . $jail['jailno'])] = $jail;
+			$a_jail[] = $jail;
 			
 			// In this case, the default jail location will be used
 			
@@ -282,7 +282,7 @@ function thebrig_get_next_jailnumber() {
 	// Set starting jail number
 	$jailno = 1;
 
-	$a_jails = $config['thebrig']['jail'];
+	$a_jails = $config['thebrig']['content'];
 	if (false !== array_search_ex(strval($jailno), $a_jails, "jailno")) {
 		do {
 			$jailno += 1; // Increase jail number until a unused one is found.
