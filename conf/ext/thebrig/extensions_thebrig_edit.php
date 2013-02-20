@@ -73,6 +73,10 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
 	$pconfig['extraoptions'] = $a_jail[$cnid]['extraoptions'];
 	$pconfig['desc'] = $a_jail[$cnid]['desc'];
+	$pconfig['base_ver'] = $a_jail[$cnid]['base_ver'];
+	$pconfig['lib_ver'] = $a_jail[$cnid]['lib_ver'];
+	$pconfig['src_ver'] = $a_jail[$cnid]['src_ver'];
+	$pconfig['doc_ver'] = $a_jail[$cnid]['doc_ver'];
 }
 // In this case, the $uuid isn't set (this is a new jail), so set some default values
 else {
@@ -95,6 +99,10 @@ else {
 	$pconfig['exec_stop'] = "";
 	$pconfig['extraoptions'] = "";
 	$pconfig['desc'] = "";
+	$pconfig['base_ver'] = "Unknown";
+	$pconfig['lib_ver'] = "Not Installed";
+	$pconfig['src_ver'] = "Not Installed";
+	$pconfig['doc_ver'] = "Not Installed";
 }
 
 	$myrelease = exec("/usr/bin/uname -r");
@@ -105,6 +113,7 @@ else {
 if ($_POST) {
 	unset($input_errors);
 	$pconfig = $_POST;
+	$files_selected = $pconfig['formFiles'];
 
 	if (isset($_POST['Cancel']) && $_POST['Cancel']) {
 		header("Location: extensions_thebrig.php");
@@ -112,6 +121,49 @@ if ($_POST) {
 	}
 
 	// Input validation.
+		// Check to make sure there are not any duplicate files selected
+	if ( count( $files_selected) > 0 ){
+		$base_count = 0;
+		$lib_count = 0;
+		$doc_count = 0;
+		$src_count = 0;
+		// Examine the list of files specified by the user, verify no duplicates
+		foreach ( $files_selected as $file ){
+			$file_split = explode( '-', $file );
+			if ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'base.txz') == 0 ) {
+				$base_count++;
+				$_POST['base_ver'] = $file_split[2] . "-" . $file_split[3]; 
+			}
+			elseif ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'lib32.txz') == 0 ){
+				$lib_count++;
+				$_POST['lib_ver'] = $file_split[2] . "-" . $file_split[3] ;
+			}
+			elseif ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'doc.txz') == 0 ){
+				$doc_count++;
+				$_POST['doc_ver'] = $file_split[2] . "-" . $file_split[3] ;
+			}
+			elseif ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'src.txz') == 0 ){
+				$src_count++;
+				$_POST['src_ver'] = $file_split[2] . "-" . $file_split[3] ;
+			}
+			else {
+				$_POST['base_ver']= "Unknown";
+				$_POST['lib_ver'] = "Unknown";
+				$_POST['src_ver'] = "Unknown";
+				$_POST['doc_ver'] = "Unknown";
+			}
+		} // End of foreach
+	} // end of if ( files selected )
+		
+	// Need to deal with keeping track of the lib version as the same as the base version
+	if ( $myarch != "amd64" ){
+		$lib_ver = $base_ver ;
+	}
+	
+	// Make sure only one tarball of each type is selected
+	if ( $src_count > 1 || $base_count > 1 || $lib_count > 1 || $doc_count > 1 )
+		$input_errors[] = "You have selected more than one of a given tarball type!!";
+		
 	// Validate if jail number is unique in order to reorder the jails (if necessary)
 	// Alexey - why do we care about the jail number or the uuid?
 	// Why not use the name?
@@ -134,7 +186,7 @@ if ($_POST) {
 				// This indicates that a list item has been made later
 				// We need to move all the the ones that follow the old location earlier by one, up
 				// to and including the conflict
-				for ( $i = $cnid+1; $i <= $index ; $i++ ){
+				for ( $i = $cnid; $i <= $index ; $i++ ){
 					$a_jail[$i]['jailno'] -= 1;
 				} // end for
 			} // end $cnid < $index
@@ -178,6 +230,21 @@ if ($_POST) {
 		$jail['desc'] = $_POST['desc'];
 		$pconfig['name'] = $_POST['name'];
 		$pconfig['txzfile'] = $_POST['txzfile'];
+		$jail['base_ver'] = $_POST['base_ver'];
+		$jail['lib_ver'] = $_POST['lib_ver'];
+		$jail['src_ver'] = $_POST['src_ver'];
+		$jail['doc_ver'] = $_POST['doc_ver'];
+		
+		// For each of the files in the array
+		if ( count ( $files_selected ) > 0 ){
+			foreach ( $files_selected as $file ) {
+			// Delete the selected file from the "work" directory
+				$commandextract = "tar xvf {$config['thebrig']['rootfolder']}/work/{$file} -C {$config['thebrig']['rootfolder']}/$jail['jailname']}";
+				mwexec_bg( $commandextract );
+			}
+		}
+		
+		
 		// This determines if it was an update or a new jail
 		if (isset($uuid) && (FALSE !== $cnid)) {
 			// Copies newly modified properties over the old
@@ -198,17 +265,6 @@ if ($_POST) {
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
 		mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}") ;
-		/*extract tarball into jail. It give 3 option. 
-		1 standart, downloaded from tarbal.php, 
-		2 "custom" - downloaded by hand or backup from old jail and 
-		3. "none" - only simulate.  This is default*/ 
-		if ($_POST['exractbin'] === "freebsd")  { 
-				$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$mysystem."-".$myarch."-".$myrelease."-base.txz -C ". $config['thebrig']['rootfolder']."/".$jail['jailname']."/";
-				}
-		elseif ($_POST['exractbin'] === "custom") {
-				$commandextract = "tar xvf ".$_POST['txzfile']." -C ".$config['thebrig']['rootfolder']."/".$jail['jailname']."/";
-				}
-		else {header("Location: extensions_thebrig.php");}
 		$commandresolv = "cp /etc/resolv.conf {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/";
 		$commandtime = "cp {$config['thebrig']['rootfolder']}/{$jail['jailname']}/usr/share/zoneinfo/{$config['system']['timezone']} {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/localtime";
 		mwexec ($commandextract);
@@ -322,12 +378,39 @@ function mount_enable_change() {
 			<?php html_inputbox("exec_stop", gettext("User command stop"), !empty($pconfig['exec_stop']) ? $pconfig['exec_stop'] : "/bin/sh /etc/rc.shutdown" , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
 			<?php html_inputbox("extraoptions", gettext("Options. "), !empty($pconfig['extraoptions']) ? $pconfig['extraoptions'] : "-l -U root -n _____", gettext("Add to rc.conf.local variable jail_jailname_flags. "), false, 40);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
-			<!-- in edit mode user not have access to extract binaries -->
-			<?php if (!isset($uuid)) { 
-			html_separator();
-			html_combobox("exractbin", gettext("Extract binaries"), $pconfig['exractbin'], array("none" => gettext("Not now"), "freebsd" => gettext("Standart"), "custom" => gettext("From backup")), gettext("If you wan't extract binaries now check it."), true); } 
-			html_filechooser("txzfile", gettext("File for extract"), $pconfig['txzfile'], sprintf(gettext("File (e.g. /mnt/sharename/thebrig/work/%s) used as source."), $pconfig['jailname']), $config['thebrig']['rootfolder']."/work", true);?>
-	
+			<!-- in edit mode user not have access to extract binaries. I strongly disagree. -->
+		
+			<?php html_titleline(gettext("Tarballs"));?>
+			<?php
+			// This obtains a list of files that match the criteria (named anything FreeBSD*)
+			// within the /work folder.
+			$file_list = thebrig_tarball_list("FreeBSD*");
+			// This filelist is then used to generate html code with checkboxes
+			$installLib = thebrig_checkbox_list($file_list);
+			if ( $installLib ) { // If the array exists and has a size, then display that html code?>
+		<!-- The first td of this row is the box in the top row, far left. -->
+		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_OFFICIAL_TB; ?></td>
+		<!-- The next td is the larger box to the right, which contains the text box and info --> 
+		<td width="78%" class="vtable">
+			<?php echo $installLib; ?>
+			</td></tr>
+			<?php } //endif ?>
+			
+			
+			<?php
+			// This obtains a list of files that match the criteria (named anything *, excluding FreeBSD)
+			// within the /work folder.
+			$file_list = thebrig_tarball_list( "*" , array( "FreeBSD"  ) );
+			// This filelist is then used to generate html code with checkboxes
+			$installLib = thebrig_checkbox_list( $file_list );
+			if ( $installLib )  {  // If the array exists and has a size, then display that html code?>
+			<!-- The first td of this row is the box in the top row, far left. -->
+		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_CUSTOM_TB; ?></td>
+		<!-- The next td is the larger box to the right, which contains the text box and info --> 
+		<td width="78%" class="vtable">
+			<?php echo $installLib; ?>
+			</td></tr>
+			<?php } //endif ?>	
 				</table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" />
