@@ -10,7 +10,7 @@ require_once("ext/thebrig/functions.inc");
 // require_once("XML/Unserializer.php");
 if (isset($_GET['name'])) {
 
-	$actjailname = $_GET['name'];	
+$actjailname = $_GET['name'];	
 $jailnameexec=$_GET['name'];
 $jailnamecmd=$_GET['action'];
 mwexec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}");
@@ -74,7 +74,10 @@ $a_jail = &$config['thebrig']['jail'];
 if (isset($_GET['act']) && $_GET['act'] === "del") {
 	// Prevent create archive for jail files into thebrig rootfolder with name <jailname>.tgz
 	$jail2delete = $_GET['name'];
-	mwexec("tar cvzf {$config['thebrig']['rootfolder']}/{$jail2delete}.tgz {$config['thebrig']['rootfolder']}/{$jail2delete}/");
+	// May be you have better idea for do backup, but my way work now. Also I synk backup procedure need create as function - I want call it from tarball page for migrate old jails.
+	chdir ($config['thebrig']['rootfolder']."/");
+	mwexec("tar -cf backup_{$jail2delete}.txz -C {$config['thebrig']['rootfolder']}/{$jail2delete}/ ./ {$jail2delete}/ ");
+	mwexec("mv backup_{$jail2delete}.txz work/backup_{$jail2delete}.txz");
 	mwexec("chflags -R noschg {$config['thebrig']['rootfolder']}/{$jail2delete}");
 	mwexec("rm -rf {$config['thebrig']['rootfolder']}/{$jail2delete}");
 	// If we want to delete the jail, set the notification

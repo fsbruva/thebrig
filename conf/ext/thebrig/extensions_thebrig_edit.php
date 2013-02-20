@@ -6,6 +6,8 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
+// I'm sorry, but I want next line commented.  I create page trap.php for trap _POST _GET messages, for testing my code.  
+//  include_once ("ext/thebrig/trap.php");
 
 //I check install.
 if ( !is_dir ( $config['thebrig']['rootfolder']."/work") ) { 
@@ -174,7 +176,8 @@ if ($_POST) {
 		$jail['exec_stop'] = $_POST['exec_stop'];
 		$jail['extraoptions'] = $_POST['extraoptions'];
 		$jail['desc'] = $_POST['desc'];
-		
+		$pconfig['name'] = $_POST['name'];
+		$pconfig['txzfile'] = $_POST['txzfile'];
 		// This determines if it was an update or a new jail
 		if (isset($uuid) && (FALSE !== $cnid)) {
 			// Copies newly modified properties over the old
@@ -195,15 +198,22 @@ if ($_POST) {
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
 		mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}") ;
-		//extract tarball into jail
-		if (isset($_POST['exractbin']) ) {
-		$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$mysystem."-".$myarch."-".$myrelease."-base.txz -C ". $config['thebrig']['rootfolder']."/".$jail['jailname']."/";
+		/*extract tarball into jail. It give 3 option. 
+		1 standart, downloaded from tarbal.php, 
+		2 "custom" - downloaded by hand or backup from old jail and 
+		3. "none" - only simulate.  This is default*/ 
+		if ($_POST['exractbin'] === "freebsd")  { 
+				$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$mysystem."-".$myarch."-".$myrelease."-base.txz -C ". $config['thebrig']['rootfolder']."/".$jail['jailname']."/";
+				}
+		elseif ($_POST['exractbin'] === "custom") {
+				$commandextract = "tar xvf ".$_POST['txzfile']." -C ".$config['thebrig']['rootfolder']."/".$jail['jailname']."/";
+				}
+		else {header("Location: extensions_thebrig.php");}
 		$commandresolv = "cp /etc/resolv.conf {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/";
 		$commandtime = "cp {$config['thebrig']['rootfolder']}/{$jail['jailname']}/usr/share/zoneinfo/{$config['system']['timezone']} {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/localtime";
 		mwexec ($commandextract);
 		mwexec ($commandresolv);
 		mwexec ($commandtime);
-		}
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
@@ -234,6 +244,23 @@ $(document).ready(function () {
 	showElementById('proc_enable_tr','hide');
 	showElementById('fdescfs_enable_tr','hide');
 	showElementById('fstab_tr','hide');
+	showElementById('txzfile_tr','hide');
+$('#exractbin').change(function(){switch ($('#exractbin').val()) {
+		case "custom":
+			$('#txzfile_tr').show();
+			break;
+		case "freebsd":
+			$('#txzfile_tr').hide();
+			break;
+		case "none":
+			$('#txzfile_tr').hide();
+			break;	
+		default:
+			$('#txzfile_tr').hide();
+			
+			break;
+		}
+	});
 });
 
 function mount_enable_change() {
@@ -254,6 +281,7 @@ function mount_enable_change() {
 			break;
 	}
 }
+
 // -->
 </script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -294,9 +322,12 @@ function mount_enable_change() {
 			<?php html_inputbox("exec_stop", gettext("User command stop"), !empty($pconfig['exec_stop']) ? $pconfig['exec_stop'] : "/bin/sh /etc/rc.shutdown" , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
 			<?php html_inputbox("extraoptions", gettext("Options. "), !empty($pconfig['extraoptions']) ? $pconfig['extraoptions'] : "-l -U root -n _____", gettext("Add to rc.conf.local variable jail_jailname_flags. "), false, 40);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
-			<?php html_separator();?>
-			<?php html_checkbox("exractbin", gettext("Extract binaries"), $pconfig['exractbin'], "If you wan't extract binaries now check it", "", false);?>
-			
+			<!-- in edit mode user not have access to extract binaries -->
+			<?php if (!isset($uuid)) { 
+			html_separator();
+			html_combobox("exractbin", gettext("Extract binaries"), $pconfig['exractbin'], array("none" => gettext("Not now"), "freebsd" => gettext("Standart"), "custom" => gettext("From backup")), gettext("If you wan't extract binaries now check it."), true); } 
+			html_filechooser("txzfile", gettext("File for extract"), $pconfig['txzfile'], sprintf(gettext("File (e.g. /mnt/sharename/thebrig/work/%s) used as source."), $pconfig['jailname']), $config['thebrig']['rootfolder']."/work", true);?>
+	
 				</table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" />
@@ -306,7 +337,7 @@ function mount_enable_change() {
 				<?php include("formend.inc");?>
 			</form>
 		</td>
-	
+	<?php  echo  $pconfig['name']. $pconfig['txzfile'];?>
 	</tr>
 </table>
 <?php include("fend.inc");?>
