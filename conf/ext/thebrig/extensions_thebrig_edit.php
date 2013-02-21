@@ -311,21 +311,16 @@ if ($_POST) {
 			// Copies the first jail into $a_jail
 			$a_jail[] = $jail;
 			
-			// In this case, the default jail location will be used
-			
-			
-			
-			
+			$commandresolv = "cp /etc/resolv.conf {$jail['jailpath']}/etc/";
+			$commandtime = "cp {$jail['jailpath']}/usr/share/zoneinfo/{$config['system']['timezone']} {$jail['jailpath']}/etc/localtime";
+			mwexec ($commandresolv);
+			mwexec ($commandtime);
 			$mode = UPDATENOTIFY_MODE_NEW;
 		}
 		
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-		$commandresolv = "cp /etc/resolv.conf {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/";
-		$commandtime = "cp {$config['thebrig']['rootfolder']}/{$jail['jailname']}/usr/share/zoneinfo/{$config['system']['timezone']} {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/localtime";
-		mwexec ($commandextract);
-		mwexec ($commandresolv);
-		mwexec ($commandtime);
+
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
