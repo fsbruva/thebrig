@@ -19,6 +19,3 @@ do
 	# Create link
 	ln -s "$file" "${file##*/}"
 done
-$BRIG_ROOT/ext/thebrig/jail_start.sh
- logger "this is postinit"
-/etc/rc.d/jail restart
