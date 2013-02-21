@@ -77,6 +77,13 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['lib_ver'] = $a_jail[$cnid]['lib_ver'];
 	$pconfig['src_ver'] = $a_jail[$cnid]['src_ver'];
 	$pconfig['doc_ver'] = $a_jail[$cnid]['doc_ver'];
+	$pconfig['image'] = $a_jail[$cnid]['image'];
+	$pconfig['image_type'] = $a_jail[$cnid]['image_type'];
+	$pconfig['attach_params'] = $a_jail[$cnid]['attach_params'];
+	$pconfig['attach_blocking'] = $a_jail[$cnid]['attach_blocking'];
+	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
+	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
+	$pconfig['fib'] = $a_jail[$cnid]['fib'];
 }
 // In this case, the $uuid isn't set (this is a new jail), so set some default values
 else {
@@ -103,6 +110,13 @@ else {
 	$pconfig['lib_ver'] = "Not Installed";
 	$pconfig['src_ver'] = "Not Installed";
 	$pconfig['doc_ver'] = "Not Installed";
+	$pconfig['image'] = "";
+	$pconfig['image_type'] = "";
+	$pconfig['attach_params'] = "";
+	$pconfig['attach_blocking'] = "";
+	$pconfig['force_blocking'] = "";
+	$pconfig['zfs_datasets'] = "";
+	$pconfig['fib'] = "";
 }
 
 	$myrelease = exec("/usr/bin/uname -r");
@@ -228,12 +242,17 @@ if ($_POST) {
 		$jail['exec_stop'] = $_POST['exec_stop'];
 		$jail['extraoptions'] = $_POST['extraoptions'];
 		$jail['desc'] = $_POST['desc'];
-		$pconfig['name'] = $_POST['name'];
-		$pconfig['txzfile'] = $_POST['txzfile'];
 		$jail['base_ver'] = $_POST['base_ver'];
 		$jail['lib_ver'] = $_POST['lib_ver'];
 		$jail['src_ver'] = $_POST['src_ver'];
 		$jail['doc_ver'] = $_POST['doc_ver'];
+		$jail['image'] = $_POST['image'];
+		$jail['image_type'] = $_POST['image_type'];
+		$jail['attach_params'] = $_POST['attach_params'];
+		$jail['attach_blocking'] = $_POST['attach_blocking'];
+		$jail['force_blocking'] = $_POST['force_blocking'];
+		$jail['zfs_datasets'] = $_POST['zfs_datasets'];
+		$jail['fib'] = $_POST['fib'];
 		
 		// For each of the files in the array
 		if ( count ( $files_selected ) > 0 ){
