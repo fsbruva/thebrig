@@ -38,9 +38,10 @@ $tar_check = thebrig_tarball_check();
 // we need a base tarball 
 if ( $tar_check % 2 == 1 ) 
 	$input_errors[] = _THEBRIG_NO_BASE ;
-	
+
+$myarch = exec("/usr/bin/uname -p");
 // Since 32 gets added if there is no lib32, this lets us know we need one
-if ( $tar_check > 31 ) 
+if ( $tar_check > 31 && $myarch == "amd64" ) 
 	$input_errors[] = _THEBRIG_NO_LIB32 ;
 
 
@@ -119,10 +120,6 @@ else {
 	$pconfig['fib'] = "";
 }
 
-	$myrelease = exec("/usr/bin/uname -r");
-	$myarch = exec("/usr/bin/uname -p");
-	$mysystem = exec("/usr/bin/uname -s");
-	$myfile = $config['thebrig']['rootfolder'] . "/work/" . $mysystem ."-" . $myarch . "-" . $myrelease . "-base.txz";
 
 if ($_POST) {
 	unset($input_errors);
