@@ -159,19 +159,22 @@ if ($_POST) {
 	
 	// If they haven't set a path, then we need to assume one
 	if ( ! isset($_POST['jailpath']) || empty($_POST['jailpath']) ) {
-		$pconfig['jailpath']=$config['thebrig']['rootfolder']."/".$_POST['jailname'];
+		$_POST['jailpath']=$config['thebrig']['rootfolder'].$_POST['jailname'];
+	}
+	else {
+		// remove trailing slashes
+		$_POST['jailpath'] = rtrim( $_POST['jailpath'] , '/');
 	}
 	// If the specified path doesn't exist, we need to create it.
 	if ( !is_dir( $pconfig['jailpath'] )) {
-		mwexec ("/bin/mkdir {$pconfig['jailpath']}");
+		mwexec ("/bin/mkdir {$_POST['jailpath']}");
 	}
 	
 	// This is a second test to see if the directory was created properly.
 	if ( !is_dir( $pconfig['jailpath'] )){
 		$input_errors[] = "Could not create directory for jail to live in!";
 	}
-	
-	
+		
 	
 		// Check to make sure there are not any duplicate files selected
 	if ( count( $files_selected) > 0 ){
@@ -296,7 +299,7 @@ if ($_POST) {
 		if ( count ( $files_selected ) > 0 ){
 			foreach ( $files_selected as $file ) {
 			// Delete the selected file from the "work" directory
-				$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$file." -C ".$jail['jailpath'];
+				$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."work/".$file." -C ".$jail['jailpath'];
 				mwexec_bg( $commandextract );
 			}
 		}
