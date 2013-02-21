@@ -62,7 +62,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['if'] = $a_jail[$cnid]['if'];
 	$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
 	$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
-	$pconfig['rootfolder'] = $a_jail[$cnid]['rootfolder'];
+	$pconfig['jailpath'] = $a_jail[$cnid]['jailpath'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['devfs_enable'] = isset($a_jail[$cnid]['devfs_enable']);
 	$pconfig['proc_enable'] = isset($a_jail[$cnid]['proc_enable']);
@@ -95,7 +95,7 @@ else {
 	$pconfig['if'] = "";
 	$pconfig['ipaddr'] = "";
 	$pconfig['subnet'] = "32";
-	$pconfig['rootfolder']="";
+	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = false;
 	$pconfig['devfs_enable'] = false;
 	$pconfig['proc_enable'] = false;
@@ -132,6 +132,47 @@ if ($_POST) {
 	}
 
 	// Input validation.
+	$reqdfields = explode(" ", "jailno jailname ipaddr");
+	$reqdfieldsn = array(gettext("Jail Number"), gettext("Jail Name"), gettext("Jail IP Address") );
+	$reqdfieldst = explode(" ", "numericint hostname ipaddr");
+	
+	do_input_validation($pconfig, $reqdfields, $reqdfieldsn, $input_errors);
+	do_input_validation_type($pconfig, $reqdfields, $reqdfieldsn, $reqdfieldst, $input_errors);
+	
+	// Check to see if duplicate jail names:
+	$index = array_search_ex($_POST['jailname'], $a_jail, "jailname");
+	if ( FALSE !== $index ) {
+		// If $index is not null, then there is a name conflict
+		if (!(isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))))
+			// This means we are not editing an existing jail - we are creating a new one
+			$input_errors[] = "The specified jailname is already in use. Please choose another.";
+	}
+	
+	// Check to see if duplicate ip addresses:
+	$index = array_search_ex($_POST['ipaddr'], $a_jail, "ipaddr");
+	if ( FALSE !== $index && strcmp( $_POST['type'] , "Base" ) != 0) {
+		// If $index is not null, then there is a name conflict
+		if (!(isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))))
+			// This means we are not editing an existing jail - we are creating a new one
+			$input_errors[] = "The specified ip address is already in use. Please choose another.";
+	}
+	
+	// If they haven't set a path, then we need to assume one
+	if ( ! isset($_POST['jailpath']) || empty($_POST['jailpath']) ) {
+		$_POST['jailpath']="{$config['thebrig']['rootfolder']}{$_POST['jailname']}";
+	}
+	// If the specified path doesn't exist, we need to create it.
+	if ( !is_dir( $pconfig['jailpath'] )) {
+		mwexec ("/bin/mkdir {$_POST['jailpath']}");
+	}
+	
+	// This is a second test to see if the directory was created properly.
+	if ( !is_dir( $_POST['jailpath'] )){
+		$input_errors[] = "Could not create directory for jail to live in!";
+	}
+	
+	
+	
 		// Check to make sure there are not any duplicate files selected
 	if ( count( $files_selected) > 0 ){
 		$base_count = 0;
@@ -227,7 +268,7 @@ if ($_POST) {
 		$jail['if'] = $_POST['if'];
 		$jail['ipaddr'] = $_POST['ipaddr'];
 		$jail['subnet'] = $_POST['subnet'];
-		
+		$jail['jailpath'] = $_POST['jailpath'];
 		$jail['devfsrules'] = $_POST['dst'];
 		$jail['jail_mount'] = isset($_POST['jail_mount']) ? true : false;
 		$jail['devfs_enable'] = isset($_POST['devfs_enable']) ? true : false;
@@ -255,7 +296,7 @@ if ($_POST) {
 		if ( count ( $files_selected ) > 0 ){
 			foreach ( $files_selected as $file ) {
 			// Delete the selected file from the "work" directory
-				$commandextract = "tar xvf {$config['thebrig']['rootfolder']}/work/{$file} -C {$config['thebrig']['rootfolder']}/$jail['jailname']}";
+				$commandextract = "tar xvf {$config['thebrig']['rootfolder']}/work/{$file} -C {$$jail['jailpath']}";
 				mwexec_bg( $commandextract );
 			}
 		}
@@ -280,7 +321,6 @@ if ($_POST) {
 		
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-		mwexec ("/bin/mkdir {$config['thebrig']['rootfolder']}/{$jail['jailname']}") ;
 		$commandresolv = "cp /etc/resolv.conf {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/";
 		$commandtime = "cp {$config['thebrig']['rootfolder']}/{$jail['jailname']}/usr/share/zoneinfo/{$config['system']['timezone']} {$config['thebrig']['rootfolder']}/{$jail['jailname']}/etc/localtime";
 		mwexec ($commandextract);
@@ -373,12 +413,12 @@ function mount_enable_change() {
         <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			<?php html_titleline(gettext("Jail parameters"));?>
         	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
-			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15);?>
+			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid));?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
 			<?php html_checkbox("enable", gettext("Jail start on boot"),			!empty($pconfig['enable']) ? true : false, gettext("Enable"), "");?>
-			
+			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40,isset($uuid) && (FALSE !== $cnid));?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
  			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable")," " ," ","mount_enable_change()");?>
