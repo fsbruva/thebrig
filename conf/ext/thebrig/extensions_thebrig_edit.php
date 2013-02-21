@@ -159,15 +159,15 @@ if ($_POST) {
 	
 	// If they haven't set a path, then we need to assume one
 	if ( ! isset($_POST['jailpath']) || empty($_POST['jailpath']) ) {
-		$_POST['jailpath']="{$config['thebrig']['rootfolder']}{$_POST['jailname']}";
+		$pconfig['jailpath']=$config['thebrig']['rootfolder']."/".$_POST['jailname'];
 	}
 	// If the specified path doesn't exist, we need to create it.
 	if ( !is_dir( $pconfig['jailpath'] )) {
-		mwexec ("/bin/mkdir {$_POST['jailpath']}");
+		mwexec ("/bin/mkdir {$pconfig['jailpath']}");
 	}
 	
 	// This is a second test to see if the directory was created properly.
-	if ( !is_dir( $_POST['jailpath'] )){
+	if ( !is_dir( $pconfig['jailpath'] )){
 		$input_errors[] = "Could not create directory for jail to live in!";
 	}
 	

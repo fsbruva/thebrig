@@ -6,6 +6,7 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
+include("trap.php"); 
 // require_once("XML/Serializer.php");
 // require_once("XML/Unserializer.php");
 if (isset($_GET['name'])) {
@@ -47,14 +48,14 @@ if ($_POST) {
 	write_config();
 
 	$retval = 0;
-	// This checks to see if any webgui changes require a reboot 
-	if ( !file_exists($d_sysrebootreqd_path) ) {
+	// This checks to see if any webgui changes require a reboot, and create rc.conf.local
+		if ( !file_exists($d_sysrebootreqd_path) ) {
+		write_rcconflocal();
 		// OR the return value from the attempt to process the notification
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
 		// Lock the config
 		config_lock();
-		// OR the return value from the attempt to restart the firewall.. Hmmmm  I don't understand this if...
-		$retval |= rc_update_service("ipfw");
+		$retval |= rc_update_service("jail"); // This need be checked.  For jail this way no good
 		// Unlock the config
 		config_unlock();
 	}
@@ -74,6 +75,12 @@ $a_jail = &$config['thebrig']['content'];
 if (isset($_GET['act']) && $_GET['act'] === "del") {
 	// Prevent create archive for jail files into thebrig rootfolder with name <jailname>.tgz
 	// If we want to delete the jail, set the notification
+	$jail2delete = $_GET['name'];
+	chdir ($config['thebrig']['rootfolder']."/");
+	mwexec("tar -czf backup_{$jail2delete}.txz -C {$config['thebrig']['rootfolder']}/{$jail2delete}/ ./ {$jail2delete}/ ");
+	mwexec("mv backup_{$jail2delete}.txz work/backup_{$jail2delete}.txz");
+	mwexec("chflags -R noschg {$config['thebrig']['rootfolder']}/{$jail2delete}");
+	mwexec("rm -rf {$config['thebrig']['rootfolder']}/{$jail2delete}");
 	updatenotify_set("thebrig", UPDATENOTIFY_MODE_DIRTY, $_GET['uuid']);
 	
 	header("Location: extensions_thebrig.php");
@@ -94,11 +101,7 @@ function thebrig_process_updatenotification($mode, $data) {
 			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
 			if (false !== $cnid) {
 				$del_jail = $config['thebrig']['content']['cnid'];
-	// May be you have better idea for do backup, but my way work now. Also I synk backup procedure need create as function - I want call it from tarball page for migrate old jails.
-				mwexec("tar -cf {$config['thebrig']['rootfolder']}work/backup_{$del_jail['jailname']}.txz {$del_jail['jailpath']}");
-				mwexec("chflags -R noschg {$del_jail['jailpath']}");
-				mwexec("rm -rf {$del_jail['jailpath']}");
-				unset($config['thebrig']['content'][$cnid]);
+			unset($config['thebrig']['content'][$cnid]);
 				write_config();
 			}
 			break;
@@ -210,9 +213,6 @@ var auto_refresh = setInterval(
 									<td class="list" colspan="8"></td>
 									<td class="list">
 										<a href="extensions_thebrig_edit.php"><img src="plus.gif" title="<?=gettext("Add jail");?>" border="0" alt="<?=gettext("Add jail");?>" /></a>
-										<?php if (!empty($a_jail)):?>
-											<a href="extensions_thebrig.php?act=del&amp;uuid=all" onclick="return confirm('<?=gettext("Do you really want to delete all jails?");?>')"><img src="x.gif" title="<?=gettext("Delete all jails");?>" border="0" alt="<?=gettext("Delete all jails");?>" /></a>
-										<?php endif;?>
 									</td>
 								</tr>
 							</table>
@@ -236,7 +236,6 @@ var auto_refresh = setInterval(
 </td></tr>
 <?php include("formend.inc");?>
 </form>
-<?php print $mess; ?>
 </table>
 <?php include("fend.inc"); ?>
 
