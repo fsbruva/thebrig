@@ -163,7 +163,7 @@ function thebrig_tarball_list ($contains , $exclude='') {
 	// This function creates a list of tarballs that match a certain filename pattern
 	$installFiles = "";
 	if ( is_dir( $config['thebrig']['rootfolder'] )) {
-		$raw_list = glob("{$config['thebrig']['rootfolder']}work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip}", GLOB_BRACE);
+		$raw_list = glob("{$config['thebrig']['rootfolder']}/work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip}", GLOB_BRACE);
 		$file_list = array_unique( $raw_list );
 		if ( $exclude ) {
 			foreach ( $exclude as $search_pattern ) {
@@ -226,20 +226,20 @@ function thebrig_checkbox_list ($file_list) {
 				// This code is repeated for the other two columns.
 				// Left Column
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace( "{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
+			$file = str_replace( "{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			. " {$file} ";
 			$i++;
 			$installFiles .= "</td>";
 			// Middle Column
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace( "{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
+			$file = str_replace( "{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			.  " {$file} ";
 			$i++;
 			// Right Column - with a minor change - it is the end of a row, so we have a new line
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace ("{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
+			$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			.  " {$file}";
 			$i++ ; 
@@ -253,7 +253,7 @@ function thebrig_checkbox_list ($file_list) {
 			// an html checkbox entry for the file, and increments to the next index (i)
 			$installFiles .= "<tr>";
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace ("{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
+			$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			.  " {$file} ";
 			$i++ ;
@@ -264,7 +264,7 @@ function thebrig_checkbox_list ($file_list) {
 				// This code removes the pesky path data from the globbed file list, then creates
 				// an html checkbox entry for the file, and increments to the next index (i)
 				$installFiles .= "<td width=\"33%\">" ;
-				$file = str_replace ("{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
+				$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
 				$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 				.  " {$file}";
 				$i++ ;
