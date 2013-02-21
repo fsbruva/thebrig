@@ -73,13 +73,6 @@ $a_jail = &$config['thebrig']['content'];
 // This is what we do when we return to this page from the "edit" page
 if (isset($_GET['act']) && $_GET['act'] === "del") {
 	// Prevent create archive for jail files into thebrig rootfolder with name <jailname>.tgz
-	$jail2delete = $_GET['name'];
-	// May be you have better idea for do backup, but my way work now. Also I synk backup procedure need create as function - I want call it from tarball page for migrate old jails.
-	chdir ($config['thebrig']['rootfolder']."/");
-	mwexec("tar -cf backup_{$jail2delete}.txz -C {$config['thebrig']['rootfolder']}/{$jail2delete}/ ./ {$jail2delete}/ ");
-	mwexec("mv backup_{$jail2delete}.txz work/backup_{$jail2delete}.txz");
-	mwexec("chflags -R noschg {$config['thebrig']['rootfolder']}/{$jail2delete}");
-	mwexec("rm -rf {$config['thebrig']['rootfolder']}/{$jail2delete}");
 	// If we want to delete the jail, set the notification
 	updatenotify_set("thebrig", UPDATENOTIFY_MODE_DIRTY, $_GET['uuid']);
 	
@@ -100,6 +93,11 @@ function thebrig_process_updatenotification($mode, $data) {
 			// This indicates that we want to delete one or more of the jails
 			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
 			if (false !== $cnid) {
+				$del_jail = $config['thebrig']['content']['cnid'];
+	// May be you have better idea for do backup, but my way work now. Also I synk backup procedure need create as function - I want call it from tarball page for migrate old jails.
+				mwexec("tar -cf {$config['thebrig']['rootfolder']}work/backup_{$del_jail['jailname']}.txz {$del_jail['jailpath']}");
+				mwexec("chflags -R noschg {$del_jail['jailpath']");
+				mwexec("rm -rf {$del_jail['jailpath']");
 				unset($config['thebrig']['content'][$cnid]);
 				write_config();
 			}
