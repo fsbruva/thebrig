@@ -107,9 +107,17 @@ if ($_POST) {
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 			// a jail at the old location. Call thebrig_populate, which will move all the web stuff and create the 
 			// directory tree
+			// Also add startup command when thebrig completly installed
 			thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] );
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			write_config(); // Write the config to disk
+			$file = $config['thebrig']['rootfolder']."/conf/bin/thebrig_start.sh";
+			$temporary = file_get_contents ($file);
+			if (substr_count($temporary, "jail") == 0) { 			
+					$handle = fopen($file, "a");
+					fwrite ($handle, "\n\$BRIG_ROOT/ext/thebrig/jail_start.sh\n logger \"this is postinit\"\n/etc/rc.d/jail restart");
+					fclose ($handle);
+				}
 		}
 		// Whatever we did, we did it successfully
 		$retval = 0;
