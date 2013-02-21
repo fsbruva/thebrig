@@ -96,8 +96,8 @@ function thebrig_process_updatenotification($mode, $data) {
 				$del_jail = $config['thebrig']['content']['cnid'];
 	// May be you have better idea for do backup, but my way work now. Also I synk backup procedure need create as function - I want call it from tarball page for migrate old jails.
 				mwexec("tar -cf {$config['thebrig']['rootfolder']}work/backup_{$del_jail['jailname']}.txz {$del_jail['jailpath']}");
-				mwexec("chflags -R noschg {$del_jail['jailpath']");
-				mwexec("rm -rf {$del_jail['jailpath']");
+				mwexec("chflags -R noschg {$del_jail['jailpath']}");
+				mwexec("rm -rf {$del_jail['jailpath']}");
 				unset($config['thebrig']['content'][$cnid]);
 				write_config();
 			}

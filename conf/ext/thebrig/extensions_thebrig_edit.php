@@ -296,7 +296,7 @@ if ($_POST) {
 		if ( count ( $files_selected ) > 0 ){
 			foreach ( $files_selected as $file ) {
 			// Delete the selected file from the "work" directory
-				$commandextract = "tar xvf {$config['thebrig']['rootfolder']}/work/{$file} -C {$jail['jailpath']}";
+				$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$file." -C ".$jail['jailpath'];
 				mwexec_bg( $commandextract );
 			}
 		}
@@ -311,8 +311,8 @@ if ($_POST) {
 			// Copies the first jail into $a_jail
 			$a_jail[] = $jail;
 			
-			$commandresolv = "cp /etc/resolv.conf {$jail['jailpath']}/etc/";
-			$commandtime = "cp {$jail['jailpath']}/usr/share/zoneinfo/{$config['system']['timezone']} {$jail['jailpath']}/etc/localtime";
+			$commandresolv = "cp /etc/resolv.conf ".$jail['jailpath']."/etc/";
+			$commandtime = "cp ".$jail['jailpath']."/usr/share/zoneinfo/".$config['system']['timezone']." ".$jail['jailpath']."/etc/localtime";
 			mwexec ($commandresolv);
 			mwexec ($commandtime);
 			$mode = UPDATENOTIFY_MODE_NEW;
