@@ -22,6 +22,8 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
 if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebrig.tmp' ) ) {
 	// This next line extracts the root folder from the install artifact (trimed to remove trailing CR/LF)
 	$config['thebrig']['rootfolder'] = rtrim( file_get_contents('/tmp/thebrig.tmp') );
+	$config['thebrig']['rootfolder'] = rtrim( $config['thebrig']['rootfolder'] , '/' );
+	
 	// The next line propagates the the page's config data (the text box) with the extracted value
 	$pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
 
@@ -52,7 +54,7 @@ if ($_POST) {
 	 // Convert after filechoicer
 
 	if (strlen($pconfig['rootfolder']) > 8 && $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] == "/") {
-		$pconfig['rootfolder'] = substr($pconfig['rootfolder'], 0, strlen($pconfig['rootfolder'])-1);}
+		$pconfig['rootfolder'] = rtim ($pconfig['rootfolder'], '/' );}
 	
 	/* input validation */
 	$reqdfields = array();
