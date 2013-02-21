@@ -41,20 +41,20 @@ redirect=">/dev/null 2>&1"
 /usr/bin/fetch -q -o ${dest}/${rel}_${arch}_MANIFEST $ftp_url/MANIFEST >/dev/null 2>$1
 
 # Carry out the grep operation to extract the desired sha256 hash from the manifest
-desired_hash=`grep $pack ${dest}/${rel}_${arch}_MANIFEST | awk '{print $2}'`
+desired_hash=`grep ${pack} ${dest}/${rel}_${arch}_MANIFEST | awk '{print $2}'`
 
 # Determine the file size from the ftp server
-desired_size=`/usr/bin/fetch -s $ftp_url/$pack.txz`
+desired_size=`/usr/bin/fetch -s ${ftp_url}/${pack}.txz`
 
 # Carry out the tarball fetch command, appending "partial" to the temporary download file
-/usr/bin/fetch -q -o ${dest}/FreeBSD-${arch}-${rel}-${pack}_partial_${desired_size}.txz $ftp_url/$pack.txz >/dev/null 2>$1
+/usr/bin/fetch -q -o ${dest}/FreeBSD-${arch}-${rel}-${pack}_partial_${desired_size}H.txz $ftp_url/$pack.txz >/dev/null 2>$1
 
 # Now that we've finished the download, we need to calculate the hash of the file in order to figure out 
 # if the download went well or not
 result_hash=`sha256 -q ${dest}/FreeBSD-${arch}-${rel}-${pack}_partial_${desired_size}.txz`
 
 # Now compare the hash from the manifest with the hash from the file we downloaded
-if [ $desired_hash = $result_hash ]; then
+if [ $desired_hash eq $result_hash ]; then
 	# The hashes match, so we need to rename the tarball to its final name
 	mv ${dest}/FreeBSD-${arch}-${rel}-${pack}_partial_${desired_size}.txz ${dest}/FreeBSD-${arch}-${rel}-${pack}.txz
 else
