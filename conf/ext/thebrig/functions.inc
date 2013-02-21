@@ -233,7 +233,7 @@ function thebrig_checkbox_list ($file_list) {
 			$installFiles .= "</td>";
 			// Middle Column
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace( "{$config['thebrig']['rootfolder']/work/" , "", $file_list[$i]);
+			$file = str_replace( "{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			.  " {$file} ";
 			$i++;
