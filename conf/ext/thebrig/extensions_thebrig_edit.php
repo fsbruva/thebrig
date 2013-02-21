@@ -296,7 +296,7 @@ if ($_POST) {
 		if ( count ( $files_selected ) > 0 ){
 			foreach ( $files_selected as $file ) {
 			// Delete the selected file from the "work" directory
-				$commandextract = "tar xvf {$config['thebrig']['rootfolder']}/work/{$file} -C {$$jail['jailpath']}";
+				$commandextract = "tar xvf {$config['thebrig']['rootfolder']}/work/{$file} -C {$jail['jailpath']}";
 				mwexec_bg( $commandextract );
 			}
 		}
