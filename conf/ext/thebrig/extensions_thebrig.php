@@ -195,7 +195,7 @@ var auto_refresh = setInterval(
 									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(isset($jail['enable']) ? "YES" : "NO");?></td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['ipaddr'] . " / " . $jail['subnet']) ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($jail['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($config['thebrig']['rootfolder'] . "/" . $jail['jailname']);?>&nbsp;</td>
+									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['jailpath']);?>&nbsp;</td>
 									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
