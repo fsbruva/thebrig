@@ -299,7 +299,7 @@ if ($_POST) {
 		if ( count ( $files_selected ) > 0 ){
 			foreach ( $files_selected as $file ) {
 			// Delete the selected file from the "work" directory
-				$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."work/".$file." -C ".$jail['jailpath'];
+				$commandextract = "tar xvf ".$config['thebrig']['rootfolder']."/work/".$file." -C ".$config['thebrig']['rootfolder']."/".$jail['jailname']."/";
 				mwexec_bg( $commandextract );
 			}
 		}
@@ -416,7 +416,7 @@ function mount_enable_change() {
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
 			<?php html_checkbox("enable", gettext("Jail start on boot"),			!empty($pconfig['enable']) ? true : false, gettext("Enable"), "");?>
-			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40,isset($uuid) && (FALSE !== $cnid));?>
+			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40, isset($uuid) && (FALSE !== $cnid));?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
  			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable")," " ," ","mount_enable_change()");?>
