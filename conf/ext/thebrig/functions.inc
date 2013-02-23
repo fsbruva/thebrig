@@ -21,12 +21,12 @@ function thebrig_unregister() {
  	
  	// First, glob all the php files from the extensions folder into an array of fully pathed filenames
  	// and work through them one at a time as file. 
- 	foreach ( glob( "{$brigroot}/conf/ext/thebrig/*.php" ) as $file ) {
+ 	foreach ( glob( "{$brigroot}conf/ext/thebrig/*.php" ) as $file ) {
  			// Carry out the string replacement operation. For each file, search for the string 
- 			//"{$brigroot}/ext/thebrig" and replace it with /usr/local/www. This will create a 
+ 			//"{$brigroot}conf/ext/thebrig" and replace it with /usr/local/www. This will create a 
  			// string that has a fully pathed filename for the extension's webpages (which are 
  			// actually symbolic links we need to destroy.
- 		$file = str_replace("{$brigroot}/conf/ext/thebrig", "/usr/local/www", $file);
+ 		$file = str_replace("{$brigroot}conf/ext/thebrig", "/usr/local/www", $file);
  			// only carry out the delete if it is a symbolic link (in case users have customised their own)
  		if ( is_link( $file ) ) {
  			unlink( $file ); 	// remove the ymbolic link
@@ -40,12 +40,12 @@ function thebrig_unregister() {
  	}
 
  	// Check to see if the folder is a folder, then remove it
- 	if ( is_dir( "/usr/local/www/ext/thebrig" ) ) {
- 		rmdir( "/usr/local/www/ext/thebrig" );
+ 	if ( is_dir( "/usr/local/www/ext/thebrig/" ) ) {
+ 		rmdir( "/usr/local/www/ext/thebrig/" );
  		# This counts the number of entries in the ext directory. If it is less than or equal to 2,
  		# the directory is empty, and can be removed (see http://www.php.net/manual/en/function.scandir.php)
- 		if ( count( scandir( "/usr/local/www/ext" ) ) <= 2 ){
- 			rmdir( "/usr/local/www/ext" );
+ 		if ( count( scandir( "/usr/local/www/ext/" ) ) <= 2 ){
+ 			rmdir( "/usr/local/www/ext/" );
  		}
  	}
 	// Make the former root folder writeable by all, so that it can be easily deleted.
@@ -65,20 +65,16 @@ function thebrig_populate ($new_location, $old_location)
 
 	// This indicates that the folders are actually different
 	if ( strcmp ( $old_location , $new_location ) ){
-		mwexec("/bin/mv {$old_location}/conf {$new_location}/");	// moves the conf
-		mwexec("/bin/mv {$old_location}/work {$new_location}/");	// moves the work folder
+		mwexec("/bin/mv {$old_location}/conf {$new_location}");	// moves the conf
+		mwexec("/bin/mv {$old_location}/work {$new_location}");	// moves the work folder
 		mwexec( "/bin/rm -r {$old_location}");						// get rid of the old folder
 	}	// moves data from and removes the old directory 
 	
 	// Create the work directory if it doesn't already exist
-	if ( ! is_dir ( "{$new_location}/work" ) ) {
-		mwexec ( "mkdir -p {$new_location}/work") ;
+	if ( ! is_dir ( "{$new_location}work/" ) ) {
+		mwexec ( "mkdir -p {$new_location}work/") ;
 	}
 	
-	// Start the creation of the jail_start script
-	mwexec ( "echo \"#!/bin/sh\" > {$new_location}/conf/jail_start") ;
-	mwexec ( "/bin/chmod 755 {$new_location}/conf/jail_start") ;
-
 	// This section finds and unsets the startup command for the extension (code borrowed from slimserver install)
 	$i = 0;
 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
@@ -100,7 +96,7 @@ function thebrig_populate ($new_location, $old_location)
 		} // end of for loop
 	} // end of array if statment
 	// update the value of the postinit command.
-	$config['rc']['postinit']['cmd'][$i] = "/bin/sh {$new_location}/conf/bin/thebrig_start.sh";
+	$config['rc']['postinit']['cmd'][$i] = "/bin/sh {$new_location}conf/bin/thebrig_start.sh";
 	// update all the symbolic links and such by executing the startup script from the new location
 	//mwexec("/bin/sh {$new_location}/conf/bin/thebrig_start.sh");
 	return 0;
@@ -114,7 +110,7 @@ function thebrig_populate ($new_location, $old_location)
 function check_thebrig() {
 	global $config;		// import global config
 		// The presence of /conf/jail_start is an analogue for the installation
-	return file_exists($config['thebrig']['rootfolder'] . "/conf/jail_start");
+	return file_exists($config['thebrig']['rootfolder'] . "conf/jail_start");
 }
 
 // Function name: 	thebrig_tarball_check
@@ -163,7 +159,7 @@ function thebrig_tarball_list ($contains , $exclude='') {
 	// This function creates a list of tarballs that match a certain filename pattern
 	$installFiles = "";
 	if ( is_dir( $config['thebrig']['rootfolder'] )) {
-		$raw_list = glob("{$config['thebrig']['rootfolder']}/work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip}", GLOB_BRACE);
+		$raw_list = glob("{$config['thebrig']['rootfolder']}work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip}", GLOB_BRACE);
 		$file_list = array_unique( $raw_list );
 		if ( $exclude ) {
 			foreach ( $exclude as $search_pattern ) {
@@ -226,20 +222,20 @@ function thebrig_checkbox_list ($file_list) {
 				// This code is repeated for the other two columns.
 				// Left Column
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace( "{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+			$file = str_replace( "{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			. " {$file} ";
 			$i++;
 			$installFiles .= "</td>";
 			// Middle Column
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace( "{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+			$file = str_replace( "{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			.  " {$file} ";
 			$i++;
 			// Right Column - with a minor change - it is the end of a row, so we have a new line
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+			$file = str_replace ("{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			.  " {$file}";
 			$i++ ; 
@@ -253,7 +249,7 @@ function thebrig_checkbox_list ($file_list) {
 			// an html checkbox entry for the file, and increments to the next index (i)
 			$installFiles .= "<tr>";
 			$installFiles .= "<td width=\"33%\">" ;
-			$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+			$file = str_replace ("{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
 			$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 			.  " {$file} ";
 			$i++ ;
@@ -264,7 +260,7 @@ function thebrig_checkbox_list ($file_list) {
 				// This code removes the pesky path data from the globbed file list, then creates
 				// an html checkbox entry for the file, and increments to the next index (i)
 				$installFiles .= "<td width=\"33%\">" ;
-				$file = str_replace ("{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$i]);
+				$file = str_replace ("{$config['thebrig']['rootfolder']}work/" , "", $file_list[$i]);
 				$installFiles .= "<input type=\"checkbox\" name=\"formFiles[]\" value={$file}> "
 				.  " {$file}";
 				$i++ ;
@@ -301,7 +297,7 @@ global $config ;
 		for ( $k = 0 ; $k < ( count( $file_list ) ) ; $k++ ) {
 			// This code removes the pesky path data from the globbed file list, as well as removing the "partial_{filesize}"
 			// It also converts all the underscores to spaces. This cleaned filename is then placed in the cell and the cell closed
-			$cleanfile = str_replace( "{$config['thebrig']['rootfolder']}/work/" , "", $file_list[$k]);
+			$cleanfile = str_replace( "{$config['thebrig']['rootfolder']}work/" , "", $file_list[$k]);
 			// We find the index of the start of "_partial_". This is used to figure out where the size is.
 			$partIndex = strripos($cleanfile , "_partial_");
 			// We can now infer where the {filesize} starts, by adding 9 to the partIndex (length of _partial_)

@@ -6,22 +6,21 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
-include("trap.php"); 
+//include("trap.php"); 
 // require_once("XML/Serializer.php");
 // require_once("XML/Unserializer.php");
-if (isset($_GET['name'])) {
 
-$actjailname = $_GET['name'];	
-$jailnameexec=$_GET['name'];
-$jailnamecmd=$_GET['action'];
-mwexec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}");
-}
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 
-if ( !isset( $config['thebrig']['rootfolder']) ) {
+if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
 } // end of elseif
 
+if (isset($_GET['name']) && ! isset($_GET['act'])) {
+	$jailnameexec=$_GET['name'];
+	$jailnamecmd=$_GET['action'];
+	mwexec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}");
+}
 
 // sent to page data from config.xml
 $rootfolder = $config['thebrig']['rootfolder'];
@@ -34,17 +33,11 @@ $pconfig['systenv'] = isset($config['thebrig']['systenv']);
 if ($_POST) {
 	// insert into pconfig changes
 
-	$rootfolder = $config['thebrig']['rootfolder'];
-	$pconfig['parastart'] = isset( $_POST['parastart'] ) ;
-	$pconfig['sethostname'] = isset($_POST['sethostname']); 
-	$pconfig['unixiproute'] = isset($_POST['unixiproute']); 
-	$pconfig['systenv'] = isset($_POST['systenv']);
-	
+
 	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
 	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
 	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
 	$config['thebrig']['systenv'] = isset ( $_POST['systenv'] );
-	$config['thebrig']['rootfolder'] = $rootfolder;
 	write_config();
 
 	$retval = 0;
@@ -55,7 +48,7 @@ if ($_POST) {
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
 		// Lock the config
 		config_lock();
-		$retval |= rc_update_service("jail"); // This need be checked.  For jail this way no good
+		//$retval |= rc_update_service("jail"); // This need be checked.  For jail this way no good
 		// Unlock the config
 		config_unlock();
 	}
@@ -75,14 +68,7 @@ $a_jail = &$config['thebrig']['content'];
 if (isset($_GET['act']) && $_GET['act'] === "del") {
 	// Prevent create archive for jail files into thebrig rootfolder with name <jailname>.tgz
 	// If we want to delete the jail, set the notification
-	$jail2delete = $_GET['name'];
-	chdir ($config['thebrig']['rootfolder']."/");
-	mwexec("tar -czf backup_{$jail2delete}.txz -C {$config['thebrig']['rootfolder']}/{$jail2delete}/ ./ {$jail2delete}/ ");
-	mwexec("mv backup_{$jail2delete}.txz work/backup_{$jail2delete}.txz");
-	mwexec("chflags -R noschg {$config['thebrig']['rootfolder']}/{$jail2delete}");
-	mwexec("rm -rf {$config['thebrig']['rootfolder']}/{$jail2delete}");
 	updatenotify_set("thebrig", UPDATENOTIFY_MODE_DIRTY, $_GET['uuid']);
-	
 	header("Location: extensions_thebrig.php");
 	exit;
 }
@@ -94,14 +80,39 @@ function thebrig_process_updatenotification($mode, $data) {
 
 	switch ($mode) {
 		case UPDATENOTIFY_MODE_NEW:
+			
+			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
+			if (false !== $cnid) {
+				$jail2add = $config['thebrig']['content'][$cnid];
+				// I have these here because the tarballs take some time to get unpacked
+				$commandresolv = "cp /etc/resolv.conf " . $jail2add['jailpath'] . "etc/";
+				if ( is_dir ( $jail2add['jailpath'] . "usr/share/zoneinfo/" )) {
+					$commandtime = "cp ".$jail2add['jailpath']."usr/share/zoneinfo/".$config['system']['timezone']." ".$jail2add['jailpath']."etc/localtime";
+					mwexec ($commandtime);
+				}
+				mwexec ($commandresolv);
+			}
+			// I have these commands here because it will take some time to untar the jail files
+			break;
 		case UPDATENOTIFY_MODE_MODIFIED:
+			// I have these commands here because it will take some time to untar the jail files
+			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
+			if (false !== $cnid) {
+				$jail2modify = $config['thebrig']['content'][$cnid];
+				// Here we place any tasks that we want to be run after a jail has been modified.
+				// Probably something to see if it was already running, and if so, restart it
+			}
 			break;
 		case UPDATENOTIFY_MODE_DIRTY:
 			// This indicates that we want to delete one or more of the jails
 			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
 			if (false !== $cnid) {
-				$del_jail = $config['thebrig']['content']['cnid'];
-			unset($config['thebrig']['content'][$cnid]);
+				$timestamp = date("Y-m-d_H:i:s");
+				$jail2delete = $config['thebrig']['content'][$cnid];
+				mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
+				mwexec("chflags -R noschg {$jail2delete['jailpath']}");
+				mwexec("rm -rf {$jail2delete['jailpath']}");
+				unset($config['thebrig']['content'][$cnid]);
 				write_config();
 			}
 			break;

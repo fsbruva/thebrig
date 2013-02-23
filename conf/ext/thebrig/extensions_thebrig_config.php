@@ -22,7 +22,10 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
 if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebrig.tmp' ) ) {
 	// This next line extracts the root folder from the install artifact (trimed to remove trailing CR/LF)
 	$config['thebrig']['rootfolder'] = rtrim( file_get_contents('/tmp/thebrig.tmp') );
-	$config['thebrig']['rootfolder'] = rtrim( $config['thebrig']['rootfolder'] , '/' );
+	// Ensure there is a / after the folder name
+	if ( $config['rootfolder'][strlen($config['rootfolder'])-1] != "/")  {
+		$config['rootfolder'] = $config['rootfolder'] . "/";
+	}
 	
 	// The next line propagates the the page's config data (the text box) with the extracted value
 	$pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
@@ -52,18 +55,9 @@ if ($_POST) {
 	$pconfig = $_POST;
 	 
 	 // Convert after filechoicer
-
-	if (strlen($pconfig['rootfolder']) > 8 && $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] == "/") {
-		$pconfig['rootfolder'] = rtim ($pconfig['rootfolder'], '/' );}
-	
-	/* input validation */
-	$reqdfields = array();
-	$reqdfieldsn = array();
-	$reqdfields = array_merge($reqdfields, explode(" ", "rootfolder"));
-	$reqdfieldsn = array_merge($reqdfieldsn, array( _THEBRIG_ROOT ));
-    
-	
-	//do_input_validation($_POST, $reqdfields, $reqdfieldsn, &$input_errors);
+	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
+		$pconfig['rootfolder'] = $pconfig['rootfolder'] . "/";
+	}
 	
 	// This first check to make sure that the supplied folder actually exists. If it does not
 	// then the user should be alerted. No changes will be made.
@@ -76,21 +70,21 @@ if ($_POST) {
 		$input_errors[] = _THEBRIG_NOTWRITABLE_FOLDER;
 	}
 	// We also need to see if there is enough space on the target disk.
-	elseif ( disk_free_space ( $pconfig['rootfolder'] ) < 2000000000 && !isset($pconfig['remove']) ) {
+	elseif ( disk_free_space ( $pconfig['rootfolder'] ) < 200000000 && !isset($pconfig['remove']) ) {
 		$input_errors[] = "There is not enough space on the target disk!";
 	}
 	
 	// The folder supplied by the user is a valid folder, so we can continue our input validations
 	else {
 		// brig_search is an array containing all the files within the root/conf that start with fstab.
-		$brig_search = glob( $config['thebrig']['rootfolder'] . "/conf/fstab." . "*" );
+		$brig_search = glob( $config['thebrig']['rootfolder'] . "conf/fstab." . "*" );
 		// If the user has selected a new installation folder, then we also must check that there are no existing 
 		// jails living there. This is a two step process. The first step is to check and see how many elements (files)
 		// are contained in brig_search. This is effective because the presence of any fstab files implies a bootable jail.
 		// The second step is to see if a basejail has been created. This jail is likely to be mounted read-only, but since
 		// the developer didn't want to mess with moving files that have the immutable flag set, he chose to dis-allow it.
 		if ( ( $pconfig['rootfolder'] != $config['thebrig']['rootfolder'] ) && 
-				( count( $brig_search ) > 0 ) || is_dir ($config['thebrig']['rootfolder'] . "/basejail" ) )   {
+				( count( $brig_search ) > 0 ) || is_dir ($config['thebrig']['rootfolder'] . "basejail" ) )   {
 			$input_errors[] = _THEBRIG_JAIL_ALREADY ;
 		}
 	}
@@ -113,13 +107,6 @@ if ($_POST) {
 			thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] );
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			write_config(); // Write the config to disk
-			$file = $config['thebrig']['rootfolder']."/conf/bin/thebrig_start.sh";
-			$temporary = file_get_contents ($file);
-			if (substr_count($temporary, "jail") == 0) { 			
-					$handle = fopen($file, "a");
-					fwrite ($handle, "\n\$BRIG_ROOT/ext/thebrig/jail_start.sh\n logger \"this is postinit\"\n/etc/rc.d/jail restart");
-					fclose ($handle);
-				}
 		}
 		// Whatever we did, we did it successfully
 		$retval = 0;

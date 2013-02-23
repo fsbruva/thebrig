@@ -68,49 +68,51 @@ function genhtmltitle($title) {
 							</tr>
 							
 							
-							<?php // this line need for analystic from host
-$jail_root_dir = $config['thebrig']['rootfolder'];
-$list = exec("ls -F {$jail_root_dir} | grep / | sed 's/\///g' | grep -v work | grep -v conf > /tmp/tempfile"); 
-$jails =  file("/tmp/tempfile");  
-$remtemp = exec ("rm /tmp/tempfile"); ?>
-							<?php foreach ($jails as $n_jail):?>
-							<tr><td width="7%" valign="top" class="vncellreq"><center><?php print $n_jail;?></center></td>
+					<?php // this line need for analystic from host
+					$jail_root_dir = $config['thebrig']['rootfolder'];
+					$jails =  $config['thebrig']['content'];
+					foreach ($jails as $n_jail):
+							$file_id = "/var/run/jail_{$n_jail['jailname']}.id";
+							If(is_file($file_id)) {
+								$jail_id = file_get_contents($file_id);
+								$jail_ls = exec ("/usr/sbin/jls -j {$jail_id}");
+								$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls);
+								$item = explode (" ",$jail_ls1);								
+							}
+							else {
+								$jail_id = "stopped";
+								$item[2] = "stopped" ;
+								$item[3] = "stopped";
+								$item[4] = "stopped";
+							}
+							
+							?>
+							<tr><td width="7%" valign="top" class="vncellreq"><center><?php print $n_jail['jailname'];?></center></td>
 								<td width="15%" valign="top" class="vncellreq">
-								<?php $n2_jail = rtrim($n_jail); if (!is_dir( (($jail_root_dir ."/" . $n2_jail . "/" ."var/run")))) {echo '<img src="'.'status_disabled.png'.'">';} 
+								<?php if (!is_dir( (($n_jail['jailpath'] ."var/run")))) {echo '<img src="'.'status_disabled.png'.'">';} 
 								else {
 								echo '<img src="'.'status_enabled.png'.'">';
-								if (is_dir($jail_root_dir ."/" . $n2_jail . "/usr/ports/Mk")) {echo " + ports ";} else {echo "";}
-								if (is_dir($jail_root_dir ."/" . $n2_jail . "/usr/src/sys")) {echo "+ src";} else {echo "";}
+								if (is_dir( $n_jail['jailpath'] . "usr/ports/Mk")) {echo " + ports ";} else {echo "";}
+								if (is_dir( $n_jail['jailpath'] . "usr/src/sys")) {echo "+ src";} else {echo "";}
 								}
 								?>								
 								</td>
-								<td width="44%" valign="top" class="vncellreq"><center><?php $n1_jail = rtrim($n_jail); $file_id = "/var/run/jail_{$n1_jail}.id"; 
+								<td width="44%" valign="top" class="vncellreq"><center><?php  
 										If(is_file($file_id)): ?>
 											<a title="<?=gettext("Running");?>"><img src="status_enabled.png" border="0" alt="" /></a>
-											<?php $procce= exec (" jexec {$n1_jail} top -d1 -I \| awk '{print \$1 \" \" \$2}' | grep proce"); echo $procce;?>
-											<?php else:?>
+											<?php $procce= exec ("jexec {$jail_id} top -d1 -I \| awk '{print \$1 \" \" \$2}' | grep proce"); echo $procce; else:?>
 											<a title="<?=gettext("Stopped");?>"><img src="status_disabled.png" border="0" alt="" /></a>
 										<?php endif;?></center>
 								</td>
-						
-								<td width="5%" valign= "top" class="vncellreq"><center><?php $n2_jail = rtrim($n_jail); $file_id = "/var/run/jail_{$n2_jail}.id";
-										If(is_file($file_id)) { $jail_id = file_get_contents($file_id); print $jail_id; } else {echo "stopped";}; ?></center></td>
-								<td width="12%" valign="top" class="vncellreq"><center><?php $n2_jail = rtrim($n_jail); $file_id = "/var/run/jail_{$n2_jail}.id";
-										If(is_file($file_id)) { $jail_ls = exec ("/usr/sbin/jls -j '{$n2_jail}'"); 
-											$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls); 
-											$item = explode (" ",$jail_ls1); print $item[2]; } else {echo "stopped";}; ?> </center></td>
-								<td width="12%" valign="top" class="vncellreq"><center><?php $n3_jail = rtrim($n_jail); $file_id = "/var/run/jail_{$n3_jail}.id";
-										If(is_file($file_id)) { $jail_ls = exec ("/usr/sbin/jls -j '{$n2_jail}'"); 
-											$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls); 
-											$item = explode (" ",$jail_ls1); print $item[3]; } else {echo "stopped";}; ?></center></td>
-								<td width="12%" valign="top" class="vncellreq"><center><?php 
-								echo $jail_root_dir ."/" . $n2_jail;
-								 ?></center></td>
+								<td width="5%" valign= "top" class="vncellreq"><center><?php print $jail_id;?></center></td>
+								<td width="12%" valign="top" class="vncellreq"><center><?php print $item[2];?> </center></td>
+								<td width="12%" valign="top" class="vncellreq"><center><?php print $item[3];?></center></td>
+								<td width="12%" valign="top" class="vncellreq"><center><?php print $item[4];?></center></td>
 								 								
-	<td width="5%" valign="top" class="vncellreq"><?php $n2_jail = rtrim($n_jail); 
+	<td width="5%" valign="top" class="vncellreq"><?php  
 	if (!is_file($file_id)) 
-	{ echo '<center><a href="extensions_thebrig.php?name='.$n2_jail.'&action=start"><img src="ext/thebrig/on_small.png" title="Jail start" border="0" alt="Jail start" /></a></center>';} 
-	else { echo '<center><a href="extensions_thebrig.php?name='.$n2_jail.'&action=stop"><img src="ext/thebrig/off_small.png" title="Jail stop" border="0" alt="Jail stop" /></a></center>';} 
+	{ echo '<center><a href="extensions_thebrig.php?name='.$n_jail['jailname'].'&action=start"><img src="ext/thebrig/on_small.png" title="Jail start" border="0" alt="Jail start" /></a></center>';} 
+	else { echo '<center><a href="extensions_thebrig.php?name='.$n_jail['jailname'].'&action=stop"><img src="ext/thebrig/off_small.png" title="Jail stop" border="0" alt="Jail stop" /></a></center>';} 
 ?>
 
 										

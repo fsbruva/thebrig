@@ -7,7 +7,7 @@ require_once("ext/thebrig/functions.inc");
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE) ;
 
-if ( !isset( $config['thebrig']['rootfolder']) ) {
+if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
 } // end of elseif
 
@@ -49,11 +49,11 @@ if ($_POST) {
 		$descriptorspec = array(
 				0 => array( "pipe" , "r" ),  // stdin is a pipe that STDIN will read from
 				1 => array( "pipe" , "w" ),  // stdout is a pipe that STDOUT will write to (write from the process)
-				2 => array( "file" , $config['thebrig']['rootfolder'] . "/thebrigerror.txt", "a") // stderr is a file to write to
+				2 => array( "file" , $config['thebrig']['rootfolder'] . "thebrigerror.txt", "a") // stderr is a file to write to
 			) ;
 		
 		//Define the command string used to open an ftp connection based on the specified parameters
-		$cmd_str = $config['thebrig']['rootfolder'] . "/conf/bin/ftp -a ftp://" . $ftp_server . $ftp_path ;
+		$cmd_str = $config['thebrig']['rootfolder'] . "conf/bin/ftp -a ftp://" . $ftp_server . $ftp_path ;
 		
 		// Define an ftp resource stream by running the specified command, using the descriptor spec and
 		// placing the process's IO within pipes. The environment and other_options parameter are NULL.		
@@ -162,7 +162,7 @@ if ($_POST) {
 			// For each of the files in the array
 			foreach ( $files_remove as $file ) {
 				// Delete the selected file from the "work" directory
-				$check = unlink ( $config['thebrig']['rootfolder'] . "/work/" . $file);
+				$check = unlink ( $config['thebrig']['rootfolder'] . "work/" . $file);
 				// If the unlink (deletion) operation is unsuccessful, alert user
 				if ( ! $check ) {
 					$input_errors[] = _THEBRIG_DELETE_FAIL . "$file" ;
@@ -183,7 +183,7 @@ if ($_POST) {
 			// This loop runs for each of the selected pacakages
 			foreach ( $pack_get as $pack_name ) {
 				// This code builds the command string with the appropriate architecture, release & package name.
-				$c_string = "/bin/sh {$config['thebrig']['rootfolder']}/conf/bin/thebrig_fetch.sh {$arch} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}/work >/dev/null &";
+				$c_string = "/bin/sh "."{$config['thebrig']['rootfolder']}"."conf/bin/thebrig_fetch.sh "."{$arch} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}"."work >/dev/null &";
 				// Carries out the fetching operation in the background
 				exec( $c_string , $output, $return);
 			}// end of for loop
