@@ -15,3 +15,5 @@ be run from the desired desination folder. The script would fetch the tarball of
 files, extract them to the current directory, and create a file /tmp/thebrig.tmp that contains
 the current path. Upon the extension's first run, this data would be read by the webgui, and 
 subsequently stored in the Nas4Free XML config. 
+
+Copyright 2013.
