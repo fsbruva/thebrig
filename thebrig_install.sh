@@ -63,6 +63,17 @@ touch /tmp/thebrig.tmp
 echo $BRIG_ROOT > /tmp/thebrig.tmp
 
 # Copy all the requisite files to be used into the /usr/local/www folders as needed
-/bin/sh $BRIG_ROOT/conf/bin/thebrig_start.sh
+cp $BRIG_ROOT/ext/thebrig/* /usr/local/www/ext/thebrig
+cd /usr/local/www
+# For each of the php files in the extensions folder
+for file in /usr/local/www/ext/thebrig/*.php
+do
+	# Check if the link is alredy there
+	if [ -e "${file##*/}" ]; then
+		rm "${file##*/}"
+	fi
+	# Create link
+	ln -s "$file" "${file##*/}"
+done
 
 echo "Congratulations! Refresh to see a new tab under \" Extensions\"!"
