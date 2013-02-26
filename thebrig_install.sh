@@ -63,6 +63,7 @@ touch /tmp/thebrig.tmp
 echo $BRIG_ROOT > /tmp/thebrig.tmp
 
 # Copy all the requisite files to be used into the /usr/local/www folders as needed
+mkdir -p /usr/local/www/ext/thebrig
 cp $BRIG_ROOT/conf/ext/thebrig/* /usr/local/www/ext/thebrig
 cd /usr/local/www
 # For each of the php files in the extensions folder
