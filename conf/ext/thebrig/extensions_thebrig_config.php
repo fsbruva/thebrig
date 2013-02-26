@@ -23,7 +23,7 @@ if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebri
 	// This next line extracts the root folder from the install artifact (trimed to remove trailing CR/LF)
 	$config['thebrig']['rootfolder'] = rtrim( file_get_contents('/tmp/thebrig.tmp') );
 	// Ensure there is a / after the folder name
-	if ( $config['rootfolder'][strlen($config['rootfolder'])-1] != "/")  {
+	if ( substr( $config['rootfolder'],-1) != '/')   {
 		$config['rootfolder'] = $config['rootfolder'] . "/";
 	}
 	
@@ -55,7 +55,7 @@ if ($_POST) {
 	$pconfig = $_POST;
 	 
 	 // Convert after filechoicer
-	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
+	if ( substr( $pconfig['rootfolder'],-1) != '/')  {
 		$pconfig['rootfolder'] = $pconfig['rootfolder'] . "/";
 	}
 	
