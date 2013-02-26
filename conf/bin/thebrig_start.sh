@@ -7,7 +7,7 @@ STAT=$(procstat -f $$ | grep -E "/"$(basename $0)"$")
 FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
 BRIG_ROOT=$(dirname $FULL_PATH | sed 's|/bin||')
 
-cp $BRIG_ROOT/ext/thebrig/* /usr/local/www/ext/thebrig
+cp $BRIG_ROOT/conf/ext/thebrig/* /usr/local/www/ext/thebrig
 cd /usr/local/www
 # For each of the php files in the extensions folder
 for file in /usr/local/www/ext/thebrig/*.php
@@ -19,6 +19,6 @@ do
 	# Create link
 	ln -s "$file" "${file##*/}"
 done
-$BRIG_ROOT/ext/thebrig/jail_start.sh
+$BRIG_ROOT/conf/ext/thebrig/jail_start.sh
  logger "this is postinit"
  
