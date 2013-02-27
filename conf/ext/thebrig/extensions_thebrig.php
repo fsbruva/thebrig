@@ -162,7 +162,9 @@ var auto_refresh = setInterval(
 				<tr> <!----  import table and check from another page --->
 					<td class="shadow">
 					<?php if ( !isset( $config['thebrig']['rootfolder']) ) : ?>
-					<a title="<?=gettext("Configure TheBrig please in first");?>
+					<a title="<?=gettext("Configure TheBrig please first");?>
+					<?php elseif ( !isset( $config['thebrig']['content']) ):?>
+					<a title="<?=gettext("Configure at least one jail first"); ?>				
 					<?php else:?>
 					<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_check.php");</script></div>
 					<?php endif;?>
