@@ -42,7 +42,7 @@ if ($_POST) {
 
 	$retval = 0;
 	// This checks to see if any webgui changes require a reboot, and create rc.conf.local
-		if ( !file_exists($d_sysrebootreqd_path) ) {
+		if ( !file_exists($d_sysrebootreqd_path) && isset($config['thebrig']['content']) ) {
 		write_rcconflocal();
 		// OR the return value from the attempt to process the notification
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
