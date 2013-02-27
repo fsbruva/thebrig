@@ -104,6 +104,7 @@ if ($_POST) {
 			// Also add startup command when thebrig completly installed
 			thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] );
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
+			$config['thebrig']['version'] = 1;
 			write_config(); // Write the config to disk
 		}
 		// Whatever we did, we did it successfully

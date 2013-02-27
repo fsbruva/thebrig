@@ -79,7 +79,7 @@ function thebrig_populate ($new_location, $old_location)
 	$i = 0;
 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-			if (preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
+			if (preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
 				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
 		 	}	// end for		
 	} // end if (is array)
@@ -96,9 +96,9 @@ function thebrig_populate ($new_location, $old_location)
 		} // end of for loop
 	} // end of array if statment
 	// update the value of the postinit command.
-	$config['rc']['postinit']['cmd'][$i] = "/bin/sh {$new_location}conf/bin/thebrig_start.sh";
+	$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$new_location}conf/bin/thebrig_start.php";
 	// update all the symbolic links and such by executing the startup script from the new location
-	//mwexec("/bin/sh {$new_location}/conf/bin/thebrig_start.sh");
+	//mwexec("/usr/local/bin/php-cgi /mnt/data/thebrig/conf/bin/thebrig_start.php");
 	return 0;
 }	// end of thebrig_populate()
 
