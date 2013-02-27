@@ -64,9 +64,9 @@ function thebrig_populate ($new_location, $old_location)
 	// Error checking prior to entry into this function guarantees $old_location will always be a directory
 
 	// This indicates that the folders are actually different
-	if ( strcmp ( $old_location , $new_location ) ){
-		mwexec("/bin/mv {$old_location}/conf {$new_location}");	// moves the conf
-		mwexec("/bin/mv {$old_location}/work {$new_location}");	// moves the work folder
+	if ( strcmp ( realpath($old_location) , realpath($new_location) ) ){
+		mwexec("/bin/mv {$old_location}conf {$new_location}");	// moves the conf
+		mwexec("/bin/mv {$old_location}work {$new_location}");	// moves the work folder
 		mwexec( "/bin/rm -r {$old_location}");						// get rid of the old folder
 	}	// moves data from and removes the old directory 
 	

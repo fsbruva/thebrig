@@ -23,7 +23,7 @@ if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebri
 	// This next line extracts the root folder from the install artifact (trimed to remove trailing CR/LF)
 	$config['thebrig']['rootfolder'] = rtrim( file_get_contents('/tmp/thebrig.tmp') );
 	// Ensure there is a / after the folder name
-	$config['rootfolder'] = rtrim ( $config['rootfolder'], '/') . '/';
+	$config['thebrig']['rootfolder'] = rtrim ( $config['thebrig']['rootfolder'], '/') . '/';
 	
 	
 	// The next line propagates the the page's config data (the text box) with the extracted value
