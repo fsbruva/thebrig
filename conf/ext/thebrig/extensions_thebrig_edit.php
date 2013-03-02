@@ -390,6 +390,9 @@ function mount_enable_change() {
 			<li class="tabinact">
 				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
+			<li class="tabinact">
+				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
+			</li>
 		</ul>
 	</td></tr>
 		<td class="tabcont">

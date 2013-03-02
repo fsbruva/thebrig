@@ -7,8 +7,8 @@ require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
 //include("trap.php"); 
-// require_once("XML/Serializer.php");
-// require_once("XML/Unserializer.php");
+require_once("XML/Serializer.php");
+require_once("XML/Unserializer.php");
 
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 
@@ -28,9 +28,84 @@ $pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ;
 $pconfig['sethostname'] = isset($config['thebrig']['sethostname']); 
 $pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
 $pconfig['systenv'] = isset($config['thebrig']['systenv']); 
+//
+if (isset($_POST['export']) && $_POST['export']) {
+	$options = array(
+		XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
+		XML_SERIALIZER_OPTION_INDENT           => "\t",
+		XML_SERIALIZER_OPTION_LINEBREAKS       => "\n",
+		XML_SERIALIZER_OPTION_XML_ENCODING     => "UTF-8",
+		XML_SERIALIZER_OPTION_ROOT_NAME        => get_product_name(),
+		XML_SERIALIZER_OPTION_ROOT_ATTRIBS     => array("version" => get_product_version(), "revision" => get_product_revision()),
+		XML_SERIALIZER_OPTION_DEFAULT_TAG      => "content",
+		XML_SERIALIZER_OPTION_MODE             => XML_SERIALIZER_MODE_DEFAULT,
+		XML_SERIALIZER_OPTION_IGNORE_FALSE     => true,
+		XML_SERIALIZER_OPTION_CONDENSE_BOOLS   => true,
+	);
 
+	$serializer = new XML_Serializer($options);
+	$status = $serializer->serialize($config['thebrig']['content']);
 
-if ($_POST) {
+	if (@PEAR::isError($status)) {
+		$errormsg = $status->getMessage();
+	} else {
+		$ts = date("YmdHis");
+		$fn = "thebrig-{$config['system']['hostname']}.{$config['system']['domain']}-{$ts}.jails";
+		$data = $serializer->getSerializedData();
+		$fs = strlen($data);
+
+		header("Content-Type: application/octet-stream");
+		header("Content-Disposition: attachment; filename={$fn}");
+		header("Content-Length: {$fs}");
+		header("Pragma: hack");
+		echo $data;
+
+		exit;
+	}
+} else if (isset($_POST['import']) && $_POST['import']) {
+	if (is_uploaded_file($_FILES['jailsfile']['tmp_name'])) {
+		$options = array(
+			XML_UNSERIALIZER_OPTION_COMPLEXTYPE => 'array',
+			XML_UNSERIALIZER_OPTION_ATTRIBUTES_PARSE => true,
+			XML_UNSERIALIZER_OPTION_FORCE_ENUM  => $listtags,
+		);
+
+		$unserializer = new XML_Unserializer($options);
+		$status = $unserializer->unserialize($_FILES['jailsfile']['tmp_name'], true);
+
+		if (@PEAR::isError($status)) {
+			$errormsg = $status->getMessage();
+		} else {
+			// Take care array already exists.
+			if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content']))
+				$config['thebrig']['content'] = array();
+
+			$data = $unserializer->getUnserializedData();
+
+			// Import jails.
+			foreach ($data['content'] as $jail) {
+				// Check if jail already exists.
+				$index = array_search_ex($jail['uuid'], $config['thebrig']['content'], "uuid");
+				if (false !== $index) {
+					// Create new uuid and mark jail as duplicate (modify description).
+					$content['uuid'] = uuid();
+					$content['desc'] = gettext("*** Imported duplicate ***") . " {$jail['desc']}";
+				}
+				$config['thebrig']['content'][] = $jail;
+
+				updatenotify_set("thebrig", UPDATENOTIFY_MODE_NEW, $jail['uuid']);
+			}
+
+			write_config();
+
+			header("Location: extensions_thebrig.php");
+			exit;
+		}
+	} else {
+		$errormsg = sprintf("%s %s", gettext("Failed to upload file."),
+			$g_file_upload_error[$_FILES['jailsfile']['error']]);
+	}
+} else if ($_POST) {
 	// insert into pconfig changes
 
 
@@ -146,6 +221,9 @@ var auto_refresh = setInterval(
 			<li class="tabinact">
 				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
+			<li class="tabinact">
+				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
+			</li>
 		</ul>
 	</td></tr>
 	
@@ -238,6 +316,25 @@ var auto_refresh = setInterval(
 							<input name="sethostname" type="checkbox" id="sethostname" value="yes" <?php if (!empty($pconfig['sethostname'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROOT_HOST?><br />
 							<input name="unixiproute" type="checkbox" id="unixiproute" value="yes" <?php if (!empty($pconfig['unixiproute'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROUTE?><br />
 							<input name="systenv" type="checkbox" id="systenv" value="yes" <?php if (!empty($pconfig['systenv'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_IPC?>
+						</td>
+					</tr>
+					<tr>
+						<td width="22%" valign="top" class="vncell">Download&nbsp;</td>
+						<td width="78%" class="vtable">
+							<?=gettext("Download jails config.");?><br />
+							<div id="submit">
+								<input name="export" type="submit" class="formbtn" value="<?=gettext("Export");?>" /><br />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td width="22%" valign="top" class="vncell">Upload&nbsp;</td>
+						<td width="78%" class="vtable">
+							<?=gettext("Import jails config.");?><br />
+							<div id="submit">
+								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="40" accept="*.jails" />&nbsp;
+								<input name="import" type="submit" class="formbtn" id="import" value="<?=gettext("Import");?>" /><br />
+							</div>
 						</td>
 					</tr>
 				</table>
