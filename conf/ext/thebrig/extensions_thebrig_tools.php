@@ -93,7 +93,8 @@ if ($_POST) {
 // I prepare Array for xml writer
 	for ($i=0; $i<(count($prsconfig['jailnames'] ) ) ; ) {
 			for ($j=0; $j<(count($prsconfig['thebrig'] ) ) ; ) {
-					$testmulti[$i]["{$prsconfig['thebrig'][$j]}"] = $prsconfig['values'][$i][$j];
+					if( ! empty ( $prsconfig['values'][$i][$j]) ) { $testmulti[$i]["{$prsconfig['thebrig'][$j]}"] = $prsconfig['values'][$i][$j];} 
+					else {unset($testmulti[$i]["{$prsconfig['thebrig'][$j]}"] ) ; }
 					++$j;	}
 			++$i;	} 
 			// and try
