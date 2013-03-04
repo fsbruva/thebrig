@@ -142,7 +142,7 @@ include("fbegin.inc");?>
 				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
 			</li>
 			<li class="tabinact">
-				<a href="extensions_thebrig_edit.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
+				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
 			<li class="tabact">
 				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
