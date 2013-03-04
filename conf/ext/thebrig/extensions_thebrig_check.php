@@ -75,10 +75,15 @@ function genhtmltitle($title) {
 					foreach ($jails as $n_jail):
 							$file_id = "/var/run/jail_{$n_jail['jailname']}.id";
 							If(is_file($file_id)) {
-								$jail_id = file_get_contents($file_id);
+								$jail_id = rtrim(file_get_contents($file_id));
 								$jail_ls = exec ("/usr/sbin/jls -j {$jail_id}");
 								$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls);
-								$item = explode (" ",$jail_ls1);								
+								$item = explode (" ",$jail_ls1);
+								$sleep_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"S\"||\$2~\"I\"){++c}END{print c}'";
+								$runn_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"R\"){++c}END{print c}'";
+								$sleep_cnt = exec ( $sleep_cmd ); 
+								$runn_cnt = exec ( $runn_cmd);
+								$total = intval($sleep_cnt) + intval($runn_cnt);
 							}
 							else {
 								$jail_id = "stopped";
@@ -101,7 +106,7 @@ function genhtmltitle($title) {
 								<td width="44%" valign="top" class="vncellreq"><center><?php  
 										If(is_file($file_id)): ?>
 											<a title="<?=gettext("Running");?>"><img src="status_enabled.png" border="0" alt="" /></a>
-											<?php $procce= exec ("jexec {$n_jail['jailname']} top -d1 -I \| awk '{print \$1 \" \" \$2}' | grep proce"); echo $procce; else:?>
+											<?php echo "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping"; else:?>
 											<a title="<?=gettext("Stopped");?>"><img src="status_disabled.png" border="0" alt="" /></a>
 										<?php endif;?></center>
 								</td>
