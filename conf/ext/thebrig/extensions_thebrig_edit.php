@@ -420,7 +420,7 @@ function mount_enable_change() {
 			<?php html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>
 			<?php html_inputbox("afterstart1", gettext("User command 1"), $pconfig['afterstart1'], gettext("command to execute after the one for starting the jail."), false, 50);?>
 			<?php html_inputbox("exec_stop", gettext("User command stop"), !empty($pconfig['exec_stop']) ? $pconfig['exec_stop'] : "/bin/sh /etc/rc.shutdown" , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
-			<?php html_inputbox("extraoptions", gettext("Options. "), !empty($pconfig['extraoptions']) ? $pconfig['extraoptions'] : "-l -U root -n _____", gettext("Add to rc.conf.local variable jail_jailname_flags. "), false, 40);?>
+			<?php html_inputbox("extraoptions", gettext("Options. "), !empty($pconfig['extraoptions']) ? $pconfig['extraoptions'] : "-l -U root", gettext("Add to rc.conf.local variable jail_jailname_flags. "), false, 40);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
 			<!-- in edit mode user not have access to extract binaries. I strongly disagree. -->
 		
