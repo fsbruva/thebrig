@@ -86,6 +86,17 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
 	$pconfig['fib'] = $a_jail[$cnid]['fib'];
+	// By default, when editing an existing jail, path and name will be read only.
+	$path_ro = true;
+	$name_ro = true;
+	if ( !is_dir( $pconfig['jailpath']) ) {
+		$input_errors[] = "The specified jail location does not exist - probably because you imported the jail's config. Please choose another.";
+		$path_ro = false;
+	}
+	if ( (FALSE !== ( $ncid = array_search_ex($pconfig['jailname'], $a_jail, "jailname"))) && $ncid !== $cnid ){
+		$input_errors[] = "The specified jailname is a duplicate - probably because you imported the jail's config. Please choose another.";	
+		$name_ro = false;
+	}
 }
 // In this case, the $uuid isn't set (this is a new jail), so set some default values
 else {
@@ -119,6 +130,8 @@ else {
 	$pconfig['force_blocking'] = "";
 	$pconfig['zfs_datasets'] = "";
 	$pconfig['fib'] = "";
+	$path_ro = false;
+	$name_ro = false;
 }
 
 
@@ -401,12 +414,12 @@ function mount_enable_change() {
         <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			<?php html_titleline(gettext("Jail parameters"));?>
         	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
-			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid));?>
+			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
 			<?php html_checkbox("enable", gettext("Jail start on boot"),			!empty($pconfig['enable']) ? true : false, gettext("Enable"), "");?>
-			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40,isset($uuid) && (FALSE !== $cnid));?>
+			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
  			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable")," " ," ","mount_enable_change()");?>
