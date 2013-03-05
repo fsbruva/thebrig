@@ -187,7 +187,9 @@ if ($_POST) {
 		$pconfig['jailpath']=$config['thebrig']['rootfolder'] . $pconfig['jailname'] ;
 	}
 	// Ensure there is a / after the folder name
-	$pconfig['thebrig']['jailpath'] = rtrim ( $pconfig['thebrig']['jailpath'], '/') . '/';
+	if ( $pconfig['jailpath'][strlen($pconfig['jailpath'])-1] != "/")  {
+		$pconfig['jailpath'] = $pconfig['jailpath'] . "/";
+	}
 	
 		// Check to make sure they are not attempting to install to a folder that thebrig uses.
 	if ( strcmp ( $pconfig['jailpath'] , $config['thebrig']['rootfolder'] . "work/" )== 0 ||
