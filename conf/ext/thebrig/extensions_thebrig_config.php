@@ -141,16 +141,16 @@ function disable_buttons() {
 			<li class="tabact">
 				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
-			</li>
+			
 		</ul>
 	</td></tr>
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav2">
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			
+			<li class="tabinact">
+				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
+			</li>
 		</ul>
 	</td></tr>
 

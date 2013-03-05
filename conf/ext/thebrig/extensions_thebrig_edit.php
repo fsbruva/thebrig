@@ -70,6 +70,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['fdescfs_enable'] = isset($a_jail[$cnid]['fdescfs_enable']);
 	$pconfig['devfsrules'] = $a_jail[$cnid]['devfsrules'];
 	$pconfig['fstab'] = $a_jail[$cnid]['fstab'];
+	$pconfig['exec_start'] = $a_jail[$cnid]['exec_start'];
 	$pconfig['afterstart0'] = $a_jail[$cnid]['afterstart0'];
 	$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
 	$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
@@ -86,17 +87,6 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
 	$pconfig['fib'] = $a_jail[$cnid]['fib'];
-	// By default, when editing an existing jail, path and name will be read only.
-	$path_ro = true;
-	$name_ro = true;
-	if ( !is_dir( $pconfig['jailpath']) ) {
-		$input_errors[] = "The specified jail location does not exist - probably because you imported the jail's config. Please choose another.";
-		$path_ro = false;
-	}
-	if ( (FALSE !== ( $ncid = array_search_ex($pconfig['jailname'], $a_jail, "jailname"))) && $ncid !== $cnid ){
-		$input_errors[] = "The specified jailname is a duplicate - probably because you imported the jail's config. Please choose another.";	
-		$name_ro = false;
-	}
 }
 // In this case, the $uuid isn't set (this is a new jail), so set some default values
 else {
@@ -114,6 +104,7 @@ else {
 	$pconfig['fdescfs_enable'] = false;
 	$pconfig['devfsrules'] = "";
 	$pconfig['fstab'] = "";
+	$pconfig['exec_start'] = "";
 	$pconfig['afterstart0'] = "";
 	$pconfig['afterstart1'] = "";
 	$pconfig['exec_stop'] = "";
@@ -130,8 +121,6 @@ else {
 	$pconfig['force_blocking'] = "";
 	$pconfig['zfs_datasets'] = "";
 	$pconfig['fib'] = "";
-	$path_ro = false;
-	$name_ro = false;
 }
 
 
@@ -301,6 +290,7 @@ if ($_POST) {
 		$jail['proc_enable'] = isset($pconfig['proc_enable']) ? true : false;
 		$jail['fdescfs_enable'] = isset($pconfig['fdescfs_enable']) ? true : false;
 		$jail['fstab'] = $pconfig['fstab'];
+		$jail['exec_start'] = $pconfig['exec_start'];
 		$jail['afterstart0'] = $pconfig['afterstart0'];
 		$jail['afterstart1'] = $pconfig['afterstart1'];
 		$jail['exec_stop'] = $pconfig['exec_stop'];
@@ -363,37 +353,7 @@ function thebrig_get_next_jailnumber() {
 }
 ?>
 <?php include("fbegin.inc");?>
-<script type="text/javascript">
-<!--
-$(document).ready(function () {
-	showElementById('devfs_enable_tr','hide');
-	showElementById('devfsrules_tr','hide');
-	showElementById('proc_enable_tr','hide');
-	showElementById('fdescfs_enable_tr','hide');
-	showElementById('fstab_tr','hide');
-});
 
-function mount_enable_change() {
-	switch (document.iform.jail_mount.checked) {
-		case false:
-			showElementById('devfs_enable_tr','hide');
-			showElementById('devfsrules_tr','hide');
-			showElementById('proc_enable_tr','hide');
-			showElementById('fdescfs_enable_tr','hide');
-			showElementById('fstab_tr','hide');
-			break;
-		case true:
-			showElementById('devfs_enable_tr','show');
-			showElementById('devfsrules_tr','show');
-			showElementById('proc_enable_tr','show');
-			showElementById('fdescfs_enable_tr','show');
-			showElementById('fstab_tr','show');
-			break;
-	}
-}
-
-// -->
-</script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
@@ -403,9 +363,6 @@ function mount_enable_change() {
 			<li class="tabinact">
 				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
-			</li>
 		</ul>
 	</td></tr>
 		<td class="tabcont">
@@ -414,7 +371,7 @@ function mount_enable_change() {
         <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			<?php html_titleline(gettext("Jail parameters"));?>
         	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
-			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
+			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid));?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
@@ -424,16 +381,17 @@ function mount_enable_change() {
 			<?php html_titleline(gettext("Mount"));?>
  			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable")," " ," ","mount_enable_change()");?>
 			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use for enable master devfs to jail over fstab"), "", false);?>
-			<?php html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
+			<?php /*html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30); */?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
-			<?php html_textarea("fstab", gettext("fstab"), !empty($pconfig['fstab']) ? $pconfig['fstab'] : "devfs /mnt/data/jail/_____/dev devfs rw 0 0", sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. If no need fstab - delete default line.  <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
+			<?php html_textarea("fstab", gettext("fstab"), $pconfig['fstab'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. If no need fstab - delete default line.  <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Commands"));?>
+			<?php html_inputbox("exec_start", gettext("Jail start command"), $pconfig['exec_start'], gettext("command to execute  for starting the jail."), false, 50);?>
 			<?php html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>
 			<?php html_inputbox("afterstart1", gettext("User command 1"), $pconfig['afterstart1'], gettext("command to execute after the one for starting the jail."), false, 50);?>
 			<?php html_inputbox("exec_stop", gettext("User command stop"), !empty($pconfig['exec_stop']) ? $pconfig['exec_stop'] : "/bin/sh /etc/rc.shutdown" , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
-			<?php html_inputbox("extraoptions", gettext("Options. "), !empty($pconfig['extraoptions']) ? $pconfig['extraoptions'] : "-l -U root", gettext("Add to rc.conf.local variable jail_jailname_flags. "), false, 40);?>
+			<?php html_inputbox("extraoptions", gettext("Options. "),  $pconfig['extraoptions'], gettext("Add to rc.conf.local variable jail_jailname_flags. Example: -l -U root -n {jailname}"), false, 40);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
 			<!-- in edit mode user not have access to extract binaries. I strongly disagree. -->
 		

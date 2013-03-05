@@ -24,7 +24,9 @@ if ($_POST) {
 		$prsconfig['jailnames'] = array(); // Define output array
 		$jailnames = preg_grep ( '/^.*_hostname=.*/i', $matches1 );
 		$jailnames =array_values($jailnames);
-		foreach ($jailnames  as $item) { $parts = explode('=', $item); 	$prsconfig['jailnames'][]=str_replace('"', '', $parts[1]);}
+		foreach ($jailnames  as $item) { $parts = explode('=', $item); 	$jailnames1[]=str_replace('"', '', $parts[1]);}
+		foreach ($jailnames1  as $item) { $parts = explode('.', $item); 	$prsconfig['jailnames'][]=$parts[0];}
+		
 		// Now I have array with jail names
 		
 		// I begin extract globals variable and compose as name => value I want to extract only 4 values, because I not need jail_enable and jail_list
@@ -45,7 +47,8 @@ if ($_POST) {
 
 		// alljails  parsing
 		// $etalon is array with standart FreeBSD names for rc.conf
-	$etalon = array("3"=>"_hostname", "4"=>"_interface", "5"=>"_ip", "7"=>"_rootdir", "9"=>"_mount_enable", "10"=>"_devfs_enable", "11"=>"_procfs_enable", "12"=>"_fdescfs_enable", "14"=>"_exec_afterstart0", "15"=>"_exec_afterstart1", "16"=>"_exec_stop", "17"=>"_flags" );
+	$etalon = array("3"=>"_hostname", "4"=>"_interface", "5"=>"_ip", "7"=>"_rootdir", "9"=>"_mount_enable", "10"=>"_devfs_enable", "11"=>"_procfs_enable", "12"=>"_fdescfs_enable", "14"=>"_exec_start", "15"=>"_exec_afterstart0", "16"=>"_exec_afterstart1", 
+		"17"=>"_exec_stop", "18"=>"_flags" );
 		// parsing....
 	for ($i=0; $i<(count($prsconfig['jailnames']));){
 		for ($j=0; $j<20;){
@@ -59,9 +62,9 @@ if ($_POST) {
 		++$i;	}
 		// Prsconfig['thebrig'] is array with thebrig variables, but it have some keys numbers as $prsconfig['names']
 		$prsconfig['thebrig'] = array ("0" =>"uuid", "1" => "enable", "2"=>"jailno", "3"=>"jailname", "4"=>"if", "5"=>"ipaddr",	"6"=>"subnet", "7"=>"jailpath", "8"=>"dst",	"9"=>"jail_mount",
-		"10"=> "devfs_enable",	"11"=> "proc_enable", 	"12"=> "fdescfs_enable", "13"=>"fstab",	"14"=>"afterstart0",	"15"=>"afterstart1", "16"=>"exec_stop",	"17"=>"extraoptions",
-		"18"=>"desc", "19"=>"base_ver",	"20"=>"lib_ver", "21"=>"src_ver",	"22"=>"doc_ver", "23"=>"image",	"24"=>"image_type",	"25"=>"attach_params",	"26"=>"attach_blocking",
-		"27"=>"force_blocking",		"28"=>"zfs_datasets",	"29"=>"fib", );
+		"10"=> "devfs_enable",	"11"=> "proc_enable", 	"12"=> "fdescfs_enable", "13"=>"fstab",	"14"=>"exec_start", "15"=>"afterstart0",	"16"=>"afterstart1", "17"=>"exec_stop",	"18"=>"extraoptions",
+		"19"=>"desc", "20"=>"base_ver",	"21"=>"lib_ver", "22"=>"src_ver",	"23"=>"doc_ver", "24"=>"image",	"25"=>"image_type",	"26"=>"attach_params",	"27"=>"attach_blocking",
+		"28"=>"force_blocking",		"29"=>"zfs_datasets",	"30"=>"fib", );
 
 		// add array startonboot
 	for ($j=0; $j<(count($matches1));){  
@@ -98,6 +101,7 @@ if ($_POST) {
 					++$j;	}
 			++$i;	} 
 			// and try
+
 		$options = array(
 		XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
 		XML_SERIALIZER_OPTION_INDENT           => "\t",
@@ -129,7 +133,7 @@ if ($_POST) {
 		echo $data;
 
 		exit;
-		}
+		} 
 } 
 out1: 
 $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_JAIL, Tools );
@@ -142,22 +146,28 @@ include("fbegin.inc");?>
 				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
 			</li>
 			<li class="tabinact">
-				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
+				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
+			
+		</ul>
+	    </td>
+	</tr>
+	<tr><td class="tabnavtbl">
+		<ul id="tabnav2">
+			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
 			<li class="tabact">
 				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
 			</li>
 		</ul>
-	    </td>
-	</tr>
-	
+	</td></tr>
 	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform">
 		<td class="tabcont">
 			 <?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
 			 <table width="100%" border="0" cellpadding="6" cellspacing="0">
 				<?php html_titleline(gettext("Migrate tools"));?>
 				<?php html_filechooser("oldconfig", gettext("Path to source"), $pconfig['oldconfig'], sprintf(gettext("If you want convert old rc.conf.local to Thebrig application, please add path to it."), $pconfig['name']), $g['media_path']."/mnt/", false);
-				html_text($confconv, gettext("Convert and download xml"), '<input name="Submit" type="submit" value="Convert"') ?>
+				html_text($confconv, gettext("Convert and download xml"), '<input name="Submit" type="submit" value="Convert">') ?>
 
 
 	     
