@@ -60,6 +60,8 @@ if ($_POST) {
 						++$k;		}
 				++$j; 	}
 		++$i;	}
+		// sanitize from domain name
+	for ($i=0; $i<(count($prsconfig['jailnames']));) {$prsconfig['values'][$i][3] = $prsconfig['jailnames'][$i]; ++$i; } 
 		// Prsconfig['thebrig'] is array with thebrig variables, but it have some keys numbers as $prsconfig['names']
 		$prsconfig['thebrig'] = array ("0" =>"uuid", "1" => "enable", "2"=>"jailno", "3"=>"jailname", "4"=>"if", "5"=>"ipaddr",	"6"=>"subnet", "7"=>"jailpath", "8"=>"dst",	"9"=>"jail_mount",
 		"10"=> "devfs_enable",	"11"=> "proc_enable", 	"12"=> "fdescfs_enable", "13"=>"fstab",	"14"=>"exec_start", "15"=>"afterstart0",	"16"=>"afterstart1", "17"=>"exec_stop",	"18"=>"extraoptions",
