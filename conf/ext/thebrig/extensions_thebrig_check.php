@@ -79,8 +79,8 @@ function genhtmltitle($title) {
 								$jail_ls = exec ("/usr/sbin/jls -j {$jail_id}");
 								$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls);
 								$item = explode (" ",$jail_ls1);
-								$sleep_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"S\"||\$2~\"I\"){++c}END{print c}'";
-								$runn_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"R\"){++c}END{print c}'";
+								$sleep_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"S\"||\$2~\"I\")&&\$2!~\"S[\+]\"{++c}END{print c}'";
+								$runn_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"R\"||\$2~\"S[\+]\"){++c}END{print c}'";
 								$sleep_cnt = exec ( $sleep_cmd ); 
 								$runn_cnt = exec ( $runn_cmd);
 								$total = intval($sleep_cnt) + intval($runn_cnt);
