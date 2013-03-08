@@ -178,7 +178,7 @@ if ($_POST) {
 	// If the specified path doesn't exist, we need to create it.
 	if ( !is_dir( $pconfig['jailpath'] )) {
 		mwexec ("/bin/mkdir {$pconfig['jailpath']}");
-	}
+	} else {}
 	
 	// This is a second test to see if the directory was created properly.
 	if ( !is_dir( $pconfig['jailpath'] )){
@@ -391,7 +391,7 @@ function thebrig_get_next_jailnumber() {
 			<?php /*html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30); */?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
-			<?php html_textarea("auxparam", gettext("auxparam"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. If no need fstab - delete default line.  <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
+			<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. If no need fstab - delete default line.  <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Commands"));?>
 			<?php html_inputbox("exec_start", gettext("Jail start command"), $pconfig['exec_start'], gettext("command to execute  for starting the jail."), false, 50);?>
