@@ -69,7 +69,9 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['proc_enable'] = isset($a_jail[$cnid]['proc_enable']);
 	$pconfig['fdescfs_enable'] = isset($a_jail[$cnid]['fdescfs_enable']);
 	$pconfig['devfsrules'] = $a_jail[$cnid]['devfsrules'];
-	$pconfig['fstab'] = $a_jail[$cnid]['fstab'];
+	$pconfig['auxparam'] = "";
+	if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam']))
+	$pconfig['auxparam'] = implode("\n", $a_jail[$cnid]['auxparam']);
 	$pconfig['exec_start'] = $a_jail[$cnid]['exec_start'];
 	$pconfig['afterstart0'] = $a_jail[$cnid]['afterstart0'];
 	$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
@@ -87,17 +89,6 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
 	$pconfig['fib'] = $a_jail[$cnid]['fib'];
-		// By default, when editing an existing jail, path and name will be read only.
-	$path_ro = true;
-	$name_ro = true;
-	if ( !is_dir( $pconfig['jailpath']) ) {
-		$input_errors[] = "The specified jail location does not exist - probably because you imported the jail's config. Please choose another.";
-		$path_ro = false;
-	}
-	if ( (FALSE !== ( $ncid = array_search_ex($pconfig['jailname'], $a_jail, "jailname"))) && $ncid !== $cnid ){
-		$input_errors[] = "The specified jailname is a duplicate - probably because you imported the jail's config. Please choose another.";	
-		$name_ro = false;
-	}
 }
 // In this case, the $uuid isn't set (this is a new jail), so set some default values
 else {
@@ -114,7 +105,7 @@ else {
 	$pconfig['proc_enable'] = false;
 	$pconfig['fdescfs_enable'] = false;
 	$pconfig['devfsrules'] = "";
-	$pconfig['fstab'] = "";
+	$pconfig['auxparam'] = "";
 	$pconfig['exec_start'] = "";
 	$pconfig['afterstart0'] = "";
 	$pconfig['afterstart1'] = "";
@@ -132,8 +123,6 @@ else {
 	$pconfig['force_blocking'] = "";
 	$pconfig['zfs_datasets'] = "";
 	$pconfig['fib'] = "";
-	$path_ro = false;
-	$name_ro = false;
 }
 
 
@@ -163,21 +152,16 @@ if ($_POST) {
 	$index = array_search_ex($pconfig['jailname'], $a_jail, "jailname");
 	if ( FALSE !== $index ) {
 		// If $index is not null, then there is a name conflict
-		if (!(isset($uuid) && (FALSE !== $cnid )))
+		if (!(isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))))
 			// This means we are not editing an existing jail - we are creating a new one
 			$input_errors[] = "The specified jailname is already in use. Please choose another.";
 	}
-	
-	if ( strcmp($pconfig['jailname'], "basejail")==0 || 
-		strcmp($pconfig['jailname'], "work")==0 || 
-		strcmp($pconfig['jailname'], "conf")==0 )
-		$input_errors[] = "The specified jailname is reserved. Please choose another.";
 	
 	// Check to see if duplicate ip addresses:
 	$index = array_search_ex($pconfig['ipaddr'], $a_jail, "ipaddr");
 	if ( FALSE !== $index && strcmp( $pconfig['type'] , "Base" ) != 0) {
 		// If $index is not null, then there is a name conflict
-		if (!(isset($uuid) && (FALSE !== $cnid )) )
+		if (!(isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))))
 			// This means we are not editing an existing jail - we are creating a new one
 			$input_errors[] = "The specified ip address is already in use. Please choose another.";
 	}
@@ -187,21 +171,14 @@ if ($_POST) {
 		$pconfig['jailpath']=$config['thebrig']['rootfolder'] . $pconfig['jailname'] ;
 	}
 	// Ensure there is a / after the folder name
-	$pconfig['thebrig']['jailpath'] = rtrim ( $pconfig['thebrig']['jailpath'], '/') . '/';
-	
-		// Check to make sure they are not attempting to install to a folder that thebrig uses.
-	if ( strcmp ( $pconfig['jailpath'] , $config['thebrig']['rootfolder'] . "work/" )== 0 ||
-			strcmp( $pconfig['jailpath'] , $config['thebrig']['rootfolder'] . "conf/" )==0 || 
-			strcmp( $pconfig['jailpath'] , $config['thebrig']['rootfolder'] . "conf/ext/" )==0 || 
-			strcmp( $pconfig['jailpath'] , $config['thebrig']['rootfolder'] . "conf/bin/" )==0 ||
-			strcmp( $pconfig['jailpath'] , $config['thebrig']['rootfolder'] . "basejail/" )==0 )
-		$input_errors[] = "The specified jail location is reserved. Please choose another.";
-	
+	if ( $pconfig['jailpath'][strlen($pconfig['jailpath'])-1] != "/")  {
+		$pconfig['jailpath'] = $pconfig['jailpath'] . "/";
+	}
 	
 	// If the specified path doesn't exist, we need to create it.
-	if ( !is_dir( $pconfig['jailpath'] ) && !isset($uuid) && (FALSE !== $cnid ) ) {
+	if ( !is_dir( $pconfig['jailpath'] )) {
 		mwexec ("/bin/mkdir {$pconfig['jailpath']}");
-	}
+	} else {}
 	
 	// This is a second test to see if the directory was created properly.
 	if ( !is_dir( $pconfig['jailpath'] )){
@@ -272,7 +249,7 @@ if ($_POST) {
 		
 		// So, starting with that jail, running through all the rest, their jail number needs to be incremented
 		// by one, to allow for the insertion of the newest jail
-		if (isset($uuid) && (FALSE !== $cnid )){
+		if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))){
 			// This indicates that we are editing an existing jail, with a uuid field that matches $uuid
 			if ( $cnid < $index ){
 				// This indicates that a list item has been made later
@@ -314,7 +291,12 @@ if ($_POST) {
 		$jail['devfs_enable'] = isset($pconfig['devfs_enable']) ? true : false;
 		$jail['proc_enable'] = isset($pconfig['proc_enable']) ? true : false;
 		$jail['fdescfs_enable'] = isset($pconfig['fdescfs_enable']) ? true : false;
-		$jail['fstab'] = $pconfig['fstab'];
+		unset($jail['auxparam']);
+		foreach (explode("\n", $_POST['auxparam']) as $auxparam) {
+			$auxparam = trim($auxparam, "\t\n\r");
+			if (!empty($auxparam))
+				$jail['auxparam'][] = $auxparam;
+				}
 		$jail['exec_start'] = $pconfig['exec_start'];
 		$jail['afterstart0'] = $pconfig['afterstart0'];
 		$jail['afterstart1'] = $pconfig['afterstart1'];
@@ -396,7 +378,7 @@ function thebrig_get_next_jailnumber() {
         <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			<?php html_titleline(gettext("Jail parameters"));?>
         	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
-			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
+			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid));?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
@@ -409,7 +391,7 @@ function thebrig_get_next_jailnumber() {
 			<?php /*html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30); */?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
-			<?php html_textarea("fstab", gettext("fstab"), $pconfig['fstab'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. If no need fstab - delete default line.  <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
+			<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. If no need fstab - delete default line.  <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Commands"));?>
 			<?php html_inputbox("exec_start", gettext("Jail start command"), $pconfig['exec_start'], gettext("command to execute  for starting the jail."), false, 50);?>

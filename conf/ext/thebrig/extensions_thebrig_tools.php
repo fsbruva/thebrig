@@ -11,7 +11,8 @@ require_once("XML/Serializer.php");
 require_once("XML/Unserializer.php");
 if ( !is_dir ( $config['thebrig']['rootfolder']."/work") ) { $input_errors[] = _THEBRIG_NOT_CONFIRMED; }
 $swich_converted = "0";
-if ($_POST) {
+if ($_POST['submit'] === "Convert") {
+	
 		if ( empty ( $_POST['oldconfig']) || !is_file($_POST['oldconfig']) ) { $input_errors[] = gettext("No valid file"); goto out1;}
 	$pconfig=$_POST;
 	$oldconfig = file($_POST['oldconfig']);
@@ -60,6 +61,9 @@ if ($_POST) {
 						++$k;		}
 				++$j; 	}
 		++$i;	}
+	// sanitize from domain name
+	for ($i=0; $i<(count($prsconfig['jailnames']));) {$prsconfig['values'][$i][3] = $prsconfig['jailnames'][$i]; ++$i; } 
+	
 		// Prsconfig['thebrig'] is array with thebrig variables, but it have some keys numbers as $prsconfig['names']
 		$prsconfig['thebrig'] = array ("0" =>"uuid", "1" => "enable", "2"=>"jailno", "3"=>"jailname", "4"=>"if", "5"=>"ipaddr",	"6"=>"subnet", "7"=>"jailpath", "8"=>"dst",	"9"=>"jail_mount",
 		"10"=> "devfs_enable",	"11"=> "proc_enable", 	"12"=> "fdescfs_enable", "13"=>"fstab",	"14"=>"exec_start", "15"=>"afterstart0",	"16"=>"afterstart1", "17"=>"exec_stop",	"18"=>"extraoptions",
@@ -135,6 +139,17 @@ if ($_POST) {
 		exit;
 		} 
 } 
+if ($_POST['submit'] === "Compress") {
+		if ( empty ( $_POST['fname']) || !is_dir($_POST['fname']) ) { $input_errors[] = gettext("No valid folder"); goto out1;}
+		$pconfig=$_POST;
+		$foldername = $_POST['fname'];
+		if (strlen($foldername) > 6 && $path[strlen($foldername)-1] == "/") { $foldername = substr($foldername, 0, strlen($foldername)-1); } 
+		$path_parts = pathinfo($foldername);
+		$timestamp = date("Y-m-d_H:i:s");
+		chdir($path_parts['dirname']);
+		mwexec("tar -c -z -f " . $config['thebrig']['rootfolder'] . "work/snached_" . $timestamp . ".txz -C" . $path_parts['dirname'] . " " . $path_parts['basename'] . "/*");
+		// This tool make archive any folder and place archive into thebrig/work.  Usefull for easy migrate old jails.
+}
 out1: 
 $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_JAIL, Tools );
 include("fbegin.inc");?>
@@ -166,9 +181,13 @@ include("fbegin.inc");?>
 			 <?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
 			 <table width="100%" border="0" cellpadding="6" cellspacing="0">
 				<?php html_titleline(gettext("Migrate tools"));?>
-				<?php html_filechooser("oldconfig", gettext("Path to source"), $pconfig['oldconfig'], sprintf(gettext("If you want convert old rc.conf.local to Thebrig application, please add path to it."), $pconfig['name']), $g['media_path']."/mnt/", false);
-				html_text($confconv, gettext("Convert and download xml"), '<input name="Submit" type="submit" value="Convert">') ?>
-
+				<?php html_filechooser("oldconfig", gettext("Path to source"), $pconfig['oldconfig'], sprintf(gettext("If you want convert old rc.conf.local to Thebrig application, please add path to it."), $pconfig['name']), "/mnt/", false);
+				html_text($confconv, gettext("Convert and download xml"), '<input name="submit" type="submit" value="Convert">') ?>
+				
+				<?php html_separator();
+				html_titleline(gettext("Snatch"));?>
+				<?php  html_filechooser("fname", gettext("Path to folder"), $pconfig['fname'], sprintf(gettext("If you want archive old jail or any another folder choice it"), $pconfig['fname']), "/mnt/", false);
+				html_text($confconv, gettext("Compress and save to work"), '<input name="submit" type="submit" value="Compress">') ?>
 
 	     
 			 </table>
