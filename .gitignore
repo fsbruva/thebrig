@@ -1,12 +1,11 @@
 #################
 ## TheBrig
 #################
+*
+!conf
+!conf/*
 conf/jail_start
 conf/bin/ftp
-work/
-thebrigerror.txt
-basejail/
-
 
 #################
 ## Eclipse
