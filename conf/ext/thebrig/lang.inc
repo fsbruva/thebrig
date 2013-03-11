@@ -12,6 +12,7 @@
 		define(_THEBRIG_JAIL, "Jail" );
 		define(_THEBRIG_EDIT, "Edit" );
 		define(_THEBRIG_ADD, "Add" );
+		define(_THEBRIG_TOOLS, "Backup/Restore");
 		define(_THEBRIG_NO_BASE, "Creating a jail requires at least one \"base\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
 		define(_THEBRIG_NO_LIB32, "As this is 64 bit Nas4free, creating a jail requires at least one \"lib32\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
 		define(_THEBRIG_BASIC_CONFIG, "Rudimentary Config");
@@ -21,9 +22,11 @@
 		define(_THEBRIG_CLEANUP_DESC, "Remove TheBrig integration from NAS4Free. This will leave the installation folder untouched - remove the files using Windows Explorer, FTP or some other tool of your choice.<br><br><b>Please note</b>: this page will no longer be available. You'll have to re-run TheBrig installation to get it back on your NAS4Free.");
 		define(_THEBRIG_ROOT, "Installation folder");
 		define(_THEBRIG_ROOT_DESC, "Please define TheBrig's jail installation folder. </br><b>Please note:</b> TheBrig will not work properly if this value is empty or incorrect.");
+		define(_THEBRIG_BASE, "Basejail Location"); 
+		define(_THEBRIG_BASE_DESC, "Sets the alternate location for the shared basejail. Default is a folder named basejail within TheBrig's installation folder. </br><b>Please note:</b> This value cannot be edited while there are any thin jails.");
 		define(_THEBRIG_NONEXISTENT_FOLDER, "Folder does not exist!");
 		define(_THEBRIG_SAVE, "Save");
-		define(_THEBRIG_JAIL_ALREADY, "It appears that at least one jail has already been created. TheBrig does not support moving its installation folder once jails have been created.</br> If you wish to move the installation folder, you must delete all jails first.");
+		define(_THEBRIG_JAIL_ALREADY, "It appears that at least one jail has already been created. TheBrig does not support moving its installation folder once jails have been created, or if either the basejail or templates have files.</br> If you wish to move the installation folder, you must delete all jails first.");
 		define(_THEBRIG_EXTN, "Extensions");
 		define(_THEBRIG_TARBALL_MGMT, "Tarball Management");
 		define(_THEBRIG_NOTWRITABLE_FOLDER, "Either the old or new folder is not writable!");

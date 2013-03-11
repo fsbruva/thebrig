@@ -60,6 +60,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['enable'] = isset($a_jail[$cnid]['enable']);
 	$pconfig['jailno'] = $a_jail[$cnid]['jailno'];
 	$pconfig['jailname'] = $a_jail[$cnid]['jailname'];
+	$pconfig['type'] = $a_jail[$cnid]['type'];
 	$pconfig['if'] = $a_jail[$cnid]['if'];
 	$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
 	$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
@@ -89,6 +90,17 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
 	$pconfig['fib'] = $a_jail[$cnid]['fib'];
+	// By default, when editing an existing jail, path and name will be read only.
+	$path_ro = true;
+	$name_ro = true;
+	if ( !is_dir( $pconfig['jailpath']) ) {
+		$input_errors[] = "The specified jail location does not exist - probably because you imported the jail's config. Please choose another.";
+		$path_ro = false;
+	}
+	if ( (FALSE !== ( $ncid = array_search_ex($pconfig['jailname'], $a_jail, "jailname"))) && $ncid !== $cnid ){
+		$input_errors[] = "The specified jailname is a duplicate - probably because you imported the jail's config. Please choose another.";	
+		$name_ro = false;
+	}
 }
 // In this case, the $uuid isn't set (this is a new jail), so set some default values
 else {
@@ -96,12 +108,13 @@ else {
 	$pconfig['enable'] = false;
 	$pconfig['jailno'] = thebrig_get_next_jailnumber();
 	$pconfig['jailname'] = "";
+	$pconfig['type']="Slim";
 	$pconfig['if'] = "";
 	$pconfig['ipaddr'] = "";
 	$pconfig['subnet'] = "32";
 	$pconfig['jailpath']="";
-	$pconfig['jail_mount'] = false;
-	$pconfig['devfs_enable'] = false;
+	$pconfig['jail_mount'] = true;
+	$pconfig['devfs_enable'] = true;
 	$pconfig['proc_enable'] = false;
 	$pconfig['fdescfs_enable'] = false;
 	$pconfig['devfsrules'] = "";
@@ -123,6 +136,8 @@ else {
 	$pconfig['force_blocking'] = "";
 	$pconfig['zfs_datasets'] = "";
 	$pconfig['fib'] = "";
+	$path_ro = false;
+	$name_ro = false;
 }
 
 
@@ -135,10 +150,8 @@ if ($_POST) {
 	}
 	
 	$pconfig = $_POST;
-	
+
 	$files_selected = $pconfig['formFiles'];
-
-
 
 	// Input validation.
 	$reqdfields = explode(" ", "jailno jailname ipaddr");
@@ -152,16 +165,25 @@ if ($_POST) {
 	$index = array_search_ex($pconfig['jailname'], $a_jail, "jailname");
 	if ( FALSE !== $index ) {
 		// If $index is not null, then there is a name conflict
-		if (!(isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))))
+		if (!(isset($uuid) && (FALSE !== $cnid )) )
 			// This means we are not editing an existing jail - we are creating a new one
 			$input_errors[] = "The specified jailname is already in use. Please choose another.";
 	}
 	
+	// Ensure we are not attempting to create a jail whose name is used by thebrig, or install to a directory that
+	// thebrig uses.
+	$thebrig_names = array ("basejail" , "work" , "conf" , "template" ); 
+	$thebrig_dirs = $thebrig_names + array ( "conf/ext" , "conf/bin");
+	$thebrig_dirs = preg_replace("/(.+)/", $config['thebrig']['rootfolder'] . "$1/", $thebrig_dirs, 1);
+	
+	if ( array_search ($pconfig['jailname'], $thebrig_names ) !== FALSE)
+		$input_errors[] = "The specified jailname is reserved. Please choose another.";
+		
 	// Check to see if duplicate ip addresses:
 	$index = array_search_ex($pconfig['ipaddr'], $a_jail, "ipaddr");
-	if ( FALSE !== $index && strcmp( $pconfig['type'] , "Base" ) != 0) {
+	if ( FALSE !== $index ) {
 		// If $index is not null, then there is a name conflict
-		if (!(isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))))
+		if (!(isset($uuid) && (FALSE !== $cnid )))
 			// This means we are not editing an existing jail - we are creating a new one
 			$input_errors[] = "The specified ip address is already in use. Please choose another.";
 	}
@@ -175,16 +197,14 @@ if ($_POST) {
 		$pconfig['jailpath'] = $pconfig['jailpath'] . "/";
 	}
 	
-	// If the specified path doesn't exist, we need to create it.
-	if ( !is_dir( $pconfig['jailpath'] )) {
-		mwexec ("/bin/mkdir {$pconfig['jailpath']}");
-	} else {}
-	
-	// This is a second test to see if the directory was created properly.
-	if ( !is_dir( $pconfig['jailpath'] )){
-		$input_errors[] = "Could not create directory for jail to live in!";
-	}
+	// Check to make sure they are not attempting to install to a folder that thebrig uses.
+	if ( array_search ($pconfig['jailpath'], $thebrig_dirs ) !== FALSE)
+		$input_errors[] = "The specified jail location is reserved. Please choose another.";
 		
+	$pconfig['base_ver']= "Unknown";
+	$pconfig['lib_ver'] = "Unknown";
+	$pconfig['src_ver'] = "Unknown";
+	$pconfig['doc_ver'] = "Unknown";
 	
 		// Check to make sure there are not any duplicate files selected
 	if ( count( $files_selected) > 0 ){
@@ -211,12 +231,6 @@ if ($_POST) {
 				$src_count++;
 				$pconfig['src_ver'] = $file_split[2] . "-" . $file_split[3] ;
 			}
-			else {
-				$pconfig['base_ver']= "Unknown";
-				$pconfig['lib_ver'] = "Unknown";
-				$pconfig['src_ver'] = "Unknown";
-				$pconfig['doc_ver'] = "Unknown";
-			}
 		} // End of foreach
 		// Need to deal with keeping track of the lib version as the same as the base version
 		if ( $myarch != "amd64" ){
@@ -226,12 +240,22 @@ if ($_POST) {
 		
 
 	if ( $myarch != "amd64" && $lib_count > 1 ){
-		$input_errors[] = "You have lib32, but you are running i386!!";
+		$input_errors[] = "You have selected lib32, but you are running i386!!";
 	}
 	
 	// Make sure only one tarball of each type is selected
 	if ( $src_count > 1 || $base_count > 1 || $lib_count > 1 || $doc_count > 1 )
-		$input_errors[] = "You have selected more than one of a given tarball type!!";
+		$input_errors[] = "You have selected more than one of a given tarball type!!  Please select only one of each type";
+		
+	// If the specified path doesn't exist, we need to create it.
+	if ( !is_dir( $pconfig['jailpath'] ) && ( count($input_errors) == 0 ) ) {
+		mwexec ("/bin/mkdir {$pconfig['jailpath']}");
+	}
+	
+	// This is a second test to see if the directory was created properly.
+	if ( !is_dir( $pconfig['jailpath'] )){
+		$input_errors[] = "Could not create directory for jail to live in!";
+	}
 		
 	// Validate if jail number is unique in order to reorder the jails (if necessary)
 	// Alexey - why do we care about the jail number or the uuid?
@@ -239,49 +263,50 @@ if ($_POST) {
 	
 	// a_jail is the list of all jails, sorted by their jail number
 	
-	// Index is the location within a_jail that has the same jailnumber as the one just entered
-	$index = array_search_ex($pconfig['jailno'], $a_jail, "jailno");
-	// for each jail? How can i determine the loop control variables?
-
-	if ( FALSE !== $index ) {
-		// If $index is not null, then there is a number conflict (the jail number use in $POST conflicts
-		// with a currently configured jail's number. The jail that has the conflict is jail $index
-		
-		// So, starting with that jail, running through all the rest, their jail number needs to be incremented
-		// by one, to allow for the insertion of the newest jail
-		if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))){
-			// This indicates that we are editing an existing jail, with a uuid field that matches $uuid
-			if ( $cnid < $index ){
-				// This indicates that a list item has been made later
-				// We need to move all the the ones that follow the old location earlier by one, up
-				// to and including the conflict
-				for ( $i = $cnid; $i <= $index ; $i++ ){
-					$a_jail[$i]['jailno'] -= 1;
-				} // end for
-			} // end $cnid < $index
-			elseif ( $cnid > $index ) {
-				// This indicates that a list item has been made earlier 
-				// We need to move all the list items (starting with the conflict) later by one, up to
-				// the currently edited jail's id
-				for ( $i = $index; $i < $cnid ; $i++ ){
-					$a_jail[$i]['jailno'] += 1;
-				} // end for loop
-			} // end elseif
-		} // end of editing existing jail
-		else {
-			// This indicates we are creating a new jail
-			for ( $i = $index; $i < count( $a_jail ); $i++ ){
-				$a_jail[$i]['jailno'] += 1;
-			} // end of for loop
-		} // end of else (we're adding a new jail
-	} // end of jail number conflict
-
 	if ( empty( $input_errors )) {
+		// Index is the location within a_jail that has the same jailnumber as the one just entered
+		$index = array_search_ex($pconfig['jailno'], $a_jail, "jailno");
+		// for each jail? How can i determine the loop control variables?
+		
+		if ( FALSE !== $index ) {
+			// If $index is not null, then there is a number conflict (the jail number use in $POST conflicts
+			// with a currently configured jail's number. The jail that has the conflict is jail $index
+		
+			// So, starting with that jail, running through all the rest, their jail number needs to be incremented
+			// by one, to allow for the insertion of the newest jail
+			if (isset($uuid) && (FALSE !== $cnid )){
+				// This indicates that we are editing an existing jail, with a uuid field that matches $uuid
+				if ( $cnid < $index ){
+					// This indicates that a list item has been made later
+					// We need to move all the the ones that follow the old location earlier by one, up
+					// to and including the conflict
+					for ( $i = $cnid; $i <= $index ; $i++ ){
+						$a_jail[$i]['jailno'] -= 1;
+					} // end for
+				} // end $cnid < $index
+				elseif ( $cnid > $index ) {
+					// This indicates that a list item has been made earlier
+					// We need to move all the list items (starting with the conflict) later by one, up to
+					// the currently edited jail's id
+					for ( $i = $index; $i < $cnid ; $i++ ){
+						$a_jail[$i]['jailno'] += 1;
+					} // end for loop
+				} // end elseif
+			} // end of editing existing jail
+			else {
+				// This indicates we are creating a new jail
+				for ( $i = $index; $i < count( $a_jail ); $i++ ){
+					$a_jail[$i]['jailno'] += 1;
+				} // end of for loop
+			} // end of else (we're adding a new jail
+		} // end of jail number conflict
+		
 		$jail = array();
 		$jail['uuid'] = $pconfig['uuid'];
 		$jail['enable'] = isset($pconfig['enable']) ? true : false;
 		$jail['jailno'] = $pconfig['jailno'];
 		$jail['jailname'] = $pconfig['jailname'];
+		$jail['type'] = $pconfig['type'];
 		$jail['if'] = $pconfig['if'];
 		$jail['ipaddr'] = $pconfig['ipaddr'];
 		$jail['subnet'] = $pconfig['subnet'];
@@ -296,7 +321,9 @@ if ($_POST) {
 			$auxparam = trim($auxparam, "\t\n\r");
 			if (!empty($auxparam))
 				$jail['auxparam'][] = $auxparam;
-				}
+			else
+				$jail['auxparam'][]="";
+			}
 		$jail['exec_start'] = $pconfig['exec_start'];
 		$jail['afterstart0'] = $pconfig['afterstart0'];
 		$jail['afterstart1'] = $pconfig['afterstart1'];
@@ -315,15 +342,23 @@ if ($_POST) {
 		$jail['zfs_datasets'] = $pconfig['zfs_datasets'];
 		$jail['fib'] = $pconfig['fib'];
 		
-		// For each of the files in the array
-		if ( count ( $files_selected ) > 0 ){
-			foreach ( $files_selected as $file ) {
-			// Extract the desired tarballs to the destination jail.
-				$commandextract = "tar xvf " . $config['thebrig']['rootfolder'] . "work/" . $file . " -C " . $jail['jailpath'];
-				mwexec_bg( $commandextract );
-			}
-		}
-				
+		// Populate the jail. The simplest case is a full jail using tarballs.
+		if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 && strcmp ( $jail['type'], "full") == 0)
+			thebrig_split_world($pconfig['jailpath'] , false , $files_selected );
+		elseif ( $pconfig['source'] === "template" && strcmp ( $jail['type'], "full") == 0 )
+			thebrig_split_world($pconfig['jailpath'] , false);
+		// Next simplest is to split the world if we're making a slim jail out of tarballs.
+		elseif ( $jail['type'] === "slim" ) {
+			// We know we're making a slim jail now
+			$config['thebrig']['basejail']['base_ver'] = $pconfig['base_ver'];
+			$config['thebrig']['basejail']['lib_ver'] = $pconfig['lib_ver'];
+			$config['thebrig']['basejail']['src_ver'] = $pconfig['src_ver'];
+			$config['thebrig']['basejail']['doc_ver'] = $pconfig['doc_ver'];
+			if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 ) 
+				thebrig_split_world($pconfig['jailpath'] , true , $files_selected );
+			elseif (  $pconfig['source'] === "template" )
+				thebrig_split_world($pconfig['jailpath'] , true);
+		}		
 		// This determines if it was an update or a new jail
 		if (isset($uuid) && (FALSE !== $cnid)) {
 			// Copies newly modified properties over the old
@@ -360,7 +395,40 @@ function thebrig_get_next_jailnumber() {
 }
 ?>
 <?php include("fbegin.inc");?>
+<script type="text/javascript">
+<!--
+$(document).ready(function () {
+	source_change();
+	type_change();
+});
 
+function type_change(){
+	switch (document.iform.type.selectedIndex) {
+	case 0:
+		document.iform.jail_mount.checked=true;
+		document.iform.jail_mount.onclick= function () {event.preventDefault();}
+		break;
+	case 1:
+		document.iform.jail_mount.onclick= function () {"";}
+		break;
+	}
+}
+
+function source_change() {
+	switch (document.iform.source.selectedIndex) {
+		case 0:
+			showElementById('official_tr','show');
+			showElementById('homegrown_tr','show');
+			break;
+		case 1:
+			showElementById('official_tr','hide');
+			showElementById('homegrown_tr','hide');
+			break;
+	}
+}
+
+// -->
+</script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
@@ -378,7 +446,8 @@ function thebrig_get_next_jailnumber() {
         <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			<?php html_titleline(gettext("Jail parameters"));?>
         	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
-			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid));?>
+			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
+			<?php html_combobox("type", gettext("Jail Type"), $pconfig['type'], array('slim' =>'Slim','full'=> 'Full'), gettext("Choose jail type"), true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
@@ -386,9 +455,9 @@ function thebrig_get_next_jailnumber() {
 			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
- 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable")," " ," ","mount_enable_change()");?>
-			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use for enable master devfs to jail over fstab"), "", false);?>
-			<?php /*html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30); */?>
+ 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable")," " ," ","event.preventDefault()");?>
+			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use to mount the device file system inside the jail. <br><b>This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.</b>"), "", false);?>
+			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
 			<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. If no need fstab - delete default line.  <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
@@ -401,38 +470,28 @@ function thebrig_get_next_jailnumber() {
 			<?php html_inputbox("extraoptions", gettext("Options. "),  $pconfig['extraoptions'], gettext("Add to rc.conf.local variable jail_jailname_flags. Example: -l -U root -n {jailname}"), false, 40);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
 			<!-- in edit mode user not have access to extract binaries. I strongly disagree. -->
-		
-			<?php html_titleline(gettext("Tarballs"));?>
+			<?php html_separator();?>
+			<?php html_titleline(gettext("Installation Source"));?>
+			<?php html_combobox("source", gettext("Jail Source"), $pconfig['source'], array('tarballs' =>'From Archive','template'=> 'From Template'), gettext("Choose jail source. Selecting 'From Template' will clone the jail specified by the template folder." ), true, false , "source_change()" );?>
 			<?php
 			// This obtains a list of files that match the criteria (named anything FreeBSD*)
 			// within the /work folder.
 			$file_list = thebrig_tarball_list("FreeBSD*");
 			// This filelist is then used to generate html code with checkboxes
 			$installLib = thebrig_checkbox_list($file_list);
-			if ( $installLib ) { // If the array exists and has a size, then display that html code?>
-		<!-- The first td of this row is the box in the top row, far left. -->
-		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_OFFICIAL_TB; ?></td>
-		<!-- The next td is the larger box to the right, which contains the text box and info --> 
-		<td width="78%" class="vtable">
-			<?php echo $installLib; ?>
-			</td></tr>
-			<?php } //endif ?>
+			if ( $installLib ) { 
+				html_text("official",_THEBRIG_OFFICIAL_TB, $installLib );		
+			} //endif 
 			
-			
-			<?php
 			// This obtains a list of files that match the criteria (named anything *, excluding FreeBSD)
 			// within the /work folder.
 			$file_list = thebrig_tarball_list( "*" , array( "FreeBSD"  ) );
 			// This filelist is then used to generate html code with checkboxes
 			$installLib = thebrig_checkbox_list( $file_list );
-			if ( $installLib )  {  // If the array exists and has a size, then display that html code?>
-			<!-- The first td of this row is the box in the top row, far left. -->
-		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_CUSTOM_TB; ?></td>
-		<!-- The next td is the larger box to the right, which contains the text box and info --> 
-		<td width="78%" class="vtable">
-			<?php echo $installLib; ?>
-			</td></tr>
-			<?php } //endif ?>	
+			if ( $installLib )  {  
+				// If the array exists and has a size, then display that html code
+				html_text("homegrown",_THEBRIG_CUSTOM_TB, $installLib);
+			} //endif ?>	
 				</table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" />
@@ -442,7 +501,6 @@ function thebrig_get_next_jailnumber() {
 				<?php include("formend.inc");?>
 			</form>
 		</td>
-	<?php  echo  $pconfig['name']. $pconfig['txzfile'];?>
 	</tr>
 </table>
 <?php include("fend.inc");?>

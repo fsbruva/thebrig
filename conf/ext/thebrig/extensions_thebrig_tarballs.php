@@ -222,7 +222,7 @@ var auto_refresh = setInterval(
 				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
 			</li>
 			<li class="tabact">
-				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
+				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
 		</ul>
 	</td></tr>
@@ -231,7 +231,7 @@ var auto_refresh = setInterval(
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"  title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
 			<li class="tabinact">
-				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
+				<a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a>
 			</li>
 			
 		</ul>
@@ -240,15 +240,8 @@ var auto_refresh = setInterval(
 	<tr><td class="tabcont">
 		<form action="extensions_thebrig_tarballs.php" method="post" name="iform" id="iform">
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
-		<tr><td colspan="2" valign="top" class="optsect_t">
-			<table border="0" cellspacing="0" cellpadding="0" width="100%">
-				<tr><td class="optsect_s"><strong><?=_THEBRIG_CURRENT_TB; ?></strong></td>
-					<td align="right" class="optsect_s">
-					</td>
-				</tr>
-			</table>
-		</td></tr>
 
+		<?php html_titleline(gettext(_THEBRIG_CURRENT_TB));?>
 		<!-- The first td of this row is the box in the top row, far left. -->
 		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_OFFICIAL_TB; ?></td>
 		<!-- The next td is the larger box to the right, which contains the text box and info --> 
@@ -293,14 +286,9 @@ var auto_refresh = setInterval(
 			</td>
 		</tr>
 
-		<!--  These next two rows merely output some space between the upper and middle tables -->
-		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
-		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
-			
-		<!-- This is the table to allow the user to download remote tarballs -->
-		<tr><td colspan="2" valign="top" class="optsect_t">
-			<div class="optsect_s"><strong><?=_THEBRIG_REMOTE_TB;?></strong></div></td></tr>
-			
+		<?php html_separator();?>	
+		<?php html_titleline(gettext(_THEBRIG_REMOTE_TB));?>
+					
 		<!-- This is the row beneath the title -->
 		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_REMOTE_AVAIL ?></td>
 			<td width="78%" class="vtable">
@@ -351,14 +339,9 @@ var auto_refresh = setInterval(
 			} ?>
 			</td>
 		</tr>
-				<!--  These next two rows merely output some space between the middle and lower tables -->
-		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
-		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
+		<?php html_separator();?>	
+		<?php html_titleline(gettext(_THEBRIG_REMOTE_ACTIVE));?>
 		
-		<!-- This is the table to allow the user to download remote tarballs -->
-		<tr><td colspan="2" valign="top" class="optsect_t">
-			<div class="optsect_s"><strong><?=_THEBRIG_REMOTE_ACTIVE;?></strong></div></td></tr>
-			
 				<!-- The first td of this row is the box in the top row, far left. -->
 		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_PARTIAL_TB; ?></td>
 		<!-- The next td is the larger box to the right, which contains the text box and info --> 

@@ -1,5 +1,7 @@
 <?php
 
+
+
 function thebrig_unregister() {
  	global $config;
  	
@@ -172,12 +174,98 @@ function thebrig_tarball_list ($contains , $exclude='') {
 }
 
 
-// Function name: 	thebrig_name_check
-// Inputs: 			none
-// Outputs: 		integer result based on the proposed jail name
-// Description:		This function evaluates whether or not the provided jail name is 
-// 					a duplicate, or if it has illegal characters within it.
+// Function name: 	thebrig_split_world
+// Inputs: 			destination			string containing the jail's location
+//					jail_type			boolean value, true indicating slim jail, false indicating full
+//					source				Optional array containing the list of tarballs. Its absence indicates 
+//										we are extracting from a buildworld.
+// Outputs: 		none
+// Description:		This function takes the necessary steps to create a jail, from a file moving/copying
+//					standpoint.
 
+
+function thebrig_split_world ( $destination , $jail_type ){
+	global $config;
+	
+	if ( !$jail_type ){
+		if ( func_num_args() === 3 ){
+			$file_list = func_get_arg(2);
+			// We are extracting from a list of traballs.
+			foreach ( $file_list as $file ) {
+				// Extract the desired tarballs to the destination jail.
+				$commandextract = "tar xf " . $config['thebrig']['rootfolder'] . "work/" . $file . " -C " . $destination;
+				mwexec( $commandextract );
+			}
+		}
+		else{
+			// We are extracting from a buildworld
+			$commandextract = "tar -cf - -C " . $config['thebrig']['template'] . " . | (cd ". $destination . " && tar --unlink --keep-newer-files -xBpf -)";
+			mwexec( $commandextract );
+		}
+		// Move the timezone info
+		if ( is_dir ( $destination . "usr/share/zoneinfo/" )) {
+			$commandtime = "cp ".$destination . "usr/share/zoneinfo/".$config['system']['timezone']." ".$destination."etc/localtime";
+			mwexec ($commandtime);
+		}
+	}
+	else {
+		// We are attempting to make a thin jail
+		if ( !is_dir( $config['thebrig']['basejail']['folder'] ) )
+			exec( "mkdir -p " . $config['thebrig']['basejail']['folder'] );
+		
+		// these are needed for slim jails
+		$dir_list = array ( "bin" , "boot" , "lib", "libexec", "sbin" , "usr/bin" , "usr/include" , "usr/lib" , "usr/libexec" , "usr/sbin", "usr/src" , "usr/share");
+		if ( $myarch == "amd64")
+			$dir_list[] = "usr/lib32";
+		
+		$base_switches = "";
+		$slim_switches = "";
+		foreach ( $dir_list as $dir ){
+			$base_switches = $base_switches . "--include='./" . $dir . "/*' ";
+			$slim_switches = $slim_switches . "--exclude='./" . $dir . "/*' ";
+		}
+		if ( func_num_args() === 3 ){
+			$file_list = func_get_arg(2);
+			foreach ( $file_list as $file ) {
+				// Extract the desired tarball to the basejail.
+				$commandextract = "tar " . $base_switches . " --unlink --keep-newer-files -xBpf " . $config['thebrig']['rootfolder'] . "work/" . $file . " -C " . $config['thebrig']['basejail']['folder'];
+				mwexec( $commandextract );
+				// Extract the tarball to thin jail
+				$commandextract = "tar " . $slim_switches . " --unlink --keep-newer-files -xBpf " . $config['thebrig']['rootfolder'] . "work/" . $file . " -C " . $destination;
+				mwexec( $commandextract );
+			}
+				
+		}
+		else{
+			// We are extracting from a buildworld
+			$commandextract = "tar " . $base_switches . " -cf - -C " . $config['thebrig']['template'] . " . | ( cd ". $config['thebrig']['basejail']['folder']. " && tar --unlink --keep-newer-files -xBpf -)";
+			mwexec( $commandextract );
+			$commandextract = "tar " . $slim_switches . " -cf - -C " . $config['thebrig']['template'] . " . | ( cd " . $destination . " && tar --unlink --keep-newer-files -xBpf -)";
+			mwexec( $commandextract );
+		}
+		// Move the timezone info
+		if ( is_dir ( $config['thebrig']['basejail']['folder'] . "usr/share/zoneinfo/" )) {
+			$commandtime = "cp ".$config['thebrig']['basejail']['folder'] . "usr/share/zoneinfo/".$config['system']['timezone']." ".$destination."etc/localtime";
+			mwexec ($commandtime);
+		}
+		
+		// Create the necessary symlinks so the basejail's binaries can be accessed
+		foreach ( $dir_list as $dir ) {
+			exec ( "ln -s /basejail/" . $dir . " " . $destination . $dir );
+		}
+		// create the mountpoint for the basejail within the thin jail
+		exec ("mkdir -p " . $destination . "basejail/") ;
+		
+		// ugly perl hack. Some applications require perl to be at /usr/bin/perl. So, we accomodate within the basejail.
+		if ( ! is_dir( $config['thebrig']['basejail']['folder'] . "usr/bin/" )){
+			exec ( "ln -s /usr/local/bin/perl " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl" );
+			exec ( "ln -s /usr/local/bin/perl5 " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl5" );
+		}
+		
+	}
+	
+	
+}
 
 
 // Function name: 	thebrig_radio_list
@@ -410,10 +498,10 @@ foreach ($testarray as $out_jail ) {
 		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n");
 		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
 		$handle1 = fopen($fstabfile, "w");
-		foreach ($out_jail['auxparam'] as $fstab) {
-		fwrite ($handle1, $fstab."\n"); } 
+		foreach ($out_jail['auxparam'] as $fstab) {	fwrite ($handle1, $fstab."\n"); } 
+		if ( $out_jail['type'] === 'slim') { fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); }
 		fclose($handle1);
-		//fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
+		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
 		If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
 		If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
 		If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}

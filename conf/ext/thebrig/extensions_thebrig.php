@@ -29,83 +29,8 @@ $pconfig['sethostname'] = isset($config['thebrig']['sethostname']);
 $pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
 $pconfig['systenv'] = isset($config['thebrig']['systenv']); 
 //
-if (isset($_POST['export']) && $_POST['export']) {
-	$options = array(
-		XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
-		XML_SERIALIZER_OPTION_INDENT           => "\t",
-		XML_SERIALIZER_OPTION_LINEBREAKS       => "\n",
-		XML_SERIALIZER_OPTION_XML_ENCODING     => "UTF-8",
-		XML_SERIALIZER_OPTION_ROOT_NAME        => get_product_name(),
-		XML_SERIALIZER_OPTION_ROOT_ATTRIBS     => array("version" => get_product_version(), "revision" => get_product_revision()),
-		XML_SERIALIZER_OPTION_DEFAULT_TAG      => "content",
-		XML_SERIALIZER_OPTION_MODE             => XML_SERIALIZER_MODE_DEFAULT,
-		XML_SERIALIZER_OPTION_IGNORE_FALSE     => true,
-		XML_SERIALIZER_OPTION_CONDENSE_BOOLS   => true,
-	);
 
-	$serializer = new XML_Serializer($options);
-	$status = $serializer->serialize($config['thebrig']['content']);
-
-	if (@PEAR::isError($status)) {
-		$errormsg = $status->getMessage();
-	} else {
-		$ts = date("YmdHis");
-		$fn = "thebrig-{$config['system']['hostname']}.{$config['system']['domain']}-{$ts}.jails";
-		$data = $serializer->getSerializedData();
-		$fs = strlen($data);
-
-		header("Content-Type: application/octet-stream");
-		header("Content-Disposition: attachment; filename={$fn}");
-		header("Content-Length: {$fs}");
-		header("Pragma: hack");
-		echo $data;
-
-		exit;
-	}
-} else if (isset($_POST['import']) && $_POST['import']) {
-	if (is_uploaded_file($_FILES['jailsfile']['tmp_name'])) {
-		$options = array(
-			XML_UNSERIALIZER_OPTION_COMPLEXTYPE => 'array',
-			XML_UNSERIALIZER_OPTION_ATTRIBUTES_PARSE => true,
-			XML_UNSERIALIZER_OPTION_FORCE_ENUM  => $listtags,
-		);
-
-		$unserializer = new XML_Unserializer($options);
-		$status = $unserializer->unserialize($_FILES['jailsfile']['tmp_name'], true);
-
-		if (@PEAR::isError($status)) {
-			$errormsg = $status->getMessage();
-		} else {
-			// Take care array already exists.
-			if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content']))
-				$config['thebrig']['content'] = array();
-
-			$data = $unserializer->getUnserializedData();
-
-			// Import jails.
-			foreach ($data['content'] as $jail) {
-				// Check if jail already exists.
-				$index = array_search_ex($jail['uuid'], $config['thebrig']['content'], "uuid");
-				if (false !== $index) {
-					// Create new uuid and mark jail as duplicate (modify description).
-					$content['uuid'] = uuid();
-					$content['desc'] = gettext("*** Imported duplicate ***") . " {$jail['desc']}";
-				}
-				$config['thebrig']['content'][] = $jail;
-
-				updatenotify_set("thebrig", UPDATENOTIFY_MODE_NEW, $jail['uuid']);
-			}
-
-			write_config();
-
-			header("Location: extensions_thebrig.php");
-			exit;
-		}
-	} else {
-		$errormsg = sprintf("%s %s", gettext("Failed to upload file."),
-			$g_file_upload_error[$_FILES['jailsfile']['error']]);
-	}
-} else if ($_POST) {
+if ($_POST) {
 	// insert into pconfig changes
 
 
@@ -161,10 +86,6 @@ function thebrig_process_updatenotification($mode, $data) {
 				$jail2add = $config['thebrig']['content'][$cnid];
 				// I have these here because the tarballs take some time to get unpacked
 				$commandresolv = "cp /etc/resolv.conf " . $jail2add['jailpath'] . "etc/";
-				if ( is_dir ( $jail2add['jailpath'] . "usr/share/zoneinfo/" )) {
-					$commandtime = "cp ".$jail2add['jailpath']."usr/share/zoneinfo/".$config['system']['timezone']." ".$jail2add['jailpath']."etc/localtime";
-					mwexec ($commandtime);
-				}
 				mwexec ($commandresolv);
 			}
 			// I have these commands here because it will take some time to untar the jail files
@@ -184,9 +105,14 @@ function thebrig_process_updatenotification($mode, $data) {
 			if (false !== $cnid) {
 				$timestamp = date("Y-m-d_H:i:s");
 				$jail2delete = $config['thebrig']['content'][$cnid];
+				mwexec ( "/etc/rc.d/jail stop " . $jail2delete['jailname']);
 				mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
+				mwexec ( "umount -a -F /etc/fstab." .  $jail2delete['jailname']);
+				if ( $jail2delete['devfs_enable'] == true )
+					mwexec ( "umount " . $jail2delete['jailpath'] . "dev");
 				mwexec("chflags -R noschg {$jail2delete['jailpath']}");
 				mwexec("rm -rf {$jail2delete['jailpath']}");
+				mwexec( "rm /etc/fstab." . $jail2delete['jailname']);
 				unset($config['thebrig']['content'][$cnid]);
 				write_config();
 			}
@@ -219,7 +145,7 @@ var auto_refresh = setInterval(
 				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
 			</li>
 			<li class="tabinact">
-				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
+				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
 		</ul>
 	</td></tr>
@@ -315,25 +241,7 @@ var auto_refresh = setInterval(
 							<input name="systenv" type="checkbox" id="systenv" value="yes" <?php if (!empty($pconfig['systenv'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_IPC?>
 						</td>
 					</tr>
-					<tr>
-						<td width="22%" valign="top" class="vncell">Download&nbsp;</td>
-						<td width="78%" class="vtable">
-							<?=gettext("Download jails config.");?><br />
-							<div id="submit">
-								<input name="export" type="submit" class="formbtn" value="<?=gettext("Export");?>" /><br />
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td width="22%" valign="top" class="vncell">Upload&nbsp;</td>
-						<td width="78%" class="vtable">
-							<?=gettext("Import jails config.");?><br />
-							<div id="submit">
-								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="40" accept="*.jails" />&nbsp;
-								<input name="import" type="submit" class="formbtn" id="import" value="<?=gettext("Import");?>" /><br />
-							</div>
-						</td>
-					</tr>
+
 				</table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />

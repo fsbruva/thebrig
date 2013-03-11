@@ -11,9 +11,23 @@ if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) {
 
 // attempt to extract the rootfolder from the global config
 $pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
+$pconfig['template'] = $config['thebrig']['template'] ;
+$pconfig['basejail'] = $config['thebrig']['basejail']['folder'] ;
 
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
+
+// This determines if there are any thin jails (type = slim), which means we shouldn't
+// relocate the basejail. We also need to check and make sure no jails currently live 
+// within thebrig's root folder. 
+$base_ro = false;
+$brig_jails = false;
+foreach ( $config['thebrig']['content'] as $jail ){
+	if ( $jail['type'] === 'slim' )
+		$base_ro = true;
+	if ( preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
+		$brig_jails=true;
+}
 
 // This checks to see if the XML config has no rootfolder for thebrig, but does have the remnants of a 
 // successful installation. The original installation script creates the /tmp/thebrig.tmp file, and puts the 
@@ -23,8 +37,9 @@ if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebri
 	// This next line extracts the root folder from the install artifact (trimed to remove trailing CR/LF)
 	$config['thebrig']['rootfolder'] = rtrim( file_get_contents('/tmp/thebrig.tmp') );
 	// Ensure there is a / after the folder name
-	$config['thebrig']['rootfolder'] = rtrim ( $config['thebrig']['rootfolder'], '/') . '/';
-	
+	if ( $pconfig['jailpath'][strlen($pconfig['jailpath'])-1] != "/")  {
+		$pconfig['jailpath'] = $pconfig['jailpath'] . "/";
+	}
 	
 	// The next line propagates the the page's config data (the text box) with the extracted value
 	$pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
@@ -48,14 +63,20 @@ else if ( !isset( $config['thebrig']['rootfolder']) || !is_dir ( $config['thebri
 	$input_errors[] = _THEBRIG_NOT_INSTALLED;
 } // end of elseif
 
+// Look in the existing folder to see if there are files we can't (or don't want to) move.
+$base_search = glob( $config['thebrig']['rootfolder'] . "basejail/bin/*" );
+$template_search = glob ( $config['thebrig']['rootfolder'] . "template/bin/*" );
+
 // User has clicked a button
 if ($_POST) {
 	unset($input_errors);
 	$pconfig = $_POST;
 	 
-	 // Convert after filechoicer
-	$pconfig['rootfolder'] = rtrim( $pconfig['rootfolder'] , '/' ) . '/';
-	
+	// Complete all root folder error checking.
+	// Convert root folder after filechoicer
+	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
+		$pconfig['rootfolder'] = $pconfig['rootfolder'] . "/";
+	}
 	
 	// This first check to make sure that the supplied folder actually exists. If it does not
 	// then the user should be alerted. No changes will be made.
@@ -73,19 +94,34 @@ if ($_POST) {
 	}
 	
 	// The folder supplied by the user is a valid folder, so we can continue our input validations
-	else {
-		// brig_search is an array containing all the files within the root/conf that start with fstab.
-		$brig_search = glob( $config['thebrig']['rootfolder'] . "conf/fstab." . "*" );
-		// If the user has selected a new installation folder, then we also must check that there are no existing 
-		// jails living there. This is a two step process. The first step is to check and see how many elements (files)
-		// are contained in brig_search. This is effective because the presence of any fstab files implies a bootable jail.
-		// The second step is to see if a basejail has been created. This jail is likely to be mounted read-only, but since
-		// the developer didn't want to mess with moving files that have the immutable flag set, he chose to dis-allow it.
-		if ( ( $pconfig['rootfolder'] != $config['thebrig']['rootfolder'] ) && 
-				( count( $brig_search ) > 0 ) || is_dir ($config['thebrig']['rootfolder'] . "basejail" ) )   {
+	elseif( ( $pconfig['rootfolder'] !== $config['thebrig']['rootfolder'] ) && 				
+				(( count( $base_search ) > 0 ) || ( count( $template_search ) > 0) || $brig_jails )  ) {
+		// If the user has selected a new installation folder, then we also must check that there are no existing
+		// jails living there. This is a multiple step process. We need to see if there is anything in the basejail or in the
+		// template jail, or if there are any jails defined that have their jailpath within thebrig's root. Since
+		// the developers didn't want to mess with moving files that have the immutable flag set, they chose to dis-allow it.
 			$input_errors[] = _THEBRIG_JAIL_ALREADY ;
 		}
+	else {
+		// If they haven't set a path for the basejail, then we need to assume one
+		if ( ! isset($pconfig['basejail']) || empty($pconfig['basejail']) ) 
+			$pconfig['basejail']=$pconfig['rootfolder'] . "basejail" ;
+		
+		// Convert basejail to have trailing /
+		if ( $pconfig['basejail'][strlen($pconfig['basejail'])-1] != "/")  
+			$pconfig['basejail'] = $pconfig['basejail'] . "/";
+		
+		// If they haven't set a template path, then we need to assume one
+		if ( ! isset($pconfig['template']) || empty($pconfig['template']) ) 
+			$pconfig['template']=$pconfig['rootfolder'] . "template" ;
+				
+		// Convert template location to have trailing /
+		if ( $pconfig['template'][strlen($pconfig['template'])-1] != "/")  
+			$pconfig['template'] = $pconfig['template'] . "/";
+		
 	}
+	
+	
 	
 	// There are no input errors detected.
 	if ( !$input_errors ){
@@ -104,6 +140,8 @@ if ($_POST) {
 			// Also add startup command when thebrig completly installed
 			thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] );
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
+			$config['thebrig']['template'] = $pconfig['template'];
+			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
 			$config['thebrig']['version'] = 1;
 			write_config(); // Write the config to disk
 		}
@@ -139,7 +177,7 @@ function disable_buttons() {
 				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
 			</li>
 			<li class="tabact">
-				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
+				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
 			
 		</ul>
@@ -149,7 +187,7 @@ function disable_buttons() {
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
 			<li class="tabinact">
-				<a href="extensions_thebrig_tools.php"><span><?=gettext("Tools");?></span></a>
+				<a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a>
 			</li>
 		</ul>
 	</td></tr>
@@ -157,32 +195,18 @@ function disable_buttons() {
 	<tr><td class="tabcont">
 		<form action="extensions_thebrig_config.php" method="post" name="iform" id="iform">
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
-		<tr><td colspan="2" valign="top" class="optsect_t">
-			<table border="0" cellspacing="0" cellpadding="0" width="100%">
-				<tr><td class="optsect_s"><strong><?=_THEBRIG_SETTINGS_BASIC; ?></strong></td>
-					<td align="right" class="optsect_s">
-					</td>
-				</tr>
-			</table>
-		</td></tr>
-
-		<!-- The first td of this row is the box in the top row, far left.-->
-		<tr><td width="22%" valign="top" class="vncellreq"><?=_THEBRIG_ROOT; ?></td>
-		 <!-- The next td is the larger box to the right, which contains the text box and info -->
-		<td width="78%" class="vtable">
-			<input name="rootfolder" type="text" class="formfld" id="rootfolder" size="50" value="<?=htmlspecialchars($pconfig['rootfolder']);?>"><br/>
-			<span class="vexpl"><?=_THEBRIG_ROOT_DESC ;?></span>
-		</td></tr>  <?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
-						
-
-		<!--  These next two rows merely output some space between the upper and lower tables -->
-		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
-		<tr><td colspan="2" valign="top" class="tblnk"></td></tr>
-			
-		<!-- This is the table to allow the user to uninstall TheBrig from N4F -->
-		<tr><td colspan="2" valign="top" class="optsect_t">
-			<div class="optsect_s"><strong><?=_THEBRIG_CLEANUP;?></strong></div></td></tr>
-			
+		<?php html_titleline(gettext(_THEBRIG_SETTINGS_BASIC));?>
+		<?php html_inputbox("rootfolder", gettext(_THEBRIG_ROOT), $pconfig['rootfolder'], gettext(_THEBRIG_ROOT_DESC), true, 50);?>
+	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
+		<?php html_separator();?>		
+		<?php html_titleline(gettext("Advanced Jail Locations"));?>
+		<?php html_inputbox("basejail", gettext(_THEBRIG_BASE), $pconfig['basejail'], gettext(_THEBRIG_BASE_DESC), false, 50 , $base_ro );?>
+	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
+		<?php html_inputbox("template", gettext("Template Location"), $pconfig['template'], gettext("Sets the alternate location for the buildworld jail template. Default is in a folder named template within TheBrig's installation folder."), false, 50);?>
+	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
+		<?php html_separator();?>
+		<?php html_titleline(gettext(_THEBRIG_CLEANUP));?>
+		
 		<!-- This is the row beneath the title -->
 		<tr><td width="22%" valign="top" class="vncellreq">&nbsp;</td>
 			<td width="78%" class="vtable">

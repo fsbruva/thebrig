@@ -75,7 +75,7 @@ function genhtmltitle($title) {
 					foreach ($jails as $n_jail):
 							$file_id = "/var/run/jail_{$n_jail['jailname']}.id";
 							If(is_file($file_id)) {
-								$jail_id = rtrim( file_get_contents($file_id) );
+								$jail_id = rtrim(file_get_contents($file_id));
 								$jail_ls = exec ("/usr/sbin/jls -j {$jail_id}");
 								$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls);
 								$item = explode (" ",$jail_ls1);
