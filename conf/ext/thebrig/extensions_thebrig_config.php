@@ -22,12 +22,15 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
 // within thebrig's root folder. 
 $base_ro = false;
 $brig_jails = false;
-foreach ( $config['thebrig']['content'] as $jail ){
-	if ( $jail['type'] === 'slim' )
-		$base_ro = true;
-	if ( preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
-		$brig_jails=true;
+if ( !isset($pconfig['remove'] ) ) {
+	foreach ( $config['thebrig']['content'] as $jail ){
+		if ( $jail['type'] === 'slim' )
+			$base_ro = true;
+		if ( preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
+			$brig_jails=true;
+	}
 }
+
 
 // This checks to see if the XML config has no rootfolder for thebrig, but does have the remnants of a 
 // successful installation. The original installation script creates the /tmp/thebrig.tmp file, and puts the 
@@ -37,8 +40,8 @@ if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebri
 	// This next line extracts the root folder from the install artifact (trimed to remove trailing CR/LF)
 	$config['thebrig']['rootfolder'] = rtrim( file_get_contents('/tmp/thebrig.tmp') );
 	// Ensure there is a / after the folder name
-	if ( $pconfig['jailpath'][strlen($pconfig['jailpath'])-1] != "/")  {
-		$pconfig['jailpath'] = $pconfig['jailpath'] . "/";
+	if ( $config['thebrig']['rootfolder'][strlen($config['thebrig']['rootfolder'])-1] != "/")  {
+		$config['thebrig']['rootfolder'] = $config['thebrig']['rootfolder'] . "/";
 	}
 	
 	// The next line propagates the the page's config data (the text box) with the extracted value
