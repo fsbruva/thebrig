@@ -8,6 +8,12 @@ conf/jail_start
 conf/bin/ftp
 conf/ports
 conf/ports/*
+conf/sbin
+conf/sbin/*
+conf/libexec
+conf/libexec/*
+conf/db
+conf/db/*
 
 #################
 ## Eclipse
