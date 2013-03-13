@@ -6,6 +6,8 @@
 !conf/*
 conf/jail_start
 conf/bin/ftp
+conf/ports
+conf/ports/*
 
 #################
 ## Eclipse
