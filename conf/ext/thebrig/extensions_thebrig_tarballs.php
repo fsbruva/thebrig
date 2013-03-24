@@ -43,7 +43,7 @@ if ($_POST) {
 		// Specifies the FTP server to contact
 		$ftp_server = "ftp.freebsd.org" ;
 		// Specifies the folder to access
-		$ftp_path = "/pub/FreeBSD/releases/$arch/" ;
+		$ftp_path = "/pub/FreeBSD/releases/{$arch}/" ;
 		// Method is used from: http://camposer-techie.blogspot.com/2010/08/ejecutando-comandos-sobre-un-programa.html
 		// Creates an array of streams to deal with stdin, stdout and error file.
 		$descriptorspec = array(
