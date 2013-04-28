@@ -43,7 +43,7 @@ if ($_POST) {
 		// Specifies the FTP server to contact
 		$ftp_server = "ftp.freebsd.org" ;
 		// Specifies the folder to access
-		$ftp_path = "/pub/FreeBSD/releases/$arch/" ;
+		$ftp_path = "/pub/FreeBSD/releases/".$arch."/" ;
 		// Method is used from: http://camposer-techie.blogspot.com/2010/08/ejecutando-comandos-sobre-un-programa.html
 		// Creates an array of streams to deal with stdin, stdout and error file.
 		$descriptorspec = array(
@@ -63,7 +63,7 @@ if ($_POST) {
 		$read = array( $pipes[1] ) ;    // renames the pipe
 		$write = null ;
 		$except = null ;
-		$readTimeout = 5 ;
+		$readTimeout = 15 ;
 		
 		//  If the connection cannot be established, then $ftp_proc will be false, and not a resource
 		//  However, this check is mostly uneeded, even if the ftp binary doesn't exist.
@@ -102,7 +102,7 @@ if ($_POST) {
 			} // end of while loop
 			// Now we need to get data about release candidates. We do this by moving into the arch directory,
 			// and listing the contents. 
-			fwrite( $pipes[0] , "cd $arch\nls\n" );
+			fwrite( $pipes[0] , "cd {$arch}\nls\n" );
 			// We then need the output to be actually written out of the buffer (send the command)
 			fflush( $pipes[0] );
 			// We then tell PHP that we would like to wait for the change in status of the read pipe (that is, there is data to be
