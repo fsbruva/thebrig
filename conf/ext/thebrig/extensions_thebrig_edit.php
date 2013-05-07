@@ -52,6 +52,10 @@ array_sort_key($config['thebrig']['content'], "jailno");
 // This identifies the jail section of the XML, but does so by reference.
 $a_jail = &$config['thebrig']['content'];
 
+$a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }
+
+//input_errors[] = implode ( " | " , array_keys ( $a_interface ));
+//$input_errors[] = implode( " | " , $a_interface);
 // This checks that the $uuid variable is set, and that the 
 // attempt to determine the index of the jail config that has the same 
 // uuid as the page was entered with is not empty
@@ -72,7 +76,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['devfsrules'] = $a_jail[$cnid]['devfsrules'];
 	$pconfig['auxparam'] = "";
 	if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam']))
-	$pconfig['auxparam'] = implode("\n", $a_jail[$cnid]['auxparam']);
+		$pconfig['auxparam'] = implode("\n", $a_jail[$cnid]['auxparam']);
 	$pconfig['exec_start'] = $a_jail[$cnid]['exec_start'];
 	$pconfig['afterstart0'] = $a_jail[$cnid]['afterstart0'];
 	$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
@@ -90,6 +94,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
 	$pconfig['fib'] = $a_jail[$cnid]['fib'];
+	$pconfig['ports'] = ( isset($a_jail[$cnid]['ports']) ) ? $a_jail[$cnid]['ports'] : false ;
 	// By default, when editing an existing jail, path and name will be read only.
 	$path_ro = true;
 	$name_ro = true;
@@ -136,6 +141,7 @@ else {
 	$pconfig['force_blocking'] = "";
 	$pconfig['zfs_datasets'] = "";
 	$pconfig['fib'] = "";
+	$pconfig['ports']=false;
 	$path_ro = false;
 	$name_ro = false;
 }
@@ -150,9 +156,7 @@ if ($_POST) {
 	}
 	
 	$pconfig = $_POST;
-
-	$files_selected = $pconfig['formFiles'];
-
+	$files_selected = $_POST['formFiles'];
 	// Input validation.
 	$reqdfields = explode(" ", "jailno jailname ipaddr");
 	$reqdfieldsn = array(gettext("Jail Number"), gettext("Jail Name"), gettext("Jail IP Address") );
@@ -201,12 +205,7 @@ if ($_POST) {
 	if ( array_search ($pconfig['jailpath'], $thebrig_dirs ) !== FALSE)
 		$input_errors[] = "The specified jail location is reserved. Please choose another.";
 		
-	$pconfig['base_ver']= "Unknown";
-	$pconfig['lib_ver'] = "Unknown";
-	$pconfig['src_ver'] = "Unknown";
-	$pconfig['doc_ver'] = "Unknown";
-	
-		// Check to make sure there are not any duplicate files selected
+			// Check to make sure there are not any duplicate files selected
 	if ( count( $files_selected) > 0 ){
 		$base_count = 0;
 		$lib_count = 0;
@@ -231,10 +230,16 @@ if ($_POST) {
 				$src_count++;
 				$pconfig['src_ver'] = $file_split[2] . "-" . $file_split[3] ;
 			}
+			else {
+				$pconfig['base_ver']= "Unknown";
+				$pconfig['lib_ver'] = "Unknown";
+				$pconfig['src_ver'] = "Unknown";
+				$pconfig['doc_ver'] = "Unknown";
+			}
 		} // End of foreach
 		// Need to deal with keeping track of the lib version as the same as the base version
 		if ( $myarch != "amd64" ){
-			$lib_ver = $base_ver ;
+			$pconfig['lib_ver'] = $pconfig['base_ver'] ;
 		}
 	} // end of if ( files selected )
 		
@@ -341,6 +346,7 @@ if ($_POST) {
 		$jail['force_blocking'] = $pconfig['force_blocking'];
 		$jail['zfs_datasets'] = $pconfig['zfs_datasets'];
 		$jail['fib'] = $pconfig['fib'];
+		$jail['ports'] = $pconfig['ports'];
 		
 		// Populate the jail. The simplest case is a full jail using tarballs.
 		if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 && strcmp ( $jail['type'], "full") == 0)
@@ -403,13 +409,16 @@ $(document).ready(function () {
 });
 
 function type_change(){
-	switch (document.iform.type.selectedIndex) {
+	var x=document.iform.jail_type.selectedIndex;
+	var y=document.iform.jail_type.options;
+	document.iform.type.value = y[x].value;
+	switch (x) {
 	case 0:
 		document.iform.jail_mount.checked=true;
-		document.iform.jail_mount.onclick= function () {event.preventDefault();}
+		document.iform.jail_mount.onclick= function () {event.preventDefault();};
 		break;
 	case 1:
-		document.iform.jail_mount.onclick= function () {"";}
+		document.iform.jail_mount.onclick= function() {"";};
 		break;
 	}
 }
@@ -442,12 +451,24 @@ function source_change() {
 	</td></tr>
 		<td class="tabcont">
       <form action="extensions_thebrig_edit.php" method="post" name="iform" id="iform">
+      <input name="jailpath" type="hidden" value="<?=$pconfig['jailpath'];?>" />
+					<input name="base_ver" type="hidden" value="<?=$pconfig['base_ver'];?>" />
+					<input name="lib_ver" type="hidden" value="<?=$pconfig['lib_ver'];?>" />
+					<input name="doc_ver" type="hidden" value="<?=$pconfig['doc_ver'];?>" />
+					<input name="src_ver" type="hidden" value="<?=$pconfig['src_ver'];?>" />
+					<input name="image" type="hidden" value="<?=$pconfig['image'];?>" />
+					<input name="image_type" type="hidden" value="<?=$pconfig['image_type'];?>" />
+					<input name="attach_params" type="hidden" value="<?=$pconfig['attach_params'];?>" />
+					<input name="force_blocking" type="hidden" value="<?=$pconfig['force_blocking'];?>" />
+					<input name="zfs_datasets" type="hidden" value="<?=$pconfig['zfs_datasets'];?>" />
+					<input name="fib" type="hidden" value="<?=$pconfig['fib'];?>" />
+					<input name="attach_blocking" type="hidden" value="<?=$pconfig['attach_blocking'];?>" />
       	<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
         <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			<?php html_titleline(gettext("Jail parameters"));?>
         	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
 			<?php html_inputbox("jailname", gettext("Jail name"), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
-			<?php html_combobox("type", gettext("Jail Type"), $pconfig['type'], array('slim' =>'Slim','full'=> 'Full'), gettext("Choose jail type"), true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
+			<?php html_combobox("jail_type", gettext("Jail Type"), $pconfig['type'], array('slim' =>'Slim','full'=> 'Full'), gettext("Choose jail type"), true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
@@ -455,7 +476,7 @@ function source_change() {
 			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Mount"));?>
- 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("enable")," " ," ","event.preventDefault()");?>
+ 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("Enable the jail to automount its fstab file. <b>This is not optional for thin jails.</b> ")," " ," ", "event.preventDefault()");?>
 			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use to mount the device file system inside the jail. <br><b>This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.</b>"), "", false);?>
 			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
@@ -497,6 +518,7 @@ function source_change() {
 					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" />
 					<input name="Cancel" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
+					<input name="type" type="hidden" value="<?=$pconfig['type'];?>" />
 				</div>
 				<?php include("formend.inc");?>
 			</form>
