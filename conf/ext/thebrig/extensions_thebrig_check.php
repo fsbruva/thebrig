@@ -96,7 +96,7 @@ function genhtmltitle($title) {
 							?>
 							<tr><td width="7%" valign="top" class="vncellreq"><center><?php print $n_jail['jailname'];?></center></td>
 								<td width="15%" valign="top" class="vncellreq">
-								<?php if (!is_dir( (($n_jail['jailpath'] ."var/run")))) {echo '<img src="'.'status_disabled.png'.'">';} 
+								<?php if (!is_dir( $n_jail['jailpath'] ."var/run")) {echo '<img src="'.'status_disabled.png'.'">';} 
 								else {
 								echo '<img src="'.'status_enabled.png'.'">';
 								if (is_dir( $n_jail['jailpath'] . "usr/ports/Mk")) {echo " + ports ";} else {echo "";}
