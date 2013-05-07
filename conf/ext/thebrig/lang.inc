@@ -1,6 +1,6 @@
 <?php
 	define(_THEBRIG_VERSION_NBR, 'v0.5');
-
+	
 	if ($config['system']['language'] == 'en_US') { }
 	
 		define(_THEBRIG_TITLE, "TheBrig");
@@ -9,6 +9,12 @@
 		define(_THEBRIG_INSTALL, "Install the jail tarball");
 		define(_THEBRIG_DONT_CHANGE, "Keep existing - don't change");
 		define(_THEBRIG_MAINTENANCE, "Maintenance");
+		define(_THEBRIG_UPDATES , "Updates");
+		define(_THEBRIG_PORTS, "Central Ports");
+		define(_THEBRIG_PORT_CRON, "Enable 2:47 a.m. daily cron fetch of port tree.");
+		define(_THEBRIG_UPDATE_CRON, "Enable 1:28 a.m. daily cron fetch of updates for all jails.");
+		define(_THEBRIG_UPDATER , "FreeBSD Update");
+		define(_THEBRIG_MANAGER , "TheBrig Updater");
 		define(_THEBRIG_JAIL, "Jail" );
 		define(_THEBRIG_EDIT, "Edit" );
 		define(_THEBRIG_ADD, "Add" );
