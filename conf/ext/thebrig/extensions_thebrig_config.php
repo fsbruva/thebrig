@@ -22,7 +22,7 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
 // within thebrig's root folder. 
 $base_ro = false;
 $brig_jails = false;
-if ( !isset($pconfig['remove'] ) ) {
+if ( !isset($_POST['remove'] ) && is_array(  $config['thebrig']['content'] ) ) {
 	foreach ( $config['thebrig']['content'] as $jail ){
 		if ( $jail['type'] === 'slim' )
 			$base_ro = true;
@@ -75,6 +75,13 @@ if ($_POST) {
 	unset($input_errors);
 	$pconfig = $_POST;
 	 
+	if ( $pconfig['remove'] ) {
+		// we want to remove thebrig
+		thebrig_unregister();
+		// Browse back to the main page
+		header("Location: /");
+		exit;
+	}
 	// Complete all root folder error checking.
 	// Convert root folder after filechoicer
 	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
@@ -97,7 +104,7 @@ if ($_POST) {
 	}
 	
 	// The folder supplied by the user is a valid folder, so we can continue our input validations
-	elseif( ( $pconfig['rootfolder'] !== $config['thebrig']['rootfolder'] ) && 				
+	elseif( ( strcmp ( realpath($old_location) , realpath($new_location) ) != 0 ) && 				
 				(( count( $base_search ) > 0 ) || ( count( $template_search ) > 0) || $brig_jails )  ) {
 		// If the user has selected a new installation folder, then we also must check that there are no existing
 		// jails living there. This is a multiple step process. We need to see if there is anything in the basejail or in the
@@ -128,15 +135,6 @@ if ($_POST) {
 	
 	// There are no input errors detected.
 	if ( !$input_errors ){
-		// The user wants to unregister the extension
-		if ( $pconfig['remove'] ) {
-			// we want to remove thebrig
-			thebrig_unregister();
-			// Browse back to the main page
-			header("Location: /");
-			exit;
-		}
-		else {
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 			// a jail at the old location. Call thebrig_populate, which will move all the web stuff and create the 
 			// directory tree
@@ -147,7 +145,7 @@ if ($_POST) {
 			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
 			$config['thebrig']['version'] = 1;
 			write_config(); // Write the config to disk
-		}
+		
 		// Whatever we did, we did it successfully
 		$retval = 0;
 		$savemsg = get_std_save_message($retval);
@@ -223,7 +221,8 @@ function disable_buttons() {
 			 	<input name="Submit" type="submit" class="formbtn" value="<?=_THEBRIG_SAVE;?>" onClick="disable_buttons();">
 			</td>
 		</tr>
-	</table><?php include("formend.inc");?>
+	</table>
+	<?php include("formend.inc");?>
 </form>
 </td></tr>
 </table>
