@@ -173,6 +173,218 @@ function thebrig_tarball_list ($contains , $exclude='') {
 	return $file_list ;
 }
 
+// Function name: 	thebrig_portsnap
+// Inputs: 			dest_dir		array containing the location we want the updates to be applied to 
+//					work_dir		array containing the location we want to use for temp downloads
+//					conf_file		array containing the full path to the freebsd-update conf file
+//					action			string to indicate the operation we should carry out. 
+// Outputs: 		success			integer value, 0 indicating success, 1 indicating there was some sort of problem
+//									with the preparations, 2 indicating there was some sort of problem cleaning up.
+// Description:		This function takes the necessary steps to prepare the Nas4Free host to
+function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
+	global $config;
+	// First run the update tasks to make those binaries available to Nas4Free
+	if ( thebrig_update_config ( true ) == true ){
+		return 1; // If update_config returns anything other than a 0, there was a problem
+	}
+	else {
+		$k = 0;
+		for ( $k ; $k < count ($dest_dir ); $k++ ){
+
+			$command_prefix = "/bin/sh " . $config['thebrig']['rootfolder'] . "conf/sbin/freebsd-update -d " . $work_dir[$k] . " -f " . $conf_file[$k] . " -b " . $dest_dir[$k];
+			// The prep operation was successful
+			if ( !is_dir($work_dir[$k]))
+				exec("mkdir -p " . $work_dir[$k] );
+
+			switch ( $action ){
+				case "Fetch":
+					// Fetch only
+					$command_fetch= $command_prefix . " fetch";
+					exec($command_fetch);
+					break;
+				case "Install":
+					// Update
+					$command_update= $command_prefix . " install";
+					exec($command_update);
+					break;
+				case "Fetch & Install":
+					// Install --> fetch & extract
+					$command_fetch= $command_prefix . " fetch install";
+					mwexec($command_fetch );
+					break;
+				case "Cron":
+					// Cron
+					$command_cron= $command_prefix . " cron";
+					mwexec($command_cron);
+					break;
+
+			} // end of switch
+
+		} // end of for loop
+		// Cleanup Nas4Free and return it to its previous state
+		if ( thebrig_update_config ( false ) == true ){
+			return 2; // if the cleanup returns anything other than 0, there was a problem.
+		}
+	}
+	return 0;
+}
+
+// Function name: 	thebrig_portsnap
+// Inputs: 			ports_dir		string containing the location we want the ports tree to be stored
+//					work_dir		string containing the location we want portsnap to use for temp downloads
+//					conf_file		string containing the full path to the portsnap conf file
+//					action			integer to indicate the operation we should carry out. 0 = fetch , 1 = update  2 = install for the first time.				
+// Outputs: 		success			integer value, 0 indicating success, 1 indicating there was some sort of problem
+//									with the preparations, 2 indicating there was some sort of problem cleaning up.
+// Description:		This function takes the necessary steps to prepare the Nas4Free host to
+function thebrig_portsnap ( $ports_dir , $work_dir , $conf_file , $action ) {
+	global $config;
+	// First run the update tasks to make those binaries available to Nas4Free
+	if ( thebrig_update_config ( true ) == true ){
+		return 1; // If update_config returns anything other than a 0, there was a problem
+	}
+	else {
+		$command_prefix = "/bin/sh " . $config['thebrig']['rootfolder'] . "conf/sbin/portsnap -d " . $work_dir . " -f " . $conf_file . " -p " . $ports_dir;
+		// The prep operation was successful
+		if (!is_dir($ports_dir))
+			exec("mkdir -p " . $ports_dir );
+		if ( !is_dir($work_dir))
+			exec("mkdir -p " . $work_dir );
+
+		switch ( $action ){
+			case "Fetch":
+				// Fetch only
+				$command_fetch= $command_prefix . " fetch";
+				exec($command_fetch);
+				break;
+			case "Update":
+				// Update
+				$command_update= $command_prefix . " update";
+				exec($command_update);
+				break;
+			case "Fetch & Install":
+				// Install --> fetch & extract
+				$command_fetch= $command_prefix . " fetch extract";
+				mwexec($command_fetch );
+				break;
+			case "Fetch & Update":
+				// Update --> fetch & update
+				$command_fetch= $command_prefix . " fetch update";
+				mwexec($command_fetch);
+				break;
+			case "Cron":
+				// Cron
+				$command_cron= $command_prefix . " cron";
+				mwexec($command_cron);
+				break;
+				
+		}
+		
+		// Cleanup Nas4Free and return it to its previous state
+		if ( thebrig_update_config ( false ) == true ){
+			return 2; // if the cleanup returns anything other than 0, there was a problem.
+		}
+	}
+	return 0;
+}
+
+
+
+// Function name: 	thebrig_update_config
+// Inputs: 			setup			boolean value, true indicating we are setting up for update operations,
+//									false indicating we are cleaning up from them
+// Outputs: 		success			integer value, 0 indicating success, 1 indicating there was some sort of problem
+//									with the preparations
+// Description:		This function takes the necessary steps to prepare the Nas4Free host to 
+function thebrig_update_config ( $setup ) {
+	global $config;
+	$brig_root = $config['thebrig']['rootfolder'];
+	$bin_list = $config['thebrig']['update']['cmd'];
+	$op_failure = false ;
+	if ( $setup ) {
+		// We want to prepare for portsnap and update operations by putting the files within the respective locations on the 
+		// Nas4Free host. This is necessary because of the way portsnap and freebsd-update has certain paths fully qualified
+		for ( $i = 0; $i <= 8; $i++ ){
+			if ( file_exists ( "/usr/" . $bin_list[$i] ) ){
+				// There is an existing file of the same name (should only be host, but who knows). We should make a backup
+				exec ( "mv /usr/" . $bin_list[$i] . " " . "/usr/" . $bin_list[$i] . ".bak" , $blank, $result );
+				$op_failure |= $result;
+			}
+			// Relocate the necessary files so Nas4Free can use them
+			exec( "cp " . $brig_root . "conf/" . $bin_list[$i] . " " . "/usr/" . $bin_list[$i] , $blank, $result );
+			$op_failure |= $result;
+		} // End of for loop
+	}
+	else {
+		// we want to cleanup after operations, so we need to get rid of the old copies of things, but only those things we messed with
+		for ( $i = 0; $i <= 8; $i++ ){
+			// Get rid of the the files we copied in
+			exec( "rm /usr/" . $bin_list[$i] , $blank, $result );
+			$op_failure |= $result;
+			// If we made backups, we should restore them now
+			if ( file_exists ( "/usr/" . $bin_list[$i] . ".bak") ){
+				// There is an existing file of the same name (should only be host, but who knows). We should make a backup
+				exec ( "mv /usr/" . $bin_list[$i] . ".bak " . "/usr/" . $bin_list[$i] , $blank, $result );
+				$op_failure |= $result;
+			}
+		} // End of for loop
+	}
+	return $op_failure;
+}// end of function
+
+
+// Function name: 	thebrig_update_prep
+// Inputs: 			none
+// Outputs: 		success			integer value, 0 indicating success, 1 if there was a problem copying any of the
+//									files, or 2 if there are no jails configured
+// Description:		This function first checks if any of the files needed by takes the necessary steps to copy the files needed to perform some of the update tasks
+// 					to the /conf location.
+function thebrig_update_prep (  ) {
+	global $config;
+	// Store the list of files that portsnap and freebsd-update need
+	if ( !is_array ( $config['thebrig']['update']['cmd'])){
+		$config['thebrig']['update']['cmd'] = array ( "bin/host", "bin/comm" , "bin/join" , "bin/lam", "bin/look", "bin/bspatch", "bin/openssl" , "libexec/make_index" , "libexec/phttpget" );
+		write_config();
+	}
+	$brig_root = $config['thebrig']['rootfolder'];
+	$base_root = $config['thebrig']['basejail']['folder'];
+	$copy_failure = false ; 
+	// Run through the list of files.
+	foreach ( $config['thebrig']['update']['cmd'] as $file ){
+		// We want to first check to see if we even need to copy anything
+		if ( is_file ( $brig_root . "conf/" . $file ) ) 
+			continue; // Moves us out of the current "for" loop
+		else {
+			// We need to copy the file so Nas4Free has it. 
+			// Before we look for them, we need to make sure we have the appropriate receptacles.
+			if ( !is_dir ( $base_root . "conf/libexec" )) 
+				exec( "mkdir " . $brig_root . "conf/libexec");
+				
+			// See if it's in the base jail
+			if ( is_file ( $base_root . "usr/" . $file ) ) {
+				exec ( "cp " . $base_root . "usr/" . $file . " " . $brig_root . "conf/" . $file , $blank , $result );
+				$copy_failure |= $result;
+				continue; // depart the for loop - we've found the file we needed
+			}
+			// it wasn't found in the basejail - we need to look elsewhere (all other jails)
+			foreach ( $config['thebrig']['content'] as $jail ){
+				if ( is_file ( $jail['jailpath'] . "usr/" . $file ) ) {
+					exec ( "cp " . $jail['jailpath'] . "usr/" . $file . " " . $brig_root . "conf/" . $file , $blank , $result );
+					$copy_failure |= $result;
+					break; // depart the for loop - we've found the file we needed
+				} // end if
+			} // end for each jail	
+			// Check if we were able to copy it to the destination location
+			if ( !is_file ( $brig_root . "conf/" . $file ) ) {
+				// We didn't have it to start, and we searched all jails - something's up. 	
+				return 2;
+			}
+		} // end else (we needed to copy it
+	}
+	return (int)$copy_failure;
+} // end of function
+
+
 
 // Function name: 	thebrig_split_world
 // Inputs: 			destination			string containing the jail's location
@@ -256,16 +468,26 @@ function thebrig_split_world ( $destination , $jail_type ){
 		// create the mountpoint for the basejail within the thin jail
 		exec ("mkdir -p " . $destination . "basejail/") ;
 		
+		// Make backup of existing make file for later
+		if ( file_exists($destination . "etc/periodic.conf"))
+			exec("mv " . $destination . "etc/periodic.conf " . $destination. "etc/periodic.conf.bak");
+		// Use the non-standard periodic file
+		exec ( "cp " . $brig_root . "conf/periodic.conf " . $destination . "etc/");
+		
 		// ugly perl hack. Some applications require perl to be at /usr/bin/perl. So, we accomodate within the basejail.
 		if ( ! is_dir( $config['thebrig']['basejail']['folder'] . "usr/bin/" )){
 			exec ( "ln -s /usr/local/bin/perl " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl" );
 			exec ( "ln -s /usr/local/bin/perl5 " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl5" );
-		}
+		} // end of check for ugly perl hack
 		
-	}
+	} // end of else for all slim jails
 	
-	
-}
+	exec ( "echo 'sendmail_enable=\"NONE\"' >> " . $destination . "etc/rc.conf" );
+	exec ( "echo 'syslogd_flags=\"-ss\"' >> " . $destination . "etc/rc.conf" );
+	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
+	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
+	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
+} // end of function
 
 
 // Function name: 	thebrig_radio_list
@@ -500,6 +722,7 @@ foreach ($testarray as $out_jail ) {
 		$handle1 = fopen($fstabfile, "w");
 		foreach ($out_jail['auxparam'] as $fstab) {	fwrite ($handle1, $fstab."\n"); } 
 		if ( $out_jail['type'] === 'slim') { fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); }
+		if ( isset( $out_jail['ports']) ) { fwrite( $handle1 ,  $config['thebrig']['rootfolder'] . "conf/ports/ " .  $out_jail['jailpath'] . "usr/ports/ nullfs ro 0 0\n"); }
 		fclose($handle1);
 		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
 		If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
