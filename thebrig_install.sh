@@ -34,9 +34,16 @@ fi
 # It first fetches the zip of the most recent version from github
 # and then extracts it.
 
-# Fetch the master branch as a zip file
-echo "Retrieving the most recent version of TheBrig"
-fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
+if [ $# -e 2 ]
+    # Fetch the testing branch as a zip file
+    echo "Retrieving the testing branch as a zip file"
+    fetch https://github.com/fsbruva/thebrig/archive/testing.zip || exerr "ERROR: Could not write to install directory!"
+    mv testing.zip master.zip
+else
+    # Fetch the master branch as a zip file
+    echo "Retrieving the most recent version of TheBrig"
+    fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
+fi
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
@@ -57,7 +64,7 @@ else
     rm conf/bin/ftp_amd64
 fi
 
-# Place the path (of the current directory) within a file for the intial
+# Place the path (of the current directory) within a file for the initial
 # run of the extension
 touch /tmp/thebrig.tmp
 echo $BRIG_ROOT > /tmp/thebrig.tmp
