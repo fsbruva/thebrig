@@ -34,7 +34,7 @@ fi
 # It first fetches the zip of the most recent version from github
 # and then extracts it.
 
-if [ $# -e 2 ]
+if [ $# -e 2 ]; then 
     # Fetch the testing branch as a zip file
     echo "Retrieving the testing branch as a zip file"
     fetch https://github.com/fsbruva/thebrig/archive/testing.zip || exerr "ERROR: Could not write to install directory!"
