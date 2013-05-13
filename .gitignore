@@ -4,6 +4,7 @@
 *
 !conf
 !conf/*
+!conf/ext/*
 conf/jail_start
 conf/bin/ftp
 conf/ports
