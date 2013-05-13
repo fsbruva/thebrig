@@ -4,7 +4,7 @@
 *
 !conf
 !conf/*
-!conf/ext/*
+!conf/ext/thebrig/*
 conf/jail_start
 conf/bin/ftp
 conf/ports
