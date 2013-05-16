@@ -472,7 +472,8 @@ function thebrig_split_world ( $destination , $jail_type ){
 		if ( file_exists($destination . "etc/periodic.conf"))
 			exec("mv " . $destination . "etc/periodic.conf " . $destination. "etc/periodic.conf.bak");
 		// Use the non-standard periodic file
-		exec ( "cp " . $brig_root . "conf/periodic.conf " . $destination . "etc/");
+		if ( is_dir( $destination. "etc/" ) )
+		    exec ( "cp " . $brig_root . "conf/periodic.conf " . $destination . "etc/");
 		
 		// ugly perl hack. Some applications require perl to be at /usr/bin/perl. So, we accomodate within the basejail.
 		if ( ! is_dir( $config['thebrig']['basejail']['folder'] . "usr/bin/" )){
@@ -482,11 +483,13 @@ function thebrig_split_world ( $destination , $jail_type ){
 		
 	} // end of else for all slim jails
 	
+	if ( is_dir( $destination . "etc/" ) ) {
 	exec ( "echo 'sendmail_enable=\"NONE\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'syslogd_flags=\"-ss\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
+	}
 } // end of function
 
 
