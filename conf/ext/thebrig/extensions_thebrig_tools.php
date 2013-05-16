@@ -148,7 +148,7 @@ if ($_POST['submit'] === "Convert") {
 		$prsconfig['thebrig'] = array ("0" =>"uuid", "1" => "enable", "2"=>"jailno", "3"=>"jailname", "4"=>"if", "5"=>"ipaddr",	"6"=>"subnet", "7"=>"jailpath", "8"=>"dst",	"9"=>"jail_mount",
 		"10"=> "devfs_enable",	"11"=> "proc_enable", 	"12"=> "fdescfs_enable", "13"=>"fstab",	"14"=>"exec_start", "15"=>"afterstart0",	"16"=>"afterstart1", "17"=>"exec_stop",	"18"=>"extraoptions",
 		"19"=>"desc", "20"=>"base_ver",	"21"=>"lib_ver", "22"=>"src_ver",	"23"=>"doc_ver", "24"=>"image",	"25"=>"image_type",	"26"=>"attach_params",	"27"=>"attach_blocking",
-		"28"=>"force_blocking",		"29"=>"zfs_datasets",	"30"=>"fib", );
+		"28"=>"force_blocking",		"29"=>"zfs_datasets",	"30"=>"fib", "31"=>"type", );
 
 		// add array startonboot
 	for ($j=0; $j<(count($matches1));){  
@@ -162,6 +162,7 @@ if ($_POST['submit'] === "Convert") {
 		//Add values jailno, uuid, startonboot  to jails  values 
 	for ($i=0; $i<(count($prsconfig['jailnames'] ) ) ; ) {
 		$prsconfig['values'][$i]['2'] = ($i+1);
+		$prsconfig['values'][$i]['31']='full';
 		$prsconfig['values'][$i]['0'] = uuid();
 			for ($j=0; $j<(count($prsconfig['startonboot']));){ 
 				if ($prsconfig['startonboot'][$j] == $prsconfig['values'][$i][3]) { 
