@@ -162,7 +162,7 @@ if ($_POST['submit'] === "Convert") {
 		//Add values jailno, uuid, startonboot  to jails  values 
 	for ($i=0; $i<(count($prsconfig['jailnames'] ) ) ; ) {
 		$prsconfig['values'][$i]['2'] = ($i+1);
-		$prsconfig['values'][$i]['31']='full';
+		$prsconfig['values'][$i]['31']="full";
 		$prsconfig['values'][$i]['0'] = uuid();
 			for ($j=0; $j<(count($prsconfig['startonboot']));){ 
 				if ($prsconfig['startonboot'][$j] == $prsconfig['values'][$i][3]) { 
