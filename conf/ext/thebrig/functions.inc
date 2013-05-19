@@ -476,10 +476,10 @@ function thebrig_split_world ( $destination , $jail_type ){
 		    exec ( "cp " . $brig_root . "conf/periodic.conf " . $destination . "etc/");
 		
 		// ugly perl hack. Some applications require perl to be at /usr/bin/perl. So, we accomodate within the basejail.
-		if ( ! is_dir( $config['thebrig']['basejail']['folder'] . "usr/bin/" )){
-			exec ( "ln -s /usr/local/bin/perl " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl" );
-			exec ( "ln -s /usr/local/bin/perl5 " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl5" );
-		} // end of check for ugly perl hack
+		
+		exec ( "ln -s /usr/local/bin/perl " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl" );
+	  	exec ( "ln -s /usr/local/bin/perl5 " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl5" );
+	
 		
 	} // end of else for all slim jails
 	
