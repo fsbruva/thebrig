@@ -489,7 +489,13 @@ function thebrig_split_world ( $destination , $jail_type ){
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
+		// Always check to see if the jail needs resolv.conf
+	if ( ! is_file ( $destination . "etc/resolv.conf ) ) 
+		exec ( "cp /etc/resolv.conf " . $destination . "etc/");
 	}
+	
+
+	
 } // end of function
 
 
