@@ -48,8 +48,7 @@ if ( $brig_update_ready == 0 ) {
 		$conffile_list[] = $brig_root . "conf/freebsd-update.conf";
 	} // end of template selected
 
-			$response = thebrig_update($basedir_list, $workdir_list , $conffile_list, "Fetch");
-	//$response = thebrig_portsnap($brig_root . "conf/ports", $brig_root . "conf/db/ports", $brig_root . "conf/portsnap.conf", "Fetch");
+	$response = thebrig_update($basedir_list, $workdir_list , $conffile_list, "Fetch");
 } // end of brig_update_ready
 
 ?>
