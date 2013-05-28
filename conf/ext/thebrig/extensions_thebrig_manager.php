@@ -181,16 +181,16 @@ function conf_handler() {
 		return confirm('The selected operation will be completed. Please do not click any other buttons.');
 	}
 }
-</script>
 
+</script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabinact">
 				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
 			</li>
-			<li class="tabact">
-				<a href="extensions_thebrig_ports.php"><span><?=_THEBRIG_UPDATES;?></span></a>
+			<li class="tabinact">
+				<a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a>
 			</li>
 			<li class="tabinact">
 				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
