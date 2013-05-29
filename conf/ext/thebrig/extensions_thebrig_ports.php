@@ -91,7 +91,7 @@ if ($_POST) {
 		foreach ( $a_jail as &$my_jail ){
 			// Update the config by setting or unsetting the jail value
 			// Remove the link & directory - or add it within each jail
-			if ( isset($my_jail['ports']) ){
+			if ( $my_jail['ports'] == true ){
 				// The jail is currently configured to have ports
 				if  (FALSE === ($cnid = array_search($my_jail['uuid'], $formjails ))){
 					// We didn't find the jail's uuid within the array of checked boxes, which means we need to "turn off" ports
@@ -321,7 +321,7 @@ function conf_handler() {
 									<td class="<?=$enable?"listlr":"listlrd";?>"><input
 										type="checkbox" name="formJails[]"
 										value=<?php echo "{$a_jail[$k]['uuid']}";?>
-										<?php /* This ugliness is a hack based on deselecting a jail will show checked after submitting.*/echo ( $_POST ) ? ( (FALSE !== ($cnid_test = array_search($a_jail[$k]['uuid'], $formjails )) ) ? "checked" :  "unchecked" ) : ( ( isset($a_jail[$k]['ports']) ) ? "checked" :  "unchecked" ); ?>>&nbsp;</td>
+										<?php ( ( isset( $a_jail[$k]['ports'] )  ) ? "checked" :  "unchecked" ); ?>>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['jailname']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['ipaddr'] . " / " . $a_jail[$k]['subnet']) ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($a_jail[$k]['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
