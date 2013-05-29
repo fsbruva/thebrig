@@ -193,7 +193,7 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 
 			$command_prefix = "/bin/sh " . $config['thebrig']['rootfolder'] . "conf/sbin/freebsd-update -d " . $work_dir[$k] . " -f " . $conf_file[$k] . " -b " . $dest_dir[$k];
 			// The prep operation was successful
-			if ( !is_dir($work_dir[$k]))
+			if ( !is_dir($work_dir[$k]) )
 				exec("mkdir -p " . $work_dir[$k] );
 
 			switch ( $action ){
