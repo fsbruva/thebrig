@@ -22,6 +22,7 @@ array_sort_key($config['thebrig']['content'], "jailno");
 $a_jail = &$config['thebrig']['content'];
 $pconfig['portscron'] = isset( $config['thebrig']['portscron'] ) ;
 
+
 // User has clicked a button
 if ($_POST) {
 	unset($input_errors);
@@ -91,13 +92,13 @@ if ($_POST) {
 		foreach ( $a_jail as &$my_jail ){
 			// Update the config by setting or unsetting the jail value
 			// Remove the link & directory - or add it within each jail
-			if ( $my_jail['ports'] == true ){
+			if ( isset( $my_jail['ports'] ) ) {
 				// The jail is currently configured to have ports
 				if  (FALSE === ($cnid = array_search($my_jail['uuid'], $formjails ))){
 					// We didn't find the jail's uuid within the array of checked boxes, which means we need to "turn off" ports
-					$my_jail['ports'] = false;
+					unset ( $my_jail['ports'] ) ;
 					$config_changed=true;
-					$pconfig['ports'] = $my_jail['ports'];
+					//$pconfig['ports'] = $my_jail['ports'];
 					// Unmount the ports, and remove the directory
 					exec ( "umount -f " . $my_jail['jailpath'] . "usr/ports" );
 					exec ( "rm -r " . $my_jail['jailpath'] . "usr/ports");
@@ -321,7 +322,7 @@ function conf_handler() {
 									<td class="<?=$enable?"listlr":"listlrd";?>"><input
 										type="checkbox" name="formJails[]"
 										value=<?php echo "{$a_jail[$k]['uuid']}";?>
-										<?php ( ( isset( $a_jail[$k]['ports'] )  ) ? "checked" :  "unchecked" ); ?>>&nbsp;</td>
+										<?php  echo ( isset( $a_jail[$k]['ports'] ) ? "checked=\"checked\"" :  "" ) ; ?>>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['jailname']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['ipaddr'] . " / " . $a_jail[$k]['subnet']) ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($a_jail[$k]['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
