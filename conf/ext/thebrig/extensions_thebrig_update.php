@@ -104,7 +104,7 @@ if ($_POST) {
 				if ( $a_jail[$jid]['type'] == 'slim' && $job_jail != "00000000-0000-0000-0000-000000000000" ){
 					$base_selected=true;
 				}
-				if ( $job_jail == "00000000-0000-0000-0000-000000000000")
+				if ( $job_jail === "00000000-0000-0000-0000-000000000000")
 					$template_selected=true;
 			} // end of foreach jail
 				
@@ -113,6 +113,10 @@ if ($_POST) {
 				// Perform the input validations!
 				$basedir_hash = exec ( "echo " . $my_jail['jailpath'] . " | sha256 -q" );
 				
+				if  (FALSE === ($cnid = array_search($my_jail['uuid'], $formjails ))){
+					// We didn't find the jail's uuid within the array of checked boxes, so we can exit this for loop
+					continue;
+				}
 				// We are attempting to install updates that don't exist
 				// Check for the existence of the -install link 
 				if ( ! is_link ( $my_jail['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-install" ) && $pconfig['update_op'] == "Install") {
@@ -248,7 +252,7 @@ if ($_POST) {
 					$config_changed = true;
 					$my_tag_full = explode( "|", file_get_contents( $brig_temp_db . "tag")) ;
 					$config['thebrig']['template_ver'] = $my_tag_full[2] . "-p" . $my_tag_full[3];
-					exec( "rm " . $brig_update_db . "files.*" );
+					exec( "rm " . $brig_temp_db . "files.*" );
 				}
 			}
 			
@@ -443,7 +447,7 @@ function conf_handler() {
 						if ( $a_jail[$k]['type'] == 'slim' ){
 						// we're talking about a slim jail here, we should check if this is the first slim we've prepped for
 						// If so, we need ot define a few "constant" values for the duration of this for loop
-							if ( !isset( $base_update_contents)) {
+							if ( !isset( $base_update_contents) && file_exists( $brig_update_db . "files.updated" ) ) {
 								// Pull in the lists of files to be added, updated and removed for the base jail
 								$base_updated_contents =  rtrim(file_get_contents($brig_update_db . "files.updated"));
 								$base_added_contents =  rtrim(file_get_contents($brig_update_db . "files.added"));
