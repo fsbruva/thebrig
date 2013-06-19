@@ -345,7 +345,7 @@ if ($_POST) {
 		$jail['force_blocking'] = $pconfig['force_blocking'];
 		$jail['zfs_datasets'] = $pconfig['zfs_datasets'];
 		$jail['fib'] = $pconfig['fib'];
-		$jail['ports'] = isset( $pconfig['ports'] );
+		$jail['ports'] = isset( $pconfig['ports'] ) ? true : false ;
 		
 		// Populate the jail. The simplest case is a full jail using tarballs.
 		if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 && strcmp ( $jail['type'], "full") == 0)
@@ -521,6 +521,9 @@ function source_change() {
 					<input name="Cancel" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
 					<input name="type" type="hidden" value="<?=$pconfig['type'];?>" />
+					<?php if ( isset( $pconfig['ports'])) { ?>
+						<input name="ports" type="hidden" value="<?= true;?>" />
+					<?php }?>
 				</div>
 				<?php include("formend.inc");?>
 			</form>
