@@ -15,7 +15,7 @@ $pconfig['template'] = $config['thebrig']['template'] ;
 $pconfig['basejail'] = $config['thebrig']['basejail']['folder'] ;
 
 // Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, isset($config['thebrig']['version']) ? "version:".$config['thebrig']['version'] : "First start");
 
 // This determines if there are any thin jails (type = slim), which means we shouldn't
 // relocate the basejail. We also need to check and make sure no jails currently live 
