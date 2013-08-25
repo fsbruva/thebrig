@@ -71,6 +71,7 @@ $template_search = glob ( $config['thebrig']['rootfolder'] . "template/bin/*" );
 
 // User has clicked a button
 if ($_POST) {
+	
 	unset($input_errors);
 	$pconfig = $_POST;
 	 
@@ -81,12 +82,22 @@ if ($_POST) {
 		header("Location: /");
 		exit;
 	}
+	if ( isset($pconfig['update'])) {
+		mwexec ( "fetch -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/testing/conf/ext/thebrig/lang.inc" ) ;
+		$langfile = file("/usr/local/www/ext/thebrig/lang.inc");
+		$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+		$myversion = substr($version_1[1],0,3);
+		$langfile = file("/tmp/lang.inc");
+		$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+		$gitversion = substr($version_1[1],0,3);
+		if ($gitversion == $myversion) {  $savemsg = " Your TheBrig run on current ".$myversion." version"; goto menu; }
 	// Complete all root folder error checking.
 	// Convert root folder after filechoicer
 	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
 		$pconfig['rootfolder'] = $pconfig['rootfolder'] . "/";
 	}
 	
+	if ( isset($pconfig['Submit'])) {
 	// This first check to make sure that the supplied folder actually exists. If it does not
 	// then the user should be alerted. No changes will be made.
 	if ( !is_dir( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ) {
@@ -151,6 +162,7 @@ if ($_POST) {
 		$retval = 0;
 		$savemsg = get_std_save_message($retval);
 	} // end of no input errors
+	}
 } // end of POST
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, isset($config['thebrig']['version']) ? "version:".$config['thebrig']['version'] : "First start");
@@ -210,6 +222,9 @@ function disable_buttons() {
 	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
 		<?php html_inputbox("template", gettext("Template Location"), $pconfig['template'], gettext("Sets the alternate location for the buildworld jail template. Default is in a folder named template within TheBrig's installation folder."), false, 50);?>
 	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
+		<?php html_separator();?>
+		<tr><td width="22%" valign="top" class="vncellreq" > </td>
+			<td width="78%"><input name="update" type="submit" class="formbtn" value="Update TheBrig" >
 		<?php html_separator();?>
 		<?php html_titleline(gettext(_THEBRIG_CLEANUP));?>
 		
