@@ -143,7 +143,9 @@ if ($_POST) {
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			$config['thebrig']['template'] = $pconfig['template'];
 			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
-			$config['thebrig']['version'] = 1;
+			$langfile = file("ext/thebrig/lang.inc");
+			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+			$config['thebrig']['version'] = substr($version_1[1],0,3);
 			write_config(); // Write the config to disk
 		
 		// Whatever we did, we did it successfully
