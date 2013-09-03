@@ -3,8 +3,19 @@
 # define our bail out shortcut function anytime there is an error - display the error message, then exit
 # returning 1.
 exerr () { echo -e "$*" >&2 ; exit 1; }
-startfolder=`pwd`
-echo $startfolder > /tmp/thebriginstaller
+
+# Alexey - the use of pwd is too simplistic. If user is in /etc and calls script, pwd will return /etc
+
+# Determine the current directory
+# Method adapted from user apokalyptik at
+# http://hintsforums.macworld.com/archive/index.php/t-73839.html
+STAT=$(procstat -f $$ | grep -E "/"$(basename $0)"$")
+FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
+START_FOLDER=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
+
+# Store the script's current location in a file
+echo $START_FOLDER > /tmp/thebriginstaller
+
 # This first checks to see that the user has supplied an argument
 if [ ! -z $1 ]; then
     # The first argument will be the path that the user wants to be the root folder.
@@ -24,13 +35,7 @@ if [ ! -z $1 ]; then
 else
 # We are here because the user did not specify an alternate location. Thus, we should use the 
 # current directory as the root.
-
-    # Determine the current directory
-    # Method adapted from user apokalyptik at
-    # http://hintsforums.macworld.com/archive/index.php/t-73839.html
-    STAT=$(procstat -f $$ | grep -E "/"$(basename $0)"$")
-    FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
-    BRIG_ROOT=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
+    BRIG_ROOT=$START_FOLDER
 fi
 
 
@@ -45,9 +50,14 @@ echo "Unpacking the tarball..."
 tar -xvf master.zip --exclude='.git*' --strip-components 1
 # Get rid of the tarball
 rm master.zip
+
+# Run the change_ver script to deal with different versions of TheBrig
 /usr/local/bin/php-cgi -f conf/bin/change_ver.php
 
 file="/tmp/thebrigversion"
+
+# The file /tmp/thebrigversion might get created by the change_ver script
+# Its existence implies that we need to carry out the install procedure
 if [ -f "$file" ]
 then
 	echo "Thebrig install/update"
@@ -67,7 +77,7 @@ then
 	# For each of the php files in the extensions folder
 	for file in /usr/local/www/ext/thebrig/*.php
 	do
-	# Check if the link is alredy there
+	# Check if the link is already there
 		if [ -e "${file##*/}" ]; then
 			rm "${file##*/}"
 		fi
@@ -76,10 +86,12 @@ then
 		done
 	echo "Congratulations! Thebrig was updated/installed . Navigate to rudimentary config and push Save "
 else
+# There was not /tmp/thebrigversion, so we are already using the latest version
 	echo "You use fresh version"
 fi
 # Clean after work
-cd $startfolder
+cd $START_FOLDER
+# Get rid of staged updates
 rm -Rf temporary/*
 rmdir temporary
 rm /tmp/thebriginstaller
