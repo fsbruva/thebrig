@@ -5,7 +5,7 @@
 exerr () { echo -e "$*" >&2 ; exit 1; }
 
 # Alexey - the use of pwd is too simplistic. If user is in /etc and calls script, pwd will return /etc
-
+# Your right, but I need Current Working Folder Name for work! And all files will deleted from /CurrentWorkFolder/temporary or /CurrentWorkFolder/master.zip
 # Determine the current directory
 # Method adapted from user apokalyptik at
 # http://hintsforums.macworld.com/archive/index.php/t-73839.html
