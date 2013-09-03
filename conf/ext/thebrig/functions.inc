@@ -193,7 +193,7 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 
 			$command_prefix = "/bin/sh " . $config['thebrig']['rootfolder'] . "conf/sbin/freebsd-update -d " . $work_dir[$k] . " -f " . $conf_file[$k] . " -b " . $dest_dir[$k];
 			// The prep operation was successful
-			if ( !is_dir($work_dir[$k]))
+			if ( !is_dir($work_dir[$k]) )
 				exec("mkdir -p " . $work_dir[$k] );
 
 			switch ( $action ){
@@ -472,31 +472,21 @@ function thebrig_split_world ( $destination , $jail_type ){
 		if ( file_exists($destination . "etc/periodic.conf"))
 			exec("mv " . $destination . "etc/periodic.conf " . $destination. "etc/periodic.conf.bak");
 		// Use the non-standard periodic file
-		if ( is_dir( $destination. "etc/" ) )
-		    exec ( "cp " . $brig_root . "conf/periodic.conf " . $destination . "etc/");
+		exec ( "cp " . $brig_root . "conf/periodic.conf " . $destination . "etc/");
 		
 		// ugly perl hack. Some applications require perl to be at /usr/bin/perl. So, we accomodate within the basejail.
-		
-		exec ( "ln -s /usr/local/bin/perl " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl" );
-	  	exec ( "ln -s /usr/local/bin/perl5 " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl5" );
-	
+		if ( ! is_dir( $config['thebrig']['basejail']['folder'] . "usr/bin/" )){
+			exec ( "ln -s /usr/local/bin/perl " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl" );
+			exec ( "ln -s /usr/local/bin/perl5 " . $config['thebrig']['basejail']['folder'] . "usr/bin/perl5" );
+		} // end of check for ugly perl hack
 		
 	} // end of else for all slim jails
 	
-	if ( is_dir( $destination . "etc/" ) ) {
 	exec ( "echo 'sendmail_enable=\"NONE\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'syslogd_flags=\"-ss\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
-		// Always check to see if the jail needs resolv.conf
-	if ( ! file_exists ( $destination . "etc/resolv.conf" ) ) {
-		exec ( "cp /etc/resolv.conf " . $destination . "etc/" );
-		}
-	}
-	
-
-	
 } // end of function
 
 
@@ -728,20 +718,71 @@ foreach ($testarray as $out_jail ) {
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_stop=\"{$out_jail['exec_stop']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n");
+		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
 		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
 		$handle1 = fopen($fstabfile, "w");
+		switch ($out_jail['type']) {
+			case "slim":
+				fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
+				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); 
+						fwrite( $handle1 ,"devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
+				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
+						fwrite( $handle1 ,"procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
+				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n"); 
+						fwrite( $handle1 ,"fdescfs " .  $out_jail['jailpath'] . "dev/fd fdescfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
+				fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); 
+			break;
+			case "full":
+				If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
+				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); 
+						fwrite( $handle1 ,"devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
+				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
+						fwrite( $handle1 ,"procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
+				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");
+						fwrite( $handle1 ,"fdescfs " .  $out_jail['jailpath'] . "dev/fd fdescfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
+						
+			break;
+			case "linux":
+				fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
+				fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");
+				fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
+				fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");
+			
+			break;
+			case "custom":
+				If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
+				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
+				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
+				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
+			break;
+		}	
 		foreach ($out_jail['auxparam'] as $fstab) {	fwrite ($handle1, $fstab."\n"); } 
-		if ( $out_jail['type'] === 'slim') { fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); }
-		if ( isset( $out_jail['ports']) ) { fwrite( $handle1 ,  $config['thebrig']['rootfolder'] . "conf/ports/ " .  $out_jail['jailpath'] . "usr/ports/ nullfs ro 0 0\n"); }
 		fclose($handle1);
-		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
-		If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
-		If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
-		If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
-		If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
-		If (isset($out_jail['enable'])) {$startonboot = "{$startonboot} {$out_jail['jailname']}";} else {$startonboot = $startonboot;}
 	}
 $startonboot = ltrim( $startonboot );
 fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
 fclose($handle);
+}
+function cmd_exec($cmd, &$stdout, &$stderr)
+{
+    $outfile = tempnam(".", "cmd");
+    $errfile = tempnam(".", "cmd");
+    $descriptorspec = array(
+        0 => array("pipe", "r"),
+        1 => array("file", $outfile, "w"),
+        2 => array("file", $errfile, "w")
+    );
+    $proc = proc_open($cmd, $descriptorspec, $pipes);
+    
+    if (!is_resource($proc)) return 255;
+
+    fclose($pipes[0]);    //Don't really want to give any input
+
+    $exit = proc_close($proc);
+    $stdout = file($outfile);
+    $stderr = file($errfile);
+
+    unlink($outfile);
+    unlink($errfile);
+    return $exit;
 }

@@ -6,6 +6,8 @@
 !conf/*
 !conf/bin
 !conf/bin/*
+!conf/ext/thebrig
+!conf/ext/thebrig/*
 conf/jail_start
 conf/bin/ftp
 conf/ports

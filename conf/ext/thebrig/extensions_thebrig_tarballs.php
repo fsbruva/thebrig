@@ -6,7 +6,13 @@ require_once("ext/thebrig/functions.inc");
 	
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE) ;
-
+// add array Freebsd ftp servers 
+$ftp_servers = array( "ftp1.freebsd.org", "ftp2.freebsd.org", "ftp3.freebsd.org", "ftp4.freebsd.org","ftp5.freebsd.org", "ftp.freebsd.org", "ftp6.freebsd.org","ftp7.freebsd.org","ftp10.FreeBSD.org","ftp11.FreeBSD.org","ftp13.FreeBSD.org","ftp14.FreeBSD.org");
+if (is_file("/tmp/ftpsen") ) {$ftp_n = file_get_contents("/tmp/ftpsen");} else { $ftp_n = "0"; }
+file_put_contents ("/tmp/ftpsen", $ftp_n );
+file_put_contents ("ftpservers", $ftp_servers[$ftp_n] );
+$tempfilecontent = "<?php require(\"auth.inc\"); require(\"guiconfig.inc\"); print ( file_get_contents(\"ftpservers\"));?>";
+file_put_contents ("test.php", $tempfilecontent );
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
 } // end of elseif
@@ -40,8 +46,10 @@ if ($_POST) {
 	// This data is needed to populate the tarball selection section of the page. For example, for N4F that is based
 	// on 9.1-RC3, the data about amd64 & i386 for 9.0 release AND 9.1-RC3 is downloaded. 
 	if ( isset( $_POST['ftpquery'] ) && $_POST['ftpquery'] ){
+	$ftp_n = file_get_contents("/tmp/ftpsen");
+m1000:	file_put_contents ("ftpservers", $ftp_servers[$ftp_n] );
 		// Specifies the FTP server to contact
-		$ftp_server = "ftp.freebsd.org" ;
+		$ftp_server = $ftp_servers[$ftp_n] ;
 		// Specifies the folder to access
 		$ftp_path = "/pub/FreeBSD/releases/".$arch."/" ;
 		// Method is used from: http://camposer-techie.blogspot.com/2010/08/ejecutando-comandos-sobre-un-programa.html
@@ -63,7 +71,7 @@ if ($_POST) {
 		$read = array( $pipes[1] ) ;    // renames the pipe
 		$write = null ;
 		$except = null ;
-		$readTimeout = 15 ;
+		$readTimeout = 4 ;
 		
 		//  If the connection cannot be established, then $ftp_proc will be false, and not a resource
 		//  However, this check is mostly uneeded, even if the ftp binary doesn't exist.
@@ -129,7 +137,11 @@ if ($_POST) {
 			// 2. DNS is misconfigured
 			// 3. The ftp binary that is bundled with theBrig is missing
 			if ( !$result ) {
-				$input_errors[] = _THEBRIG_CHECK_NETWORKING ;
+			++$ftp_n;
+			file_put_contents ("/tmp/ftpsen", $ftp_n );
+			If ($ftp_n < count ($ftp_servers)) {goto m1000;}
+unlink ("/tmp/ftpsen");
+			$input_errors[] = _THEBRIG_CHECK_NETWORKING ;
 			}
 			else {
 				// A valid response was obtained, so we can finish grabbing the other items (manifests, mostly) we need.
@@ -150,8 +162,12 @@ if ($_POST) {
 			$input_errors[] = "not a resource!";
 		}
 	} // end of if for the user pressed "query"
-	
-
+	$a_tolog1 = file($config['thebrig']['rootfolder'] . "thebrigerror.txt");
+	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
+	$handle1 = fopen($filelog, "a+");
+	foreach ($a_tolog1 as $tolog1 ) { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog1)."\n" ); }
+	fclose ($handle1);
+unlink ($config['thebrig']['rootfolder'] . "thebrigerror.txt");
 	// There are no input errors detected, so we can attempt the actual work 
 	if ( !$input_errors )
 	{
@@ -178,12 +194,13 @@ if ($_POST) {
 		} // end of if for "delete"
 				
 		elseif ( isset( $_POST['fetch'] ) && $_POST['fetch'] ) {
+		$ftp_n = file_get_contents("/tmp/ftpsen");
 			$pack_get = $_POST['formPackages'] ;
 			$rel_get = $_POST['formRelease'] ;
 			// This loop runs for each of the selected pacakages
 			foreach ( $pack_get as $pack_name ) {
 				// This code builds the command string with the appropriate architecture, release & package name.
-				$c_string = "/bin/sh "."{$config['thebrig']['rootfolder']}"."conf/bin/thebrig_fetch.sh "."{$arch} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}"."work >/dev/null &";
+				$c_string = "/bin/sh "."{$config['thebrig']['rootfolder']}"."conf/bin/thebrig_fetch.sh ".$arch." ".$rel_get." ".$pack_name." ".$config['thebrig']['rootfolder']."work ".$ftp_servers[$ftp_n]." >/dev/null &";
 				// Carries out the fetching operation in the background
 				exec( $c_string , $output, $return);
 			}// end of for loop
@@ -212,18 +229,16 @@ var auto_refresh = setInterval(
 		function()
 		{
 		$('#loaddiv').load('extensions_thebrig_download.php');
-		}, 5000);
+		$('#ftpserv').load('test.php');
+		}, 2000);
 </script>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0" >
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
-			<li class="tabinact">
-				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
-			</li>
-			<li class="tabact">
-				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
-			</li>
+			<li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
+			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 		</ul>
 	</td></tr>
 	<tr><td class="tabnavtbl">
@@ -325,7 +340,7 @@ var auto_refresh = setInterval(
 		</tr>
 		<tr>
 			<!-- This is the empty left column-->
-			<td width="22%" valign="top"> </td>
+			<td width="22%" valign="top"><div id="ftpserv" style="display: block;"> </td>
 			<td width="78%">
 			<!-- This is the Fetch button, which is dependent upon a successful ftp server query -->
 			<?php 
