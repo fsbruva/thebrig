@@ -4,6 +4,7 @@
 *
 !conf
 !conf/*
+!conf/bin/
 conf/jail_start
 conf/bin/ftp
 conf/ports
@@ -22,7 +23,6 @@ conf/db/*
 *.pydevproject
 .project
 .metadata
-#bin/
 
 tmp/
 *.tmp
@@ -157,7 +157,6 @@ dist
 build
 eggs
 parts
-#bin
 var
 sdist
 develop-eggs
