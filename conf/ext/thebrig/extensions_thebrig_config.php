@@ -75,6 +75,7 @@ if ($_POST) {
 	$pconfig = $_POST;
 	 
 	if ( $pconfig['remove'] ) {
+		if (is_dir($config['thebrig']['rootfolder']."basejail")) { $cmd = "chflags -R noschg ".$config['thebrig']['rootfolder']."basejail"; mwexec($cmd);} else {}
 		// we want to remove thebrig
 		thebrig_unregister();
 		// Browse back to the main page
