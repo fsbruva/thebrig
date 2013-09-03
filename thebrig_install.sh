@@ -36,7 +36,7 @@ fi
 
 # Fetch the master branch as a zip file
 echo "Retrieving the most recent version of TheBrig"
-fetch https://github.com/alexey1234/mythebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
+fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
 
 
 # Extract the files we want, stripping the leading directory, and exclude
