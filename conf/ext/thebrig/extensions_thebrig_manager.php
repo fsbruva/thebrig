@@ -140,6 +140,16 @@ if ($_POST) {
 	
 	// There are no input errors detected.
 	if ( !$input_errors ){
+		if ( isset($pconfig['update'])) {
+			mwexec ( "fetch -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/testing/conf/ext/thebrig/lang.inc" ) ;
+			$langfile = file("/usr/local/www/ext/thebrig/lang.inc");
+			$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+			$myversion = substr($version_1[1],0,3);
+			$langfile = file("/tmp/lang.inc");
+			$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+			$gitversion = substr($version_1[1],0,3);
+			//if ($gitversion == $myversion) {  $savemsg = " Your TheBrig run on current ".$myversion." version"; goto menu; }
+		}
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 		if ( $config_changed ) {
 			write_config();
