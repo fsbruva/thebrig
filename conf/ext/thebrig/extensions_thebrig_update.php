@@ -21,7 +21,7 @@ if ($brig_update_ready == 0 ){
 	$brig_root = $config['thebrig']['rootfolder'] ;
 	$brig_update_db = $brig_root . "conf/db/freebsd-update/";
 
-	array_sort_key($config['thebrig']['content'], "jailno");
+	if (is_array($config['thebrig']['content'])) { array_sort_key($config['thebrig']['content'], "jailno");
 	$a_jail = &$config['thebrig']['content'];
 	$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
 
@@ -30,6 +30,7 @@ if ($brig_update_ready == 0 ){
 	if ( is_link ( $a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) ) {
 		//$input_errors[]=$a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback";
 	}
+}
 }
 // User has clicked a button
 if ($_POST) {
