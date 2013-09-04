@@ -382,8 +382,9 @@ function conf_handler() {
 			// Obtain information about the latest update, if we can
 			$my_arch = exec ( "uname -m");
 			$my_rel = exec ( "uname -r");
-			exec ( "fetch -o /tmp/latest.ssl http://update.freebsd.org/" . $my_rel . "/". $my_arch ."/latest.ssl");
-			exec ( "fetch -o /tmp/pub.ssl http://update.freebsd.org/" . $my_rel . "/". $my_arch ."/pub.ssl");
+			$my_rel_cut = exec ("uname -r | cut -d- -f1-2" ) ;     // Obtain the current kernel release
+			exec ( "fetch -o /tmp/latest.ssl http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch ."/latest.ssl");
+			exec ( "fetch -o /tmp/pub.ssl http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch ."/pub.ssl");
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then
 			// converts that from an epoch second to a usable date.
 			exec (  $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
