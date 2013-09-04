@@ -147,7 +147,7 @@ if ($_POST) {
 			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
 			$langfile = file("ext/thebrig/lang.inc");
 			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
-			$config['thebrig']['version'] = substr($version_1[1],0,3);
+			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
 			write_config(); // Write the config to disk
 		
 		// Whatever we did, we did it successfully
