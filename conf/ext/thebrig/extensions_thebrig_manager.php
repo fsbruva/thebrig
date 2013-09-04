@@ -22,8 +22,28 @@ if ($_POST) {
 	$config_changed = false;		// Keep track if we need to re-write the config
 
 	if ( isset($pconfig['update']) && $pconfig['update'] ){ 
-
-	} // end of "clicked save"
+		
+		$langfile = file("/tmp/lang.inc");
+		$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+		$gitversion = 0 + substr($version[1],0,3);
+		
+		// This extracts the actual version from the lang.inc file
+		$version = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
+		$myversion = 0 + substr($version[1],0,3); // Forces version to be a float
+		// This checks to make sure the XML config concurs with the version of lang.inc, even if we already
+		// have the most recent version
+		if ( ($config['thebrig']['version'] != $myversion ) && ($gitversion == $myversion)){
+			// We need to update the XML config to reflect reality
+			$config['thebrig']['version'] = $myversion;
+			$config_changed = true;
+		} 
+		elseif ( $gitversion > $myversion ) {
+			// We want to make sure we can't let the user revert
+			
+		}
+		
+		
+	} // end of "clicked update"
 	
 		
 	// There are no input errors detected.
@@ -36,7 +56,6 @@ if ($_POST) {
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 		if ( $config_changed ) {
 			write_config();
-			write_rcconflocal();
 		}
 		// Whatever we did, we did it successfully
 		$retval = 0;
@@ -102,17 +121,16 @@ function conf_handler() {
 	</td></tr>
 
 	<tr><td class="tabcont">
-		<form action="extensions_thebrig_update.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
+		<form action="extensions_thebrig_manager.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php 
 			// Download the most recent lang.inc, to see the version
 			mwexec ( "fetch -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/working/conf/ext/thebrig/lang.inc" ) ;
-			$langfile = file("/usr/local/www/ext/thebrig/lang.inc");
-			$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
-			$myversion = substr($version[1],0,3);
+			$version = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
+			$myversion = 0 + substr($version[1],0,3);
 			$langfile = file("/tmp/lang.inc");
 			$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
-			$gitversion = substr($version[1],0,3);
+			$gitversion = 0 + substr($version[1],0,3);
 			
 			
 			html_titleline(gettext("Update Availability")); 
@@ -123,7 +141,7 @@ function conf_handler() {
 			<td width="78%" class="vtable">
 			<?=gettext("Click below to download and install the latest version.");?><br />
 				<div id="submit_x">
-					<input id="update" name="thebrig_op" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return conf_handler();" /><br />
+					<input id="update" name="update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return conf_handler();" /><br />
 				</div>
 			</td>
 			</tr>
