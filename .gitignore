@@ -6,6 +6,8 @@
 !conf/*
 !conf/ext/thebrig
 !conf/ext/thebrig/*
++!conf/ext/thebrig
++!conf/ext/thebrig/* 
 !conf/sbin
 !conf/sbin/*
 conf/jail_start
