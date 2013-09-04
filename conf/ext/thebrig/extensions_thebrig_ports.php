@@ -21,11 +21,11 @@ if ( $brig_update_ready == 0 ){
 	$brig_root = $config['thebrig']['rootfolder'] ;
 	$brig_port_db = $brig_root . "conf/db/ports/";
 
-	array_sort_key($config['thebrig']['content'], "jailno");
+	if (is_array($config['thebrig']['content'])) { array_sort_key($config['thebrig']['content'], "jailno");
 	$a_jail = &$config['thebrig']['content'];
 	$pconfig['portscron'] = isset( $config['thebrig']['portscron'] ) ;
 }
-
+}
 // User has clicked a button
 if ($_POST) {
 	unset($input_errors);
