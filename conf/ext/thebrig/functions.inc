@@ -193,7 +193,9 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 
 			$command_prefix = "/bin/sh " . $config['thebrig']['rootfolder'] . "conf/sbin/freebsd-update -d " . $work_dir[$k] . " -f " . $conf_file[$k] . " -b " . $dest_dir[$k];
 			// The prep operation was successful
+
 			if ( !is_dir($work_dir[$k]) )
+
 				exec("mkdir -p " . $work_dir[$k] );
 
 			switch ( $action ){
@@ -472,6 +474,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 		if ( file_exists($destination . "etc/periodic.conf"))
 			exec("mv " . $destination . "etc/periodic.conf " . $destination. "etc/periodic.conf.bak");
 		// Use the non-standard periodic file
+		if ( is_dir( $destination. "etc/" ) )
 		exec ( "cp " . $brig_root . "conf/periodic.conf " . $destination . "etc/");
 		
 		// ugly perl hack. Some applications require perl to be at /usr/bin/perl. So, we accomodate within the basejail.
@@ -487,6 +490,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
+
 } // end of function
 
 

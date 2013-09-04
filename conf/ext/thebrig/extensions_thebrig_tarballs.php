@@ -16,7 +16,7 @@ if ($_POST) {
 	$pconfig = $_POST;		
 	mwexec2("uname -m" , $arch ) ;		// Obtain the machine architecture
 	$arch = $arch[0] ;					// Extract the first string from the array
-	mwexec2("uname -r" , $rel ) ; 		// Obtain the current kernel release
+	mwexec2("uname -r | cut -d- -f1-2" , $rel ) ; 		// Obtain the current kernel release
 	$rel = $rel[0] ;					// Extract the first string from the array
 
 	// This first error check is verifying that at least one file was selected for deletion. 

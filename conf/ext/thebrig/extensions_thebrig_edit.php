@@ -94,7 +94,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
 	$pconfig['fib'] = $a_jail[$cnid]['fib'];
-	$pconfig['ports'] = isset($a_jail[$cnid]['ports']) ;
+	$pconfig['ports'] = ( isset($a_jail[$cnid]['ports']) ) ? true : false ;
 	// By default, when editing an existing jail, path and name will be read only.
 	$path_ro = true;
 	$name_ro = true;
@@ -524,6 +524,7 @@ function source_change() {
 					<?php if ( isset( $pconfig['ports'])) { ?>
 						<input name="ports" type="hidden" value="<?= true;?>" />
 					<?php }?>
+
 				</div>
 				<?php include("formend.inc");?>
 			</form>
