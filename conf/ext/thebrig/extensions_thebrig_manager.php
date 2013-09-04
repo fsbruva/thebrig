@@ -12,9 +12,6 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Manager");
 
-array_sort_key($config['thebrig']['content'], "jailno");
-$a_jail = &$config['thebrig']['content'];
-
 // User has clicked a button
 if ($_POST) {
 	unset($input_errors);
