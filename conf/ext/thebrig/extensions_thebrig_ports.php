@@ -210,7 +210,7 @@ function conf_handler() {
 				<li class="tabact"><a href="extensions_thebrig_ports.php"
 					title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_PORTS;?> </span>
 				</a></li>
-				<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_MANAGER;?>
+				<li class="tabinact"><a href="extensions_thebrig_manager.php"><span><?=_THEBRIG_MANAGER;?>
 					</span> </a>
 				</li>
 			</ul>
