@@ -40,7 +40,7 @@ fi
 if [ $2 -eq 2 ]; then 
     # Fetch the testing branch as a zip file
     echo "Retrieving the testing branch as a zip file"
-    fetch https://github.com/fsbruva/thebrig/archive/testing.zip || exerr "ERROR: Could not write to install directory!"
+    fetch https://github.com/fsbruva/thebrig/archive/working.zip || exerr "ERROR: Could not write to install directory!"
     mv testing.zip master.zip
 else
     # Fetch the master branch as a zip file
