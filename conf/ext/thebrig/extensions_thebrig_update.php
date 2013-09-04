@@ -12,20 +12,24 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_UPDATER);
 
+
 // we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
 $brig_update_ready = thebrig_update_prep();
-// Slight redefinition to make life a little easier
-$brig_root = $config['thebrig']['rootfolder'] ;
-$brig_update_db = $brig_root . "conf/db/freebsd-update/";
 
-array_sort_key($config['thebrig']['content'], "jailno");
-$a_jail = &$config['thebrig']['content'];
-$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
+if ($brig_update_ready == 0 ){
+	// Slight redefinition to make life a little easier
+	$brig_root = $config['thebrig']['rootfolder'] ;
+	$brig_update_db = $brig_root . "conf/db/freebsd-update/";
+
+	array_sort_key($config['thebrig']['content'], "jailno");
+	$a_jail = &$config['thebrig']['content'];
+	$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
 
 
-$basedir_hash = exec ( "echo " . $a_jail[0]['jailpath'] . " | sha256 -q" );
-if ( is_link ( $a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) ) {
-	//$input_errors[]=$a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback";
+	$basedir_hash = exec ( "echo " . $a_jail[0]['jailpath'] . " | sha256 -q" );
+	if ( is_link ( $a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) ) {
+		//$input_errors[]=$a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback";
+	}
 }
 // User has clicked a button
 if ($_POST) {

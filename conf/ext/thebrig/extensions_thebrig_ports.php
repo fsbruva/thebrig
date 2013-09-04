@@ -14,14 +14,17 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_PORTS);
 
 // we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
 $brig_update_ready = thebrig_update_prep();
-// Slight redefinition to make life a little easier
-$brig_root = $config['thebrig']['rootfolder'] ;
-$brig_port_db = $brig_root . "conf/db/ports/";
 
-array_sort_key($config['thebrig']['content'], "jailno");
-$a_jail = &$config['thebrig']['content'];
-$pconfig['portscron'] = isset( $config['thebrig']['portscron'] ) ;
+if ( $brig_update_ready == 0 ){
 
+	// Slight redefinition to make life a little easier
+	$brig_root = $config['thebrig']['rootfolder'] ;
+	$brig_port_db = $brig_root . "conf/db/ports/";
+
+	array_sort_key($config['thebrig']['content'], "jailno");
+	$a_jail = &$config['thebrig']['content'];
+	$pconfig['portscron'] = isset( $config['thebrig']['portscron'] ) ;
+}
 
 // User has clicked a button
 if ($_POST) {

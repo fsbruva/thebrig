@@ -369,13 +369,19 @@ function thebrig_update_prep (  ) {
 				continue; // depart the for loop - we've found the file we needed
 			}
 			// it wasn't found in the basejail - we need to look elsewhere (all other jails)
-			foreach ( $config['thebrig']['content'] as $jail ){
-				if ( is_file ( $jail['jailpath'] . "usr/" . $file ) ) {
-					exec ( "cp " . $jail['jailpath'] . "usr/" . $file . " " . $brig_root . "conf/" . $file , $blank , $result );
-					$copy_failure |= $result;
-					break; // depart the for loop - we've found the file we needed
-				} // end if
-			} // end for each jail	
+			if ( isset ( $config['thebrig']['content'])){
+				foreach ( $config['thebrig']['content'] as $jail ){
+					if ( is_file ( $jail['jailpath'] . "usr/" . $file ) ) {
+						exec ( "cp " . $jail['jailpath'] . "usr/" . $file . " " . $brig_root . "conf/" . $file , $blank , $result );
+						$copy_failure |= $result;
+						break; // depart the for loop - we've found the file we needed
+					} // end if
+				} // end for each jail
+			}
+			else {
+				// There are no jails defined yet - stop
+				return 2;
+			}
 			// Check if we were able to copy it to the destination location
 			if ( !is_file ( $brig_root . "conf/" . $file ) ) {
 				// We didn't have it to start, and we searched all jails - something's up. 	
