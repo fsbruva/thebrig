@@ -440,7 +440,6 @@ function type_change(){
 		showElementById('devfs_enable_tr','show');
 		showElementById('proc_enable_tr','show');
 		showElementById('fdescfs_enable_tr','show');
-		showElementById('ports_tr','hide');
 		showElementById('install_source_empty','show');
 		showElementById('install_source','show');
 		showElementById('source_tr','show');
@@ -453,7 +452,6 @@ function type_change(){
 		showElementById('devfs_enable_tr','show');
 		showElementById('proc_enable_tr','show');
 		showElementById('fdescfs_enable_tr','show');
-		showElementById('ports_tr','show');
 		showElementById('install_source_empty','show');
 		showElementById('install_source','show');
 		showElementById('source_tr','show');
@@ -466,7 +464,6 @@ function type_change(){
 		showElementById('devfs_enable_tr','hide');
 		showElementById('proc_enable_tr','hide');
 		showElementById('fdescfs_enable_tr','hide');
-		showElementById('ports_tr','hide');
 		showElementById('install_source_empty','hide');
 		showElementById('install_source','hide');
 		showElementById('source_tr','hide');
@@ -481,8 +478,7 @@ function type_change(){
 		showElementById('devfs_enable_tr','show');
 		showElementById('proc_enable_tr','show');
 		showElementById('fdescfs_enable_tr','show');
-		showElementById('ports_tr','show');
-	    showElementById('install_source_empty','hide');
+		showElementById('install_source_empty','hide');
 		showElementById('install_source','hide');
 		showElementById('source_tr','hide');
 		showElementById('official_tr','hide');
@@ -559,9 +555,10 @@ function redirect() {
 			<?php /*html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);*/?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.", "", false);?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "The file-descriptor file system, or <a href=http://www.freebsd.org/cgi/man.cgi?query=fdescfs&sektion=5>fdescfs</a>, provides access to the perprocess file descriptor namespace in the global file system namespace.", "", false);?>
-			<?php html_checkbox("ports", gettext("Enable mount piblic ports"), !empty($pconfig['ports']) ? true : false, "", "", false);?>
-			<!---<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. If no need fstab - delete default line.  <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> ")), false, 65, 5, false, false);?>
-		-->	<?php html_separator();?>
+			<?php html_separator();?>
+			<?php html_titleline(gettext("Fstab"));?>
+			<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> <p> Also you can use fstab editor ")), false, 65, 5, false, false);?>
+			<?php html_separator();?>
 			<?php html_titleline(gettext("Commands"));?>
 			<?php html_inputbox("exec_start", gettext("Jail start command"), $pconfig['exec_start'], gettext("command to execute  for starting the jail."), false, 50);?>
 			<?php html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>

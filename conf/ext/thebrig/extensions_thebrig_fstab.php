@@ -360,13 +360,14 @@ function ds(f) {
 					<input name="referer" type="hidden" value="<?=$link;?>" />	
 				 <input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;color: #900;" value="Add line" onclick="ds('wrapper0');">	
 	</div>
+			<tr><td>If you edit entered values without add new line, please use add line button for add entered value to temporary storage.</td></tr>
 			<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save and exit");?>" />
 					<input name="Cancel" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
 					<input name="numberline" type="hidden" value="<?=$i;?>" />
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
 					<input name="referer" type="hidden" value="<?=$link;?>" />
-				</div>	
+			</div>	
 
 	<?php include("formend.inc");?>
 </form>

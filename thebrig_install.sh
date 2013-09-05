@@ -39,9 +39,20 @@ else
 fi
 
 
-# Fetch the master branch as a zip file
-echo "Retrieving the most recent version of TheBrig"
-fetch https://github.com/fsbruva/thebrig/archive/alexey.zip || exerr "ERROR: Could not write to install directory!"
+if [ $2 -eq 2 ]; then 
+    # Fetch the testing branch as a zip file
+    echo "Retrieving the testing branch as a zip file"
+    fetch https://github.com/fsbruva/thebrig/archive/working.zip || exerr "ERROR: Could not write to install directory!"
+    mv working.zip master.zip
+elif [ $2 -eq 3 ]; then
+	echo "Retrieving the alexey's branch as a zip file"
+	fetch https://github.com/fsbruva/thebrig/archive/alexey.zip || exerr "ERROR: Could not write to install directory!"
+	mv alexey.zip master.zip
+else
+	# Fetch the master branch as a zip file
+	echo "Retrieving the most recent version of TheBrig"
+	fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
+fi
 
 
 # Extract the files we want, stripping the leading directory, and exclude
