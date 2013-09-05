@@ -374,5 +374,4 @@ var auto_refresh = setInterval(
 </form>
 </td></tr>
 </table>
-<?php print $cmd; ?>
 <?php include("fend.inc"); ?>

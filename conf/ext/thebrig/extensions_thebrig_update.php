@@ -18,8 +18,8 @@ $brig_update_ready = thebrig_update_prep();
 $brig_root = $config['thebrig']['rootfolder'] ;
 $brig_update_db = $brig_root . "conf/db/freebsd-update/";
 
-array_sort_key($config['thebrig']['content'], "jailno");
-$a_jail = &$config['thebrig']['content'];
+if (is_array ($config['thebrig']['content'])) { array_sort_key($config['thebrig']['content'], "jailno");
+$a_jail = &$config['thebrig']['content'];}
 $pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
 
 
@@ -551,9 +551,9 @@ function conf_handler() {
 				<?php html_separator();
 				html_titleline(gettext("Update Details"));
 				// Build an array with the keys as the jail uuid, and with the value as the jail's name
-				$jail_names = array();
+				$jail_names = array(); if (is_array($a_jail)) {
 				foreach ( $a_jail as $one_jail){
-					$jail_names[$one_jail['uuid']]=$one_jail['jailname'];}
+					$jail_names[$one_jail['uuid']]=$one_jail['jailname'];} }
 				$jail_names['00000000-0000-0000-0000-000000000000']="TEMPLATE";
 				html_combobox("jail_name", gettext("Jail Name"), $pconfig['type'], $jail_names, gettext("Choose jail to view more information regarding a pending update."), "","","");?>
 				<?php $i = 0; for( $i; $i < count ( $a_jail ) ; $i ++ ): 
