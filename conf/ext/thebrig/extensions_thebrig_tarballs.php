@@ -19,6 +19,8 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 } // end of elseif
 
 if ($_POST) {
+$cmd = "touch ".$config['thebrig']['rootfolder']."thebrigerror.txt";
+mwexec ($cmd);
 	unset( $input_errors ) ; // clear out the input errors array
 	$pconfig = $_POST;		
 	mwexec2("uname -m" , $arch ) ;		// Obtain the machine architecture
@@ -163,13 +165,7 @@ m1000:	file_put_contents ("ftpservers", $ftp_servers[$ftp_n] );
 			$input_errors[] = "not a resource!";
 		}
 	} // end of if for the user pressed "query"
-	//output to thebrig.log
-	$a_tolog1 = file($config['thebrig']['rootfolder'] . "thebrigerror.txt");
-	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
-	$handle1 = fopen($filelog, "a+");
-	foreach ($a_tolog1 as $tolog1 ) { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog1)."\n" ); }
-	fclose ($handle1);
-	unlink ($config['thebrig']['rootfolder'] . "thebrigerror.txt");
+	
 	// There are no input errors detected, so we can attempt the actual work
 	if ( !$input_errors )
 	{
@@ -180,7 +176,7 @@ m1000:	file_put_contents ("ftpservers", $ftp_servers[$ftp_n] );
 			// For each of the files in the array
 			foreach ( $files_remove as $file ) {
 				// Delete the selected file from the "work" directory
-				$check = unlink ( $config['thebrig']['rootfolder'] . "work/" . $file);
+				if (is_file($config['thebrig']['rootfolder'] . "work/" . $file)) $check = unlink ( $config['thebrig']['rootfolder'] . "work/" . $file);
 				// If the unlink (deletion) operation is unsuccessful, alert user
 				if ( ! $check ) {
 					$input_errors[] = _THEBRIG_DELETE_FAIL . "$file" ;
@@ -209,6 +205,14 @@ m1000:	file_put_contents ("ftpservers", $ftp_servers[$ftp_n] );
 					
 		} // end of elseif for "fetch"
 	}
+//output to thebrig.log
+	$a_tolog1 = file($config['thebrig']['rootfolder'] . "thebrigerror.txt");
+	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
+	$handle1 = fopen($filelog, "a+");
+	foreach ($a_tolog1 as $tolog1 ) { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog1)."\n" ); }
+	fclose ($handle1);
+
+	unlink ($config['thebrig']['rootfolder'] . "thebrigerror.txt");
 }
 
 // Uses the global fbegin include
@@ -370,5 +374,5 @@ var auto_refresh = setInterval(
 </form>
 </td></tr>
 </table>
-
+<?php print $cmd; ?>
 <?php include("fend.inc"); ?>
