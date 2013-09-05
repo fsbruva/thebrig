@@ -472,6 +472,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 		if ( file_exists($destination . "etc/periodic.conf"))
 			exec("mv " . $destination . "etc/periodic.conf " . $destination. "etc/periodic.conf.bak");
 		// Use the non-standard periodic file
+		if ( is_dir( $destination. "etc/" ) )
 		exec ( "cp " . $brig_root . "conf/periodic.conf " . $destination . "etc/");
 		
 		// ugly perl hack. Some applications require perl to be at /usr/bin/perl. So, we accomodate within the basejail.
@@ -763,6 +764,10 @@ $startonboot = ltrim( $startonboot );
 fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
 fclose($handle);
 }
+// cmd_exec execute process and have output and error
+//$cmd - proccess
+//$stdout - result
+//$stderr - messages about error
 function cmd_exec($cmd, &$stdout, &$stderr)
 {
     $outfile = tempnam(".", "cmd");

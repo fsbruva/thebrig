@@ -32,9 +32,10 @@ arch=$1  	# The first argument will be the architecture
 rel=$2		# The second argument will be the release
 pack=$3		# The third argument will be the desired package
 dest=$4		# The fourth argument will be the destination folder (TheBrig's work folder)
+ftpserv=$5  # Selected ftp server
 
 # This is the url of the ftp folder, as well as the background redirect (if we need it)
-ftp_url="ftp://ftp.freebsd.org/pub/FreeBSD/releases/$arch/$arch/$rel"
+ftp_url="ftp://$ftpserv/pub/FreeBSD/releases/$arch/$arch/$rel"
 redirect=">/dev/null 2>&1"
 
 # Fetch the manifest. place it in the desired folder, and name it based on the release and arch
@@ -47,8 +48,9 @@ desired_hash=`grep ${pack} ${dest}/${rel}_${arch}_MANIFEST | awk '{print $2}'`
 desired_size=`/usr/bin/fetch -s ${ftp_url}/${pack}.txz`
 
 # Carry out the tarball fetch command, appending "partial" to the temporary download file
-/usr/bin/fetch -q -o ${dest}/FreeBSD-${arch}-${rel}-${pack}_partial_${desired_size}.txz $ftp_url/$pack.txz >/dev/null 2>$1
-
+# /usr/bin/fetch -q -o ${dest}/FreeBSD-${arch}-${rel}-${pack}_partial_${desired_size}.txz $ftp_url/$pack.txz >/dev/null 2>$1
+/usr/bin/fetch -q -o ${dest}/FreeBSD-${arch}-${rel}-${pack}_partial_${desired_size}.txz $ftp_url/$pack.txz > /tmp/fetch.log
+echo {$ftp_url}/{$pack} > /tmp/link
 # Now that we've finished the download, we need to calculate the hash of the file in order to figure out 
 # if the download went well or not
 result_hash=`sha256 -q ${dest}/FreeBSD-${arch}-${rel}-${pack}_partial_${desired_size}.txz`

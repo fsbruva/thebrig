@@ -9,6 +9,7 @@ require_once("ext/thebrig/functions.inc");
 // I'm sorry, but I want next line commented.  I create page trap.php for trap _POST _GET messages, for testing my code.  
 //  include_once ("ext/thebrig/trap.php");
 if (is_file("/tmp/tempjail")){unlink ("/tmp/tempjail");}
+
 //I check install.
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
@@ -73,7 +74,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['devfs_enable'] = isset($a_jail[$cnid]['devfs_enable']);
 	$pconfig['proc_enable'] = isset($a_jail[$cnid]['proc_enable']);
 	$pconfig['fdescfs_enable'] = isset($a_jail[$cnid]['fdescfs_enable']);
-	// $pconfig['devfsrules'] = $a_jail[$cnid]['devfsrules'];
+	$pconfig['devfsrules'] = $a_jail[$cnid]['devfsrules'];
 	unset ($pconfig['auxparam']);
 	if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam']))
 		$pconfig['auxparam'] = implode("\n", $a_jail[$cnid]['auxparam']);
@@ -122,7 +123,7 @@ else {
 	$pconfig['devfs_enable'] = true;
 	$pconfig['proc_enable'] = false;
 	$pconfig['fdescfs_enable'] = false;
-	// unset ($pconfig['devfsrules'] );
+	unset ($pconfig['devfsrules'] );
 	unset($pconfig['auxparam']);
 	$pconfig['exec_start'] = "/bin/sh /etc/rc";
 	$pconfig['afterstart0'] = "";
@@ -141,7 +142,6 @@ else {
 	$pconfig['force_blocking'] = "";
 	$pconfig['zfs_datasets'] = "";
 	$pconfig['fib'] = false;
-	$pconfig['ports'] = false;
 	$path_ro = false;
 	$name_ro = false;
 }
@@ -345,10 +345,12 @@ if ($_POST) {
 				$jail['ports'] = ( isset($pconfig['ports']) ) ? true : false ;
 				break;
 	}
+		$jail['devfsrules'] = $pconfig['dst'];
 		unset($jail['auxparam']);
 		foreach (explode("\n", $_POST['auxparam']) as $auxparam) {
 			$auxparam = trim($auxparam, "\t\n\r");
 			if (!empty($auxparam)) $jail['auxparam'][] = $auxparam;
+			else {};
 			}
 		$jail['exec_start'] = $pconfig['exec_start'];
 		$jail['afterstart0'] = $pconfig['afterstart0'];
@@ -367,7 +369,6 @@ if ($_POST) {
 		$jail['force_blocking'] = $pconfig['force_blocking'];
 		$jail['zfs_datasets'] = $pconfig['zfs_datasets'];
 		$jail['fib'] = $pconfig['fib'];
-			
 		// Populate the jail. The simplest case is a full jail using tarballs.
 		if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 && strcmp ( $jail['type'], "full") == 0)
 			thebrig_split_world($pconfig['jailpath'] , false , $files_selected );
@@ -516,6 +517,9 @@ function redirect() {
 			<li class="tabact">
 				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
 			</li>
+			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?>
+					</span> </a>
+				</li>
 			<li class="tabinact">
 				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
@@ -549,12 +553,11 @@ function redirect() {
 			<?php html_separator();?>
 			<tr id='mounts_separator_empty'>	<td colspan='2' class='list' height='12'></td>
 			<tr id='mounts_separator'><td colspan='2' valign='top' class='listtopic'>Mounts</td></tr>
-			
- 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("Enable the jail to automount its fstab file. ")," " ," ", "");?>
-			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use to mount the device file system inside the jail. <br>"), "", false);?>
-			<?php /*html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);*/?>
-			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.", "", false);?>
-			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "The file-descriptor file system, or <a href=http://www.freebsd.org/cgi/man.cgi?query=fdescfs&sektion=5>fdescfs</a>, provides access to the perprocess file descriptor namespace in the global file system namespace.", "", false);?>
+ 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("Enable the jail to automount its fstab file. <b>This is not optional for thin jails.</b> ")," " ," ", "event.preventDefault()");?>
+			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use to mount the device file system inside the jail. <br><b>This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.</b>"), "", false);?>
+			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
+			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
+			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Fstab"));?>
 			<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> <p> Also you can use fstab editor ")), false, 65, 5, false, false);?>
@@ -569,7 +572,6 @@ function redirect() {
 			<!-- in edit mode user not have access to extract binaries. I strongly disagree. -->
 			<tr id='install_source_empty'><td colspan='2' class='list' height='12'></td></tr>
 			<tr id='install_source'><td colspan='2' valign='top' class='listtopic'>Installation Source</td></tr>
-			
 			<?php html_combobox("source", gettext("Jail Source"), $pconfig['source'], array('tarballs' =>'From Archive','template'=> 'From Template'), gettext("Choose jail source. Selecting 'From Template' will clone the jail specified by the template folder." ), true, false , "source_change()" );?>
 			<?php
 			// This obtains a list of files that match the criteria (named anything FreeBSD*)
@@ -597,9 +599,10 @@ function redirect() {
 					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="Fstab editor">
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
 					<input name="type" type="hidden" value="<?=$pconfig['type'];?>" />
+					<?php if ( isset( $pconfig['ports'])) { ?>
+						<input name="ports" type="hidden" value="<?= true;?>" />
+					<?php }?>
 				</div>
-				
-				
 				<?php include("formend.inc");?>
 			</form>
 		</td>

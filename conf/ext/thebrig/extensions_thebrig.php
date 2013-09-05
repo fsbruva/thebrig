@@ -19,12 +19,12 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 if (isset($_GET['name']) && ! isset($_GET['act'])) {
 	$jailnameexec=$_GET['name'];
 	$jailnamecmd=$_GET['action'];
+	// Next lines write messages to log
 	cmd_exec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}",$a_tolog, $a_tolog1);
 	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
 	$handle1 = fopen($filelog, "a+");
 	foreach ($a_tolog1 as $tolog1 ) { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog1)."\n" ); }
 	fclose ($handle1);
-	
 }
 
 // sent to page data from config.xml
@@ -147,6 +147,7 @@ var auto_refresh = setInterval(
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 		</ul>

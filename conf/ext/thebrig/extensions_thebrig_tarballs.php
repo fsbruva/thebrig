@@ -13,6 +13,7 @@ file_put_contents ("/tmp/ftpsen", $ftp_n );
 file_put_contents ("ftpservers", $ftp_servers[$ftp_n] );
 $tempfilecontent = "<?php require(\"auth.inc\"); require(\"guiconfig.inc\"); print ( file_get_contents(\"ftpservers\"));?>";
 file_put_contents ("test.php", $tempfilecontent );
+
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
 } // end of elseif
@@ -140,7 +141,7 @@ m1000:	file_put_contents ("ftpservers", $ftp_servers[$ftp_n] );
 			++$ftp_n;
 			file_put_contents ("/tmp/ftpsen", $ftp_n );
 			If ($ftp_n < count ($ftp_servers)) {goto m1000;}
-unlink ("/tmp/ftpsen");
+			unlink ("/tmp/ftpsen");
 			$input_errors[] = _THEBRIG_CHECK_NETWORKING ;
 			}
 			else {
@@ -162,13 +163,14 @@ unlink ("/tmp/ftpsen");
 			$input_errors[] = "not a resource!";
 		}
 	} // end of if for the user pressed "query"
+	//output to thebrig.log
 	$a_tolog1 = file($config['thebrig']['rootfolder'] . "thebrigerror.txt");
 	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
 	$handle1 = fopen($filelog, "a+");
 	foreach ($a_tolog1 as $tolog1 ) { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog1)."\n" ); }
 	fclose ($handle1);
-unlink ($config['thebrig']['rootfolder'] . "thebrigerror.txt");
-	// There are no input errors detected, so we can attempt the actual work 
+	unlink ($config['thebrig']['rootfolder'] . "thebrigerror.txt");
+	// There are no input errors detected, so we can attempt the actual work
 	if ( !$input_errors )
 	{
 		// In this case, the actual work is to delete the selected tarballs from the upper section of the page
@@ -200,7 +202,7 @@ unlink ($config['thebrig']['rootfolder'] . "thebrigerror.txt");
 			// This loop runs for each of the selected pacakages
 			foreach ( $pack_get as $pack_name ) {
 				// This code builds the command string with the appropriate architecture, release & package name.
-				$c_string = "/bin/sh "."{$config['thebrig']['rootfolder']}"."conf/bin/thebrig_fetch.sh ".$arch." ".$rel_get." ".$pack_name." ".$config['thebrig']['rootfolder']."work ".$ftp_servers[$ftp_n]." >/dev/null &";
+				$c_string = "/bin/sh "."{$config['thebrig']['rootfolder']}"."conf/bin/thebrig_fetch.sh "."{$arch} {$rel_get} {$pack_name} {$config['thebrig']['rootfolder']}"."work ".$ftp_servers[$ftp_n]." >/dev/null &";
 				// Carries out the fetching operation in the background
 				exec( $c_string , $output, $return);
 			}// end of for loop
@@ -237,6 +239,7 @@ var auto_refresh = setInterval(
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 		</ul>
@@ -245,10 +248,7 @@ var auto_refresh = setInterval(
 		<ul id="tabnav2">
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"  title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a>
-			</li>
-			
+			<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
 
@@ -340,7 +340,7 @@ var auto_refresh = setInterval(
 		</tr>
 		<tr>
 			<!-- This is the empty left column-->
-			<td width="22%" valign="top"><div id="ftpserv" style="display: block;"> </td>
+			<td width="22%" valign="top"><div id="ftpserv" style="display: block;"></td>
 			<td width="78%">
 			<!-- This is the Fetch button, which is dependent upon a successful ftp server query -->
 			<?php 

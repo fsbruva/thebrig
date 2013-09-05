@@ -247,9 +247,7 @@ include("fbegin.inc");?>
 		<ul id="tabnav2">
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			<li class="tabact">
-				<a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a>
-			</li>
+			<li class="tabact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
 	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform">

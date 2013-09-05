@@ -87,7 +87,6 @@ if ($_POST) {
 	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
 		$pconfig['rootfolder'] = $pconfig['rootfolder'] . "/";
 	}
-	
 	// This first check to make sure that the supplied folder actually exists. If it does not
 	// then the user should be alerted. No changes will be made.
 	if ( !is_dir( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ) {
@@ -145,7 +144,7 @@ if ($_POST) {
 			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
 			$langfile = file("ext/thebrig/lang.inc");
 			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
-			$config['thebrig']['version'] = substr($version_1[1],0,3);
+			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
 			write_config(); // Write the config to disk
 			if (!is_dir ("{$config['thebrig']['rootfolder']}conf/ports")) mkdir ("{$config['thebrig']['rootfolder']}conf/ports",0777);
 		// Whatever we did, we did it successfully
@@ -178,7 +177,7 @@ function disable_buttons() {
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
-			<!--- <li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li> -->
+			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 		</ul>
@@ -187,9 +186,7 @@ function disable_buttons() {
 		<ul id="tabnav2">
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a>
-			</li>
+			<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
 
