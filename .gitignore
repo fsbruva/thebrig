@@ -18,7 +18,9 @@ conf/ports/*
 !conf/libexec/*
 !conf/db
 conf/db/*
-
+conf/periodic.conf
+conf/portsnap.conf
+conf/freebsd-update.conf
 #################
 ## Eclipse
 #################
