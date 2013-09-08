@@ -35,7 +35,7 @@ if ($_POST) {
 			$config_changed = true;
 		} 
 		elseif ( $gitversion > $myversion ) {
-			// We want to make sure we can't let the user revert
+			// We want to make sure we can't let the user revert - the code we need to update thebrig will go here.
 			
 		}
 		
