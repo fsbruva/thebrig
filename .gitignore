@@ -6,6 +6,17 @@
 !conf/*
 !conf/ext/thebrig
 !conf/ext/thebrig/*
+!conf/bin
+!conf/bin/*
+conf/bin/bspatch
+conf/bin/comm
+conf/bin/ftp_amd64
+conf/bin/ftp_i386
+conf/bin/host
+conf/bin/join
+conf/bin/lam
+conf/bin/look
+conf/bin/openssl
 conf/sbin
 conf/sbin/*
 conf/jail_start
