@@ -708,6 +708,7 @@ If (isset($config['thebrig']['systenv'])) { fwrite ($handle, "jail_sysvipc_allow
 // with this trick I can make simple loop for write config
 array_sort_key($testarray, "jailno");
 foreach ($testarray as $out_jail ) {
+		If (isset($out_jail['enable'])) {$startonboot = "{$startonboot} {$out_jail['jailname']}";} else {$startonboot = $startonboot;}
 		fwrite ($handle, "##{$k}###########{$out_jail['jailname']}####{$out_jail['desc']}#####\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_rootdir=\"{$out_jail['jailpath']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_hostname=\"{$out_jail['jailname']}.{$config['system']['domain']}\"\n");
