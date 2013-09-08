@@ -17,11 +17,16 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_UPDATER);
 $brig_update_ready = thebrig_update_prep();
 
 if ($brig_update_ready == 0 ){
+	// The operations carried out in thebrig_update_prep will only return 0 if there is at least one complete jail,
+	// and the necessary binaries for update operations were able to be copied. If there are no jails present, then the function
+	// will return 2
+	
 	// Slight redefinition to make life a little easier
 	$brig_root = $config['thebrig']['rootfolder'] ;
 	$brig_update_db = $brig_root . "conf/db/freebsd-update/";
 
-	if (is_array($config['thebrig']['content'])) { array_sort_key($config['thebrig']['content'], "jailno");
+	// See my above comments for why the if() that used to live here is no longer needed
+	array_sort_key($config['thebrig']['content'], "jailno");
 	$a_jail = &$config['thebrig']['content'];
 	$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
 
@@ -31,7 +36,7 @@ if ($brig_update_ready == 0 ){
 		//$input_errors[]=$a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback";
 	}
 }
-}
+
 // User has clicked a button
 if ($_POST) {
 	unset($input_errors);
