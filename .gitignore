@@ -4,23 +4,30 @@
 *
 !conf
 !conf/*
-!conf/bin
-!conf/bin/*
 !conf/ext/thebrig
 !conf/ext/thebrig/*
+!conf/bin
+!conf/bin/*
+conf/bin/bspatch
+conf/bin/comm
+conf/bin/ftp_amd64
+conf/bin/ftp_i386
+conf/bin/host
+conf/bin/join
+conf/bin/lam
+conf/bin/look
+conf/bin/openssl
+conf/sbin
+conf/sbin/*
 conf/jail_start
 conf/bin/ftp
-!conf/ports
+conf/ports
 conf/ports/*
-!conf/sbin
-!conf/sbin/*
-!conf/libexec
-!conf/libexec/*
-!conf/db
+conf/libexec
+conf/libexec/*
+conf/db
 conf/db/*
-conf/periodic.conf
-conf/portsnap.conf
-conf/freebsd-update.conf
+
 #################
 ## Eclipse
 #################
@@ -28,6 +35,7 @@ conf/freebsd-update.conf
 *.pydevproject
 .project
 .metadata
+#bin/
 
 tmp/
 *.tmp
@@ -120,6 +128,7 @@ DocProject/Help/html
 publish
 
 # Others
+[Bb]in
 [Oo]bj
 sql
 TestResults
@@ -162,6 +171,7 @@ dist
 build
 eggs
 parts
+#bin
 var
 sdist
 develop-eggs
