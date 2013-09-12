@@ -76,19 +76,18 @@ if ($_POST) {
 	$pconfig = $_POST;
 	 
 	if ( $pconfig['remove'] ) {
+		if (is_dir($config['thebrig']['rootfolder']."basejail")) { $cmd = "chflags -R noschg ".$config['thebrig']['rootfolder']."basejail"; mwexec($cmd);} else {}
 		// we want to remove thebrig
 		thebrig_unregister();
 		// Browse back to the main page
 		header("Location: /");
 		exit;
 	}
-	
 	// Complete all root folder error checking.
 	// Convert root folder after filechoicer
 	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
 		$pconfig['rootfolder'] = $pconfig['rootfolder'] . "/";
 	}
-	
 	
 	// This first check to make sure that the supplied folder actually exists. If it does not
 	// then the user should be alerted. No changes will be made.
@@ -174,30 +173,30 @@ elseif ($savemsg) print_info_box($savemsg);
 function disable_buttons() {
 	document.iform.Submit.disabled = true;
 	document.iform.submit();}
+function message(obj) {
+	if (obj.checked) {
+		alert('If you want to uninstall the TheBrig, please make sure that all jails have been removed');
+	}
+		return true;
+}
 </script>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
-			<li class="tabinact">
-				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
-			</li>
-			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?>
+			<li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li>
+			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 					</span> </a>
 				</li>
-			<li class="tabact">
-				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
-			</li>
-			
 		</ul>
 	</td></tr>
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav2">
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a>
-			</li>
+			<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
 
@@ -219,7 +218,7 @@ function disable_buttons() {
 		<!-- This is the row beneath the title -->
 		<tr><td width="22%" valign="top" class="vncellreq">&nbsp;</td>
 			<td width="78%" class="vtable">
-				<input type="checkbox" name="remove" value="1"><?=_THEBRIG_CLEANUP_DESC;?>
+				<input type="checkbox" name="remove" value="1" onclick="return message(this);" ><?=_THEBRIG_CLEANUP_DESC;?>
 			</td>
 		</tr>
 			

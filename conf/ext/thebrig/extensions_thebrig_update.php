@@ -12,7 +12,6 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_UPDATER);
 
-
 // we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
 $brig_update_ready = thebrig_update_prep();
 
@@ -352,7 +351,7 @@ function conf_handler() {
 				<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?>
 					</span> </a>
 				</li>
-
+				<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 			</ul>
 		</td>
 	</tr>

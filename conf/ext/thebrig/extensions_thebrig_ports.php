@@ -205,7 +205,7 @@ function conf_handler() {
 				<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?>
 					</span> </a>
 				</li>
-
+				<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 			</ul>
 		</td>
 	</tr>

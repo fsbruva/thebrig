@@ -496,7 +496,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
-
+	
 } // end of function
 
 
@@ -717,6 +717,7 @@ If (isset($config['thebrig']['systenv'])) { fwrite ($handle, "jail_sysvipc_allow
 // with this trick I can make simple loop for write config
 array_sort_key($testarray, "jailno");
 foreach ($testarray as $out_jail ) {
+		If (isset($out_jail['enable'])) {$startonboot = "{$startonboot} {$out_jail['jailname']}";} else {$startonboot = $startonboot;}
 		fwrite ($handle, "##{$k}###########{$out_jail['jailname']}####{$out_jail['desc']}#####\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_rootdir=\"{$out_jail['jailpath']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_hostname=\"{$out_jail['jailname']}.{$config['system']['domain']}\"\n");
@@ -729,14 +730,16 @@ foreach ($testarray as $out_jail ) {
 		fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
+		foreach ($out_jail['auxparam'] as $fstab) {	fwrite ($handle1, $fstab."\n"); } 
+		if ( $out_jail['type'] === 'slim') { fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); }
+		if ( isset( $out_jail['ports']) ) { fwrite( $handle1 ,  $config['thebrig']['rootfolder'] . "conf/ports/ " .  $out_jail['jailpath'] . "usr/ports/ nullfs ro 0 0\n"); }
+		fclose($handle1);
+		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
 		If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
-		If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
-		If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
-		If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
-		If (isset($out_jail['enable'])) {$startonboot = "{$startonboot} {$out_jail['jailname']}";} else {$startonboot = $startonboot;}
-		// Fstab entries
-		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
-		$handle1 = fopen($fstabfile, "w");
+		If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
+				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
+				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
+			break;
 		if ( $out_jail['type'] === 'slim') { fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); }
 		if ( isset( $out_jail['ports']) ) { fwrite( $handle1 ,  $config['thebrig']['rootfolder'] . "conf/ports/ " .  $out_jail['jailpath'] . "usr/ports/ nullfs ro 0 0\n"); }
 		If (isset($out_jail['devfs_enable'])) { fwrite( $handle1 ,"devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n"); }
@@ -748,4 +751,31 @@ foreach ($testarray as $out_jail ) {
 $startonboot = ltrim( $startonboot );
 fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
 fclose($handle);
+}
+// cmd_exec execute process and have output and error
+//$cmd - proccess
+//$stdout - result
+//$stderr - messages about error
+function cmd_exec($cmd, &$stdout, &$stderr)
+{
+    $outfile = tempnam(".", "cmd");
+    $errfile = tempnam(".", "cmd");
+    $descriptorspec = array(
+        0 => array("pipe", "r"),
+        1 => array("file", $outfile, "w"),
+        2 => array("file", $errfile, "w")
+    );
+    $proc = proc_open($cmd, $descriptorspec, $pipes);
+    
+    if (!is_resource($proc)) return 255;
+
+    fclose($pipes[0]);    //Don't really want to give any input
+
+    $exit = proc_close($proc);
+    $stdout = file($outfile);
+    $stderr = file($errfile);
+
+    unlink($outfile);
+    unlink($errfile);
+    return $exit;
 }

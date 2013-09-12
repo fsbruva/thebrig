@@ -19,7 +19,12 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 if (isset($_GET['name']) && ! isset($_GET['act'])) {
 	$jailnameexec=$_GET['name'];
 	$jailnamecmd=$_GET['action'];
-	mwexec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}");
+	// Next lines write messages to log
+	cmd_exec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}",$a_tolog, $a_tolog1);
+	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
+	$handle1 = fopen($filelog, "a+");
+	foreach ($a_tolog1 as $tolog1 ) { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog1)."\n" ); }
+	fclose ($handle1);
 }
 
 // sent to page data from config.xml
@@ -141,15 +146,12 @@ var auto_refresh = setInterval(
 <table width="100%" border="0" cellpadding="0" cellspacing="0" >
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
-			<li class="tabact">
-				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
-			</li>
-			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?>
+			<li class="tabact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 					</span> </a>
 				</li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
-			</li>
 		</ul>
 	</td></tr>
 	
@@ -216,8 +218,9 @@ var auto_refresh = setInterval(
 									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
-										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="e.gif" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>
-										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return confirm('<?=gettext("Do you really want to delete this jail? I will archive file just in case. It can be removed later. ");?>')"><img src="x.gif" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>
+										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="e.gif" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>&nbsp;
+										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return confirm('<?=gettext("Do you really want to delete this jail? I will archive file just in case. It can be removed later. ");?>')"><img src="x.gif" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>&nbsp;
+										<a href="extensions_thebrig_fstab.php?act=editor&amp;uuid=<?=$jail['uuid'];?>"><img src="ext/thebrig/fstab.png" title="<?=gettext("Edit fstab for this jail");?>" border="0" alt="<?=gettext("Edit jail's fstab");?>" /></a>
 									</td>
 									<?php else:?>
 									<td valign="middle" nowrap="nowrap" class="list">

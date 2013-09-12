@@ -12,6 +12,9 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Manager");
 
+if (is_array ($config['thebrig']['content'])) { array_sort_key($config['thebrig']['content'], "jailno"); }
+$a_jail = &$config['thebrig']['content'];
+
 // User has clicked a button
 if ($_POST) {
 	unset($input_errors);
@@ -104,7 +107,7 @@ function conf_handler() {
 			<li class="tabinact">
 				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
-			
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 		</ul>
 	</td></tr>
 	<tr><td class="tabnavtbl">
