@@ -142,6 +142,7 @@ m1000:	file_put_contents ("ftpservers", $ftp_servers[$ftp_n] );
 			if ( !$result ) {
 			++$ftp_n;
 			file_put_contents ("/tmp/ftpsen", $ftp_n );
+			// This causes a return to an earlier part of the code. VERY POOR CODING.
 			If ($ftp_n < count ($ftp_servers)) {goto m1000;}
 			unlink ("/tmp/ftpsen");
 			$input_errors[] = _THEBRIG_CHECK_NETWORKING ;
@@ -246,9 +247,6 @@ var auto_refresh = setInterval(
 			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?>
-					</span> </a>
-				</li>
 		</ul>
 	</td></tr>
 	<tr><td class="tabnavtbl">
