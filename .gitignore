@@ -35,7 +35,6 @@ conf/db/*
 *.pydevproject
 .project
 .metadata
-#bin/
 
 tmp/
 *.tmp
