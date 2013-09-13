@@ -435,11 +435,11 @@ function conf_handler() {
 									</td>
 								</tr>
 			<?php $k = 0; for( $k; $k < count ( $a_jail ) ; $k ++ ):
-				if ( file_exists ( $a_jail[$k]['jailpath'] . "/var/db/freebsd-update/tag")){
+				if ( file_exists ( $a_jail[$k]['jailpath'] . "var/db/freebsd-update/tag")){
 				// Extract the most recent tag's date, and convert from Unix epoch to a readable date
-					$tag_full = explode( "|", file_get_contents($a_jail[$k]['jailpath'] . "/var/db/freebsd-update/tag")) ;
+					$tag_full = explode( "|", file_get_contents($a_jail[$k]['jailpath'] . "var/db/freebsd-update/tag")) ;
 					$tag_version = $tag_full[2] . "-p" . $tag_full[3];
-					$tag_date = date ( "M d Y" ,filemtime( $a_jail[$k]['jailpath'] . "/var/db/freebsd-update/tag" ));
+					$tag_date = date ( "M d Y" ,filemtime( $a_jail[$k]['jailpath'] . "var/db/freebsd-update/tag" ));
 					// Check if there are any pending updates (file lists have been created)
 					if ( file_exists ( $a_jail[$k]['jailpath'] . "var/db/freebsd-update/files.updated" ) ) {
 						$updated_contents[$k] = rtrim ( file_get_contents($a_jail[$k]['jailpath'] . "var/db/freebsd-update/files.updated"));
@@ -489,9 +489,9 @@ function conf_handler() {
 				<?php endfor; 
 				if ( file_exists ( $config['thebrig']['template'] . "/var/db/freebsd-update/tag")){
 				// Extract the most recent tag's date, and convert from Unix epoch to a readable date
-					$tag_full = explode( "|", file_get_contents($config['thebrig']['template'] . "/var/db/freebsd-update/tag")) ;
+					$tag_full = explode( "|", file_get_contents($config['thebrig']['template'] . "var/db/freebsd-update/tag")) ;
 					$tag_version = $tag_full[2] . "-p" . $tag_full[3];
-					$tag_date = date ( "M d Y" ,filemtime( $config['thebrig']['template'] . "/var/db/freebsd-update/tag" ));
+					$tag_date = date ( "M d Y" ,filemtime( $config['thebrig']['template'] . "var/db/freebsd-update/tag" ));
 					// Check if there are any pending updates (file lists have been created)
 					if ( file_exists ( $config['thebrig']['template'] . "var/db/freebsd-update/files.updated" ) ) {
 						$updated_contents[$k] = rtrim ( file_get_contents($config['thebrig']['template'] . "var/db/freebsd-update/files.updated"));
