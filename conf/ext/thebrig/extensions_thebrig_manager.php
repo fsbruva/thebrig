@@ -127,7 +127,7 @@ function conf_handler() {
 			$myversion = 0 + substr($myversion[1],0,3);
 			$gitlangfile = file("/tmp/lang.inc");
 			$gitversion = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[1]);
-			$gitversion = 0 + substr($version[1],0,3);
+			$gitversion = 0 + substr($gitversion[1],0,3);
 			
 			
 			html_titleline(gettext("Update Availability")); 
