@@ -12,9 +12,6 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Manager");
 
-if (is_array ($config['thebrig']['content'])) { array_sort_key($config['thebrig']['content'], "jailno"); }
-$a_jail = &$config['thebrig']['content'];
-
 // User has clicked a button
 if ($_POST) {
 	unset($input_errors);
@@ -126,10 +123,10 @@ function conf_handler() {
 		<?php 
 			// Download the most recent lang.inc, to see the version
 			mwexec ( "fetch -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/working/conf/ext/thebrig/lang.inc" ) ;
-			$version = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
-			$myversion = 0 + substr($version[1],0,3);
-			$langfile = file("/tmp/lang.inc");
-			$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+			$myversion = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
+			$myversion = 0 + substr($myversion[1],0,3);
+			$gitlangfile = file("/tmp/lang.inc");
+			$gitversion = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[1]);
 			$gitversion = 0 + substr($version[1],0,3);
 			
 			
