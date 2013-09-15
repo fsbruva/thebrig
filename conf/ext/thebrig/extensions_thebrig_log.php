@@ -158,7 +158,7 @@ function log_download($loginfo) {
 			readfile($loginfo['logfile']);
 	}
 }
-$pgtitle = array(gettext("Thebrig"), gettext(" Log"));
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, gettext(" Log"));
 ?>
 <?php include("fbegin.inc");?>
 <script type="text/javascript">

@@ -5,7 +5,7 @@ require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
 	
 // Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE) ;
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE,  _THEBRIG_TARBALL_MGMT) ;
 // add array Freebsd ftp servers 
 $ftp_servers = array( "ftp1.freebsd.org", "ftp2.freebsd.org", "ftp3.freebsd.org", "ftp4.freebsd.org","ftp5.freebsd.org", "ftp.freebsd.org", "ftp6.freebsd.org","ftp7.freebsd.org","ftp10.FreeBSD.org","ftp11.FreeBSD.org","ftp13.FreeBSD.org","ftp14.FreeBSD.org");
 // This checks if we have successfully contacted a ftp server - the existence of /tmp/ftpsen gives us a clue about that. If the file
