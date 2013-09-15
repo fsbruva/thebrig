@@ -730,21 +730,43 @@ foreach ($testarray as $out_jail ) {
 		fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
-		foreach ($out_jail['auxparam'] as $fstab) {	fwrite ($handle1, $fstab."\n"); } 
-		if ( $out_jail['type'] === 'slim') { fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); }
-		if ( isset( $out_jail['ports']) ) { fwrite( $handle1 ,  $config['thebrig']['rootfolder'] . "conf/ports/ " .  $out_jail['jailpath'] . "usr/ports/ nullfs ro 0 0\n"); }
-		fclose($handle1);
-		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
-		If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
-		If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
+		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
+		$handle1 = fopen($fstabfile, "w");
+		switch ($out_jail['type']) {
+			case "slim":
+				fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
+				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); 
+						fwrite( $handle1 ,"devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
+				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
+						fwrite( $handle1 ,"procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
+				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n"); 
+						fwrite( $handle1 ,"fdescfs " .  $out_jail['jailpath'] . "dev/fd fdescfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
+				fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); 
+			break;
+			case "full":
+				If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
+				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); 
+						fwrite( $handle1 ,"devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
+				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
+						fwrite( $handle1 ,"procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
+				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");
+						fwrite( $handle1 ,"fdescfs " .  $out_jail['jailpath'] . "dev/fd fdescfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
+						
+			break;
+			case "linux":
+				fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
+				fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");
+				fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
+				fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");
+			
+			break;
+			case "custom":
+				If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
+				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
 				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
 				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
 			break;
-		if ( $out_jail['type'] === 'slim') { fwrite( $handle1 ,  $config['thebrig']['basejail']['folder'] . " " .  $out_jail['jailpath'] . "basejail/ nullfs ro 0 0\n"); }
-		if ( isset( $out_jail['ports']) ) { fwrite( $handle1 ,  $config['thebrig']['rootfolder'] . "conf/ports/ " .  $out_jail['jailpath'] . "usr/ports/ nullfs ro 0 0\n"); }
-		If (isset($out_jail['devfs_enable'])) { fwrite( $handle1 ,"devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n"); }
-		If (isset($out_jail['fdescfs_enable'])) { fwrite( $handle1 ,"fdescfs " .  $out_jail['jailpath'] . "dev fdescfs rw 0 0\n"); }
-		If (isset($out_jail['proc_enable'])) { fwrite( $handle1 ,"procfs " .  $out_jail['jailpath'] . "dev procfs rw 0 0\n"); }
+		}	
 		foreach ($out_jail['auxparam'] as $fstab) {	fwrite ($handle1, $fstab."\n"); } 
 		fclose($handle1);
 	}
