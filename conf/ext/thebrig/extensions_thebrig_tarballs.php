@@ -324,7 +324,7 @@ var auto_refresh = setInterval(
 			
 			<?php 
 			if ( isset($config['thebrig']['ftpquery']) ){
-				// This means we have successfully queried the ftp server, and so can thus display some
+				// This means we have  successfully queried the ftp server, and so can thus display some
 				// info to the user about their download options.
 				echo "Release: " ;
 				// This calls the menu list creation function to build the html object (dropdown box). This object is named formRelease, and is
