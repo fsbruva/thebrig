@@ -153,7 +153,7 @@ if ($_POST) {
 	} // end of no input errors
 } // end of POST
 // Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, isset($config['thebrig']['version']) ? "version:".$config['thebrig']['version'] : "First start");
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_BASIC_CONFIG, isset($config['thebrig']['version']) ? "version:".$config['thebrig']['version'] : "First start");
 // Uses the global fbegin include
 include("fbegin.inc");
 
