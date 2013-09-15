@@ -164,7 +164,7 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, gettext(" Log"));
 <script type="text/javascript">
 <!--
 function log_change() {
-	// Reload page
+	// Reload page .
 	window.document.location.href = 'extensions_thebrig_log.php?log=' + document.iform.log.value;
 }
 //-->
