@@ -227,8 +227,8 @@ if ($_POST['submit'] === "Compress") {
 		if (strlen($foldername) > 6 && $path[strlen($foldername)-1] == "/") { $foldername = substr($foldername, 0, strlen($foldername)-1); } 
 		$path_parts = pathinfo($foldername);
 		$timestamp = date("Y-m-d_H:i:s");
-		chdir($path_parts['dirname']);
-		mwexec("tar -c -z -f " . $config['thebrig']['rootfolder'] . "work/snached_" . $timestamp . ".txz -C" . $path_parts['dirname'] . " " . $path_parts['basename'] . "/*");
+		chdir($foldername);
+		mwexec("tar -c -z -f " . $config['thebrig']['rootfolder'] . "work/snached_" . $timestamp . ".txz -C" . $path_parts['dirname'] . "/".$path_parts['basename']. " " . "*");
 		// This tool make archive any folder and place archive into thebrig/work.  Usefull for easy migrate old jails.
 }
 out1: 
