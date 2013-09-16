@@ -413,6 +413,7 @@ function type_change(){
 		showElementById('mounts_separator_empty','show');
 		showElementById('mounts_separator','show');
 		showElementById('jail_mount_tr','hide');
+		document.iform.jail_mount.checked = true;
 		showElementById('devfs_enable_tr','show');
 		showElementById('proc_enable_tr','show');
 		showElementById('fdescfs_enable_tr','show');
@@ -437,9 +438,13 @@ function type_change(){
 		showElementById('mounts_separator_empty','hide');
 		showElementById('mounts_separator','hide');
 		showElementById('jail_mount_tr','hide');
+		document.iform.jail_mount.checked = true;
 		showElementById('devfs_enable_tr','hide');
+		document.iform.devfs_enable.checked = true;
 		showElementById('proc_enable_tr','hide');
+		document.iform.proc_enable.checked = true;
 		showElementById('fdescfs_enable_tr','hide');
+		document.iform.fdescfs_enable.checked = true;
 		showElementById('install_source_empty','hide');
 		showElementById('install_source','hide');
 		showElementById('source_tr','hide');
@@ -528,7 +533,7 @@ function redirect() {
 			<?php html_separator();?>
 			<tr id='mounts_separator_empty'>	<td colspan='2' class='list' height='12'></td>
 			<tr id='mounts_separator'><td colspan='2' valign='top' class='listtopic'>Mounts</td></tr>
- 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("Enable the jail to automount its fstab file. <b>This is not optional for thin jails.</b> ")," " ," ", "event.preventDefault()");?>
+ 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("Enable the jail to automount its fstab file. <b>This is not optional for thin jails.</b> ")," " ," ");?>
 			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use to mount the device file system inside the jail. <br><b>This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.</b>"), "", false);?>
 			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "", false);?>
