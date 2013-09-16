@@ -55,7 +55,7 @@ $a_jail = &$config['thebrig']['content'];
 
 $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }
 
-//input_errors[] = implode ( " | " , array_keys ( $a_interface ));
+//$input_errors[] = implode ( " | " , array_keys ( $a_interface ));
 //$input_errors[] = implode( " | " , $a_interface);
 // This checks that the $uuid variable is set, and that the 
 // attempt to determine the index of the jail config that has the same 
@@ -345,9 +345,9 @@ if ($_POST) {
 		$jail['fib'] = $pconfig['fib'];
 		$jail['ports'] = isset( $pconfig['ports'] ) ? true : false ;
 		// Populate the jail. The simplest case is a full jail using tarballs.
-		if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 && strcmp ( $jail['type'], "full") == 0)
+		if ( $pconfig['source'] === "tarballs" && ( count ( $files_selected ) > 0 ) && $jail['type'] === "full")
 			thebrig_split_world($pconfig['jailpath'] , false , $files_selected );
-		elseif ( $pconfig['source'] === "template" && strcmp ( $jail['type'], "full") == 0 )
+		elseif ( $pconfig['source'] === "template" && $jail['type'] === "full" )
 			thebrig_split_world($pconfig['jailpath'] , false);
 		// Next simplest is to split the world if we're making a slim jail out of tarballs.
 		elseif ( $jail['type'] === "slim" ) {
