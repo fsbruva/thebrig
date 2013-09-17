@@ -416,19 +416,25 @@ function type_change(){
 		document.iform.jail_mount.checked = true;
 		showElementById('devfs_enable_tr','show');
 		showElementById('proc_enable_tr','show');
-		showElementById('fdescfs_enable_tr','show');
+		showElementById('fdescfs_enable_tr','hide');
 		showElementById('install_source_empty','show');
 		showElementById('install_source','show');
 		showElementById('source_tr','show');
 		showElementById('official_tr','show');
+		document.iform.devfs_enable.checked = false;
+		document.iform.proc_enable.checked = true;
 		break;
 	case 1:	
 		showElementById('mounts_separator_empty','show');
 		showElementById('mounts_separator','show');
 		showElementById('jail_mount_tr','show');
+		document.iform.jail_mount.checked = true;
 		showElementById('devfs_enable_tr','show');
+		document.iform.devfs_enable.checked = false;
 		showElementById('proc_enable_tr','show');
-		showElementById('fdescfs_enable_tr','show');
+		document.iform.proc_enable.checked = true;
+		showElementById('fdescfs_enable_tr','hide');
+		document.iform.fdescfs_enable.checked = false;
 		showElementById('install_source_empty','show');
 		showElementById('install_source','show');
 		showElementById('source_tr','show');
@@ -458,11 +464,15 @@ function type_change(){
 		showElementById('jail_mount_tr','show');
 		showElementById('devfs_enable_tr','show');
 		showElementById('proc_enable_tr','show');
-		showElementById('fdescfs_enable_tr','show');
+		showElementById('fdescfs_enable_tr','hide');
 		showElementById('install_source_empty','hide');
 		showElementById('install_source','hide');
 		showElementById('source_tr','hide');
 		showElementById('official_tr','hide');
+		document.iform.jail_mount.checked = true;
+		document.iform.devfs_enable.checked = false;
+		document.iform.proc_enable.checked = true;
+		document.iform.fdescfs_enable.checked = false;
 
 
 		break;
