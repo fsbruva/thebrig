@@ -421,8 +421,8 @@ function type_change(){
 		showElementById('install_source','show');
 		showElementById('source_tr','show');
 		showElementById('official_tr','show');
-		document.iform.devfs_enable.checked = false;
-		document.iform.proc_enable.checked = true;
+		document.iform.devfs_enable.checked = true;
+		document.iform.proc_enable.checked = false;
 		break;
 	case 1:	
 		showElementById('mounts_separator_empty','show');
@@ -430,9 +430,9 @@ function type_change(){
 		showElementById('jail_mount_tr','show');
 		document.iform.jail_mount.checked = true;
 		showElementById('devfs_enable_tr','show');
-		document.iform.devfs_enable.checked = false;
+		document.iform.devfs_enable.checked = true;
 		showElementById('proc_enable_tr','show');
-		document.iform.proc_enable.checked = true;
+		document.iform.proc_enable.checked = false;
 		showElementById('fdescfs_enable_tr','hide');
 		document.iform.fdescfs_enable.checked = false;
 		showElementById('install_source_empty','show');
@@ -470,8 +470,8 @@ function type_change(){
 		showElementById('source_tr','hide');
 		showElementById('official_tr','hide');
 		document.iform.jail_mount.checked = true;
-		document.iform.devfs_enable.checked = false;
-		document.iform.proc_enable.checked = true;
+		document.iform.devfs_enable.checked = true;
+		document.iform.proc_enable.checked = false;
 		document.iform.fdescfs_enable.checked = false;
 
 
