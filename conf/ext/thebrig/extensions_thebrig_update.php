@@ -71,12 +71,12 @@ if ($_POST) {
 			$brig_cron_job['hour']=1;
 			$brig_cron_job['day']="";
 			$brig_cron_job['month']="";
-			$brig_cron_job['weekday']="";
+			$brig_cron_job['weekday']=2;
 			$brig_cron_job['all_mins']=0;
 			$brig_cron_job['all_hours']=0;
 			$brig_cron_job['all_days']=1;
 			$brig_cron_job['all_months']=1;
-			$brig_cron_job['all_weekdays']=1;
+			$brig_cron_job['all_weekdays']=0;
 			$brig_cron_job['who']="root";
 			$brig_cron_job['command'] = "/usr/local/bin/php-cgi " . $brig_root . "conf/bin/thebrig_update_cron.php";
 
