@@ -161,7 +161,7 @@ function thebrig_tarball_list ($contains , $exclude='') {
 	// This function creates a list of tarballs that match a certain filename pattern
 	$installFiles = "";
 	if ( is_dir( $config['thebrig']['rootfolder'] )) {
-		$raw_list = glob("{$config['thebrig']['rootfolder']}work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip}", GLOB_BRACE);
+		$raw_list = glob("{$config['thebrig']['rootfolder']}work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip,tar.xz}", GLOB_BRACE);
 		$file_list = array_unique( $raw_list );
 		if ( $exclude ) {
 			foreach ( $exclude as $search_pattern ) {
