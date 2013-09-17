@@ -111,7 +111,13 @@ function thebrig_process_updatenotification($mode, $data) {
 				$timestamp = date("Y-m-d_H:i:s");
 				$jail2delete = $config['thebrig']['content'][$cnid];
 				mwexec ( "/etc/rc.d/jail stop " . $jail2delete['jailname']);
-				mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
+				if ( $jail2delete['type'] === "slim") {
+					mwexec("tar -cf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -C " . $jail2delete['jailpath'] . " ./" );
+					mwexec("tar -rf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -X basejail/ -C " . $config['thebrig']['basejail']['folder'] . " ./" );
+					mwexec("xz -S .txz " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar" );
+				}
+				else 
+					mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
 				mwexec ( "umount -a -F /etc/fstab." .  $jail2delete['jailname']);
 				if ( $jail2delete['devfs_enable'] == true )
 					mwexec ( "umount " . $jail2delete['jailpath'] . "dev");
