@@ -747,7 +747,8 @@ function write_rcconflocal () {
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_afterstart1=\"{$out_jail['afterstart1']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_stop=\"{$out_jail['exec_stop']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n");
+		fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n"
+		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n"));
 		If (isset($out_jail['jail_mount'])) {
 			fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
 		} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");
@@ -760,10 +761,6 @@ function write_rcconflocal () {
 		If (isset($out_jail['proc_enable'])) {
 			fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
 		} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");
-		}
-		If (isset($out_jail['fdescfs_enable'])) {
-			fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");
-		} else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");
 		}
 		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
 		$handle1 = fopen($fstabfile, "w");
