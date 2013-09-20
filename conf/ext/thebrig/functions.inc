@@ -773,6 +773,10 @@ function write_rcconflocal () {
 				fwrite ($handle1, $fstab."\n");
 			}
 		} else {}
+		if (isset($out_jail['ports'])) { 
+		$portsjailfolder	= 	$config['thebrig']['rootfolder']."conf/ports";
+		fwrite( $handle1 ,  $portsjailfolder . " " .  $out_jail['jailpath'] . "usr/ports nullfs ro 0 0\n");
+		} else {}
 		fclose($handle1);
 	}
 	$startonboot = ltrim( $startonboot );
