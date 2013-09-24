@@ -37,7 +37,7 @@ $pconfig['systenv'] = isset($config['thebrig']['systenv']);
 
 if ($_POST) {
 	// insert into pconfig changes
-
+	$pconfig = $_POST;
 
 	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
 	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
