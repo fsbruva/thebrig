@@ -26,7 +26,7 @@ if (isset($_POST['uuid']))
 
 // Page title
 $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_JAIL, isset($uuid) ? _THEBRIG_EDIT : _THEBRIG_ADD );
-$snid = "jail60"; // what is this for?
+
 
 // This checks if the current XML config has a section for jails, or if it's an array
 if ( !isset($config['thebrig']['content']) || !is_array($config['thebrig']['content']) )
@@ -65,7 +65,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['enable'] = isset($a_jail[$cnid]['enable']);
 	$pconfig['jailno'] = $a_jail[$cnid]['jailno'];
 	$pconfig['jailname'] = $a_jail[$cnid]['jailname'];
-	$pconfig['type'] = $a_jail[$cnid]['type'];
+	$pconfig['jail_type'] = $a_jail[$cnid]['jail_type'];
 	$pconfig['if'] = $a_jail[$cnid]['if'];
 	$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
 	$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
@@ -114,7 +114,7 @@ else {
 	$pconfig['enable'] = false;
 	$pconfig['jailno'] = thebrig_get_next_jailnumber();
 	$pconfig['jailname'] = "";
-	$pconfig['type']="Slim";
+	$pconfig['jail_type']="Slim";
 	$pconfig['if'] = "";
 	$pconfig['ipaddr'] = "";
 	$pconfig['subnet'] = "32";
@@ -310,7 +310,7 @@ if ($_POST) {
 		$jail['enable'] = isset($pconfig['enable']) ? true : false;
 		$jail['jailno'] = $pconfig['jailno'];
 		$jail['jailname'] = $pconfig['jailname'];
-		$jail['type'] = $pconfig['type'];
+		$jail['jail_type'] = $pconfig['jail_type'];
 		$jail['if'] = $pconfig['if'];
 		$jail['ipaddr'] = $pconfig['ipaddr'];
 		$jail['subnet'] = $pconfig['subnet'];
@@ -345,12 +345,12 @@ if ($_POST) {
 		$jail['fib'] = $pconfig['fib'];
 		$jail['ports'] = isset( $pconfig['ports'] ) ? true : false ;
 		// Populate the jail. The simplest case is a full jail using tarballs.
-		if ( $pconfig['source'] === "tarballs" && ( count ( $files_selected ) > 0 ) && $jail['type'] === "full")
+		if ( $pconfig['source'] === "tarballs" && ( count ( $files_selected ) > 0 ) && $jail['jail_type'] === "full")
 			thebrig_split_world($pconfig['jailpath'] , false , $files_selected );
-		elseif ( $pconfig['source'] === "template" && $jail['type'] === "full" )
+		elseif ( $pconfig['source'] === "template" && $jail['jail_type'] === "full" )
 			thebrig_split_world($pconfig['jailpath'] , false);
 		// Next simplest is to split the world if we're making a slim jail out of tarballs.
-		elseif ( $jail['type'] === "slim" ) {
+		elseif ( $jail['jail_type'] === "slim" ) {
 			// We know we're making a slim jail now
 			$config['thebrig']['basejail']['base_ver'] = $pconfig['base_ver'];
 			$config['thebrig']['basejail']['lib_ver'] = $pconfig['lib_ver'];
@@ -396,110 +396,91 @@ function thebrig_get_next_jailnumber() {
 	return $jailno;
 }
 ?>
+
 <?php include("fbegin.inc");?>
-<script type="text/javascript">
-<!--
-$(document).ready(function () {
-	source_change();
-	type_change();
+<script type="text/javascript">//<![CDATA[
+$(document).ready(function(){
+	var gui = new GUI;
+	$('#jail_type').change(function() {
+		switch ($('#jail_type').val()) {
+	case "slim":
+		$('#mounts_separator_empty').show();
+		$('#mounts_separator').show();
+		$('#jail_mount_tr').hide();
+		$('#devfs_enable_tr').show();
+		$('#proc_enable_tr').show();
+		$('#fdescfs_enable_tr').hide();
+		$('#install_source_empty').show();
+		$('#install_source').show();
+		$('#source_tr').show();
+		$('#official_tr').show();
+		$('#jail_mount').prop('checked', true);
+		$('#devfs_enable').prop('checked', true);
+		$('#proc_enable').prop('checked', false);
+		break;
+	case "full":	
+		$('#mounts_separator_empty').show();
+		$('#mounts_separator').show();
+		$('#jail_mount_tr').show();
+		$('#devfs_enable_tr').show();
+		$('#proc_enable_tr').show();
+		$('#fdescfs_enable_tr').hide();
+		$('#install_source_empty').show();
+		$('#install_source').show();
+		$('#source_tr').show();
+		$('#official_tr').show();
+		$('#jail_mount').prop('checked', true);
+		$('#devfs_enable').prop('checked', false);
+		$('#proc_enable').prop('checked', false);
+		break;
+	case "linux":	
+		$('#mounts_separator_empty').hide();
+		$('#mounts_separator').hide();
+		$('#jail_mount_tr').hide();
+		$('#devfs_enable_tr').hide();
+		$('#proc_enable_tr').hide();
+		$('#fdescfs_enable_tr').hide();
+		$('#install_source_empty').hide();
+		$('#install_source').hide();
+		$('#source_tr').hide();
+		$('#official_tr').hide();
+		$('#jail_mount').prop('checked', true);
+		$('#devfs_enable').prop('checked', true);
+		$('#proc_enable').prop('checked', true);
+		break;	
+	case "custom":
+		$('#mounts_separator_empty').show();
+		$('#mounts_separator').show();
+		$('#jail_mount_tr').show();
+		$('#devfs_enable_tr').show();
+		$('#proc_enable_tr').show();
+		$('#fdescfs_enable_tr').hide();
+		$('#install_source_empty').hide();
+		$('#install_source').hide();
+		$('#source_tr').hide();
+		$('#official_tr').hide();
+		$('#jail_mount').prop('checked', false);
+		$('#devfs_enable').prop('checked', false);
+		$('#proc_enable').prop('checked', false);
+		break;
+		}
+	});
+$('#source').change(function(){
+	switch ($('#source').val()) {
+	case "tarballs":
+		$('#official_tr').show();	
+		$('#homegrown_tr').show();
+		break;
+	case "template":
+		$('#official_tr').hide();
+		$('#homegrown_tr').hide();
+		}
+	});
+$('#jail_type').change();
+$('#source').change();
 });
 
-function type_change(){
-	var x=document.iform.jail_type.selectedIndex;
-	var y=document.iform.jail_type.options;
-	document.iform.type.value = y[x].value;
-	switch (x) {
-	case 0:
-		showElementById('mounts_separator_empty','show');
-		showElementById('mounts_separator','show');
-		showElementById('jail_mount_tr','hide');
-		document.iform.jail_mount.checked = true;
-		showElementById('devfs_enable_tr','show');
-		showElementById('proc_enable_tr','show');
-		showElementById('fdescfs_enable_tr','hide');
-		showElementById('install_source_empty','show');
-		showElementById('install_source','show');
-		showElementById('source_tr','show');
-		showElementById('official_tr','show');
-		document.iform.devfs_enable.checked = true;
-		document.iform.proc_enable.checked = false;
-		break;
-	case 1:	
-		showElementById('mounts_separator_empty','show');
-		showElementById('mounts_separator','show');
-		showElementById('jail_mount_tr','show');
-		document.iform.jail_mount.checked = true;
-		showElementById('devfs_enable_tr','show');
-		document.iform.devfs_enable.checked = true;
-		showElementById('proc_enable_tr','show');
-		document.iform.proc_enable.checked = false;
-		showElementById('fdescfs_enable_tr','hide');
-		document.iform.fdescfs_enable.checked = false;
-		showElementById('install_source_empty','show');
-		showElementById('install_source','show');
-		showElementById('source_tr','show');
-		showElementById('official_tr','show');
-		break;
-	case 2:	
-		showElementById('mounts_separator_empty','hide');
-		showElementById('mounts_separator','hide');
-		showElementById('jail_mount_tr','hide');
-		document.iform.jail_mount.checked = true;
-		showElementById('devfs_enable_tr','hide');
-		document.iform.devfs_enable.checked = true;
-		showElementById('proc_enable_tr','hide');
-		document.iform.proc_enable.checked = true;
-		showElementById('fdescfs_enable_tr','hide');
-		document.iform.fdescfs_enable.checked = true;
-		showElementById('install_source_empty','hide');
-		showElementById('install_source','hide');
-		showElementById('source_tr','hide');
-		showElementById('official_tr','hide');
-		
-		break;	
-	    
-	case 3:	
-		showElementById('mounts_separator_empty','show');
-		showElementById('mounts_separator','show');
-		showElementById('jail_mount_tr','show');
-		showElementById('devfs_enable_tr','show');
-		showElementById('proc_enable_tr','show');
-		showElementById('fdescfs_enable_tr','hide');
-		showElementById('install_source_empty','hide');
-		showElementById('install_source','hide');
-		showElementById('source_tr','hide');
-		showElementById('official_tr','hide');
-		document.iform.jail_mount.checked = true;
-		document.iform.devfs_enable.checked = true;
-		document.iform.proc_enable.checked = false;
-		document.iform.fdescfs_enable.checked = false;
-
-
-		break;
-
-	}
-}
-function source_change() {
-	switch (document.iform.source.selectedIndex) {
-		case 0:
-			showElementById('official_tr','show');
-			showElementById('homegrown_tr','show');
-			break;
-		case 1:
-			showElementById('official_tr','hide');
-			showElementById('homegrown_tr','hide');
-			break;
-	}
-}
-function helpbox()
-{
-alert("Slim - This is a fully functional jail, but when first installed, only occupies about 2 MB in its folder.\n\n full - This is a full sized jail, about 300 MB per jail, and is completely self contained.\n\n Linux - jail for Linux, such Debian.\n\n custom- this only create jail folder and make simulation without install. Usefull for migrate jails." );
-}
-function redirect() {
-	window.location = "extensions_thebrig_fstab.php?uuid=<?=$pconfig['uuid'];?>&act=editor"
-
-}
-// -->
+//]]>
 </script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
@@ -534,7 +515,7 @@ function redirect() {
 			<?php html_titleline(gettext("Jail parameters"));?>
         	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
 			<?php html_inputbox("jailname", gettext("Jail name "), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
-			<?php html_combobox("jail_type", gettext("Jail Type \n <input type=\"button\" onclick=\"helpbox()\" value=\"Help\" />"), $pconfig['type'], array('slim' =>'Slim','full'=> 'Full', 'linux'=> 'Linux', 'custom'=> 'Custom'), "Choose jail type ", true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
+			<?php html_combobox("jail_type", gettext("Jail Type"), $pconfig['jail_type'], array('slim' =>'Slim','full'=> 'Full', 'linux'=> 'Linux', 'custom'=> 'Custom'), "Choose jail type ", true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
@@ -588,7 +569,7 @@ function redirect() {
 					<input name="Cancel" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
 					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="Fstab editor">
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
-					<input name="type" type="hidden" value="<?=$pconfig['type'];?>" />
+					
 					<?php if ( isset( $pconfig['ports'])) { ?>
 						<input name="ports" type="hidden" value="<?= true;?>" />
 					<?php }?>
@@ -599,4 +580,5 @@ function redirect() {
 		</td>
 	</tr>
 </table>
+
 <?php include("fend.inc");?>
