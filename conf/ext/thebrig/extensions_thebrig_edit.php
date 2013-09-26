@@ -478,8 +478,10 @@ $('#source').change(function(){
 	});
 $('#jail_type').change();
 $('#source').change();
-});
 
+});
+function helpbox() { alert("Slim - This is a fully functional jail, but when first installed, only occupies about 2 MB in its folder.\n\n full - This is a full sized jail, about 300 MB per jail, and is completely self contained.\n\n Linux - jail for Linux, such Debian.\n\n custom- this only create jail folder and make simulation without install. Usefull for migrate jails." ); }
+function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$pconfig['uuid'];?>&act=editor" }
 //]]>
 </script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -515,7 +517,7 @@ $('#source').change();
 			<?php html_titleline(gettext("Jail parameters"));?>
         	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
 			<?php html_inputbox("jailname", gettext("Jail name "), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
-			<?php html_combobox("jail_type", gettext("Jail Type"), $pconfig['jail_type'], array('slim' =>'Slim','full'=> 'Full', 'linux'=> 'Linux', 'custom'=> 'Custom'), "Choose jail type ", true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
+			<?php html_combobox("jail_type", gettext("Jail Type \n <input type=\"button\" onclick=\"helpbox()\" value=\"Help\" />"), $pconfig['jail_type'], array('slim' =>'Slim','full'=> 'Full', 'linux'=> 'Linux', 'custom'=> 'Custom'), "Choose jail type ", true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
 			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
