@@ -721,12 +721,12 @@ function write_rcconflocal () {
 	} else {fwrite($handle, "jail_set_hostname_allow=\"NO\"\n");
 	}
 	If (isset($config['thebrig']['unixiproute'])) {
-		fwrite ($handle, "jail_socket_unixiproute_only=\"YES\"\n");
-	} else {fwrite($handle, "jail_socket_unixiproute_only=\"NO\"\n");
+		fwrite ($handle, "jail_socket_unixiproute_only=\"YES\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=1");
+	} else {fwrite($handle, "jail_socket_unixiproute_only=\"NO\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=0");
 	}
 	If (isset($config['thebrig']['systenv'])) {
-		fwrite ($handle, "jail_sysvipc_allow=\"YES\"\n");
-	} else {fwrite($handle, "jail_sysvipc_allow=\"NO\"\n");
+		fwrite ($handle, "jail_sysvipc_allow=\"YES\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=1");
+	} else {fwrite($handle, "jail_sysvipc_allow=\"NO\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=0");
 	}
 	// I explode multi array to small arrays and replace tag [cell(n)] to [number] number is 1,2,3,4...
 	// with this trick I can make simple loop for write config
@@ -764,7 +764,7 @@ function write_rcconflocal () {
 		}
 		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
 		$handle1 = fopen($fstabfile, "w");
-		if  ($out_jail['type'] === "slim") {
+		if  ($out_jail['jail_type'] === "slim") {
 			$basejailfolder	= 	 substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
 			fwrite( $handle1 ,  $basejailfolder . " " .  $out_jail['jailpath'] . "basejail nullfs ro 0 0\n");
 		}

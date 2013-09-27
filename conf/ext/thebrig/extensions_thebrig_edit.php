@@ -94,8 +94,9 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['attach_blocking'] = $a_jail[$cnid]['attach_blocking'];
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
-	$pconfig['fib'] = $a_jail[$cnid]['fib'];
-	$pconfig['ports'] = ( isset($a_jail[$cnid]['ports']) ) ? true : false ;
+	if (FALSE == $a_jail[$cnid]['fib']) { unset ($pconfig['fib']);} else {$pconfig['fib'] = $a_jail[$cnid]['fib'];}
+	if (FALSE == $a_jail[$cnid]['ports']) { unset ($pconfig['ports']);} else {$pconfig['ports'] = $a_jail[$cnid]['ports'];}
+	// $pconfig['ports'] = ( isset($a_jail[$cnid]['ports']) ) ? true : false ;
 	// By default, when editing an existing jail, path and name will be read only.
 	$path_ro = true;
 	$name_ro = true;
@@ -141,7 +142,7 @@ else {
 	$pconfig['attach_blocking'] = "";
 	$pconfig['force_blocking'] = "";
 	$pconfig['zfs_datasets'] = "";
-	$pconfig['fib'] = false;
+	unset ($pconfig['fib']);
 	$path_ro = false;
 	$name_ro = false;
 }
@@ -499,7 +500,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 		</ul>
 	</td></tr>
 		<td class="tabcont">
-      <form action="extensions_thebrig_edit.php" method="post" name="iform" id="iform">
+      <form action="extensions_thebrig_edit.php" method="post" name="iform" id="iform">	  
       <input name="jailpath" type="hidden" value="<?=$pconfig['jailpath'];?>" />
 					<input name="base_ver" type="hidden" value="<?=$pconfig['base_ver'];?>" />
 					<input name="lib_ver" type="hidden" value="<?=$pconfig['lib_ver'];?>" />
@@ -572,15 +573,16 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="Fstab editor">
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
 					
-					<?php if ( isset( $pconfig['ports'])) { ?>
+					<?php if ( TRUE == isset( $pconfig['ports'])) { ?>
 						<input name="ports" type="hidden" value="<?= true;?>" />
 					<?php }?>
-
+					<?php if ( isset($uuid) && (FALSE !== $cnid)) { ?>
+					<input name="jail_type" type="hidden" value="<?=$pconfig['jail_type'];?>" />
+					<?php }?>
 				</div>
 				<?php include("formend.inc");?>
 			</form>
 		</td>
 	</tr>
 </table>
-
 <?php include("fend.inc");?>
