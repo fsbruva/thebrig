@@ -777,6 +777,10 @@ function write_rcconflocal () {
 		$portsjailfolder	= 	$config['thebrig']['rootfolder']."conf/ports";
 		fwrite( $handle1 ,  $portsjailfolder . " " .  $out_jail['jailpath'] . "usr/ports nullfs ro 0 0\n");
 		} else {}
+		if  (($out_jail['jail_type'] === "slim") || ($out_jail['jail_type'] === "full")) {
+			If (isset($out_jail['devfs_enable'])) { fwrite( $handle1 ,  "devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n");} else {}
+			If (isset($out_jail['proc_enable'])) { fwrite( $handle1 ,  "procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} else {}
+			}
 		fclose($handle1);
 	}
 	$startonboot = ltrim( $startonboot );
