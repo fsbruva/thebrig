@@ -242,7 +242,7 @@ elseif ($savemsg) print_info_box($savemsg);
 function disable_buttons() {
 	document.iform.Submit.disabled = true;
 	document.iform.submit();}
-var auto_refresh = setInterval(
+var auto_refresh = setTimeout(
 		function()
 		{
 		$('#loaddiv').load('extensions_thebrig_download.php');
