@@ -148,7 +148,7 @@ if ($_POST) {
 			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
 			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
 			write_config(); // Write the config to disk
-		
+			unlink_if_exists("/tmp/thebrig.tmp");
 		// Whatever we did, we did it successfully
 		$retval = 0;
 		$savemsg = get_std_save_message($retval);
