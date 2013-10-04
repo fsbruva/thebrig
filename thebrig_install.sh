@@ -71,7 +71,7 @@ file="/tmp/thebrigversion"
 if [ -f "$file" ]
 then
 	action=`cat ${file}` 
-	echo "Thebrig "${action}
+	# echo "Thebrig "${action}
 		if [ `uname -p` = "amd64" ]; then
 			echo "Renaming 64 bit ftp binary"
 			mv conf/bin/ftp_amd64 conf/bin/ftp
