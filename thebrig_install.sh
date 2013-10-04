@@ -3,10 +3,7 @@
 # define our bail out shortcut function anytime there is an error - display the error message, then exit
 # returning 1.
 exerr () { echo -e "$*" >&2 ; exit 1; }
-startfolder=`pwd`
 
-# Alexey - the use of pwd is too simplistic. If user is in /etc and calls script, pwd will return /etc
-# Your right, but I need Current Working Folder Name for work! And all files will deleted from /CurrentWorkFolder/temporary or /CurrentWorkFolder/master.zip
 # Determine the current directory
 # Method adapted from user apokalyptik at
 # http://hintsforums.macworld.com/archive/index.php/t-73839.html
@@ -64,12 +61,12 @@ rm master.zip
 .# Run the change_ver script to deal with different versions of TheBrig
 /usr/local/bin/php-cgi -f conf/bin/change_ver.php
 
-file="/tmp/thebrigversion"
+filever="/tmp/thebrigversion"
 # The file /tmp/thebrigversion might get created by the change_ver script
 # Its existence implies that we need to carry out the install procedure
-if [ -f "$file" ]
+if [ -f "$filever" ]
 then
-	action=`cat ${file}` 
+	action=`cat ${filever}` 
 	# echo "Thebrig "${action}
 		if [ `uname -p` = "amd64" ]; then
 			echo "Renaming 64 bit ftp binary"
@@ -95,7 +92,7 @@ then
 		ln -s "$file" "${file##*/}"
 		done
 	echo $BRIG_ROOT > /tmp/thebrig.tmp
-	echo "Congratulations! Thebrig was updated/installed . Navigate to rudimentary config and push Save "
+	echo "Congratulations! Thebrig ${action} . Navigate to rudimentary config tab and push Save "
 else
 # There was not /tmp/thebrigversion, so we are already using the latest version
 	echo "You use fresh version"
