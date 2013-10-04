@@ -30,7 +30,6 @@ if [ ! -z $1 ]; then
         mkdir -p $BRIG_ROOT || exerr "ERROR: Could not create directory!"
     fi
 	mkdir -p temporary || exerr "ERROR: Could not create install directory!"
-	echo $BRIG_ROOT > /tmp/thebrig.tmp
 	cd temporary || exerr "ERROR: Could not access install directory!"
 #    cd $BRIG_ROOT || exerr "ERROR: Could not access install directory!"
 else
@@ -95,6 +94,7 @@ then
 			# Create link
 		ln -s "$file" "${file##*/}"
 		done
+	echo $BRIG_ROOT > /tmp/thebrig.tmp
 	echo "Congratulations! Thebrig was updated/installed . Navigate to rudimentary config and push Save "
 else
 # There was not /tmp/thebrigversion, so we are already using the latest version
