@@ -20,20 +20,20 @@ if (is_array($config['thebrig'])) {
 				$message = "You use first thebrig version \n";
 				$config['thebrig']['version'] = $currentversion;
 				write_config();
-				file_put_contents("/tmp/thebrigversion", "update");
+				file_put_contents("/tmp/thebrigversion", "updated");
 				}
 			else {
 				$message = "You use old thebrig version, we reinstall it \n";
 				$config['thebrig']['version'] = $currentversion;
 				write_config();
-				file_put_contents("/tmp/thebrigversion", "update");
+				file_put_contents("/tmp/thebrigversion", "updated");
 				}
 			}
 		else { $message = "You cannot have Thebrig installed"; 
-		file_put_contents("/tmp/thebrigversion", "install");
+		file_put_contents("/tmp/thebrigversion", "installed");
 		}
 		}
 	else { $message = "Hello new user, We will install TheBrig now \n";
-	file_put_contents("/tmp/thebrigversion", "install"); }
+	file_put_contents("/tmp/thebrigversion", "installed"); }
 met1 : echo $message;
 ?>
