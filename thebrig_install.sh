@@ -108,4 +108,4 @@ then
 	rm /tmp/thebrigversion
 fi
 currentdate=`date -j +"%Y-%m-%d %H:%M:%S"`
-echo "[$currentdate]: TheBrig installer!: installer: [$action] action successfull" >> $BRIG_ROOT/thebrig.log
+echo "[$currentdate]: TheBrig installer!: installer: ${action} successfully" >> $BRIG_ROOT/thebrig.log
