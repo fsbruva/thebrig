@@ -58,7 +58,7 @@ echo "Unpacking the tarball..."
 tar -xvf master.zip --exclude='.git*' --strip-components 1
 rm master.zip
 
-.# Run the change_ver script to deal with different versions of TheBrig
+# Run the change_ver script to deal with different versions of TheBrig
 /usr/local/bin/php-cgi -f conf/bin/change_ver.php
 
 filever="/tmp/thebrigversion"
