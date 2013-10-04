@@ -74,7 +74,7 @@ if ($_POST) {
 			$read = array( $pipes[1] ) ;    // renames the pipe
 			$write = null ;
 			$except = null ;
-			$readTimeout = 4 ;
+			$readTimeout = 10 ;
 
 			//  If the connection cannot be established, then $ftp_proc will be false, and not a resource
 			//  However, this check is mostly uneeded, even if the ftp binary doesn't exist.
