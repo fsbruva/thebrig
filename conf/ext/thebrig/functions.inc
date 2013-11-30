@@ -721,7 +721,10 @@ foreach ($testarray as $out_jail ) {
 		fwrite ($handle, "jail_{$out_jail['jailname']}_rootdir=\"{$out_jail['jailpath']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_hostname=\"{$out_jail['jailname']}.{$config['system']['domain']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_interface=\"{$out_jail['if']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_ip=\"{$out_jail['ipaddr']}/{$out_jail['subnet']}\"\n");
+		$ipstring=$out_jail['ipaddr']."/".$out_jail['subnet'];
+		if(isset($out_jail['ip6addr'])) 
+			$ipstring .= $out_jail['ip6addr']."/".$out_jail['subnet6'];
+		fwrite ($handle, "jail_{$out_jail['jailname']}_ip=\"{$ipstring}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_start=\"{$out_jail['exec_start']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_afterstart0=\"{$out_jail['afterstart0']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_afterstart1=\"{$out_jail['afterstart1']}\"\n");
