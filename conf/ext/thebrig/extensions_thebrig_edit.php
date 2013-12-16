@@ -416,8 +416,8 @@ $(document).ready(function(){
 		$('#source_tr').show();
 		$('#official_tr').show();
 		$('#jail_mount').prop('checked', true);
-		$('#devfs_enable').prop('checked', false);
-		$('#proc_enable').prop('checked', false);
+		$('#devfs_enable').show();
+		$('#proc_enable').show();
 		break;
 	case "full":	
 		$('#mounts_separator_empty').show();
@@ -430,9 +430,9 @@ $(document).ready(function(){
 		$('#install_source').show();
 		$('#source_tr').show();
 		$('#official_tr').show();
-		$('#jail_mount').prop('checked', true);
-		$('#devfs_enable').prop('checked', false);
-		$('#proc_enable').prop('checked', false);
+		$('#jail_mount').show();
+		$('#devfs_enable').show();
+		$('#proc_enable').show();
 		break;
 	case "linux":	
 		$('#mounts_separator_empty').hide();
@@ -460,9 +460,9 @@ $(document).ready(function(){
 		$('#install_source').hide();
 		$('#source_tr').hide();
 		$('#official_tr').hide();
-		$('#jail_mount').prop('checked', false);
-		$('#devfs_enable').prop('checked', false);
-		$('#proc_enable').prop('checked', false);
+		$('#jail_mount').show();
+		$('#devfs_enable').show();
+		$('#proc_enable').show();
 		break;
 		}
 	});
