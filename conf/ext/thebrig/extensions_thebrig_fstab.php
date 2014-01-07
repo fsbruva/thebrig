@@ -33,12 +33,14 @@ print_r ($_GET);
 	if(isset($a_jail[$cnid]['proc_enable'])) {fwrite ($handle, "proc_enable:yes\n");} else { fwrite ($handle, "proc_enable:no\n" );}
 	if(isset($a_jail[$cnid]['fdescfs_enable'])) {fwrite ($handle, "fdescfs_enable:yes\n");} else { fwrite ($handle, "fdescfs_enable:no\n" );}
 	if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam']))  {	$p_config['auxparam'] = implode(",", $a_jail[$cnid]['auxparam']); } 
-	fwrite ($handle, "auxparam:".$p_config['auxparam']."\n");			/*13*/ 
+	fwrite ($handle, "auxparam:".$p_config['auxparam']."\n");/*13*/
+	fwrite ($handle, "exec_prestart:".$a_jail[$cnid]['exec_prestart']."\n");
 	fwrite ($handle, "exec_start:".$a_jail[$cnid]['exec_start']."\n");
 	fwrite ($handle, "afterstart0:".$a_jail[$cnid]['afterstart0']."\n");
 	fwrite ($handle, "afterstart1:".$a_jail[$cnid]['afterstart1']."\n");
 	fwrite ($handle, "exec_stop:".$a_jail[$cnid]['exec_stop']."\n");
 	fwrite ($handle, "extraoptions:".$a_jail[$cnid]['extraoptions']."\n");
+	fwrite ($handle, "jail_parameters:".$a_jail[$cnid]['jail_parameters']."\n");
 	fwrite ($handle, "desc:".$a_jail[$cnid]['desc']."\n");
 	fwrite ($handle, "base_ver:".$a_jail[$cnid]['base_ver']."\n");
 	fwrite ($handle, "lib_ver:".$a_jail[$cnid]['lib_ver']."\n");
@@ -162,40 +164,44 @@ if(isset($_POST['Submit'])) {
 		unset($jail['auxparam']);
 				$jail['auxparam'] = $result;
 		$a_frombackup = explode(":", $frombackup[14]);
+				$jail['exec_prestart'] = trim ($a_frombackup[1], "\n");
+		$a_frombackup = explode(":", $frombackup[15]);		
 				$jail['exec_start'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[15]);
-				$jail['afterstart0'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[16]);
-				$jail['afterstart1'] = trim ($a_frombackup[1], "\n");
+				$jail['afterstart0'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[17]);
-				$jail['exec_stop'] = trim ($a_frombackup[1], "\n");
+				$jail['afterstart1'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[18]);
-				$jail['extraoptions'] = trim ($a_frombackup[1], "\n");
+				$jail['exec_stop'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[19]);
-				$jail['desc'] = trim ($a_frombackup[1], "\n");
+				$jail['extraoptions'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[20]);
-			$jail['base_ver'] = trim ($a_frombackup[1], "\n");
+				$jail['jail_parameters'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[21]);
-			$jail['lib_ver'] = trim ($a_frombackup[1], "\n");
+				$jail['desc'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[22]);
-			$jail['src_ver'] = trim ($a_frombackup[1], "\n");
+			$jail['base_ver'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[23]);
-			$jail['doc_ver'] = trim ($a_frombackup[1], "\n");
+			$jail['lib_ver'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[24]);
-			$jail['image'] = trim ($a_frombackup[1], "\n");
+			$jail['src_ver'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[25]);
-			$jail['image_type'] = trim ($a_frombackup[1], "\n");
+			$jail['doc_ver'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[26]);
-			$jail['attach_params'] = trim ($a_frombackup[1], "\n");
+			$jail['image'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[27]);
-			$jail['attach_blocking'] = trim ($a_frombackup[1], "\n");
+			$jail['image_type'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[28]);
-			$jail['force_blocking'] = trim ($a_frombackup[1], "\n");
+			$jail['attach_params'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[29]);
-			$jail['zfs_datasets'] = trim ($a_frombackup[1], "\n");
+			$jail['attach_blocking'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[30]);
-			if (strlen ($a_frombackup[1]) > 3) { $jail['fib']  = true; } else { unset($jail['fib'] ); }
+			$jail['force_blocking'] = trim ($a_frombackup[1], "\n");
 		$a_frombackup = explode(":", $frombackup[31]);
+			$jail['zfs_datasets'] = trim ($a_frombackup[1], "\n");
+		$a_frombackup = explode(":", $frombackup[32]);
+			if (strlen ($a_frombackup[1]) > 3) { $jail['fib']  = true; } else { unset($jail['fib'] ); }
+		$a_frombackup = explode(":", $frombackup[33]);
 			if (strlen ($a_frombackup[1]) > 3) { $jail['ports']  = true; } else { unset($jail['ports'] ); }
 				
 		if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))) {
