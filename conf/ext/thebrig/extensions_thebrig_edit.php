@@ -78,6 +78,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	unset ($pconfig['auxparam']);
 	if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam']))
 		$pconfig['auxparam'] = implode("\n", $a_jail[$cnid]['auxparam']);
+	$pconfig['exec_prestart'] = $a_jail[$cnid]['exec_prestart'];
 	$pconfig['exec_start'] = $a_jail[$cnid]['exec_start'];
 	$pconfig['afterstart0'] = $a_jail[$cnid]['afterstart0'];
 	$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
@@ -125,6 +126,7 @@ else {
 	$pconfig['fdescfs_enable'] = false;
 	unset ($pconfig['devfsrules'] );
 	unset($pconfig['auxparam']);
+	$pconfig['exec_prestart'] = "";
 	$pconfig['exec_start'] = "/bin/sh /etc/rc";
 	$pconfig['afterstart0'] = "";
 	$pconfig['afterstart1'] = "";
@@ -326,6 +328,7 @@ if ($_POST) {
 			if (!empty($auxparam)) $jail['auxparam'][] = $auxparam;
 			else {};
 			}
+		$jail['exec_prestart'] = $pconfig['exec_prestart'];
 		$jail['exec_start'] = $pconfig['exec_start'];
 		$jail['afterstart0'] = $pconfig['afterstart0'];
 		$jail['afterstart1'] = $pconfig['afterstart1'];
@@ -537,6 +540,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> <p> Also you can use fstab editor ")), false, 65, 5, false, false);?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Commands"));?>
+			<?php html_inputbox("exec_prestart", gettext("Jail prestart command"), $pconfig['exec_prestart'], gettext("NAS4Free command to execute  <b>before</b> starting the jail. May be user's script"), false, 50);?>
 			<?php html_inputbox("exec_start", gettext("Jail start command"), $pconfig['exec_start'], gettext("command to execute  for starting the jail."), false, 50);?>
 			<?php html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>
 			<?php html_inputbox("afterstart1", gettext("User command 1"), $pconfig['afterstart1'], gettext("command to execute after the one for starting the jail."), false, 50);?>
