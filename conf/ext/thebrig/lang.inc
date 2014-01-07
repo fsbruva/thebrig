@@ -1,5 +1,5 @@
 <?php
-	define(_THEBRIG_VERSION_NBR, 'v0.6');
+	define(_THEBRIG_VERSION_NBR, 'v0.7');
 	
 	if ($config['system']['language'] == 'en_US') { }
 	
