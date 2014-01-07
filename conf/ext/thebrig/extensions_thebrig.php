@@ -141,7 +141,7 @@ include("fbegin.inc");?>
 function disable_buttons() {
 	document.iform.Submit.disabled = true;
 	document.iform.submit();}
-var auto_refresh = setTimeout(
+var auto_refresh = setInterval(
 		function()
 		{
 		$('#loaddiv').load('extensions_thebrig_check.php');
