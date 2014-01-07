@@ -19,6 +19,22 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 if (isset($_GET['name']) && ! isset($_GET['act'])) {
 	$jailnameexec=$_GET['name'];
 	$jailnamecmd=$_GET['action'];
+	if ( $jailnamecmd == "start" )	{
+		// Execute prestart
+		array_sort_key($config['thebrig']['content'], "jailno");
+		$a_jail = &$config['thebrig']['content'];
+		$index = array_search_ex($jailnameexec, $a_jail, "jailname");
+		foreach ($a_jail as $n_jail) {
+		If (isset ($n_jail['enable']) && !empty ($n_jail['exec_prestart'])) {
+		cmd_exec ( $n_jail['exec_prestart'], $a_tolog, $a_tolog1);
+		$filelog = $config['thebrig']['rootfolder']."thebrig.log";
+		$handle1 = fopen($filelog, "a+");
+		foreach ($a_tolog1 as $tolog1 ) { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog1)."\n" ); }
+		fclose ($handle1);
+				}  
+			}
+	
+	}
 	// Next lines write messages to log
 	cmd_exec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}",$a_tolog, $a_tolog1);
 	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
