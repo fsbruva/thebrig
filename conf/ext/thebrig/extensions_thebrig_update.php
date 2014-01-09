@@ -25,6 +25,7 @@ if ($brig_update_ready == 0 ){
 	$brig_update_db = $brig_root . "conf/db/freebsd-update/";
 
 	// See my above comments for why the if() that used to live here is no longer needed
+	if (!is_array($config['thebrig']['content'])) {$input_errors[] = "Not defined any jail. I don't know what you want "; goto out;}
 	array_sort_key($config['thebrig']['content'], "jailno");
 	$a_jail = &$config['thebrig']['content'];
 	$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
@@ -275,7 +276,7 @@ if ($_POST) {
 		$savemsg = get_std_save_message($retval);
 	} // end of no input errors
 } // end of POST
-
+out:
 // Uses the global fbegin include
 include("fbegin.inc");
 
