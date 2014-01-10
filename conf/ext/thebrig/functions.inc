@@ -161,7 +161,7 @@ function thebrig_tarball_list ($contains , $exclude='') {
 	// This function creates a list of tarballs that match a certain filename pattern
 	$installFiles = "";
 	if ( is_dir( $config['thebrig']['rootfolder'] )) {
-		$raw_list = glob("{$config['thebrig']['rootfolder']}work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip}", GLOB_BRACE);
+		$raw_list = glob("{$config['thebrig']['rootfolder']}work/{$contains}.{txz,tgz,tbz,tbz2,tb2,taz,tlz,zip,tar.xz}", GLOB_BRACE);
 		$file_list = array_unique( $raw_list );
 		if ( $exclude ) {
 			foreach ( $exclude as $search_pattern ) {
@@ -193,7 +193,9 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 
 			$command_prefix = "/bin/sh " . $config['thebrig']['rootfolder'] . "conf/sbin/freebsd-update -d " . $work_dir[$k] . " -f " . $conf_file[$k] . " -b " . $dest_dir[$k];
 			// The prep operation was successful
+
 			if ( !is_dir($work_dir[$k]) )
+
 				exec("mkdir -p " . $work_dir[$k] );
 
 			switch ( $action ){
@@ -367,13 +369,19 @@ function thebrig_update_prep (  ) {
 				continue; // depart the for loop - we've found the file we needed
 			}
 			// it wasn't found in the basejail - we need to look elsewhere (all other jails)
-			foreach ( $config['thebrig']['content'] as $jail ){
-				if ( is_file ( $jail['jailpath'] . "usr/" . $file ) ) {
-					exec ( "cp " . $jail['jailpath'] . "usr/" . $file . " " . $brig_root . "conf/" . $file , $blank , $result );
-					$copy_failure |= $result;
-					break; // depart the for loop - we've found the file we needed
-				} // end if
-			} // end for each jail	
+			if ( isset ( $config['thebrig']['content'])){
+				foreach ( $config['thebrig']['content'] as $jail ){
+					if ( is_file ( $jail['jailpath'] . "usr/" . $file ) ) {
+						exec ( "cp " . $jail['jailpath'] . "usr/" . $file . " " . $brig_root . "conf/" . $file , $blank , $result );
+						$copy_failure |= $result;
+						break; // depart the for loop - we've found the file we needed
+					} // end if
+				} // end for each jail
+			}
+			else {
+				// There are no jails defined yet - stop
+				return 2;
+			}
 			// Check if we were able to copy it to the destination location
 			if ( !is_file ( $brig_root . "conf/" . $file ) ) {
 				// We didn't have it to start, and we searched all jails - something's up. 	
@@ -488,6 +496,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
+	
 } // end of function
 
 
@@ -692,23 +701,41 @@ function get_nice_filesize ($file) {
 	}
 }
 function write_rcconflocal () {
-global $config, $g;
-$testarray = array();
-$startonboot ="";
-// copy part of config in temporary array
-$testarray = $config['thebrig']['content']; 
-$file = "/etc/rc.conf.local";
-$handle=fopen($file, "w");
-If (isset($config['thebrig'])) { fwrite ($handle, "jail_enable=\"YES\"\n");} else {fwrite($handle, "jail_enable=\"NO\"\n");}
-If (isset($config['thebrig']['parastart'])) { fwrite ($handle, "jail_parallel_start=\"YES\"\n");} else {fwrite($handle, "jail_parallel_start=\"NO\"\n");}
-If (isset($config['thebrig']['sethostname'])) { fwrite ($handle, "jail_set_hostname_allow=\"YES\"\n");} else {fwrite($handle, "jail_set_hostname_allow=\"NO\"\n");}
-If (isset($config['thebrig']['unixiproute'])) { fwrite ($handle, "jail_socket_unixiproute_only=\"YES\"\n");} else {fwrite($handle, "jail_socket_unixiproute_only=\"NO\"\n");}
-If (isset($config['thebrig']['systenv'])) { fwrite ($handle, "jail_sysvipc_allow=\"YES\"\n");} else {fwrite($handle, "jail_sysvipc_allow=\"NO\"\n");}
-// I explode multi array to small arrays and replace tag [cell(n)] to [number] number is 1,2,3,4... 
-// with this trick I can make simple loop for write config
-array_sort_key($testarray, "jailno");
-foreach ($testarray as $out_jail ) {
-		If (isset($out_jail['enable'])) {$startonboot = "{$startonboot} {$out_jail['jailname']}";} else {$startonboot = $startonboot;}
+	global $config, $g;
+	$testarray = array();
+	$startonboot ="";
+	// copy part of config in temporary array
+	$testarray = $config['thebrig']['content'];
+	$file = "/etc/rc.conf.local";
+	$handle=fopen($file, "w");
+	If (isset($config['thebrig'])) {
+		fwrite ($handle, "jail_enable=\"YES\"\n");
+	} else {fwrite($handle, "jail_enable=\"NO\"\n");
+	}
+	If (isset($config['thebrig']['parastart'])) {
+		fwrite ($handle, "jail_parallel_start=\"YES\"\n");
+	} else {fwrite($handle, "jail_parallel_start=\"NO\"\n");
+	}
+	If (isset($config['thebrig']['sethostname'])) {
+		fwrite ($handle, "jail_set_hostname_allow=\"YES\"\n");
+	} else {fwrite($handle, "jail_set_hostname_allow=\"NO\"\n");
+	}
+	If (isset($config['thebrig']['unixiproute'])) {
+		fwrite ($handle, "jail_socket_unixiproute_only=\"YES\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=1");
+	} else {fwrite($handle, "jail_socket_unixiproute_only=\"NO\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=0");
+	}
+	If (isset($config['thebrig']['systenv'])) {
+		fwrite ($handle, "jail_sysvipc_allow=\"YES\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=1");
+	} else {fwrite($handle, "jail_sysvipc_allow=\"NO\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=0");
+	}
+	// I explode multi array to small arrays and replace tag [cell(n)] to [number] number is 1,2,3,4...
+	// with this trick I can make simple loop for write config
+	array_sort_key($testarray, "jailno");
+	foreach ($testarray as $out_jail ) {
+		If (isset($out_jail['enable'])) {
+			$startonboot = "{$startonboot} {$out_jail['jailname']}";
+		} else {$startonboot = $startonboot;
+		}
 		fwrite ($handle, "##{$k}###########{$out_jail['jailname']}####{$out_jail['desc']}#####\n");
 		$out_jail_comb = substr($out_jail['jailpath'], 0, strlen($out_jail['jailpath'])-1);
 		fwrite ($handle, "jail_{$out_jail['jailname']}_rootdir=\"{$out_jail_comb}\"\n");
@@ -720,52 +747,46 @@ foreach ($testarray as $out_jail ) {
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_afterstart1=\"{$out_jail['afterstart1']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_stop=\"{$out_jail['exec_stop']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
+		fwrite ($handle, "jail_{$out_jail['jailname']}_parameters=\"{$out_jail['jail_parameters']}\"\n");
+		fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n");
+		If (isset($out_jail['jail_mount'])) {
+			fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
+		} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");
+		}
 		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
+		If (isset($out_jail['devfs_enable'])) {
+			fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");
+		} else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");
+		}
+		If (isset($out_jail['proc_enable'])) {
+			fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
+		} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");
+		}
 		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
 		$handle1 = fopen($fstabfile, "w");
-		switch ($out_jail['type']) {
-			case "slim":
-				fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
-				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); 
-						fwrite( $handle1 ,"devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
-				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
-						fwrite( $handle1 ,"procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
-				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n"); 
-						fwrite( $handle1 ,"fdescfs " .  $out_jail['jailpath'] . "dev/fd fdescfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
-				$basejailfolder	= 	 substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
-				fwrite( $handle1 ,  $basejailfolder . " " .  $out_jail['jailpath'] . "basejail nullfs ro 0 0\n"); 
-			break;
-			case "full":
-				If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
-				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); 
-						fwrite( $handle1 ,"devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
-				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
-						fwrite( $handle1 ,"procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
-				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");
-						fwrite( $handle1 ,"fdescfs " .  $out_jail['jailpath'] . "dev/fd fdescfs rw 0 0\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
-						
-			break;
-			case "linux":
-				fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
-				fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");
-				fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
-				fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");
-			
-			break;
-			case "custom":
-				If (isset($out_jail['jail_mount'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");}
-				If (isset($out_jail['devfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n"); } else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");}
-				If (isset($out_jail['proc_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");}
-				If (isset($out_jail['fdescfs_enable'])) { fwrite ($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"YES\"\n");} else {fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");}
-			break;
-		}	
-		if (TRUE == is_array($out_jail['auxparam'])) { foreach ($out_jail['auxparam'] as $fstab) {	fwrite ($handle1, $fstab."\n"); } } else {}
+		if  ($out_jail['jail_type'] === "slim") {
+			$basejailfolder	= 	 substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
+			fwrite( $handle1 ,  $basejailfolder . " " .  $out_jail['jailpath'] . "basejail nullfs ro 0 0\n");
+		}
+		if (TRUE == is_array($out_jail['auxparam'])) {
+			foreach ($out_jail['auxparam'] as $fstab) {
+				fwrite ($handle1, $fstab."\n");
+			}
+		} else {}
+		if (isset($out_jail['ports'])) { 
+		$portsjailfolder	= 	$config['thebrig']['rootfolder']."conf/ports";
+		fwrite( $handle1 ,  $portsjailfolder . " " .  $out_jail['jailpath'] . "usr/ports nullfs ro 0 0\n");
+		} else {}
+		if  (($out_jail['jail_type'] === "slim") || ($out_jail['jail_type'] === "full")) {
+			If (isset($out_jail['devfs_enable'])) { fwrite( $handle1 ,  "devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n");} else {}
+			If (isset($out_jail['proc_enable'])) { fwrite( $handle1 ,  "procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} else {}
+			}
 		fclose($handle1);
 	}
-$startonboot = ltrim( $startonboot );
-fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
-fclose($handle);
+	$startonboot = ltrim( $startonboot );
+	fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
+	fclose($handle);
 }
 // cmd_exec execute process and have output and error
 //$cmd - proccess
