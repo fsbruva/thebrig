@@ -19,6 +19,22 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 if (isset($_GET['name']) && ! isset($_GET['act'])) {
 	$jailnameexec=$_GET['name'];
 	$jailnamecmd=$_GET['action'];
+	if ( $jailnamecmd == "start" )	{
+		// Execute prestart
+		array_sort_key($config['thebrig']['content'], "jailno");
+		$a_jail = &$config['thebrig']['content'];
+		$index = array_search_ex($jailnameexec, $a_jail, "jailname");
+		foreach ($a_jail as $n_jail) {
+		If (isset ($n_jail['enable']) && !empty ($n_jail['exec_prestart'])) {
+		cmd_exec ( $n_jail['exec_prestart'], $a_tolog, $a_tolog1);
+		$filelog = $config['thebrig']['rootfolder']."thebrig.log";
+		$handle1 = fopen($filelog, "a+");
+		foreach ($a_tolog1 as $tolog1 ) { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog1)."\n" ); }
+		fclose ($handle1);
+				}  
+			}
+	
+	}
 	// Next lines write messages to log
 	cmd_exec("/etc/rc.d/jail {$jailnamecmd} {$jailnameexec}",$a_tolog, $a_tolog1);
 	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
@@ -37,7 +53,7 @@ $pconfig['systenv'] = isset($config['thebrig']['systenv']);
 
 if ($_POST) {
 	// insert into pconfig changes
-
+	$pconfig = $_POST;
 
 	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
 	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
@@ -111,7 +127,13 @@ function thebrig_process_updatenotification($mode, $data) {
 				$timestamp = date("Y-m-d_H:i:s");
 				$jail2delete = $config['thebrig']['content'][$cnid];
 				mwexec ( "/etc/rc.d/jail stop " . $jail2delete['jailname']);
-				mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
+				if ( $jail2delete['type'] === "slim") {
+					mwexec("tar -cf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -C " . $jail2delete['jailpath'] . " ./" );
+					mwexec("tar -rf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -X basejail/ -C " . $config['thebrig']['basejail']['folder'] . " ./" );
+					mwexec("xz -S .txz " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar" );
+				}
+				else 
+					mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
 				mwexec ( "umount -a -F /etc/fstab." .  $jail2delete['jailname']);
 				if ( $jail2delete['devfs_enable'] == true )
 					mwexec ( "umount " . $jail2delete['jailpath'] . "dev");
@@ -150,6 +172,8 @@ var auto_refresh = setInterval(
 			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+					</span> </a>
+				</li>
 		</ul>
 	</td></tr>
 	
