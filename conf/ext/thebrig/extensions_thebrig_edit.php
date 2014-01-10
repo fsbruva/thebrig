@@ -84,6 +84,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
 	$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
 	$pconfig['extraoptions'] = $a_jail[$cnid]['extraoptions'];
+	$pconfig['jail_parameters'] = $a_jail[$cnid]['jail_parameters'];
 	$pconfig['desc'] = $a_jail[$cnid]['desc'];
 	$pconfig['base_ver'] = $a_jail[$cnid]['base_ver'];
 	$pconfig['lib_ver'] = $a_jail[$cnid]['lib_ver'];
@@ -96,7 +97,8 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
 	if (FALSE == $a_jail[$cnid]['fib']) { unset ($pconfig['fib']);} else {$pconfig['fib'] = $a_jail[$cnid]['fib'];}
-	if (TRUE == isset( $a_jail[$cnid]['ports'])) { $pconfig['ports'] = $a_jail[$cnid]['ports'];}
+	if (FALSE == $a_jail[$cnid]['ports']) { unset ($pconfig['ports']);} else {$pconfig['ports'] = $a_jail[$cnid]['ports'];}
+	// $pconfig['ports'] = ( isset($a_jail[$cnid]['ports']) ) ? true : false ;
 	// By default, when editing an existing jail, path and name will be read only.
 	$path_ro = true;
 	$name_ro = true;
@@ -121,7 +123,7 @@ else {
 	$pconfig['subnet'] = "32";
 	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = true;
-	$pconfig['devfs_enable'] = true;
+	$pconfig['devfs_enable'] = false;
 	$pconfig['proc_enable'] = false;
 	$pconfig['fdescfs_enable'] = false;
 	unset ($pconfig['devfsrules'] );
@@ -132,6 +134,7 @@ else {
 	$pconfig['afterstart1'] = "";
 	$pconfig['exec_stop'] = "";
 	$pconfig['extraoptions'] = "";
+	$pconfig['jail_parameters'] = "";
 	$pconfig['desc'] = "";
 	$pconfig['base_ver'] = "Unknown";
 	$pconfig['lib_ver'] = "Not Installed";
@@ -335,6 +338,7 @@ if ($_POST) {
 		$jail['exec_stop'] = $pconfig['exec_stop'];
 		if (empty ($pconfig['extraoptions'])) { $pconfig['extraoptions'] = "-l -U root -n ".$pconfig['jailname'];} else {}
 		$jail['extraoptions'] = $pconfig['extraoptions'];
+		$jail['jail_parameters'] = $pconfig['jail_parameters'];
 		$jail['desc'] = $pconfig['desc'];
 		$jail['base_ver'] = $pconfig['base_ver'];
 		$jail['lib_ver'] = $pconfig['lib_ver'];
@@ -418,9 +422,9 @@ $(document).ready(function(){
 		$('#install_source').show();
 		$('#source_tr').show();
 		$('#official_tr').show();
-		$('#jail_mount').prop('checked', true);
-		$('#devfs_enable').show();
-		$('#proc_enable').show();
+		$('#jail_mount').attr('checked', true);
+		$('#devfs_enable').prop('checked', false );
+		$('#proc_enable').prop('checked', false);
 		break;
 	case "full":	
 		$('#mounts_separator_empty').show();
@@ -433,9 +437,9 @@ $(document).ready(function(){
 		$('#install_source').show();
 		$('#source_tr').show();
 		$('#official_tr').show();
-		$('#jail_mount').show();
-		$('#devfs_enable').show();
-		$('#proc_enable').show();
+		$('#jail_mount').prop('checked', true);
+		$('#devfs_enable').prop('checked', false);
+		$('#proc_enable').prop('checked', false);
 		break;
 	case "linux":	
 		$('#mounts_separator_empty').hide();
@@ -463,9 +467,9 @@ $(document).ready(function(){
 		$('#install_source').hide();
 		$('#source_tr').hide();
 		$('#official_tr').hide();
-		$('#jail_mount').show();
-		$('#devfs_enable').show();
-		$('#proc_enable').show();
+		$('#jail_mount').prop('checked', false);
+		$('#devfs_enable').prop('checked', false);
+		$('#proc_enable').prop('checked', false);
 		break;
 		}
 	});
@@ -491,15 +495,12 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
-			<li class="tabact">
-				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
-			</li>
-			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?>
-					</span> </a>
-				</li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
-			</li>
+			<li class="tabact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
+			<?php If (!empty($config['thebrig']['content'])) { 
+			$thebrigupdates=_THEBRIG_UPDATES;
+			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
+			} else {} ?>
+			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 		</ul>
 	</td></tr>
 		<td class="tabcont">
@@ -546,6 +547,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_inputbox("afterstart1", gettext("User command 1"), $pconfig['afterstart1'], gettext("command to execute after the one for starting the jail."), false, 50);?>
 			<?php html_inputbox("exec_stop", gettext("User command stop"), !empty($pconfig['exec_stop']) ? $pconfig['exec_stop'] : "/bin/sh /etc/rc.shutdown" , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
 			<?php html_inputbox("extraoptions", gettext("Options. "),  $pconfig['extraoptions'], gettext("Add to rc.conf.local variable jail_jailname_flags. Example: -l -U root -n {jailname}"), false, 40);?>
+			<?php html_inputbox("jail_parameters", gettext("Addition Parameters "),  $pconfig['jail_parameters'], gettext("Add to rc.conf.local variable jail_parameters. Must be separated by space. See jail.conf(5)"), false, 80);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
 			<!-- in edit mode user not have access to extract binaries. I strongly disagree. -->
 			<tr id='install_source_empty'><td colspan='2' class='list' height='12'></td></tr>
