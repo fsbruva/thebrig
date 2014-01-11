@@ -427,6 +427,11 @@ function thebrig_split_world ( $destination , $jail_type ){
 			$commandtime = "cp ".$destination . "usr/share/zoneinfo/".$config['system']['timezone']." ".$destination."etc/localtime";
 			mwexec ($commandtime);
 		}
+		// Move resolve.conf
+		if ( ! is_file ( $destination . "etc/resolv.conf" )) {
+			$commandresolve = "cp /var/etc/resolve.conf ".$destination."etc/resolve.conf";
+			mwexec ($commandresolve);
+		}
 	}
 	else {
 		// We are attempting to make a thin jail
@@ -468,7 +473,11 @@ function thebrig_split_world ( $destination , $jail_type ){
 			$commandtime = "cp ".$config['thebrig']['basejail']['folder'] . "usr/share/zoneinfo/".$config['system']['timezone']." ".$destination."etc/localtime";
 			mwexec ($commandtime);
 		}
-		
+		// Move resolve.conf
+		if ( ! is_file ( $destination . "etc/resolv.conf" )) {
+			$commandresolve = "cp /var/etc/resolve.conf ".$destination."etc/resolve.conf";
+			mwexec ($commandresolve);
+		}
 		// Create the necessary symlinks so the basejail's binaries can be accessed
 		foreach ( $dir_list as $dir ) {
 			exec ( "ln -s /basejail/" . $dir . " " . $destination . $dir );
