@@ -7,6 +7,7 @@
 # REQUIRE: LOGIN FILESYSTEMS
 # BEFORE: securelevel
 # KEYWORD: nojail shutdown
+#RCVAR: jail
 
 # WARNING: This script deals with untrusted data (the data and
 # processes inside the jails) and care must be taken when changing the
