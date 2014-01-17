@@ -144,7 +144,7 @@ if ($_POST) {
 				
 				
 				// This if gets entered the jail is checked and is fullsized
-				if  ( (FALSE !== ($cnid = array_search($my_jail['uuid'], $formjails ))) && $my_jail['type'] == 'full' ){
+				if  ( (FALSE !== ($cnid = array_search($my_jail['uuid'], $formjails ))) && $my_jail['jail_type'] == 'full' ){
 					$basedir_list[]=$my_jail['jailpath'];
 					$workdir_list[]=$my_jail['jailpath'] . "var/db/freebsd-update/";
 					$conffile_list[] = $brig_root . "conf/freebsd-update.conf";
