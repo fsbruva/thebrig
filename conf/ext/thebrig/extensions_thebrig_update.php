@@ -150,7 +150,7 @@ if ($_POST) {
 					$conffile_list[] = $brig_root . "conf/freebsd-update.conf";
 				} // end of selected full sized jail
 
-				if ( $my_jail['type'] == 'slim' && $base_selected ){
+				if ( $my_jail['jail_type'] == 'slim' && $base_selected ){
 					// We are looking at a slim jail, and we are supposed to upgrade all of them
 					$basedir_list[]=$my_jail['jailpath'];
 					$workdir_list[]=$my_jail['jailpath'] . "var/db/freebsd-update/";
