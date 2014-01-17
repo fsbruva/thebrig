@@ -222,8 +222,8 @@ if ($_POST) {
 			// Need to cycle through all the jails (again)
 			foreach ( $a_jail as &$my_jail ) {
 				// This if gets entered the jail is checked and is fullsized, OR is thin and we selected to upgrade them all
-				if  ( (FALSE !== ($cnid = array_search($my_jail['uuid'], $formjails )) && $my_jail['type'] == 'full' )  ||
-						( $my_jail['type'] == 'slim' && $base_selected ) ){
+				if  ( (FALSE !== ($cnid = array_search($my_jail['uuid'], $formjails )) && $my_jail['jail_type'] == 'full' )  ||
+						( $my_jail['jail_type'] == 'slim' && $base_selected ) ){
 					$config_changed = true;
 					$basedir_hash = exec ( "echo " . $my_jail['jailpath'] . " | sha256 -q" );
 					if ( is_link ( $my_jail['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" )) {
