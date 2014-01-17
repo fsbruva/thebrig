@@ -131,14 +131,14 @@ if ($_POST) {
 				// Check for the existence of the -install link 
 				if ( ! is_link ( $my_jail['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-install" ) && $pconfig['update_op'] == "Install") {
 				// We are attempting to rollback a jail that can't be
-					$input_errors[] = "The jail named " . $my_jail['name'] . " does not have any updates ready for installation. <br>Please run 'fetch' for this jail.";
+					$input_errors[] = "The jail named " . $my_jail['jailname'] . " does not have any updates ready for installation. <br>Please run 'fetch' for this jail.";
 					break;
 				}
 				
 				// Check for a rollback
 				if ( ! is_link ( $my_jail['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) && $pconfig['update_op'] == "Rollback") {
 					// We are attempting to rollback a jail that can't be
-					$input_errors[] = "The jail named " . $my_jail['name'] . " cannot have its installation rolled back. <br>Sorry.";
+					$input_errors[] = "The jail named " . $my_jail['jailname'] . " cannot have its installation rolled back. <br>Sorry.";
 					break;
 				}
 				
