@@ -111,7 +111,7 @@ if ($_POST) {
 				// we need to search through the array of listed jails to see if any of them are thin jails
 				$jid = array_search_ex($job_jail, $a_jail , 'uuid' );
 				
-				if ( $a_jail[$jid]['type'] == 'slim' && $job_jail != "00000000-0000-0000-0000-000000000000" ){
+				if ( $a_jail[$jid]['jail_type'] == 'slim' && $job_jail != "00000000-0000-0000-0000-000000000000" ){
 					$base_selected=true;
 				}
 				if ( $job_jail === "00000000-0000-0000-0000-000000000000")
@@ -455,7 +455,7 @@ function conf_handler() {
 						$updated_contents[$k] = rtrim ( file_get_contents($a_jail[$k]['jailpath'] . "var/db/freebsd-update/files.updated"));
 						$added_contents[$k] = rtrim(file_get_contents($a_jail[$k]['jailpath'] . "var/db/freebsd-update/files.added"));
 						$removed_contents[$k] = rtrim(file_get_contents($a_jail[$k]['jailpath'] . "var/db/freebsd-update/files.removed"));
-						if ( $a_jail[$k]['type'] == 'slim' ){
+						if ( $a_jail[$k]['jail_type'] == 'slim' ){
 						// we're talking about a slim jail here, we should check if this is the first slim we've prepped for
 						// If so, we need ot define a few "constant" values for the duration of this for loop
 							if ( !isset( $base_update_contents) && file_exists( $brig_update_db . "files.updated" ) ) {
