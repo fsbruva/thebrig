@@ -14,14 +14,20 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_PORTS);
 
 // we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
 $brig_update_ready = thebrig_update_prep();
-// Slight redefinition to make life a little easier
-$brig_root = $config['thebrig']['rootfolder'] ;
-$brig_port_db = $brig_root . "conf/db/ports/";
+if ( $brig_update_ready == 0 ){
+	// The operations carried out in thebrig_update_prep will only return 0 if there is at least one complete jail,
+	// and the necessary binaries for update operations were able to be copied. If there are no jails present, then the function
+	// will return 2
 
-if (is_array ($config['thebrig']['content'])) { array_sort_key($config['thebrig']['content'], "jailno"); }
-$a_jail = &$config['thebrig']['content'];
-$pconfig['portscron'] = isset( $config['thebrig']['portscron'] ) ;
+	// Slight redefinition to make life a little easier
+	$brig_root = $config['thebrig']['rootfolder'] ;
+	$brig_port_db = $brig_root . "conf/db/ports/";
 
+	// See my above comments for why the if() that used to live here is no longer needed
+	array_sort_key($config['thebrig']['content'], "jailno");
+	$a_jail = &$config['thebrig']['content'];
+	$pconfig['portscron'] = isset( $config['thebrig']['portscron'] ) ;
+}
 
 // User has clicked a button
 if ($_POST) {
