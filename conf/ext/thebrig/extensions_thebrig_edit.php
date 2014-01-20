@@ -547,7 +547,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_inputbox("afterstart1", gettext("User command 1"), $pconfig['afterstart1'], gettext("command to execute after the one for starting the jail."), false, 50);?>
 			<?php html_inputbox("exec_stop", gettext("User command stop"), !empty($pconfig['exec_stop']) ? $pconfig['exec_stop'] : "/bin/sh /etc/rc.shutdown" , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
 			<?php html_inputbox("extraoptions", gettext("Options. "),  $pconfig['extraoptions'], gettext("Add to rc.conf.local variable jail_jailname_flags. Example: -l -U root -n {jailname}"), false, 40);?>
-			<?php html_inputbox("jail_parameters", gettext("Addition Parameters "),  $pconfig['jail_parameters'], gettext("Add to rc.conf.local variable jail_parameters. Must be separated by space. See jail.conf(5)"), false, 80);?>
+			<?php html_inputbox("jail_parameters", gettext("Addition Parameters "),  $pconfig['jail_parameters'], gettext("Add to rc.conf.local variable jail_parameters. Must be separated by space. See <a href=http://www.freebsd.org/cgi/man.cgi?query=jail&sektion=8>jail(8)</a>"), false, 80);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
 			<!-- in edit mode user not have access to extract binaries. I strongly disagree. -->
 			<tr id='install_source_empty'><td colspan='2' class='list' height='12'></td></tr>
