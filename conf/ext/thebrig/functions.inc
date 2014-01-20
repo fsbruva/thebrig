@@ -313,7 +313,7 @@ function thebrig_update_config ( $setup ) {
 				$op_failure |= $result;
 			}
 			// Relocate the necessary files so Nas4Free can use them
-			exec( "ln -s " . $brig_root . "conf/" . $bin_list[$i] . " " . "/usr/" . $bin_list[$i] , $blank, $result );
+			exec( "cp " . $brig_root . "conf/" . $bin_list[$i] . " " . "/usr/" . $bin_list[$i] , $blank, $result );
 			$op_failure |= $result;
 		} // End of for loop
 	}
@@ -321,7 +321,7 @@ function thebrig_update_config ( $setup ) {
 		// we want to cleanup after operations, so we need to get rid of the old copies of things, but only those things we messed with
 		for ( $i = 0; $i <= 8; $i++ ){
 			// Get rid of the the files we copied in
-			exec( "unlink /usr/" . $bin_list[$i] , $blank, $result );
+			exec( "rm /usr/" . $bin_list[$i] , $blank, $result );
 			$op_failure |= $result;
 			// If we made backups, we should restore them now
 			if ( file_exists ( "/usr/" . $bin_list[$i] . ".bak") ){
