@@ -423,8 +423,6 @@ $(document).ready(function(){
 		$('#source_tr').show();
 		$('#official_tr').show();
 		$('#jail_mount').attr('checked', true);
-
-
 		break;
 	case "full":	
 		$('#mounts_separator_empty').show();
@@ -437,9 +435,6 @@ $(document).ready(function(){
 		$('#install_source').show();
 		$('#source_tr').show();
 		$('#official_tr').show();
-
-
-
 		break;
 	case "linux":	
 		$('#mounts_separator_empty').hide();
@@ -467,9 +462,6 @@ $(document).ready(function(){
 		$('#install_source').hide();
 		$('#source_tr').hide();
 		$('#official_tr').hide();
-
-
-
 		break;
 		}
 	});
