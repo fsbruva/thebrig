@@ -423,8 +423,8 @@ $(document).ready(function(){
 		$('#source_tr').show();
 		$('#official_tr').show();
 		$('#jail_mount').attr('checked', true);
-		$('#devfs_enable').prop('checked', false );
-		$('#proc_enable').prop('checked', false);
+
+
 		break;
 	case "full":	
 		$('#mounts_separator_empty').show();
@@ -437,9 +437,9 @@ $(document).ready(function(){
 		$('#install_source').show();
 		$('#source_tr').show();
 		$('#official_tr').show();
-		$('#jail_mount').prop('checked', true);
-		$('#devfs_enable').prop('checked', false);
-		$('#proc_enable').prop('checked', false);
+
+
+
 		break;
 	case "linux":	
 		$('#mounts_separator_empty').hide();
@@ -467,9 +467,9 @@ $(document).ready(function(){
 		$('#install_source').hide();
 		$('#source_tr').hide();
 		$('#official_tr').hide();
-		$('#jail_mount').prop('checked', false);
-		$('#devfs_enable').prop('checked', false);
-		$('#proc_enable').prop('checked', false);
+
+
+
 		break;
 		}
 	});
@@ -531,11 +531,11 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_separator();?>
 			<tr id='mounts_separator_empty'>	<td colspan='2' class='list' height='12'></td>
 			<tr id='mounts_separator'><td colspan='2' valign='top' class='listtopic'>Mounts</td></tr>
- 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), !empty($pconfig['jail_mount']) ? true : false, gettext("Enable the jail to automount its fstab file. <b>This is not optional for thin jails.</b> ")," " ," ");?>
-			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), !empty($pconfig['devfs_enable']) ? true : false, gettext("Use to mount the device file system inside the jail. <br><b>This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.</b>"), "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", false);?>
+ 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), $pconfig['jail_mount'], gettext("Enable the jail to automount its fstab file. <b>This is not optional for thin jails.</b> ")," " ," ");?>
+			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), $pconfig['devfs_enable'], gettext("Use to mount the device file system inside the jail. <br><b>This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.</b>"), "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", "", "");?>
 			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
-			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), !empty($pconfig['proc_enable']) ? true : false, "", "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", false);?>
-			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), !empty($pconfig['fdescfs_enable']) ? true : false, "", "", false);?>
+			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), $pconfig['proc_enable'], "", "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", " ", " ");?>
+			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), $pconfig['fdescfs_enable'], "", "", " ");?>
 			<?php html_separator();?>
 			<?php html_titleline(gettext("Fstab"));?>
 			<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> <p> Also you can use fstab editor ")), false, 65, 5, false, false);?>
