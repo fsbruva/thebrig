@@ -169,7 +169,10 @@ var auto_refresh = setInterval(
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a></li>
+			<?php If (!empty($config['thebrig']['content'])) { 
+			$thebrigupdates=_THEBRIG_UPDATES;
+			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
+			} else {} ?>
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
 					</span> </a>
