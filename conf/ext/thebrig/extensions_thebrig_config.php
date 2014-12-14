@@ -14,15 +14,14 @@ $pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
 $pconfig['template'] = $config['thebrig']['template'] ;
 $pconfig['basejail'] = $config['thebrig']['basejail']['folder'] ;
 
-// Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
+
 
 // This determines if there are any thin jails (type = slim), which means we shouldn't
 // relocate the basejail. We also need to check and make sure no jails currently live 
 // within thebrig's root folder. 
 $base_ro = false;
 $brig_jails = false;
-if ( !isset($pconfig['remove'] ) ) {
+if ( !isset($_POST['remove'] ) && is_array(  $config['thebrig']['content'] ) ) {
 	foreach ( $config['thebrig']['content'] as $jail ){
 		if ( $jail['type'] === 'slim' )
 			$base_ro = true;
@@ -72,9 +71,18 @@ $template_search = glob ( $config['thebrig']['rootfolder'] . "template/bin/*" );
 
 // User has clicked a button
 if ($_POST) {
+	
 	unset($input_errors);
 	$pconfig = $_POST;
 	 
+	if ( $pconfig['remove'] ) {
+		if (is_dir($config['thebrig']['rootfolder']."basejail")) { $cmd = "chflags -R noschg ".$config['thebrig']['rootfolder']."basejail"; mwexec($cmd);} else {}
+		// we want to remove thebrig
+		thebrig_unregister();
+		// Browse back to the main page
+		header("Location: /");
+		exit;
+	}
 	// Complete all root folder error checking.
 	// Convert root folder after filechoicer
 	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
@@ -97,7 +105,7 @@ if ($_POST) {
 	}
 	
 	// The folder supplied by the user is a valid folder, so we can continue our input validations
-	elseif( ( $pconfig['rootfolder'] !== $config['thebrig']['rootfolder'] ) && 				
+	elseif( ( strcmp ( realpath($old_location) , realpath($new_location) ) != 0 ) && 				
 				(( count( $base_search ) > 0 ) || ( count( $template_search ) > 0) || $brig_jails )  ) {
 		// If the user has selected a new installation folder, then we also must check that there are no existing
 		// jails living there. This is a multiple step process. We need to see if there is anything in the basejail or in the
@@ -128,15 +136,6 @@ if ($_POST) {
 	
 	// There are no input errors detected.
 	if ( !$input_errors ){
-		// The user wants to unregister the extension
-		if ( $pconfig['remove'] ) {
-			// we want to remove thebrig
-			thebrig_unregister();
-			// Browse back to the main page
-			header("Location: /");
-			exit;
-		}
-		else {
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 			// a jail at the old location. Call thebrig_populate, which will move all the web stuff and create the 
 			// directory tree
@@ -145,15 +144,18 @@ if ($_POST) {
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			$config['thebrig']['template'] = $pconfig['template'];
 			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
-			$config['thebrig']['version'] = 1;
+			$langfile = file("ext/thebrig/lang.inc");
+			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
+			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
 			write_config(); // Write the config to disk
-		}
+			unlink_if_exists("/tmp/thebrig.tmp");
 		// Whatever we did, we did it successfully
 		$retval = 0;
 		$savemsg = get_std_save_message($retval);
 	} // end of no input errors
 } // end of POST
-
+// Display the page title, based on the constants defined in lang.inc
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE,  _THEBRIG_BASIC_CONFIG, _THEBRIG_VERSION_NBR );
 // Uses the global fbegin include
 include("fbegin.inc");
 
@@ -171,27 +173,33 @@ elseif ($savemsg) print_info_box($savemsg);
 function disable_buttons() {
 	document.iform.Submit.disabled = true;
 	document.iform.submit();}
+function message(obj) {
+	if (obj.checked) {
+		alert('If you want to uninstall the TheBrig, please make sure that all jails have been removed');
+	}
+		return true;
+}
 </script>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
-			<li class="tabinact">
-				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
-			</li>
-			<li class="tabact">
-				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
-			</li>
-			
+			<li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
+			<?php If (!empty($config['thebrig']['content'])) { 
+			$thebrigupdates=_THEBRIG_UPDATES;
+			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
+			} else {} ?>
+			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+					</span> </a>
+				</li>
 		</ul>
 	</td></tr>
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav2">
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a>
-			</li>
+			<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
 
@@ -213,7 +221,7 @@ function disable_buttons() {
 		<!-- This is the row beneath the title -->
 		<tr><td width="22%" valign="top" class="vncellreq">&nbsp;</td>
 			<td width="78%" class="vtable">
-				<input type="checkbox" name="remove" value="1"><?=_THEBRIG_CLEANUP_DESC;?>
+				<input type="checkbox" name="remove" value="1" onclick="return message(this);" ><?=_THEBRIG_CLEANUP_DESC;?>
 			</td>
 		</tr>
 			
@@ -223,7 +231,8 @@ function disable_buttons() {
 			 	<input name="Submit" type="submit" class="formbtn" value="<?=_THEBRIG_SAVE;?>" onClick="disable_buttons();">
 			</td>
 		</tr>
-	</table><?php include("formend.inc");?>
+	</table>
+	<?php include("formend.inc");?>
 </form>
 </td></tr>
 </table>

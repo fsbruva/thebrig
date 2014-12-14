@@ -227,8 +227,8 @@ if ($_POST['submit'] === "Compress") {
 		if (strlen($foldername) > 6 && $path[strlen($foldername)-1] == "/") { $foldername = substr($foldername, 0, strlen($foldername)-1); } 
 		$path_parts = pathinfo($foldername);
 		$timestamp = date("Y-m-d_H:i:s");
-		chdir($path_parts['dirname']);
-		mwexec("tar -c -z -f " . $config['thebrig']['rootfolder'] . "work/snached_" . $timestamp . ".txz -C" . $path_parts['dirname'] . " " . $path_parts['basename'] . "/*");
+		chdir($foldername);
+		mwexec("tar -c -z -f " . $config['thebrig']['rootfolder'] . "work/snached_" . $timestamp . ".txz -C" . $path_parts['dirname'] . "/".$path_parts['basename']. " " . "*");
 		// This tool make archive any folder and place archive into thebrig/work.  Usefull for easy migrate old jails.
 }
 out1: 
@@ -237,14 +237,14 @@ include("fbegin.inc");?>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
-		<ul id="tabnav">
-			<li class="tabinact">
-				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
-			</li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
-			</li>
-			
+		<ul id="tabnav"><li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
+				<?php If (!empty($config['thebrig']['content'])) { 
+			$thebrigupdates=_THEBRIG_UPDATES;
+			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
+			} else {} ?>
+			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+
 		</ul>
 	    </td>
 	</tr>
@@ -252,9 +252,7 @@ include("fbegin.inc");?>
 		<ul id="tabnav2">
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			<li class="tabact">
-				<a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a>
-			</li>
+			<li class="tabact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
 	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform">

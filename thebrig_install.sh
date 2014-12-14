@@ -4,6 +4,16 @@
 # returning 1.
 exerr () { echo -e "$*" >&2 ; exit 1; }
 
+# Determine the current directory
+# Method adapted from user apokalyptik at
+# http://hintsforums.macworld.com/archive/index.php/t-73839.html
+STAT=$(procstat -f $$ | grep -E "/"$(basename $0)"$")
+FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
+START_FOLDER=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
+
+# Store the script's current location in a file
+echo $START_FOLDER > /tmp/thebriginstaller
+
 # This first checks to see that the user has supplied an argument
 if [ ! -z $1 ]; then
     # The first argument will be the path that the user wants to be the root folder.
@@ -16,65 +26,86 @@ if [ ! -z $1 ]; then
         echo "Attempting to create a new destination directory....."
         mkdir -p $BRIG_ROOT || exerr "ERROR: Could not create directory!"
     fi
-    cd $BRIG_ROOT || exerr "ERROR: Could not access install directory!"
+	mkdir -p temporary || exerr "ERROR: Could not create install directory!"
+	cd temporary || exerr "ERROR: Could not access install directory!"
+#    cd $BRIG_ROOT || exerr "ERROR: Could not access install directory!"
 else
 # We are here because the user did not specify an alternate location. Thus, we should use the 
 # current directory as the root.
+    BRIG_ROOT=$START_FOLDER
+fi
+# touch /tmp/thebrig.tmp
 
-    # Determine the current directory
-    # Method adapted from user apokalyptik at
-    # http://hintsforums.macworld.com/archive/index.php/t-73839.html
-    STAT=$(procstat -f $$ | grep -E "/"$(basename $0)"$")
-    FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
-    BRIG_ROOT=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
+if [ $2 -eq 2 ]; then 
+    # Fetch the testing branch as a zip file
+    echo "Retrieving the testing branch as a zip file"
+    fetch https://github.com/fsbruva/thebrig/archive/working.zip || exerr "ERROR: Could not write to install directory!"
+    mv working.zip master.zip
+elif [ $2 -eq 3 ]; then
+	echo "Retrieving the alexey's branch as a zip file"
+	fetch https://github.com/fsbruva/thebrig/archive/alexey.zip || exerr "ERROR: Could not write to install directory!"
+	mv alexey.zip master.zip
+else
+    # Fetch the master branch as a zip file
+    echo "Retrieving the most recent version of TheBrig"
+    fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
 fi
 
-
-# This is the script to initially install thebrig
-# It first fetches the zip of the most recent version from github
-# and then extracts it.
-
-# Fetch the master branch as a zip file
-echo "Retrieving the most recent version of TheBrig"
-fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
 tar -xvf master.zip --exclude='.git*' --strip-components 1
-
-# Get rid of the tarball
 rm master.zip
 
-# Rename some files we have so there is only one bin/ftp
-if [ `uname -p` = "amd64" ]; then
-    echo "Renaming 64 bit ftp binary"
-    mv conf/bin/ftp_amd64 conf/bin/ftp
-    rm conf/bin/ftp_i386
+# Run the change_ver script to deal with different versions of TheBrig
+/usr/local/bin/php-cgi -f conf/bin/change_ver.php
+
+filever="/tmp/thebrigversion"
+# The file /tmp/thebrigversion might get created by the change_ver script
+# Its existence implies that we need to carry out the install procedure
+if [ -f "$filever" ]
+then
+	action=`cat ${filever}` 
+	# echo "Thebrig "${action}
+		if [ `uname -p` = "amd64" ]; then
+			echo "Renaming 64 bit ftp binary"
+			mv conf/bin/ftp_amd64 conf/bin/ftp
+			rm conf/bin/ftp_i386
+		else
+			echo "Renaming 32 bit ftp binary"
+			mv conf/bin/ftp_i386 conf/bin/ftp
+			rm conf/bin/ftp_amd64
+		fi
+	cp -r * $BRIG_ROOT/
+	mkdir -p /usr/local/www/ext/thebrig
+	cp $BRIG_ROOT/conf/ext/thebrig/* /usr/local/www/ext/thebrig
+	cd /usr/local/www
+	# For each of the php files in the extensions folder
+	for file in /usr/local/www/ext/thebrig/*.php
+	do
+	# Check if the link is already there
+		if [ -e "${file##*/}" ]; then
+			rm "${file##*/}"
+		fi
+			# Create link
+		ln -s "$file" "${file##*/}"
+		done
+	echo $BRIG_ROOT > /tmp/thebrig.tmp
+	echo "Congratulations! Thebrig ${action} . Navigate to rudimentary config tab and push Save "
 else
-    echo "Renaming 32 bit ftp binary"
-    mv conf/bin/ftp_i386 conf/bin/ftp
-    rm conf/bin/ftp_amd64
+# There was not /tmp/thebrigversion, so we are already using the latest version
+	echo "You use fresh version"
 fi
-
-# Place the path (of the current directory) within a file for the intial
-# run of the extension
-touch /tmp/thebrig.tmp
-echo $BRIG_ROOT > /tmp/thebrig.tmp
-
-# Copy all the requisite files to be used into the /usr/local/www folders as needed
-mkdir -p /usr/local/www/ext/thebrig
-cp $BRIG_ROOT/conf/ext/thebrig/* /usr/local/www/ext/thebrig
-cd /usr/local/www
-# For each of the php files in the extensions folder
-for file in /usr/local/www/ext/thebrig/*.php
-do
-	# Check if the link is alredy there
-	if [ -e "${file##*/}" ]; then
-		rm "${file##*/}"
-	fi
-	# Create link
-	ln -s "$file" "${file##*/}"
-done
-
-echo "Congratulations! Refresh to see a new tab under \" Extensions\"!"
+# Clean after work
+cd $START_FOLDER
+# Get rid of staged updates
+rm -Rf temporary/*
+rmdir temporary
+rm /tmp/thebriginstaller
+if [ -f "$file" ] 
+then 
+	rm /tmp/thebrigversion
+fi
+currentdate=`date -j +"%Y-%m-%d %H:%M:%S"`
+echo "[$currentdate]: TheBrig installer!: installer: ${action} successfully" >> $BRIG_ROOT/thebrig.log
