@@ -49,6 +49,7 @@ $pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ;
 $pconfig['sethostname'] = isset($config['thebrig']['sethostname']); 
 $pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
 $pconfig['systenv'] = isset($config['thebrig']['systenv']); 
+if (isset ($config['thebrig']['gl_statfs']) )  { $pconfig['gl_statfs']  =  $config['thebrig']['gl_statfs']; } else { $pconfig['gl_statfs']  = 2; }
 //
 
 if ($_POST) {
@@ -59,12 +60,14 @@ if ($_POST) {
 	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
 	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
 	$config['thebrig']['systenv'] = isset ( $_POST['systenv'] );
+	$config['thebrig']['gl_statfs'] =  $_POST['gl_statfs'] ;
 	write_config();
 
 	$retval = 0;
 	// This checks to see if any webgui changes require a reboot, and create rc.conf.local
 		if ( !file_exists($d_sysrebootreqd_path) && isset($config['thebrig']['content']) ) {
 		write_rcconflocal();
+	//	write_jailconf();
 		// OR the return value from the attempt to process the notification
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
 		// Lock the config
@@ -189,7 +192,7 @@ var auto_refresh = setInterval(
 		<?php if ($savemsg) print_info_box($savemsg);?>
 		<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 			<table width="100%" border="0" cellpadding="0" cellspacing="0">
-				<tr><?php html_titleline(gettext("On-line view"));?></tr>
+				<tr><?php html_titleline(gettext("On-line view"));?></tr>++
 				<tr> <!----  import table and check from another page --->
 					<td class="shadow">
 					<?php if ( !isset( $config['thebrig']['rootfolder']) ) : ?>
@@ -270,9 +273,12 @@ var auto_refresh = setInterval(
 							<input name="sethostname" type="checkbox" id="sethostname" value="yes" <?php if (!empty($pconfig['sethostname'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROOT_HOST?><br />
 							<input name="unixiproute" type="checkbox" id="unixiproute" value="yes" <?php if (!empty($pconfig['unixiproute'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROUTE?><br />
 							<input name="systenv" type="checkbox" id="systenv" value="yes" <?php if (!empty($pconfig['systenv'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_IPC?>
+							
 						</td>
+						
 					</tr>
-
+					<?php html_combobox("gl_statfs", gettext("Global information about a mounted file system (statfs)"),  $pconfig['gl_statfs'], array('2' =>'2','1'=> '1', '0'=> '0'), "Choose enforce_statfs. Default value =2. Per jail value cannot be less then Clobal value . Value 2 not allow  jail root user mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount jail-friendly filesystems ", false,false);?>
+		
 				</table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />
