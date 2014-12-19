@@ -4,7 +4,8 @@
 */
 require_once ("config.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc");
-if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/jail"))  { exec ("logger Failed copy rc script");}  else {}
+if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/jail"))  
+	{ exec ("logger Failed copy rc script");} 
 chmod("/etc/rc.d/jail", 0755);
 exec( "mkdir -p /usr/local/www/ext/thebrig/" );
 exec( "cp {$config['thebrig']['rootfolder']}conf/ext/thebrig/* /usr/local/www/ext/thebrig/");
