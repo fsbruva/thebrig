@@ -58,11 +58,11 @@ function genhtmltitle($title) {
 						
 							<tr><td width="7%" class="listhdrlr"><?=gettext("Jail");?></td>
 								<td width="15%" class="listhdrc"><?=gettext("Built");?></td>
-								<td width="44%" class="listhdrc"><?=gettext("Status");?></td>
+								<td width="24%" class="listhdrc"><?=gettext("Status");?></td>
 								<td width="5%" class="listhdrc"><?=gettext("ID");?></td>
-								<td width="12%" class="listhdrc"><?=gettext("Jail ip");?></td>
+								<td width="22%" class="listhdrc"><?=gettext("Jail ip");?></td>
 								<td width="12%" class="listhdrc"><?=gettext("Jail hostname");?></td>
-								<td width="12%" class="listhdrc"><?=gettext("Path to jail");?></td>
+								<td width="22%" class="listhdrc"><?=gettext("Path to jail");?></td>
 								
 								<td width="5%" class="listhdrc"><?=gettext("Action");?></td>
 							</tr>
@@ -75,16 +75,27 @@ function genhtmltitle($title) {
 					foreach ($jails as $n_jail):
 							$file_id = "/var/run/jail_{$n_jail['jailname']}.id";
 							If(is_file($file_id)) {
-								$jail_id = rtrim(file_get_contents($file_id));
+								$jail_id_1 = rtrim(file_get_contents($file_id));
+								$jail_id_2 = explode(" ",$jail_id_1);
+								$jail_id_3 = explode ("=",$jail_id_2[0]);
+								$jail_id = $jail_id_3[1];
+								$jail_id_3 = explode ("=",$jail_id_2[11]);
+								$item[2] = $jail_id_3[1] ;
+								$jail_id_3 = explode ("=",$jail_id_2[10]);
+								$item[3] = $jail_id_3[1] ;
+								$jail_id_3 = explode ("=",$jail_id_2[3]);
+								$item[4] = $jail_id_3[1] ;
+								
+								
 								$jail_ls = exec ("/usr/sbin/jls -j {$jail_id}");
 								$jail_ls1 = preg_replace("/(\s){2,}/",' ',$jail_ls);
-								$item = explode (" ",$jail_ls1);
+								//$item = explode (" ",$jail_ls1);
 								$sleep_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"S\"||\$2~\"I\")&&\$2!~\"S[\+]\"{++c}END{print c}'";
 								$runn_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"R\"||\$2~\"S[\+]\"){++c}END{print c}'";
 								$sleep_cnt = exec ( $sleep_cmd ); 
 								$runn_cnt = exec ( $runn_cmd);
 								$total = intval($sleep_cnt) + intval($runn_cnt);
-								$item = explode (" ",$jail_ls1);								
+																
 							}
 							else {
 								$jail_id = "stopped";
@@ -94,8 +105,8 @@ function genhtmltitle($title) {
 							}
 							
 							?>
-							<tr><td width="7%" valign="top" class="vncellreq"><center><?php print $n_jail['jailname'];?></center></td>
-								<td width="15%" valign="top" class="vncellreq">
+							<tr><td width="7%" valign="top" class="vncell"><center><?php print $n_jail['jailname'];?></center></td>
+								<td width="15%" valign="top" class="vncell">
 								<?php if (!is_dir( $n_jail['jailpath'] ."var/run")) {echo '<img src="'.'status_disabled.png'.'">';}
 								else {
 								echo '<img src="'.'status_enabled.png'.'">';
@@ -104,17 +115,17 @@ function genhtmltitle($title) {
 								}
 								?>								
 								</td>
-								<td width="44%" valign="top" class="vncellreq"><center><?php  
+								<td width="24%" valign="top" class="vncell"><center><?php  
 										If(is_file($file_id)): ?>
 											<a title="<?=gettext("Running");?>"><img src="status_enabled.png" border="0" alt="" /></a>
 											<?php echo "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping"; else:?>
 											<a title="<?=gettext("Stopped");?>"><img src="status_disabled.png" border="0" alt="" /></a>
 										<?php endif;?></center>
 								</td>
-								<td width="5%" valign= "top" class="vncellreq"><center><?php print $jail_id;?></center></td>
-								<td width="12%" valign="top" class="vncellreq"><center><?php print $item[2];?> </center></td>
-								<td width="12%" valign="top" class="vncellreq"><center><?php print $item[3];?></center></td>
-								<td width="12%" valign="top" class="vncellreq"><center><?php print $item[4];?></center></td>
+								<td width="5%" valign= "top" class="vncell"><center><?php print $jail_id;?></center></td>
+								<td width="22%" valign="top" class="vncell"><center><?php print $item[2];?> </center></td>
+								<td width="12%" valign="top" class="vncell"><center><?php print $item[3];?></center></td>
+								<td width="22%" valign="top" class="vncell"><center><?php print $item[4];?></center></td>
 								 								
 	<td width="5%" valign="top" class="vncellreq"><?php  
 	if (!is_file($file_id)) 
