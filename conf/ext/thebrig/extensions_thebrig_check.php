@@ -77,14 +77,29 @@ function genhtmltitle($title) {
 							If(is_file($file_id)) {
 								$jail_id_1 = rtrim(file_get_contents($file_id));
 								$jail_id_2 = explode(" ",$jail_id_1);
-								$jail_id_3 = explode ("=",$jail_id_2[0]);
-								$jail_id = $jail_id_3[1];
-								$jail_id_3 = explode ("=",$jail_id_2[11]);
-								$item[2] = $jail_id_3[1] ;
-								$jail_id_3 = explode ("=",$jail_id_2[10]);
-								$item[3] = $jail_id_3[1] ;
+								$jail_id_3 = preg_grep("/jid=/",$jail_id_2 );
+								
+								$jail_id_4 = explode ("=",$jail_id_3[0]);
+								$jail_id = $jail_id_4[1];
+								
+								unset($jail_id_5);
+								$jail_ips = preg_grep("/.addr=/",$jail_id_2 );
+								foreach ($jail_ips as $jail_ip) { $jail_id_3 = explode ("=",$jail_ip); $jail_id_5[] = $jail_id_3[1] ;	}
+								$item[2] = implode (" as ", $jail_id_5);
+								unset($jail_id_5);
+								$jail_hostname = preg_grep("/.hostname=/", $jail_id_2 );
+								foreach ($jail_hostname as $jail_hostname) {
+								 $jail_id_3 = explode ("=",$jail_hostname); $jail_id_5[] = $jail_id_3[1] ;	}
+								$item[3] = implode (" ", $jail_id_5);
+								
+								unset($jail_id_5);
+								$jail_path = preg_grep("/path=/", $jail_id_2 );
+								foreach ($jail_path as $jail_path) {
+								 $jail_id_3 = explode ("=",$jail_path); $jail_id_5[] = $jail_id_3[1] ;	}
+								$item[4] = implode (" ", $jail_id_5);
+								
 								$jail_id_3 = explode ("=",$jail_id_2[3]);
-								$item[4] = $jail_id_3[1] ;
+								//$item[4] = $jail_id_3[1] ;
 								
 								
 								$jail_ls = exec ("/usr/sbin/jls -j {$jail_id}");

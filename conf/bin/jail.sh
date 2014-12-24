@@ -30,31 +30,12 @@ start_cmd="jail_start"
 stop_cmd="jail_stop"
 
 
-jail_mount_fstab()
-{
-	local _device _mountpt _rest
-
-	while read _device _mountpt _rest; do
-		case ":${_device}" in
-		:#* | :)
-			continue
-			;;
-		esac
-		if is_symlinked_mountpoint ${_mountpt}; then
-			warn "${_mountpt} has symlink as parent - not mounting from ${_fstab}"
-			return
-		fi
-	done <${_fstab}
-	mount -a -F "${_fstab}"
-}
 
 jail_start()
 {
 	echo -n "Starting jails: "
 	/sbin/sysctl security.jail.enforce_statfs=`configxml_get "//thebrig/gl_statfs"`
-	# this use temporary, in general it will replace for prestart script (php or sh )
-	cp /mnt/idisk2/app/jail.conf /etc/jail.conf
-	
+
 	devfs_init_rulesets
 
 	for _j in ${jail_list}; do
@@ -64,9 +45,8 @@ jail_start()
 			echo "${_j} already exists"
 			continue
 		fi
-		_fstab="/etc/fsab."${-j}
-		jail_mount_fstab
-		jail -c -i -f /etc/jail.conf -J /var/run/jail_${_j}.id ${_j}  > /mnt/idisk/thebrig/jail.log 2>&1
+
+		jail -c -i -p 10 -f /etc/thebrig.conf -J /var/run/jail_${_j}.id ${_j}  > /mnt/idisk/thebrig/jail.log 2>&1
 
 		eval _zfs=\"\${jail_${_j}_zfs:-}\"
 		_jid=`jls -j ${_j} jid 2>/dev/null`
@@ -99,7 +79,7 @@ jail_stop()
 		eval _zfs=\"\${jail_${_j}_zfs:-}\"
 		_jid=`jls -j ${_j} jid 2>/dev/null`
 
-		jail -r -f /etc/jail.conf  ${_j} > /dev/null 2>&1
+		jail -r -f /etc/thebrig.conf  ${_j} > /dev/null 2>&1
 		rm /var/run/jail_${_j}.id
 
 		if [ -n "${_zfs}" ]; then
@@ -113,7 +93,7 @@ jail_stop()
 	done
 
 	echo
-	unlink /etc/jail.conf
+	
 }
 
 load_rc_config $name
