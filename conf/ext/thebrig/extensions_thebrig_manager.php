@@ -168,10 +168,10 @@ function conf_handler() {
 			<li class="tabinact">
 				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
 			</li>
-			<li class="tabact">
+			<li class="tabinact">
 				<a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a>
 			</li>
-			<li class="tabinact">
+			<li class="tabact">
 				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
 			</li>
 			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
@@ -179,11 +179,10 @@ function conf_handler() {
 	</td></tr>
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav2">
-			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATER;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_ports.php"><span><?=_THEBRIG_PORTS;?></span></a></li>
-			<li class="tabact">
-				<a href="extensions_thebrig_manager.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_MANAGER;?></span></a>
-			</li>
+			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
+			<li class="tabact"><a href="extensions_thebrig_manager.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_MANAGER;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
 
