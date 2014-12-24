@@ -3,54 +3,124 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
+/*
+ * File name: 	extensions_thebrig_manager.php
+ * Author: 		Matt Kempe, Alexey Kruglov
+ * Modified:	Dec 2014
+ * 
+ * Purpose: 	This page is used to update all the files of TheBrig's
+ * 				extension. 
+ * 
+ * Variables used:	
+ * 
+ * input_errors		Nas4Free array with error messages
+ * pgtitle			Array to label page using lang.inc
+ * pconfig			Nas4Free array containing $_POST data
+ * config_changed	Boolean variable to track if the Nas4Free config.xml 
+ * 					needs to have changes written to it
+ * brig_ver			String (then floating point) version value stored in 
+ * 					the installed copy of TheBrig's lang.inc
+ * gitlangfile		File descriptor for accessing the github version of 
+ * 					TheBrig's lang.inc (online version)
+ * git_ver			String (then floating point) version value within the
+ * 					github version of TheBrig's lang.inc. (Also displays
+ * 					an error message when the fetch fails.
+ * fetch_args		String of OS version dependent arguments to pass to
+ * 					fetch so that it will work.
+ * fetch_ret_val	Integer to receive the program return status from 
+ * 					the call to fetch.
+ */
 	
-if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
-	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
-} // end of elseif
-
-
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Manager");
+	
+	// This checks to see if we've finished installing TheBrig. If there
+	// is no stored folder or created work folder, the install isn't done.
+if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
+	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
+} // end of if
+else { // TheBrig has been confirmed
+	// Get the string version of the installed software
+	$brig_ver = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
+	// Convert the string to a float so that it can be used in comparisons
+	$brig_ver = 0 + substr($brig_ver[1],0,3);
+	
+	if ( !$_POST ) {
+		// $_POST not being set means we haven't clicked a button - so 
+		// we need to go and get the lastest version
+		
+		// First we get rid of the previously fetched file
+		unlink_if_exists ("/tmp/lang.inc");
+		// Foolish workaround because of the version of "fetch" included
+		// in 9.1 compared to other FreeBSD versions
+		$fetch_args = "";			// "default" arguments for 9.1
+		mwexec2("uname -r | cut -d- -f1" , $rel ) ; 		// Obtain the current kernel release
+		// If the string compare yields anything other than "0", we 
+		// are not 9.1
+		if ( strcmp($rel[0], "9.1") != 0 ) {
+			// FreeBSD above 9.1 has issues fetching from GitHub, so 
+			// we need to tell fetch to not verify certificates
+			$fetch_args = "--no-verify-peer";	
+		}
+		mwexec2 ( "fetch {$fetch_args} -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/alcatraz/conf/ext/thebrig/lang.inc" , $garbage , $fetch_ret_val ) ;
+		// $result will be "1" if fetch didn't do something properly
+		if ( $fetch_ret_val == 1 ) {
+			// We couldn't get the file from GitHub. We might not have 
+			// connectivity to Github, the file wasn't found, there was 
+			// a DNS issue, or something else went wrong.
+			$input_errors[] = _THEBRIG_CHECK_NETWORKING_GIT;
+			$git_ver = _THEBRIG_ERROR;
+		}	// end of fetch failed
+	} // end of "Not Post"
 
-// User has clicked a button
+	// We need to check to see the file exists, otherwise provide error
+	// This should never happen, but you never know..
+	if ( file_exists( "/tmp/lang.inc" ) ) {
+		// Load the GitHub lang file into an array
+		$gitlangfile = file("/tmp/lang.inc");
+		// If reading the file is successful, do some operations
+		if ( $gitlangfile ) {
+			// Extract the version string from the file ("0.8", "0.9")
+			$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[1]);
+			// Force the version to be a number for comparisons
+			$git_ver = 0 + substr($git_ver[1],0,3);
+		} // end if $gitlangfile
+		else { // Something failed trying to access the GitHub lang file
+			$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
+			$git_ver = _THEBRIG_ERROR;
+		} // end else $gitlangfile
+	} // end if langfile exists
+	else { // The lang file we just downloaded is missing! HOW!
+		$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
+		$git_ver = _THEBRIG_ERROR;
+	} // end else langfile exists
+} // end of "Brig Confirmed"
+
+// We have returned to this page via a POST
 if ($_POST) {
 	unset($input_errors);
-	$pconfig = $_POST;
-	$config_changed = false;		// Keep track if we need to re-write the config
+	$pconfig = $_POST;			// move $_POST into the $post config
+	$config_changed = false;	// Keep track if we need to re-write the config
 
-	if ( isset($pconfig['update']) && $pconfig['update'] ){ 
-		
-		$langfile = file("/tmp/lang.inc");
-		$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
-		$gitversion = 0 + substr($version[1],0,3);
-		
-		// This extracts the actual version from the lang.inc file
-		$version = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
-		$myversion = 0 + substr($version[1],0,3); // Forces version to be a float
-		// This checks to make sure the XML config concurs with the version of lang.inc, even if we already
+	// There are no input errors detected - we checked:
+	// 1. Networking
+	// 2. Availability of Github servers
+	// We know we got here via "POST" - but we want to make sure the user
+	// clicked the "Update" button.
+	if ( !$input_errors && isset($pconfig['update']) && $pconfig['update']){
+		// This checks to make sure the XML config concurs with the 
+		// installed version of lang.inc, even if we already
 		// have the most recent version
-		if ( ($config['thebrig']['version'] != $myversion ) && ($gitversion == $myversion)){
+		if ( ($config['thebrig']['version'] != $brig_ver ) && ($git_ver == $brig_ver)){
 			// We need to update the XML config to reflect reality
-			$config['thebrig']['version'] = $myversion;
+			$config['thebrig']['version'] = $brig_ver;
 			$config_changed = true;
 		} 
-		elseif ( $gitversion > $myversion ) {
+		elseif ( $git_ver > $brig_ver ) {
 			// We want to make sure we can't let the user revert - the code we need to update thebrig will go here.
 			
 		}
-		
-		
-	} // end of "clicked update"
-	
-		
-	// There are no input errors detected.
-	if ( !$input_errors ){
 		// User has selected to carry out the update
-		if ( isset($pconfig['update'])) {
-
-			//if ($gitversion == $myversion) {  $savemsg = " Your TheBrig run on current ".$myversion." version"; goto menu; }
-		}
-			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 		if ( $config_changed ) {
 			write_config();
 		}
@@ -121,18 +191,8 @@ function conf_handler() {
 		<form action="extensions_thebrig_manager.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php 
-			// Download the most recent lang.inc, to see the version
-			mwexec ( "fetch -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/working/conf/ext/thebrig/lang.inc" ) ;
-			$myversion = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
-			$myversion = 0 + substr($myversion[1],0,3);
-			$gitlangfile = file("/tmp/lang.inc");
-			$gitversion = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[1]);
-			$gitversion = 0 + substr($gitversion[1],0,3);
-			
-			
 			html_titleline(gettext("Update Availability")); 
-			html_text($confconv, gettext("Current Status"),"The latest version on GitHub is: " . $gitversion . "<br /><br />Your version is: " . $myversion );
-				// We have tag meaning we have downloaded & extracted a copy of the tree before - now we just want to update it.?>
+			html_text($confconv, gettext("Current Status"),"The latest version on GitHub is: " . $git_ver . "<br /><br />Your version is: " . $brig_ver ); ?> 
 			<tr>
 			<td width="22%" valign="top" class="vncell">Update your installation&nbsp;</td>
 			<td width="78%" class="vtable">
@@ -143,9 +203,8 @@ function conf_handler() {
 			</td>
 			</tr>
 		<?php html_separator(); ?>
-
 	</table><?php include("formend.inc");?>
 </form>
 </td></tr>
 </table>
-<?php 	include("fend.inc"); ?>
+<?php include("fend.inc"); ?>

@@ -2,8 +2,8 @@
 <?php
 /*
  * File name: 	thebrig_start.php
- * Author: 		Matt Kempe
- * Date:		Dec 2014
+ * Author: 		Matt Kempe, Alexey Kruglov
+ * Modified:	Dec 2014
  * 
  * Purpose: 	This script is used to prepare the extension for use by
  * 				Nas4Free's lighttpd webgui server.
