@@ -15,6 +15,7 @@ $in_jail_allow = array (
 "allow.mount.devfs",
 "allow.mount.nullfs",
 "allow.mount.procfs",
+"allow.mount.fdescfs",
 "allow.mount.tmpfs",
 "allow.mount.zfs",
 "allow.quotas",
@@ -191,6 +192,7 @@ if ($_POST) {
 	
 	
 	/*explode network entries and check IP addres.  I check if address, if not more then 1 IP adresses specified, and not more then 1 address in jails set.*/
+	if (is_array( $pconfig['allowedip'] ) && !isset($pconfig['vnet'])) {
 	foreach ($pconfig['allowedip'] as $a_ips ) {
 		  $b_ips = explode("|", $a_ips);
 		  $c_ips = explode ("/", $b_ips[1]);
@@ -201,37 +203,48 @@ if ($_POST) {
 		   $matches = preg_grep ($delimit, $a_jail );
 		   if (count ($matches) > 1)  $input_errors[] = sprintf( gettext("The specified ip address '%s'  is already in use. Please choose another."), $c_ips[0]);
 	}
-	// check device filesystem rules.  If we have one defined -> set enables  
-	if (isset ( $pconfig['rule'] ) || count ($pconfig['rule'] > 0) ) {
-		 $pconfig['jail_mount'] = "yes";
+	}
+	// check device filesystem rules.  If we have one defined -> set enables  for devfs_enable
+	if (isset ( $pconfig['rule'] ) && count ($pconfig['rule'] > 0) && !empty($pconfig['rule']) ) {
+		 //$pconfig['jail_mount'] = "yes";
 		 $pconfig['devfs_enable'] = "yes";
 		 }
-	// check alowes
-	$a_param = $pconfig['param'];
-	// check allow mounts
+	
+	// check alowes.  Subroutine check mount section checkboxes, and give allow values allow.mount.blabla, if user not define its.
+	$cache_param_1 = array();
+	$cache_param = array();
 	if (  isset ( $pconfig['jail_mount'] ) ||  isset (  $pconfig['devfs_enable'] ) ||  isset ( $pconfig['proc_enable'] ) ||  isset ( $pconfig['fdescfs_enable'] ) ) {
-		if ( FALSE === array_search_ex("allow.mount", $a_param, "param") ) { 	$pconfig['param'][] = "allow.mount" ; 	}
-		if (isset (  $pconfig['devfs_enable'] ) ) {
-			if ( FALSE === array_search_ex("allow.mount.devfs", $a_param, "param") ) { 	$pconfig['param'][] = "allow.mount.devfs" ; 	}
-			} 
-		if (isset (  $pconfig['proc_enable'] ) ) {
-			if ( FALSE === array_search_ex("allow.mount.procfs", $a_param, "param") ) { 	$pconfig['param'][] = "allow.mount.procfs" ; 	}
+		
+		if(is_array($pconfig['param'])) { foreach ($pconfig['param'] as $parameter) {
+				unset ( $matches);
+				$parameter_1 =  $parameter;
+				preg_match ("/allow.mount/", $parameter_1, $matches );
+				$matches_1[] = $matches;
+				if (1 == $matches[0][1] )  { $cache_param[] =  $parameter_1; unset ($parameter); }
+				}
+			
+			if ( isset ( $pconfig['fdescfs_enable'] )) {  $cache_param_1[] = "allow.mount.fdescfs"; $cache_param_1[] = "allow.mount"; }
+			if ( isset ( $pconfig['proc_enable'] )) {  $cache_param_1[] = "allow.mount.procfs"; $cache_param_1[] = "allow.mount"; }
+			if ( isset ( $pconfig['devfs_enable'] )) {  $cache_param_1[] = "allow.mount.devfs"; $cache_param_1[] = "allow.mount"; }
+			$cache_param_1 = array_unique ( $cache_param_1 );
+			$result = array_merge_recursive( $cache_param,  $cache_param_1);
+			$result = array_unique (  $result );
+			$pconfig['param'] =  array_merge_recursive ($pconfig['param'], $result);
+			$pconfig['param'] = array_unique (  $pconfig['param'] );
+			    // file_put_contents ("/tmp/thebrig.error.4.txt", serialize ($anyarray));  very nice for diagnostic.  Cache values
 			}
-		if (isset (  $pconfig['fdescfs_enable'] ) ) {
-			if ( FALSE === array_search_ex("allow.mount.fdescfs", $a_param, "param") ) { 	$pconfig['param'][] = "allow.mount.fdescfs" ; 	}
-			 }
+	
+		
 		}
-	
-	
-	
-	
+
 	
 	/*  Primitive check jail commands for duplicates*/
 	// Detect duplicates into commands numbers..  converted as <commandtip><number>, --> prestart5
+	if (is_array ($pconfig['cmd'])) {
 	foreach ($pconfig['cmd'] as $a_cmd ) {  $b_cmd = explode("|", $a_cmd); $c_cmd[] =  $b_cmd[0] . $b_cmd[1]; } 
 	
 	if (count($c_cmd) != count (array_unique($c_cmd)))  $input_errors[] = sprintf( gettext("Duplicate command detected, please inspect command mice values."));
-	
+	}
 	$files_selected = $_POST['formFiles'];
 	// Input validation.
 	$reqdfields = explode(" ", "jailno jailname");

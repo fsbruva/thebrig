@@ -67,6 +67,8 @@ if ($_POST) {
 	// This checks to see if any webgui changes require a reboot, and create rc.conf.local
 		if ( !file_exists($d_sysrebootreqd_path) && isset($config['thebrig']['content']) ) {
 		write_rcconflocal();
+		 write_defs_rules();
+		 write_jailconf ();
 	//	write_jailconf();
 		// OR the return value from the attempt to process the notification
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
@@ -192,7 +194,7 @@ var auto_refresh = setInterval(
 		<?php if ($savemsg) print_info_box($savemsg);?>
 		<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 			<table width="100%" border="0" cellpadding="0" cellspacing="0">
-				<tr><?php html_titleline(gettext("On-line view"));?></tr>++
+				<tr><?php html_titleline(gettext("On-line view"));?></tr>
 				<tr> <!----  import table and check from another page --->
 					<td class="shadow">
 					<?php if ( !isset( $config['thebrig']['rootfolder']) ) : ?>
@@ -225,12 +227,12 @@ var auto_refresh = setInterval(
 								<tr>
 									<td width="4%" class="listhdrlr">&nbsp;</td>
 									<td width="10%" class="listhdrr"><?=gettext("Name");?></td>
-									<td width="5%" class="listhdrr"><?=gettext("Interface");?></td>
+									<td width="15%" class="listhdrr"><?=gettext("Interface");?></td>
 									<td width="10%" class="listhdrr"><?=gettext("Start on boot");?></td>
-									<td width="10%" class="listhdrr"><?=gettext("IP");?></td>
-									<td width="12%" class="listhdrr"><?=gettext("Hostname");?></td>
+									<td width="6%" class="listhdrr"><?=gettext("IP");?></td>
+									<td width="10%" class="listhdrr"><?=gettext("Hostname");?></td>
 									<td width="15%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?></td>
-									<td width="19%" class="listhdrr"><?=gettext("Description");?></td>
+									<td width="14%" class="listhdrr"><?=gettext("Description");?></td>
 									<td width="15%" class="list"></td>
 								</tr>
 																<?php foreach ($a_jail as $jail):?>
@@ -238,7 +240,8 @@ var auto_refresh = setInterval(
 								<tr>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['jailno']) ? "*" : $jail['jailno']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['jailname']);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['if']) ? "*" : $jail['if']);?>&nbsp;</td>
+									<?php if (is_array($jail['allowedip'])) $networks = implode(",", $jail['allowedip']); ?>
+									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['allowedip']) ? "*" : $networks);?>&nbsp;</td>  
 									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(isset($jail['enable']) ? "YES" : "NO");?></td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['ipaddr'] . " / " . $jail['subnet']) ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($jail['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>

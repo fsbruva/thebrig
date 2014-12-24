@@ -18,9 +18,9 @@
 */
 require_once ("config.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc");
-if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/jail"))  
+if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
 	{ exec ("logger Failed copy rc script");} 
-chmod("/etc/rc.d/jail", 0755);
+chmod("/etc/rc.d/thebrig", 0755);
 
 // This might be the first extension, so we need to create the folder for it
 exec( "mkdir -p /usr/local/www/ext" );

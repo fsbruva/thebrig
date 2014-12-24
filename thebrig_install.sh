@@ -40,7 +40,7 @@ if [ $2 -eq 3 ]; then
     # Fetch the testing branch as a zip file
     echo "Retrieving the testing branch as a zip file"
     fetch https://github.com/fsbruva/thebrig/archive/alcatraz.zip || exerr "ERROR: Could not write to install directory!"
-    mv working.zip master.zip
+    mv alcatraz.zip master.zip
 else
     # Fetch the master branch as a zip file
     echo "Retrieving the most recent version of TheBrig"

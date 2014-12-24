@@ -824,3 +824,93 @@ function cmd_exec($cmd, &$stdout, &$stderr)
     unlink($errfile);
     return $exit;
 }
+function write_defs_rules() {
+	global $config, $g;
+	
+	$file = "/etc/devfs.rules";
+	$handle = fopen($file, "w");
+	fwrite($handle, "##Thebrig rulesets##");
+	$jails = $config['thebrig']['content'];
+	array_sort_key($jails, "jailno");
+	foreach ($jails as $out_jail ) {
+		$ruleset_mumber = 4+$out_jail['jailno'];
+		$ruleset_tag = "[devfsrules_jail_".$out_jail['jailname']."=".$ruleset_mumber."]";
+				fwrite($handle, "\n".$ruleset_tag."\n");
+				fwrite($handle, "add include \$devfsrules_hide_all\nadd include \$devfsrules_unhide_basic\nadd include \$devfsrules_unhide_login\n");
+		if (is_array ($out_jail['rule'])) { foreach ($out_jail['rule'] as $rule ) { fwrite($handle, $rule."\n");}
+			  }	  
+	 }
+	 fclose($handle);
+}
+
+ function write_jailconf () {
+ 	global $config, $g;
+ 			$startonboot ="";
+ 			$file = "/etc/thebrig.conf";
+ 			$handle=fopen($file, "w");
+ 	// copy part of config in temporary array
+ 			$t_jail = $config['thebrig']['content'];
+			array_sort_key($t_jail, "jailno");
+			foreach ($t_jail as $out_jail ) {
+ 				If (isset($out_jail['enable'])) {$startonboot = $startonboot . " " .$out_jail['jailname']; } else { $startonboot = $startonboot; 	}
+ 				fwrite ($handle, $out_jail['jailname'] . "\t {\n"  );
+ 				$out_jail_comb = substr($out_jail['jailpath'], 0, strlen($out_jail['jailpath'])-1);
+ 				fwrite ($handle, "\tpath = \"" . $out_jail_comb . "\";\n");
+ 				fwrite ($handle, "\thost.hostname =\"" . $out_jail['jailname'] .".". $config['system']['domain'] ."\";\n");
+ 				fwrite ($handle, "\tenforce_statfs =" . $out_jail['statfs'] .";\n");
+ 				fwrite ($handle, "\tdevfs_ruleset=" . (4+ $out_jail['jailno']) .";\n");
+ 				
+ 				if (isset($out_jail['vnet'] )) {  fwrite ($handle, "\tvnet;\n"); } else {
+ 				
+ 					if (count ($out_jail['allowedip'] ) > 1 ) {
+ 							foreach ($out_jail['allowedip'] as $a_ips ) {
+ 								$b_ips = explode("|", $a_ips);
+ 								$c_ips = explode ("/", $b_ips[1]);
+ 								if (is_ipv4addr($c_ips[0])) { 
+ 									fwrite ($handle, "\tip4.addr += \"" . $out_jail['allowedip'] . "\";\n");
+ 								} else {
+ 									fwrite ($handle, "\tip6.addr += \"" . $out_jail['allowedip'] ."\";\n");
+ 								}
+							  // check, if this schema work.  If not --> replace number0 as ip = re|dfgfgfg
+ 							}
+ 				} else { /* if only one address specified */
+ 				foreach ($out_jail['allowedip'] as $a_ips ) {
+					$b_ips = explode("|", $a_ips);
+					$c_ips = explode ("/", $b_ips[1]);
+					if (is_ipv4addr($c_ips[0])) {
+						fwrite ($handle, "\tip4.addr = \"" . $out_jail['allowedip'][0] . "\";\n");
+					} else {
+						fwrite ($handle, "\tip6.addr = \"" . $out_jail['allowedip'][0] . "\";\n");
+						}
+					}
+				} 	/* end of allowed ip */ } /* end of networking */
+				
+				if (is_array($out_jail['param'] )) {
+					foreach ($out_jail['param'] as $a_param ) { fwrite ($handle, "\t". $a_param .";\n"); }  }
+				$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
+				$handle1 = fopen($fstabfile, "w");
+				if  ($out_jail['jail_type'] === "slim") {
+					$basejailfolder	= 	 substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
+					fwrite( $handle1 ,  $basejailfolder . " " .  $out_jail['jailpath'] . "basejail nullfs ro 0 0\n");
+					}
+				if (TRUE == is_array($out_jail['auxparam'])) {
+					  foreach ($out_jail['auxparam'] as $fstab) {  fwrite ($handle1, $fstab."\n"); }
+				} else {}
+				if (isset($out_jail['ports'])) { 
+					$portsjailfolder	= 	$config['thebrig']['rootfolder']."conf/ports";
+					fwrite( $handle1 ,  $portsjailfolder . " " .  $out_jail['jailpath'] . "usr/ports nullfs ro 0 0\n");
+				  } else {}
+				If (isset($out_jail['devfs_enable'])) { fwrite( $handle , "\tmount.devfs;\n") ;} else {}
+				if  (($out_jail['jail_type'] === "slim") || ($out_jail['jail_type'] === "full")) {
+					  If (isset($out_jail['fdescfs_enable'])) { fwrite( $handle1 ,  "fdescfs " .  $out_jail['jailpath'] . "dev/fd fdescfs rw 0 0\n");} else {}
+					  If (isset($out_jail['proc_enable'])) { fwrite( $handle1 ,  "procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} else {}
+				}
+				fclose($handle1);
+				
+				
+				
+			fwrite ($handle, "}\n"  );	
+
+			}
+fclose($handle);
+}
