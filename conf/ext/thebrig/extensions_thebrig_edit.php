@@ -15,8 +15,6 @@ $in_jail_allow = array (
 "allow.mount.devfs",
 "allow.mount.nullfs",
 "allow.mount.procfs",
-"allow.mount.fdescfs",
-"allow.mount.tmpfs",
 "allow.mount.zfs",
 "allow.quotas",
 "allow.socket_af"
@@ -101,7 +99,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['cmd'] = $a_jail[$cnid]['cmd'];
 	//$pconfig['afterstart0'] = $a_jail[$cnid]['afterstart0'];
 	//$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
-	//$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
+	$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
 	//$pconfig['extraoptions'] = $a_jail[$cnid]['extraoptions'];
 	//$pconfig['jail_parameters'] = $a_jail[$cnid]['jail_parameters'];
 	$pconfig['desc'] = $a_jail[$cnid]['desc'];
@@ -156,7 +154,7 @@ else {
 	$pconfig['exec_start'] = "/bin/sh /etc/rc";
 	//$pconfig['afterstart0'] = "";
 	//$pconfig['afterstart1'] = "";
-	//$pconfig['exec_stop'] = "";
+	$pconfig['exec_stop'] = "/bin/sh /etc/rc.shutdown";
 	//$pconfig['extraoptions'] = "";
 	//$pconfig['jail_parameters'] = "";
 	$pconfig['desc'] = "";
@@ -213,7 +211,7 @@ if ($_POST) {
 	// check alowes.  Subroutine check mount section checkboxes, and give allow values allow.mount.blabla, if user not define its.
 	$cache_param_1 = array();
 	$cache_param = array();
-	if (  isset ( $pconfig['jail_mount'] ) ||  isset (  $pconfig['devfs_enable'] ) ||  isset ( $pconfig['proc_enable'] ) ||  isset ( $pconfig['fdescfs_enable'] ) ) {
+	if (  isset ( $pconfig['jail_mount'] ) ||  isset (  $pconfig['devfs_enable'] ) ||  isset ( $pconfig['proc_enable'] ) ) {
 		
 		if(is_array($pconfig['param'])) { foreach ($pconfig['param'] as $parameter) {
 				unset ( $matches);
@@ -222,8 +220,7 @@ if ($_POST) {
 				$matches_1[] = $matches;
 				if (1 == $matches[0][1] )  { $cache_param[] =  $parameter_1; unset ($parameter); }
 				}
-			
-			if ( isset ( $pconfig['fdescfs_enable'] )) {  $cache_param_1[] = "allow.mount.fdescfs"; $cache_param_1[] = "allow.mount"; }
+						
 			if ( isset ( $pconfig['proc_enable'] )) {  $cache_param_1[] = "allow.mount.procfs"; $cache_param_1[] = "allow.mount"; }
 			if ( isset ( $pconfig['devfs_enable'] )) {  $cache_param_1[] = "allow.mount.devfs"; $cache_param_1[] = "allow.mount"; }
 			$cache_param_1 = array_unique ( $cache_param_1 );
@@ -418,7 +415,7 @@ if ($_POST) {
 		$jail['exec_start'] = $pconfig['exec_start'];
 		//$jail['afterstart0'] = $pconfig['afterstart0'];
 		//$jail['afterstart1'] = $pconfig['afterstart1'];
-		//$jail['exec_stop'] = $pconfig['exec_stop'];
+		$jail['exec_stop'] = $pconfig['exec_stop'];
 		if (empty ($pconfig['extraoptions'])) { $pconfig['extraoptions'] = "-l -U root -n ".$pconfig['jailname'];} else {}
 		//$jail['extraoptions'] = $pconfig['extraoptions'];
 		//$jail['jail_parameters'] = $pconfig['jail_parameters'];
@@ -686,7 +683,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), $pconfig['proc_enable'], "", "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", " ", " ");?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), $pconfig['fdescfs_enable'], "", "", " ");?>
-			
+			<?php html_checkbox("zfs_enable", gettext("Enable mount zfs dataset"), $pconfig['zfs_enable'], "", "", " ");?>
 			
 			<?php html_separator();?>
 			<tr id='mounts_separator0'><td colspan='2' valign='top' class='listtopic'>Networking</td></tr>
@@ -710,7 +707,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_inputbox("exec_start", gettext("Jail start command"), $pconfig['exec_start'], gettext("command to execute  when starting the jail. /etc/rc command load rc scripts."), false, 50);?>
 			<?php //html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>
 			<?php //html_inputbox("afterstart1", gettext("User command 1"), $pconfig['afterstart1'], gettext("command to execute after the one for starting the jail."), false, 50);?>
-			<?php //html_inputbox("exec_stop", gettext("User command stop"), !empty($pconfig['exec_stop']) ? $pconfig['exec_stop'] : "/bin/sh /etc/rc.shutdown" , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
+			<?php html_inputbox("exec_stop", gettext("User command stop"), $pconfig['exec_stop'] , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
 			<?php //html_inputbox("extraoptions", gettext("Options. "),  $pconfig['extraoptions'], gettext("Add to rc.conf.local variable jail_jailname_flags. Example: -l -U root -n {jailname}"), false, 40);?>
 			<?php //html_inputbox("jail_parameters", gettext("Addition Parameters "),  $pconfig['jail_parameters'], gettext("Add to rc.conf.local variable jail_parameters. Must be separated by space. See <a href=http://www.freebsd.org/cgi/man.cgi?query=jail&sektion=8>jail(8)</a>"), false, 80);?>
 			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
