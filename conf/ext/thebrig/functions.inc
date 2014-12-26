@@ -861,7 +861,7 @@ function write_defs_rules() {
  				fwrite ($handle, "\tenforce_statfs =" . $out_jail['statfs'] .";\n");
  				fwrite ($handle, "\tdevfs_ruleset=" . (4+ $out_jail['jailno']) .";\n");
  				fwrite ($handle, "\tmount.fstab=\"/etc/fstab." . $out_jail['jailname'] ."\";\n");
- 				if (isset($out_jail['vnet'] )) {  fwrite ($handle, "\tvnet;\n"); } else {
+ 				if (isset($out_jail['jail_vnet'] )) {  fwrite ($handle, "\tvnet;\n"); } else {
  				
  					if (count ($out_jail['allowedip'] ) > 1 ) {
  							foreach ($out_jail['allowedip'] as $a_ips ) {
@@ -918,8 +918,14 @@ function write_defs_rules() {
 					 
 					  foreach ($prestart_cmd as $command) { $a_command = explode( "|", $command); 
 						   fwrite ($handle1, $a_command[2] . "\n"); }
-					   if (isset($out_jail['vnet'] )) {	  
-		 /*TODO: I will add precommand  for create vnet enabled jail here*/  
+					   if (isset($out_jail['jail_vnet'] )) {	  
+		 
+						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." create >/dev/null\n");
+						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
+						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $config['interfaces']['lan']['if'] ."\n");						
+						fwrite ($handle1, "ifconfig epair" . $out_jail['jailno']." create\n");
+						fwrite ($handle1, "ifconfig bridge" .($out_jail['jailno']+10) . " addm epair" . $out_jail['jailno']."a\n");
+						fwrite ($handle1, "ifconfig epair". $out_jail['jailno']."a up\n");
 					  } else {} 
 					  fclose($handle1);
 					  
@@ -927,9 +933,12 @@ function write_defs_rules() {
 					  $commandfile= "/etc/jails/poststart.". $out_jail['jailname'];
 					  $handle1 = fopen( $commandfile, "w");
 					  fwrite ($handle1, "#!/bin/sh\n#\n");
-					  if (isset($out_jail['vnet'] )) {
-						    
-		 /*TODO:I will add postcommand  for create vnet enabled jail here*/
+					  if (isset($out_jail['jail_vnet'] )) {
+		 				fwrite ($handle1, "ifconfig epair".$out_jail['jailno']."b vnet " . $out_jail['jailname']."\n");
+						fwrite ($handle1, "jexec " . $out_jail['jailname'] . " ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
+						fwrite ($handle1, "jexec " . $out_jail['jailname'] . " route add default " . $out_jail['epair_a_ip'] . "\n");
+						fwrite ($handle1, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");
+						//fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $config['interfaces']['lan']['if'] ."\n");
 					  }  else {}
 					If (isset($out_jail['fdescfs_enable'])) { 
 						   fwrite( $handle1 ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  
@@ -969,12 +978,19 @@ function write_defs_rules() {
 					   If (isset($out_jail['fdescfs_enable'])) { 
 						  fwrite( $handle1 ,  "umount " . $out_jail['jailpath']."dev/fd\n");
 						    }
-		   /*TODO: Check, If need prestop command for vnet enabled jail */
+		   
 					fclose($handle1);
 					
 					 $commandfile= "/etc/jails/poststop.". $out_jail['jailname'];
 					 $handle1 = fopen( $commandfile, "w");
 					 fwrite ($handle1, "#!/bin/sh\n#\n");
+					  if (isset($out_jail['jail_vnet'] )) {					 
+						 fwrite( $handle1 ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem epair".$out_jail['jailno']."a\n");
+						 fwrite( $handle1 ,  "ifconfig epair". $out_jail['jailno']."a destroy\n");
+						 fwrite( $handle1 ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem " . $config['interfaces']['lan']['if']."\n");
+						 fwrite( $handle1 ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
+						 
+					 }else{}
 					 $poststop_cmd = preg_grep("/^afterstop\|/", $out_jail['cmd']);
 					    foreach ($poststop_cmd as $command) { 
 						   $a_command = explode( "|", $command); 
@@ -982,7 +998,7 @@ function write_defs_rules() {
 						   }
 					 fclose($handle1);
 					  if (is_file("/etc/jails/prestart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestart =\"/bin/sh /etc/jails/prestart.". $out_jail['jailname'] . "\";\n"); } else {}
-					  if (false === isset($out_jail['vnet'] )) { fwrite ($handle, "\texec.start =\"" . $out_jail['exec_start'] . "\";\n"); } else {}
+					  if (false === isset($out_jail['jail_vnet'] )) { fwrite ($handle, "\texec.start =\"" . $out_jail['exec_start'] . "\";\n"); } else {}
 					  if (is_file("/etc/jails/poststart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststart =\"/bin/sh /etc/jails/poststart.". $out_jail['jailname'] . "\";\n"); } else {}
 					  if (is_file("/etc/jails/prestop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestop =\"/bin/sh /etc/jails/prestop.". $out_jail['jailname'] . "\";\n"); } else {}
 					  fwrite ($handle, "\texec.stop =\"" . $out_jail['exec_stop'] . "\";\n");
@@ -997,13 +1013,3 @@ function write_defs_rules() {
 			}
 fclose($handle);
 }
- function thebrig_jailstop ($jailname) {
-  	global $config, $g;
-  	$t_jail = $config['thebrig']['content'];
-	array_sort_key($t_jail, "jailno");
-	if ( FALSE !== ($index = array_search_ex($jailname, $t_jail, "jailname")))  	$stop_cmd = $t_jail[$index]['exec_stop']; 
-      mwexec("/etc/jail/prestop.". $jailname);
-      mwexec("jexec " . $jailname. " " . $stop_cmd);
-      mwexec("/etc/jail/poststop.". $jailname);
- 
- }

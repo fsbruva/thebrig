@@ -82,10 +82,19 @@ function genhtmltitle($title) {
 								$jail_id_4 = explode ("=",$jail_id_3[0]);
 								$jail_id = $jail_id_4[1];
 								
+								
+								$jail_vnet = preg_grep("/vnet/", $jail_id_2 );
+								if (!empty($jail_vnet)) {
+									$item[2] = "epair" . $n_jail['jailno']."|".$n_jail['epair_a_ip'] ; 
+									/** May be better way extract ip with command "jexec proto ifconfig epair1b | grep inet | awk '{print $2}'" ??
+									*/
+								} else {
 								unset($jail_id_5);
+								
 								$jail_ips = preg_grep("/.addr=/",$jail_id_2 );
 								foreach ($jail_ips as $jail_ip) { $jail_id_3 = explode ("=",$jail_ip); $jail_id_5[] = $jail_id_3[1] ;	}
 								$item[2] = implode (" as ", $jail_id_5);
+								}
 								unset($jail_id_5);
 								$jail_hostname = preg_grep("/.hostname=/", $jail_id_2 );
 								foreach ($jail_hostname as $jail_hostname) {
@@ -150,7 +159,9 @@ function genhtmltitle($title) {
 
 										
 								</td>
-							</tr><?php endforeach; }  exit1: gettext( " Please define jail" ) ; ?>
+							</tr>
+							<?php endforeach; }  
+							exit1: gettext( " Please define jail" ) ; ?>
 													
 						</table>
 </body>

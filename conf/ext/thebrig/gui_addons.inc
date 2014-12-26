@@ -106,6 +106,9 @@ class HTMLBrigCommandBox extends HTMLBaseControl {
 		echo "		  		<option value='prestart'>prestart</option>\n";
 		echo "				<option value='afterstart_for_main'>afterstart_for_main</option>\n";
 		echo "				<option value='afterstart_for_jail'>afterstart_for_jail</option>\n";
+		echo "		  		<option value='prestop_for_main'>prestop_for_main</option>\n";
+		echo "		  		<option value='prestop_for_jail'>prestop_for_jail</option>\n";
+		echo "		  		<option value='afterstop'>afterstop</option>\n";
 		echo "	 		</select></td>\n";
 		echo "    <td><select name='{$ctrlname}datanice' class='formfld' id='{$ctrlname}datanice'>\n";
 		foreach (range(0, 5) as $nice) {

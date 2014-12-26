@@ -6,7 +6,7 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
-require("ext/thebrig/gui_addons.php");
+require("ext/thebrig/gui_addons.inc");
 $in_jail_allow = array (
 "allow.sysvipc",
 "allow.raw_sockets",
@@ -84,6 +84,11 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	//$pconfig['if'] = $a_jail[$cnid]['if'];
 	//$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
 	//$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
+	$pconfig['jail_vnet'] = isset($a_jail[$cnid]['jail_vnet']);
+	$pconfig['epair_a_ip'] = $a_jail[$cnid]['epair_a_ip'];  // new entries = ip for systemside epair interface
+	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask'];  // new entries mask for systemside epair interface
+	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip'];  // new entries = ip for jailside epair interface
+	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask'];  // new entries mask for jailside epair interface
 	$pconfig['jailpath'] = $a_jail[$cnid]['jailpath'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['statfs'] = $a_jail[$cnid]['statfs'];
@@ -137,7 +142,11 @@ else {
 	$pconfig['jail_type']="Slim";
 	$pconfig['param'] = array("allow.mount", "allow.mount.devfs");
 	unset ($pconfig['allowedip']);
-	unset ($pconfig['vnet']);
+	unset ($pconfig['jail_vnet']);
+	$pconfig['epair_a_ip'] = "192.168.1.251"; 
+	$pconfig['epair_a_mask'] = "24"; 
+	$pconfig['epair_b_ip'] = "192.168.1.251"; 
+	$pconfig['epair_b_mask'] = "24";	
 	//$pconfig['if'] = "";
 	//$pconfig['ipaddr'] = "";
 	//$pconfig['subnet'] = "32";
@@ -190,7 +199,7 @@ if ($_POST) {
 	
 	
 	/*explode network entries and check IP addres.  I check if address, if not more then 1 IP adresses specified, and not more then 1 address in jails set.*/
-	if (is_array( $pconfig['allowedip'] ) && !isset($pconfig['vnet'])) {
+	if (is_array( $pconfig['allowedip'] ) && !isset($pconfig['jail_vnet'])) {
 	foreach ($pconfig['allowedip'] as $a_ips ) {
 		  $b_ips = explode("|", $a_ips);
 		  $c_ips = explode ("/", $b_ips[1]);
@@ -396,7 +405,11 @@ if ($_POST) {
 		$jail['jailpath'] = $pconfig['jailpath'];
 		
 		$jail['allowedip'] = $pconfig['allowedip'];		
-		$jail['jail_vnet'] = isset($pconfig['jail_vnet']) ? true : false;	
+		$jail['jail_vnet'] = isset($pconfig['jail_vnet']) ? true : false;
+		$jail['epair_a_ip'] = $pconfig['epair_a_ip'];  
+		$jail['epair_a_mask'] = $pconfig['epair_a_mask'];  
+		$jail['epair_b_ip'] = $pconfig['epair_b_ip']; 
+		$jail['epair_b_mask'] = $pconfig['epair_b_mask'];
 		
 		$jail['rule'] = $pconfig['rule'];
 		$jail['jail_mount'] = isset($pconfig['jail_mount']) ? true : false;
@@ -602,17 +615,21 @@ $('#jail_vnet').change(function() {
 		switch ($('#jail_vnet').is(':checked')) {
 		case false :
 			$('#allowedip_tr').show(1500);
+			$('#epair_tr').hide(300);
+			$('#exec_start_tr').show(300);
 			break;
 			
 		case true :	
 			$('#allowedip_tr').hide(300);
+			$('#epair_tr').show(1500);
+			$('#exec_start_tr').hide(1500);
 			break;
             } 
         });
 	
 $('#jail_type').change();
 $('#source').change();
-
+$('#jail_vnet').change();
 });
 function jail_mount_enable() {
 	switch (document.iform.jail_mount.checked) {
@@ -688,7 +705,27 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_separator();?>
 			<tr id='mounts_separator0'><td colspan='2' valign='top' class='listtopic'>Networking</td></tr>
 			<?php html_checkbox("jail_vnet", gettext("Virtual network"), $pconfig['jail_vnet'], gettext("Enable virtual network stack (vnet)"), "", "","vnet_enable()");?>
-			
+			<tr id='epair_tr'>
+					<td width='22%' valign='top' class='vncell'><label for='epair'>Epair interface</label></td>
+					<td width='78%' class='vtable'>
+					
+						  <table class="formdata" width="100%" border="0">
+							<tr><td width='50%'>Side A (system)</td><td width='50%'>Side B (jail)</td>
+							<tr><td width='50%'>
+								  <input name='epair_a_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_a_ip']?>  />/
+								  <input name='epair_a_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_a_mask']?>  />
+								  <br /><span class='vexpl'>System side of interface, eq: 192.168.1.251/24</span>
+							    </td>
+							    <td width='50%'>
+								    <input name='epair_b_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_b_ip']?>  />/
+								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  />
+								 <br /><span class='vexpl'>Jail side of interface, eq: 192.168.1.252/24</span>
+							 </td></tr>
+						  </table>
+						 
+
+					</td>
+				</tr>
 			
 			<?php //$a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php //html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
@@ -751,7 +788,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 					<?php }?>
 				</div>
 				<?php include("formend.inc");?>
-			</form><?php print_r($pconfig); ?>
+			</form>
 		</td>
 	</tr>
 </table>
