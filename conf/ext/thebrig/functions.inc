@@ -888,7 +888,7 @@ function write_defs_rules() {
 				
 				if (is_array($out_jail['param'] )) {
 					foreach ($out_jail['param'] as $a_param ) { fwrite ($handle, "\t". $a_param .";\n"); }  }
-					// create fstab
+		// create fstab
 				$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
 				$handle1 = fopen($fstabfile, "w");
 				if  ($out_jail['jail_type'] === "slim") {
@@ -918,6 +918,15 @@ function write_defs_rules() {
 					 
 					  foreach ($prestart_cmd as $command) { $a_command = explode( "|", $command); 
 						   fwrite ($handle1, $a_command[2] . "\n"); }
+			 // zfs prepare
+					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])) {
+						$a_dataset = explode(";",$out_jail['zfs_datasets']);
+						foreach ($a_dataset as $b_dataset) {
+							$c_dataset =  explode("|",$b_dataset);
+							fwrite ($handle1, "zfs set jailed=on " . $c_dataset[0] . "\n");
+							}
+					} 
+			// vnet script
 					   if (isset($out_jail['jail_vnet'] )) {	  
 		 
 						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." create >/dev/null\n");
@@ -943,7 +952,20 @@ function write_defs_rules() {
 					If (isset($out_jail['fdescfs_enable'])) { 
 						   fwrite( $handle1 ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  
 					    } else {}
-					 // add users poststart command		  
+				//zfs   
+					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])) {
+						
+						fwrite ($handle1, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
+						$a_dataset = explode(";",$out_jail['zfs_datasets']);
+						foreach ($a_dataset as $b_dataset) {
+							$c_dataset =  explode("|",$b_dataset);
+							fwrite ($handle1, "/sbin/zfs jail \${JID} " . $c_dataset[0] . "\n");
+							fwrite ($handle1, "jexec " . $out_jail['jailname'] . " zfs set mountpoint=".$c_dataset[1]." ". $c_dataset[0]."\n");
+							}
+						fwrite ($handle1, "jexec " . $out_jail['jailname'] . " zfs mount -a\n");
+					}
+				
+				// add users poststart command		  
 					 $poststart_cmd_sys = preg_grep("/^afterstart_for_main\|/",$out_jail['cmd']);
 					 if (!empty($poststart_cmd_sys)) {
 						  
@@ -974,7 +996,18 @@ function write_defs_rules() {
 						   $a_command = explode( "|", $command); 
 						   fwrite ($handle1, $a_command[2] . "\n"); 						   
 						   }
-			
+				//zfs_datasets
+					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])) {
+						fwrite ($handle1, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
+						$a_dataset = explode(";",$out_jail['zfs_datasets']);
+						foreach ($a_dataset as $b_dataset) {
+							$c_dataset =  explode("|",$b_dataset);
+							fwrite ($handle1, "jexec " . $out_jail['jailname'] ." zfs unmount -f " . $c_dataset[1] . "\n");
+							fwrite ($handle1, "zfs unjail \${JID} " . $c_dataset[0] . "\n");
+							fwrite ($handle1, "zfs set jailed=off " . $c_dataset[0] . "\n");
+							}
+						
+					 }
 					   If (isset($out_jail['fdescfs_enable'])) { 
 						  fwrite( $handle1 ,  "umount " . $out_jail['jailpath']."dev/fd\n");
 						    }

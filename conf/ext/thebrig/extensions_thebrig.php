@@ -210,15 +210,15 @@ var auto_refresh = setInterval(
 						<td width="85%" class="vtable">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
-									<td width="4%" class="listhdrlr">&nbsp;</td>
-									<td width="10%" class="listhdrr"><?=gettext("Name");?></td>
-									<td width="15%" class="listhdrr"><?=gettext("Interface");?></td>
-									<td width="10%" class="listhdrr"><?=gettext("Start on boot");?></td>
-									<td width="6%" class="listhdrr"><?=gettext("IP");?></td>
+									<td width="3%" class="listhdrlr">&nbsp;</td>
+									<td width="5%" class="listhdrr"><?=gettext("Name");?></td>
+									<td width="12%" class="listhdrr"><?=gettext("Interface");?></td>
+									<td width="9%" class="listhdrr"><?=gettext("Start on boot");?></td>
+									<td width="16%" class="listhdrr"><?=gettext("Datasets");?></td>
 									<td width="10%" class="listhdrr"><?=gettext("Hostname");?></td>
 									<td width="15%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?></td>
 									<td width="14%" class="listhdrr"><?=gettext("Description");?></td>
-									<td width="15%" class="list"></td>
+									<td width="10%" class="list"></td>
 								</tr>
 																<?php foreach ($a_jail as $jail):?>
 								<?php $notificationmode = updatenotify_get_mode("thebrig", $jail['uuid']);?>
@@ -258,10 +258,10 @@ var auto_refresh = setInterval(
 						<td width="15%" valign="top" class="vncell"><?=gettext("Globals");?></td>
 						<td width="85%" class="vtable">
 							<input name="parastart" type="checkbox" id="parastart" value="yes" <?php if (!empty($pconfig['parastart'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_PARALLEL?><br />
-							<input name="sethostname" type="checkbox" id="sethostname" value="yes" <?php if (!empty($pconfig['sethostname'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROOT_HOST?><br />
+						<!---	<input name="sethostname" type="checkbox" id="sethostname" value="yes" <?php if (!empty($pconfig['sethostname'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROOT_HOST?><br />
 							<input name="unixiproute" type="checkbox" id="unixiproute" value="yes" <?php if (!empty($pconfig['unixiproute'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROUTE?><br />
 							<input name="systenv" type="checkbox" id="systenv" value="yes" <?php if (!empty($pconfig['systenv'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_IPC?>
-							
+						-->	
 						</td>
 						
 					</tr>

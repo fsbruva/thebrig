@@ -45,20 +45,11 @@ jail_start()
 			echo "${_j} already exists"
 			continue
 		fi
-
-		jail -c -i -p 10 -f /etc/thebrig.conf -J /var/run/jail_${_j}.id ${_j}  > /mnt/idisk/thebrig/jail.log 2>&1
-
-		eval _zfs=\"\${jail_${_j}_zfs:-}\"
-		_jid=`jls -j ${_j} jid 2>/dev/null`
-
-		if [ -n "${_zfs}" ]; then
-			for _ds in ${_zfs}; do
-				_jailed=`zfs get -H jailed ${_ds} 2>/dev/null | awk '{ print $3 }'`
-				if [ "${_jailed}" = "on" ]; then
-					zfs jail "${_jid}" ${_ds} 2>/dev/null
-				fi
-			done
-		fi
+		#      Uncomment for debug next string and comment next+1.
+		#	jail -c -d -p 20 -f /etc/thebrig.conf -J /var/run/jail_${_j}.id ${_j}  >> /var/log/jail.log 2>&1
+		jail -c  -p 20 -f /etc/thebrig.conf -J /var/run/jail_${_j}.id ${_j} 
+		
+		
 	done
 
 	echo
@@ -79,17 +70,10 @@ jail_stop()
 		eval _zfs=\"\${jail_${_j}_zfs:-}\"
 		_jid=`jls -j ${_j} jid 2>/dev/null`
 
-		jail -r -f /etc/thebrig.conf  ${_j} > /dev/null 2>&1
+	#	jail -r -f /etc/thebrig.conf  ${_j}  >> /var/log/jail.log 2>&1
+		jail -r -f /etc/thebrig.conf  ${_j} 
 		rm /var/run/jail_${_j}.id
-
-		if [ -n "${_zfs}" ]; then
-			for _ds in ${_zfs}; do
-				_jailed=`zfs get -H jailed ${_ds} 2>/dev/null | awk '{ print $3 }'`
-				if [ "${_jailed}" = "on" ]; then
-					zfs unjail "${_jid}" ${_ds} 2>/dev/null
-				fi
-			done
-		fi
+		
 	done
 
 	echo

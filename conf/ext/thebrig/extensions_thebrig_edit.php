@@ -117,7 +117,8 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['attach_params'] = $a_jail[$cnid]['attach_params'];
 	$pconfig['attach_blocking'] = $a_jail[$cnid]['attach_blocking'];
 	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
-	$pconfig['zfs_datasets'] = $a_jail[$cnid]['zfs_datasets'];
+	$pconfig['zfs_dataset'] = explode (";", $a_jail[$cnid]['zfs_datasets']);
+	$pconfig['zfs_enable'] =  $a_jail[$cnid]['zfs_enable'];
 	if (FALSE == $a_jail[$cnid]['fib']) { unset ($pconfig['fib']);} else {$pconfig['fib'] = $a_jail[$cnid]['fib'];}
 	if (FALSE == $a_jail[$cnid]['ports']) { unset ($pconfig['ports']);} else {$pconfig['ports'] = $a_jail[$cnid]['ports'];}
 	// $pconfig['ports'] = ( isset($a_jail[$cnid]['ports']) ) ? true : false ;
@@ -177,6 +178,7 @@ else {
 	$pconfig['attach_blocking'] = "";
 	$pconfig['force_blocking'] = "";
 	$pconfig['zfs_datasets'] = "";
+	unset ($pconfig['zfs_enable']);
 	unset ($pconfig['fib']);
 	$path_ro = false;
 	$name_ro = false;
@@ -196,7 +198,8 @@ if ($_POST) {
 	unset ($pconfig['allowedipfiletype']);
 	unset ($pconfig['cmdfiletype']);
 	unset ($pconfig['cmddatanice']);
-	
+	unset ($pconfig['zfs_datasetfiletype']);
+	unset ($pconfig['zfs_datasetdata']); 
 	
 	/*explode network entries and check IP addres.  I check if address, if not more then 1 IP adresses specified, and not more then 1 address in jails set.*/
 	if (is_array( $pconfig['allowedip'] ) && !isset($pconfig['jail_vnet'])) {
@@ -220,7 +223,7 @@ if ($_POST) {
 	// check alowes.  Subroutine check mount section checkboxes, and give allow values allow.mount.blabla, if user not define its.
 	$cache_param_1 = array();
 	$cache_param = array();
-	if (  isset ( $pconfig['jail_mount'] ) ||  isset (  $pconfig['devfs_enable'] ) ||  isset ( $pconfig['proc_enable'] ) ) {
+	if (  isset ( $pconfig['jail_mount'] ) ||  isset (  $pconfig['devfs_enable'] ) ||  isset ( $pconfig['proc_enable'] ) ||  isset ( $pconfig['zfs_enable'] )) {
 		
 		if(is_array($pconfig['param'])) { foreach ($pconfig['param'] as $parameter) {
 				unset ( $matches);
@@ -229,7 +232,7 @@ if ($_POST) {
 				$matches_1[] = $matches;
 				if (1 == $matches[0][1] )  { $cache_param[] =  $parameter_1; unset ($parameter); }
 				}
-						
+			if ( isset ( $pconfig['zfs_enable'] )) {  $cache_param_1[] = "allow.mount.zfs"; $cache_param_1[] = "allow.mount"; }			
 			if ( isset ( $pconfig['proc_enable'] )) {  $cache_param_1[] = "allow.mount.procfs"; $cache_param_1[] = "allow.mount"; }
 			if ( isset ( $pconfig['devfs_enable'] )) {  $cache_param_1[] = "allow.mount.devfs"; $cache_param_1[] = "allow.mount"; }
 			$cache_param_1 = array_unique ( $cache_param_1 );
@@ -242,7 +245,35 @@ if ($_POST) {
 	
 		
 		}
-
+	// check zfs mount setting 1. enforce_statfs insert foggoten values
+	if ( isset ( $pconfig['zfs_enable'] )) { $config['thebrig']['gl_statfs'] =0; $pconfig['statfs'] =0; } else {}
+	// remove possible empty string after edit into form
+	if (is_array($pconfig['zfs_dataset'])) $pconfig['zfs_dataset'] = array_filter($pconfig['zfs_dataset']);
+	// 3 remove whitespaces on input 
+	if (is_array($pconfig['zfs_dataset'])) {
+		foreach ($pconfig['zfs_dataset'] as $zfsdataset ) {
+			$mountpath1 = explode ("|", $zfsdataset );
+			$mountpath1[1] = trim($mountpath1[1]);
+			$zfsdataset1[] = $mountpath1[0]."|".$mountpath1[1];
+		  // 3 Check is valid characters into path
+			$mountpath2 =  trim($mountpath1[1], "/");
+			$path_parts =  explode ("/", $mountpath2 );
+			foreach ($path_parts as $parts) {
+				if (!is_hostname ($parts)) $input_errors[] = sprintf( gettext("The attribute into zfs mount point <i>'%s'</i> contains invalid characters ."), $parts);
+				}
+		// 4. Check, if defined dataset previously defined for another jail.
+		$jaileddataset = $mountpath1[0];
+		$jaileddataset = preg_quote($jaileddataset, '/' );
+		$pattern = "/".$jaileddataset."/";
+		foreach ($config['thebrig']['content'] as $check_jail) {
+			$match = preg_match($pattern, $check_jail['zfs_datasets']);
+			if ( 1 == $match &&  $check_jail['jailname'] != $pconfig['jailname'] ) {
+				$input_errors[] = sprintf( gettext("The selected dataset was previously assigned to another jail. Possible conflict, and therefore assign a different dataset or edit another prison <b>'%s'</b>."),  $check_jail['jailname']);
+				}
+			}
+	}
+	}
+	
 	
 	/*  Primitive check jail commands for duplicates*/
 	// Detect duplicates into commands numbers..  converted as <commandtip><number>, --> prestart5
@@ -442,7 +473,9 @@ if ($_POST) {
 		$jail['attach_params'] = $pconfig['attach_params'];
 		$jail['attach_blocking'] = $pconfig['attach_blocking'];
 		$jail['force_blocking'] = $pconfig['force_blocking'];
-		$jail['zfs_datasets'] = $pconfig['zfs_datasets'];
+		// compress array to string
+		if (!empty( $zfsdataset1 )) { $jail['zfs_datasets'] = implode(";", $zfsdataset1); } else { unset ($jail['zfs_datasets']);}
+		$jail['zfs_enable'] = isset($pconfig['zfs_enable']) ? true : false;
 		$jail['fib'] = $pconfig['fib'];
 		$jail['ports'] = isset( $pconfig['ports'] ) ? true : false ;
 		// Populate the jail. The simplest case is a full jail using tarballs.
@@ -626,7 +659,17 @@ $('#jail_vnet').change(function() {
 			break;
             } 
         });
-	
+$('#zfs_enable').change(function() {
+	switch ($('#zfs_enable').is(':checked')) {
+	case false :
+		$('#zfs_dataset_tr').hide();
+		break;
+	case true :
+		$('#zfs_dataset_tr').show();
+		break;
+		}
+	});
+$('#zfs_enable').change();
 $('#jail_type').change();
 $('#source').change();
 $('#jail_vnet').change();
@@ -659,7 +702,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 	</td></tr>
 		<td class="tabcont">
       <form action="extensions_thebrig_edit.php" method="post" name="iform" id="iform"> 
-      <!-- <form action="test.php" method="post" name="iform" id="iform"> -->
+     <!--  <form action="test.php" method="post" name="iform" id="iform"> -->
       <input name="jailpath" type="hidden" value="<?=$pconfig['jailpath'];?>" />
 					<input name="base_ver" type="hidden" value="<?=$pconfig['base_ver'];?>" />
 					<input name="lib_ver" type="hidden" value="<?=$pconfig['lib_ver'];?>" />
@@ -669,7 +712,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 					<input name="image_type" type="hidden" value="<?=$pconfig['image_type'];?>" />
 					<input name="attach_params" type="hidden" value="<?=$pconfig['attach_params'];?>" />
 					<input name="force_blocking" type="hidden" value="<?=$pconfig['force_blocking'];?>" />
-					<input name="zfs_datasets" type="hidden" value="<?=$pconfig['zfs_datasets'];?>" />
+					<!---<input name="zfs_datasets" type="hidden" value="<?=$pconfig['zfs_datasets'];?>" /> -->
 					<input name="fib" type="hidden" value="<?=$pconfig['fib'];?>" />
 					<input name="attach_blocking" type="hidden" value="<?=$pconfig['attach_blocking'];?>" />
       	<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
@@ -700,7 +743,10 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), $pconfig['proc_enable'], "", "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", " ", " ");?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), $pconfig['fdescfs_enable'], "", "", " ");?>
-			<?php html_checkbox("zfs_enable", gettext("Enable mount zfs dataset"), $pconfig['zfs_enable'], "", "", " ");?>
+			<?php html_checkbox("zfs_enable", gettext("Enable mount zfs dataset"), isset($pconfig['zfs_enable']) ? true : false, "", "", " ");?>
+			
+			<?php $datasets_list = brig_datasets_list();			
+			html_zfs_box("zfs_dataset", gettext("ZFS dataset, mounted to jail"), $pconfig['zfs_dataset'], $datasets_list, false, false); ?>
 			
 			<?php html_separator();?>
 			<tr id='mounts_separator0'><td colspan='2' valign='top' class='listtopic'>Networking</td></tr>
@@ -773,7 +819,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			} //endif ?>	
 				</table>
 				<div id="submit">
-					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" onclick="onsubmit_cmd(); onsubmit_allowedip(); onsubmit_rule(); onsubmit_param();"/>
+					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" onclick="onsubmit_cmd(); onsubmit_allowedip(); onsubmit_rule(); onsubmit_param();onsubmit_zfs_dataset();"/>
 					<input name="Cancel" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
 					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="Fstab editor">
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />

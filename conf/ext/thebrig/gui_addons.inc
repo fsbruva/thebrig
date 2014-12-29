@@ -392,7 +392,113 @@ class HTMLOptionsBox extends HTMLBaseControl {
 		}
 	}
 }
+class HTMLzfs_set extends HTMLBaseControl {
+	
+	function __construct($ctrlname, $title, $value, $description = "") {
+		parent::__construct($ctrlname, $title, $value, $description);
+	}
+	function Getj_dataset() {
+		return $this->j_dataset;
+	}
 
+	function Setj_dataset($j_dataset) {
+		$this->j_dataset = $j_dataset;
+	}
+	function RenderCtrl() {
+		$ctrlname = $this->GetCtrlName();
+		$value = $this->GetValue();
+		$options = $this->Getj_dataset();
+
+		echo "    <script type='text/javascript'>\n";
+		echo "    //<![CDATA[\n";
+		echo "    function onchange_{$ctrlname}() {\n";
+		echo "      var value1 = document.getElementById('{$ctrlname}');\n";
+		echo "      var result = value1.value.split('|');\n";
+		echo "      document.getElementById('{$ctrlname}data').value = result[1];\n";
+		echo "      document.getElementById('{$ctrlname}filetype').value = result[0];\n";
+		echo "    }\n";
+		echo "    function onclick_add_{$ctrlname}() {\n";
+		echo "      var value1 = document.getElementById('{$ctrlname}data').value;\n";
+		echo "      var valuetype = document.getElementById('{$ctrlname}filetype').value;\n";
+		echo "      if (valuetype != '') {\n";
+		echo "      var valuetype = valuetype + '|';\n";
+		echo "          }\n";
+		echo "      var value = valuetype +  value1;\n";
+		echo "      if (value != '') {\n";
+		echo "        var found = false;\n";
+		echo "        var element = document.getElementById('{$ctrlname}');\n";
+		echo "        for (var i = 0; i < element.length; i++) {\n";
+		echo "          if (element.options[i].text == value) {\n";
+		echo "            found = true;\n";
+		echo "            break;\n";
+		echo "          }\n";
+		echo "        }\n";
+		echo "        if (found != true) {\n";
+		echo "          element.options[element.length] = new Option(value, value, false, true);\n";
+		echo "          document.getElementById('{$ctrlname}data').value = '';\n";
+		echo "        }\n";
+		echo "      }\n";
+		echo "    }\n";
+		echo "    function onclick_delete_{$ctrlname}() {\n";
+		echo "      var element = document.getElementById('{$ctrlname}');\n";
+		echo "      if (element.value != '') {\n";
+		echo "        var msg = confirm('".htmlspecialchars(gettext("Do you really want to remove the selected item from the list?"), ENT_QUOTES)."');\n";
+		echo "        if (msg == true) {\n";
+		echo "          element.options[element.selectedIndex] = null;\n";
+		echo "          document.getElementById('{$ctrlname}data').value = '';\n";
+		echo "        }\n";
+		echo "      } else {\n";
+		echo "        alert('".htmlspecialchars(gettext("Select item to remove from the list"), ENT_QUOTES)."');\n";
+		echo "      }\n";
+		echo "    }\n";
+		echo "    function onclick_change_{$ctrlname}() {\n";
+		echo "      var element = document.getElementById('{$ctrlname}');\n";
+		echo "      if (element.value != '') {\n";
+		echo "        var value1 = document.getElementById('{$ctrlname}data').value;\n";
+		echo "      var valuetype = document.getElementById('{$ctrlname}filetype').value;\n";
+		echo "      if (valuetype != '') {\n";
+		echo "      var valuetype = valuetype + '|';\n";
+		echo "          }\n";
+		echo "      var value = valuetype +  value1;\n";
+		echo "        element.options[element.selectedIndex].text = value;\n";
+		echo "        element.options[element.selectedIndex].value = value;\n";
+		echo "      }\n";
+		echo "    }\n";
+		echo "    function onsubmit_{$ctrlname}() {\n";
+		echo "      var element = document.getElementById('{$ctrlname}');\n";
+		echo "      for (var i = 0; i < element.length; i++) {\n";
+		echo "        if (element.options[i].value != '')\n";
+		echo "          element.options[i].selected = true;\n";
+		echo "      }\n";
+		echo "    }\n";
+		echo "    //]]>\n";
+		echo "    </script>\n";
+		echo "    <table><tr><td width='40%' color='red'><center><b>In jail</b></center>\n";
+		echo "    <select name='{$ctrlname}[]' class='formfld' id='{$ctrlname}' multiple='multiple'  style='width: 350px' onchange='onchange_{$ctrlname}()'>\n";
+		foreach ($value as $valuek => $valuev) {
+			echo "      <option value='{$valuev}' {$optparam}>{$valuev}</option>\n";
+		}
+		echo "    </select>\n";
+		echo "    <input name='{$ctrlname}deletebtn' type='button' class='formbtn' id='{$ctrlname}deletebtn' value='".htmlspecialchars(gettext("Delete"), ENT_QUOTES)."' onclick='onclick_delete_{$ctrlname}()' /><br />\n";
+		echo "    </td>\n";
+		echo "    <td width='20%'>\n";
+		echo "    <center><input name='{$ctrlname}addbtn' type='button' class='formbtn' id='{$ctrlname}addbtn' value='".htmlspecialchars(gettext(" << "), ENT_QUOTES)."' onclick='onclick_add_{$ctrlname}()' /></center><br />\n";
+		echo "    <center><input name='{$ctrlname}changebtn' type='button' class='formbtn' id='{$ctrlname}changebtn' value='".htmlspecialchars(gettext(" Edit "), ENT_QUOTES)."' onclick='onclick_change_{$ctrlname}()' /></ center>\n";
+		echo "    </td>\n";
+		
+		echo "    <td width='40%'><table><tr><td width='50%'><center>datasets</center></td><td>Jail's mount point</td></tr>\n";
+		
+		echo "    <tr><td width='40%'><select name='{$ctrlname}filetype' class='formfld' id='{$ctrlname}filetype' >\n ";
+		
+		foreach ($options as $optionsv) {
+		echo "      <option value='{$optionsv[2]}' {$optparam}>{$optionsv[2]}</option>\n";
+			}
+		
+		
+		echo "    </select></td><td><input name='{$ctrlname}data' type='text' class='formfld' id='{$ctrlname}data' size='30' value='' /></td></tr></table>\n";
+		echo "    </td></tr></table>\n";
+	}
+}
 function html_optionsbox($ctrlname, $title, $value, $j_opt, $required = false, $readonly = false) {
 	$ctrl = new HTMLOptionsBox($ctrlname, $title, $value);
 	//$ctrl->GetOptions($options);
@@ -421,7 +527,13 @@ function html_brig_command_box($ctrlname, $title, $value, $desc,  $required = fa
 	$ctrl->SetReadOnly($readonly);
 	$ctrl->Render();
 }
-
+function html_zfs_box($ctrlname, $title, $value, $j_dataset, $desc,  $required = false, $readonly = false) {
+	$ctrl = new HTMLzfs_set($ctrlname, $title, $value, $desc);
+	$ctrl->Setj_dataset($j_dataset);
+	$ctrl->SetRequired($required);
+	$ctrl->SetReadOnly($readonly);	
+	$ctrl->Render();
+}
 function brig_interface_list() {
 	/* build interface list with netstat */
 	exec("/usr/bin/netstat -inW -f link", $linkinfo);
@@ -445,4 +557,27 @@ function brig_interface_list() {
 	}
 
 	return $iflist;
+}
+function brig_datasets_list() {
+	global $config;
+	$output = array(); $errors = array(); 
+	cmd_exec("zfs list -o jailed,name,mountpoint",$output, $errors); 
+	for ($i=1; $i < count($output);) { 
+		$stripped = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $output[$i]);
+		$cell[$i] = explode (" ", $stripped);
+		++$i;
+		}
+		foreach ($cell as $cells ) { $cell1[] = array_filter($cells); }
+		for ($i=0; $i< count($cell1);) { 
+			$pattern1=$cell1[$i][2];
+			$pattern1 = preg_quote($pattern1, '/' );
+			$pattern = "/".$pattern1."/"; 
+			$match = preg_match($pattern, $config['thebrig']['rootfolder']);
+			if (1 == $match) { unset ($cell1[$i]); } 
+			++$i;
+			}
+		$cell1 =  array_filter($cell1);
+		foreach ($cell1 as $cells ) { $datasets_list[] = array_filter($cells); }
+												
+	return $datasets_list;
 }
