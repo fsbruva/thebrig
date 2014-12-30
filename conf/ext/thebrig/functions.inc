@@ -1005,6 +1005,7 @@ function write_defs_rules() {
 							fwrite ($handle1, "jexec " . $out_jail['jailname'] ." zfs unmount -f " . $c_dataset[1] . "\n");
 							fwrite ($handle1, "zfs unjail \${JID} " . $c_dataset[0] . "\n");
 							fwrite ($handle1, "zfs set jailed=off " . $c_dataset[0] . "\n");
+							fwrite ($handle1, "zfs set mountpoint=/mnt/" . $c_dataset[0] ." ".$c_dataset[0] . "\n");
 							}
 						
 					 }
@@ -1024,6 +1025,9 @@ function write_defs_rules() {
 						 fwrite( $handle1 ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
 						 
 					 }else{}
+					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])) {
+						fwrite ($handle1, "zfs mount -a");
+					 }
 					 $poststop_cmd = preg_grep("/^afterstop\|/", $out_jail['cmd']);
 					    foreach ($poststop_cmd as $command) { 
 						   $a_command = explode( "|", $command); 
