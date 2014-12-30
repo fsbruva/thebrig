@@ -81,7 +81,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['jail_type'] = $a_jail[$cnid]['jail_type'];
 	$pconfig['param'] = $a_jail[$cnid]['param'];
 	$pconfig['allowedip'] = $a_jail[$cnid]['allowedip'];  // new entries
-	//$pconfig['if'] = $a_jail[$cnid]['if'];
+	$pconfig['if'] = $a_jail[$cnid]['if'];
 	//$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
 	//$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
 	$pconfig['jail_vnet'] = isset($a_jail[$cnid]['jail_vnet']);
@@ -148,7 +148,7 @@ else {
 	$pconfig['epair_a_mask'] = "24"; 
 	$pconfig['epair_b_ip'] = "192.168.1.251"; 
 	$pconfig['epair_b_mask'] = "24";	
-	//$pconfig['if'] = "";
+	$pconfig['if'] = "";
 	//$pconfig['ipaddr'] = "";
 	//$pconfig['subnet'] = "32";
 	$pconfig['jailpath']="";
@@ -428,26 +428,26 @@ if ($_POST) {
 		} // end of jail number conflict
 		$jail = array();
 		$jail['uuid'] = $pconfig['uuid'];
-		$jail['enable'] = isset($pconfig['enable']) ? true : false;
+		$jail['enable'] = isset($pconfig['enable']) ? true : false;		
 		$jail['jailno'] = $pconfig['jailno'];
 		$jail['jailname'] = $pconfig['jailname'];
 		$jail['jail_type'] = $pconfig['jail_type'];
 		$jail['param'] = $pconfig['param'];
-		$jail['jailpath'] = $pconfig['jailpath'];
-		
+		$jail['jailpath'] = $pconfig['jailpath'];		
 		$jail['allowedip'] = $pconfig['allowedip'];		
 		$jail['jail_vnet'] = isset($pconfig['jail_vnet']) ? true : false;
 		$jail['epair_a_ip'] = $pconfig['epair_a_ip'];  
 		$jail['epair_a_mask'] = $pconfig['epair_a_mask'];  
 		$jail['epair_b_ip'] = $pconfig['epair_b_ip']; 
 		$jail['epair_b_mask'] = $pconfig['epair_b_mask'];
-		
+		$jail['if'] = $pconfig['if'];
 		$jail['rule'] = $pconfig['rule'];
 		$jail['jail_mount'] = isset($pconfig['jail_mount']) ? true : false;
 		$jail['statfs'] = $pconfig['statfs'];
 		$jail['devfs_enable'] = isset($pconfig['devfs_enable']) ? true : false;
-		$jail['proc_enable'] = isset($pconfig['proc_enable']) ? true : false;		
+		$jail['proc_enable'] = isset($pconfig['proc_enable']) ? true : false;	
 		$jail['fdescfs_enable'] = isset($pconfig['fdescfs_enable']) ? true : false;
+		if (empty($pconfig['fdescfs_enable'])) { unset( $jail['fdescfs_enable']);} else { $jail['fdescfs_enable'] = 'yes';}
 		unset($jail['auxparam']);
 		foreach (explode("\n", $_POST['auxparam']) as $auxparam) {
 			$auxparam = trim($auxparam, "\t\n\r");
@@ -457,7 +457,7 @@ if ($_POST) {
 			
 		$jail['cmd'] = $pconfig['cmd'];
 		$jail['exec_start'] = $pconfig['exec_start'];
-		//$jail['afterstart0'] = $pconfig['afterstart0'];
+		//$jail['afterstart0'] = $pconfig['afterstart0'];    
 		//$jail['afterstart1'] = $pconfig['afterstart1'];
 		$jail['exec_stop'] = $pconfig['exec_stop'];
 		if (empty ($pconfig['extraoptions'])) { $pconfig['extraoptions'] = "-l -U root -n ".$pconfig['jailname'];} else {}
@@ -475,9 +475,10 @@ if ($_POST) {
 		$jail['force_blocking'] = $pconfig['force_blocking'];
 		// compress array to string
 		if (!empty( $zfsdataset1 )) { $jail['zfs_datasets'] = implode(";", $zfsdataset1); } else { unset ($jail['zfs_datasets']);}
-		$jail['zfs_enable'] = isset($pconfig['zfs_enable']) ? true : false;
+		$jail['zfs_enable'] = !empty($pconfig['zfs_enable']) ? true : false;
 		$jail['fib'] = $pconfig['fib'];
 		$jail['ports'] = isset( $pconfig['ports'] ) ? true : false ;
+		
 		// Populate the jail. The simplest case is a full jail using tarballs.
 		if ( $pconfig['source'] === "tarballs" && ( count ( $files_selected ) > 0 ) && $jail['jail_type'] === "full")
 			thebrig_split_world($pconfig['jailpath'] , false , $files_selected );
@@ -529,27 +530,7 @@ function thebrig_get_next_jailnumber() {
 	}
 	return $jailno;
 }
-function get_jail_interface_list() {
-	/* build interface list with netstat */
-	exec("/usr/bin/netstat -inW -f link", $linkinfo);
-	array_shift($linkinfo);
 
-	$iflist = array();
-
-	foreach ($linkinfo as $link) {
-		$alink = preg_split("/\s+/", $link);
-		$ifname = chop($alink[0]);
-
-		if (substr($ifname, -1) === "*")
-			$ifname = substr($ifname, 0, strlen($ifname) - 1);
-		/* add the plip interface to be excluded too */
-		if (!preg_match("/^(ppp|sl|gif|faith|lo|plip|ipfw|usbus|carp)/", $ifname)) {
-			$iflist[$ifname] = array();
-			$iflist[$ifname]['mac'] = chop($alink[3]);
-		}
-	}
-	return array_keys($iflist);
-}
 ?>
 
 <?php include("fbegin.inc");?>
@@ -650,12 +631,14 @@ $('#jail_vnet').change(function() {
 			$('#allowedip_tr').show(1500);
 			$('#epair_tr').hide(300);
 			$('#exec_start_tr').show(300);
+			$('#if_tr').hide(300);
 			break;
 			
 		case true :	
 			$('#allowedip_tr').hide(300);
 			$('#epair_tr').show(1500);
 			$('#exec_start_tr').hide(1500);
+			$('#if_tr').show(1500);
 			break;
             } 
         });
@@ -711,8 +694,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 					<input name="image" type="hidden" value="<?=$pconfig['image'];?>" />
 					<input name="image_type" type="hidden" value="<?=$pconfig['image_type'];?>" />
 					<input name="attach_params" type="hidden" value="<?=$pconfig['attach_params'];?>" />
-					<input name="force_blocking" type="hidden" value="<?=$pconfig['force_blocking'];?>" />
-					<!---<input name="zfs_datasets" type="hidden" value="<?=$pconfig['zfs_datasets'];?>" /> -->
+					<input name="force_blocking" type="hidden" value="<?=$pconfig['force_blocking'];?>" />					
 					<input name="fib" type="hidden" value="<?=$pconfig['fib'];?>" />
 					<input name="attach_blocking" type="hidden" value="<?=$pconfig['attach_blocking'];?>" />
       	<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
@@ -743,10 +725,12 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), $pconfig['proc_enable'], "", "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", " ", " ");?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), $pconfig['fdescfs_enable'], "", "", " ");?>
-			<?php html_checkbox("zfs_enable", gettext("Enable mount zfs dataset"), isset($pconfig['zfs_enable']) ? true : false, "", "", " ");?>
+			<?php if (FALSE != ($datasets_list = brig_datasets_list())) {
+			html_checkbox("zfs_enable", gettext("Enable mount zfs dataset"), isset($pconfig['zfs_enable']) ? true : false, "", "", " ");
+			html_zfs_box("zfs_dataset", gettext("ZFS dataset, mounted to jail"), $pconfig['zfs_dataset'], $datasets_list, false, false); 
+			} else { echo " <input name='zfs_enable' type='hidden' value='' />";}
 			
-			<?php $datasets_list = brig_datasets_list();			
-			html_zfs_box("zfs_dataset", gettext("ZFS dataset, mounted to jail"), $pconfig['zfs_dataset'], $datasets_list, false, false); ?>
+			?>
 			
 			<?php html_separator();?>
 			<tr id='mounts_separator0'><td colspan='2' valign='top' class='listtopic'>Networking</td></tr>
@@ -773,8 +757,9 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 					</td>
 				</tr>
 			
-			<?php //$a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
-			<?php //html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
+			
+			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
+			<?php html_combobox("if", gettext("Attach to interface"), $pconfig['if'], $a_interface, gettext("Choice interface for virtual net glue"), true);?>
 			<?php //html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IPv4 address"), $pconfig['ipaddr'], $pconfig['subnet'], "", false);?>
 			<?php // html_ipv6addrbox("ipaddr6", "subnet6", gettext("Jail IPv6 address"), $pconfig['ipaddr6'], $pconfig['subnet6'], "", false);?>
 			<?php  html_brig_network_box("allowedip",  gettext("Jail Network settings"), $pconfig['allowedip'], "", false, false) ; ?>

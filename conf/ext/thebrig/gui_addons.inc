@@ -558,26 +558,3 @@ function brig_interface_list() {
 
 	return $iflist;
 }
-function brig_datasets_list() {
-	global $config;
-	$output = array(); $errors = array(); 
-	cmd_exec("zfs list -o jailed,name,mountpoint",$output, $errors); 
-	for ($i=1; $i < count($output);) { 
-		$stripped = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $output[$i]);
-		$cell[$i] = explode (" ", $stripped);
-		++$i;
-		}
-		foreach ($cell as $cells ) { $cell1[] = array_filter($cells); }
-		for ($i=0; $i< count($cell1);) { 
-			$pattern1=$cell1[$i][2];
-			$pattern1 = preg_quote($pattern1, '/' );
-			$pattern = "/".$pattern1."/"; 
-			$match = preg_match($pattern, $config['thebrig']['rootfolder']);
-			if (1 == $match) { unset ($cell1[$i]); } 
-			++$i;
-			}
-		$cell1 =  array_filter($cell1);
-		foreach ($cell1 as $cells ) { $datasets_list[] = array_filter($cells); }
-												
-	return $datasets_list;
-}

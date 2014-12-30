@@ -8,7 +8,7 @@ function thebrig_unregister() {
  	$i = 0;
  	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
  		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
- 			if (preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
+ 			if (preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
  				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
  		}	// end for
  	} // end if (is array)
@@ -18,7 +18,7 @@ function thebrig_unregister() {
  	// clears the config variables
  	unset( $config['thebrig'] );
  	write_config();
- 	
+ 	mwexec("/bin/chmod -R 777 {$brigroot}");
  	// remove all the webgui stuff (particularly useful for "full" installs
  	
  	// First, glob all the php files from the extensions folder into an array of fully pathed filenames
@@ -28,18 +28,19 @@ function thebrig_unregister() {
  			//"{$brigroot}conf/ext/thebrig" and replace it with /usr/local/www. This will create a 
  			// string that has a fully pathed filename for the extension's webpages (which are 
  			// actually symbolic links we need to destroy.
- 		$file = str_replace("{$brigroot}conf/ext/thebrig", "/usr/local/www", $file);
+ 		$file1 = str_replace("{$brigroot}conf/ext/thebrig", "/usr/local/www", $file);
  			// only carry out the delete if it is a symbolic link (in case users have customised their own)
- 		if ( is_link( $file ) ) {
- 			unlink( $file ); 	// remove the ymbolic link
+ 		if ( is_link( $file1 ) ) {
+ 			unlink( $file1 ); 	// remove the symbolic link
  		} // end if
  	} // end for loop
  	
  	// This loops runs for each of the files in the extension folder for TheBrig, and removes
  	// all the files
- 	foreach ( glob( "/usr/local/www/ext/thebrig/*" ) as $file ) {
+ 	/*foreach ( glob( "/usr/local/www/ext/thebrig/*" ) as $file ) {
  		unlink( $file );
  	}
+ 	
 
  	// Check to see if the folder is a folder, then remove it
  	if ( is_dir( "/usr/local/www/ext/thebrig/" ) ) {
@@ -49,9 +50,11 @@ function thebrig_unregister() {
  		if ( count( scandir( "/usr/local/www/ext/" ) ) <= 2 ){
  			rmdir( "/usr/local/www/ext/" );
  		}
- 	}
+ 	}*/
+ 	if (is_link("/usr/local/www/ext/thebrig")) { unlink ("/usr/local/www/ext/thebrig");} elseif( is_dir("/usr/local/www/ext/thebrig") ) { exec ("rm -fr /usr/local/www/ext/thebrig");} else {}
 	// Make the former root folder writeable by all, so that it can be easily deleted.
- 	mwexec("/bin/chmod -R 777 {$brigroot}");
+ 	header("Location: /");
+		exit;
 } // end of thebrig_unregister function
 
 // Function name: 	thebrig_populate
@@ -824,6 +827,31 @@ function cmd_exec($cmd, &$stdout, &$stderr)
     unlink($errfile);
     return $exit;
 }
+function brig_datasets_list() {
+	global $config;
+	$output = array(); $errors = array(); 
+	cmd_exec("zfs list -o jailed,name,mountpoint",$output, $errors);
+	if (3 < count($output) ){
+	for ($i=1; $i < count($output);) { 
+		$stripped = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $output[$i]);
+		$cell[$i] = explode (" ", $stripped);
+		++$i;
+		}
+		foreach ($cell as $cells ) { $cell1[] = array_filter($cells); }
+		for ($i=0; $i< count($cell1);) { 
+			$pattern1=$cell1[$i][2];
+			$pattern1 = preg_quote($pattern1, '/' );
+			$pattern = "/".$pattern1."/"; 
+			$match = preg_match($pattern, $config['thebrig']['rootfolder']);
+			if (1 == $match) { unset ($cell1[$i]); } 
+			++$i;
+			}
+		$cell1 =  array_filter($cell1);
+		foreach ($cell1 as $cells ) { $datasets_list[] = array_filter($cells); }
+												
+	return $datasets_list;
+	} else { return false; }
+}
 function write_defs_rules() {
 	global $config, $g;
 	
@@ -908,6 +936,8 @@ function write_defs_rules() {
 					  If (isset($out_jail['proc_enable'])) { fwrite( $handle1 ,  "procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} else {}
 				}
 				fclose($handle1);
+				
+				
 		// commands processing
 				if (TRUE == is_array($out_jail['cmd'])) {
 					  if (!is_dir("/etc/jails")) mkdir( "/etc/jails", 0755);
@@ -918,8 +948,8 @@ function write_defs_rules() {
 					 
 					  foreach ($prestart_cmd as $command) { $a_command = explode( "|", $command); 
 						   fwrite ($handle1, $a_command[2] . "\n"); }
-			 // zfs prepare
-					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])) {
+			 // zfs prepare 
+					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
 						foreach ($a_dataset as $b_dataset) {
 							$c_dataset =  explode("|",$b_dataset);
@@ -931,7 +961,7 @@ function write_defs_rules() {
 		 
 						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." create >/dev/null\n");
 						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
-						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $config['interfaces']['lan']['if'] ."\n");						
+						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $out_jail['if'] ."\n");						
 						fwrite ($handle1, "ifconfig epair" . $out_jail['jailno']." create\n");
 						fwrite ($handle1, "ifconfig bridge" .($out_jail['jailno']+10) . " addm epair" . $out_jail['jailno']."a\n");
 						fwrite ($handle1, "ifconfig epair". $out_jail['jailno']."a up\n");
@@ -953,7 +983,7 @@ function write_defs_rules() {
 						   fwrite( $handle1 ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  
 					    } else {}
 				//zfs   
-					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])) {
+					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
 						
 						fwrite ($handle1, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
@@ -997,7 +1027,7 @@ function write_defs_rules() {
 						   fwrite ($handle1, $a_command[2] . "\n"); 						   
 						   }
 				//zfs_datasets
-					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])) {
+					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
 						fwrite ($handle1, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
 						foreach ($a_dataset as $b_dataset) {
@@ -1021,11 +1051,11 @@ function write_defs_rules() {
 					  if (isset($out_jail['jail_vnet'] )) {					 
 						 fwrite( $handle1 ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem epair".$out_jail['jailno']."a\n");
 						 fwrite( $handle1 ,  "ifconfig epair". $out_jail['jailno']."a destroy\n");
-						 fwrite( $handle1 ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem " . $config['interfaces']['lan']['if']."\n");
+						 fwrite( $handle1 ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem " . $out_jail['if'] ."\n");
 						 fwrite( $handle1 ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
 						 
 					 }else{}
-					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])) {
+					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_datasets_list())) {
 						fwrite ($handle1, "zfs mount -a");
 					 }
 					 $poststop_cmd = preg_grep("/^afterstop\|/", $out_jail['cmd']);
