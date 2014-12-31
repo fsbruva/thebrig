@@ -13,7 +13,7 @@
  * thebrig_ext	a string containing the real storage location of
  * 				the ext/thebrig folder. It simplifies code.
  * php_list		An array of all the php files in the ext/thebrig
- * php_file		Variable used to control a for loop
+ * php_file		Variable used to control a "for" loop
  * a_jail		An array of all the jail information from the config.xml
 */
 require_once ("config.inc");
@@ -21,6 +21,30 @@ require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc"
 if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
 	{ exec ("logger Failed copy rc script");} 
 chmod("/etc/rc.d/thebrig", 0755);
+
+/* Clean up operations
+ * 
+ * These steps serve two purposes:
+ * 1. To clean up old versions of TheBrig's file schema
+ * 2. To reset all symlinks, in case a new version was installed, and the
+ * 	  file list has changed
+ * 
+ */
+
+// Get rid of the erroneously created file (by early versions).
+unlink_if_exists ( "/usr/local/www/\*.php" );
+
+// Get a list of all the symlinks or files from TheBrig that are currently 
+// in the webroot, and destroy them
+array_map ( 'unlink' , "/usr/local/www/extensions_thebrig_*.php" );
+
+// Get rid of old schema - which was a separate copy of entire ext folder
+if ( is_dir( "/usr/local/www/ext/thebrig") ) {
+	exec ( "rm -r /usr/local/www/ext/thebrig");
+	}
+/*
+ * End of clean-up operations
+ */
 
 // This might be the first extension, so we need to create the folder for it
 exec( "mkdir -p /usr/local/www/ext" );
