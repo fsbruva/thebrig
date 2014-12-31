@@ -46,7 +46,8 @@ function thebrig_unregister() {
 } // end of thebrig_unregister function
 
 // Function name: 	thebrig_populate
-// Inputs: 			none
+// Inputs: 			new_location 	Desired location of install
+//					old_location	Former location of install
 // Outputs: 		logical result of the creation of the proper directory structure in the install folder
 // Description:		This function allows the installation (or movement of) the installation folder and
 //					directory tree
