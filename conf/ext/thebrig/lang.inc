@@ -15,6 +15,7 @@
 		define(_THEBRIG_UPDATE_CRON, "Enable 1:28 a.m. Tuesday weekly cron fetch of updates for all jails.");
 		define(_THEBRIG_UPDATER , "FreeBSD Update");
 		define(_THEBRIG_MANAGER , "TheBrig Manager");
+		define(_THEBRIG_MANAGER_TITLE , "Manager");
 		define(_THEBRIG_JAIL, "Jail" );
 		define(_THEBRIG_EDIT, "Edit" );
 		define(_THEBRIG_ADD, "Add" );
