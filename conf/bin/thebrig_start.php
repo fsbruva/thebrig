@@ -2,7 +2,7 @@
 <?php
 /*
  * File name: 	thebrig_start.php
- * Author: 		Matt Kempe, Alexey Kruglov
+ * Author:      Matt Kempe, Alexey Kruglov
  * Modified:	Dec 2014
  * 
  * Purpose: 	This script is used to prepare the extension for use by
