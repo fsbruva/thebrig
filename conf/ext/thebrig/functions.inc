@@ -18,41 +18,29 @@ function thebrig_unregister() {
  	// clears the config variables
  	unset( $config['thebrig'] );
  	write_config();
+	// Make the former root folder writeable by all, so that it can be easily deleted.
  	mwexec("/bin/chmod -R 777 {$brigroot}");
+
  	// remove all the webgui stuff (particularly useful for "full" installs
  	
- 	// First, glob all the php files from the extensions folder into an array of fully pathed filenames
+ 	// First, glob all the php files in the webroot array of fully pathed filenames
  	// and work through them one at a time as file. 
- 	foreach ( glob( "{$brigroot}conf/ext/thebrig/*.php" ) as $file ) {
- 			// Carry out the string replacement operation. For each file, search for the string 
- 			//"{$brigroot}conf/ext/thebrig" and replace it with /usr/local/www. This will create a 
- 			// string that has a fully pathed filename for the extension's webpages (which are 
- 			// actually symbolic links we need to destroy.
- 		$file1 = str_replace("{$brigroot}conf/ext/thebrig", "/usr/local/www", $file);
- 			// only carry out the delete if it is a symbolic link (in case users have customised their own)
- 		if ( is_link( $file1 ) ) {
- 			unlink( $file1 ); 	// remove the symbolic link
- 		} // end if
- 	} // end for loop
- 	
- 	// This loops runs for each of the files in the extension folder for TheBrig, and removes
- 	// all the files
- 	/*foreach ( glob( "/usr/local/www/ext/thebrig/*" ) as $file ) {
- 		unlink( $file );
- 	}
- 	
+	array_map ( 'unlink' , "/usr/local/www/extensions_thebrig_*.php" );
 
- 	// Check to see if the folder is a folder, then remove it
+ 	// Check to see if the folder is a folder or symlink and remove it
  	if ( is_dir( "/usr/local/www/ext/thebrig/" ) ) {
- 		rmdir( "/usr/local/www/ext/thebrig/" );
- 		# This counts the number of entries in the ext directory. If it is less than or equal to 2,
- 		# the directory is empty, and can be removed (see http://www.php.net/manual/en/function.scandir.php)
- 		if ( count( scandir( "/usr/local/www/ext/" ) ) <= 2 ){
- 			rmdir( "/usr/local/www/ext/" );
+ 		exec ("rm -fr /usr/local/www/ext/thebrig");
  		}
- 	}*/
- 	if (is_link("/usr/local/www/ext/thebrig")) { unlink ("/usr/local/www/ext/thebrig");} elseif( is_dir("/usr/local/www/ext/thebrig") ) { exec ("rm -fr /usr/local/www/ext/thebrig");} else {}
-	// Make the former root folder writeable by all, so that it can be easily deleted.
+ 	elseif ( is_link("/usr/local/www/ext/thebrig") ) { 
+		unlink ("/usr/local/www/ext/thebrig");
+		}
+ 	
+	# This counts the number of entries in the ext directory. If it is less than or equal to 2,
+	# the directory is empty, and can be removed (see http://www.php.net/manual/en/function.scandir.php)
+	if ( count( scandir( "/usr/local/www/ext/" ) ) <= 2 ){
+		rmdir( "/usr/local/www/ext/" );
+	}	
+
  	header("Location: /");
 		exit;
 } // end of thebrig_unregister function
