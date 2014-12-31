@@ -507,7 +507,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 	exec ( "echo 'syslogd_flags=\"-ss\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
-	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
+	exec ( "echo 'cron_flags=\"\$cron_flags -j 20 -J 15\"' >> " . $destination . "etc/rc.conf" );
 	
 } // end of function
 
