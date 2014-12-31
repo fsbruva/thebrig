@@ -70,7 +70,7 @@ if ( count ( $config['thebrig']['content'] ) > 0 ) {
 		foreach ($a_jail as $n_jail) {
 			  if ( isset ($n_jail['enable']) && !empty ($n_jail['exec_prestart'])) {  exec ( $n_jail['exec_prestart']); }
 		}
-		exec ( "/etc/rc.d/jail restart" ) ;
+		exec ( "/etc/rc.d/thebrig restart" ) ;
 	}
 }
 ?>
