@@ -58,10 +58,12 @@ if (isset($_POST['export']) && $_POST['export']) {
 
 		if (@PEAR::isError($status)) {
 			$errormsg = $status->getMessage();
-		} else {
+		} 
+		else {
 			// Take care array already exists.
-			if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content']))
+			if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content'])) {
 				$config['thebrig']['content'] = array();
+			}
 
 			$data = $unserializer->getUnserializedData();
 
