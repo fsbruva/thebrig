@@ -495,7 +495,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 	exec ( "echo 'syslogd_flags=\"-ss\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
-	exec ( "echo 'cron_flags=\"\$cron_flags -j 20 -J 15\"' >> " . $destination . "etc/rc.conf" );
+	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
 	
 } // end of function
 
@@ -815,6 +815,23 @@ function cmd_exec($cmd, &$stdout, &$stderr)
     unlink($errfile);
     return $exit;
 }
+// write message to log. 
+// $tolog - message for store
+//$fac = facility - as ERROR, warning, info... etc
+function write_briglog ($tolog, $fac) {
+	global $config;
+	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
+	$handle1 = fopen($filelog, "a+");
+	fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog)."\n" ); 
+	fclose ($handle1);
+
+}
+//this function check if zfs used by system and defined 1 dataset (+1 as pool )
+function brig_zfs_check() {	
+	$output = array(); $errors = array(); 
+	cmd_exec("zfs list -o jailed,name,mountpoint",$output, $errors);
+	if (3 < count($output) ){ return true; } else { return false;}
+}
 function brig_datasets_list() {
 	global $config;
 	$output = array(); $errors = array(); 
@@ -868,7 +885,7 @@ function write_defs_rules() {
  			$t_jail = $config['thebrig']['content'];
 			array_sort_key($t_jail, "jailno");
 			foreach ($t_jail as $out_jail ) {
- 				If (isset($out_jail['enable'])) {$startonboot = $startonboot . " " .$out_jail['jailname']; } else { $startonboot = $startonboot; 	}
+ 				If (isset($out_jail['enable'])) {$a_startonboot[] = $out_jail['jailname']; } else { }
  				fwrite ($handle, $out_jail['jailname'] . "\t {\n"  );
  				$out_jail_comb = substr($out_jail['jailpath'], 0, strlen($out_jail['jailpath'])-1);
  				fwrite ($handle, "\tpath = \"" . $out_jail_comb . "\";\n");
@@ -884,9 +901,9 @@ function write_defs_rules() {
  								$b_ips = explode("|", $a_ips);
  								$c_ips = explode ("/", $b_ips[1]);
  								if (is_ipv4addr($c_ips[0])) { 
- 									fwrite ($handle, "\tip4.addr += \"" . $out_jail['allowedip'] . "\";\n");
+ 									fwrite ($handle, "\tip4.addr += \"" . $a_ips . "\";\n");
  								} else {
- 									fwrite ($handle, "\tip6.addr += \"" . $out_jail['allowedip'] ."\";\n");
+ 									fwrite ($handle, "\tip6.addr += \"" . $a_ips ."\";\n");
  								}
 							  // check, if this schema work.  If not --> replace number0 as ip = re|dfgfgfg
  							}
@@ -927,7 +944,9 @@ function write_defs_rules() {
 				
 				
 		// commands processing
-				if (TRUE == is_array($out_jail['cmd'])) {
+		
+				
+				if (TRUE == is_array($out_jail['cmd'])) { $mess = "zfs not working"; $facility = "info"; 
 					  if (!is_dir("/etc/jails")) mkdir( "/etc/jails", 0755);
 					  $commandfile= "/etc/jails/prestart.". $out_jail['jailname'];
 					  $handle1 = fopen( $commandfile, "w");
@@ -937,13 +956,14 @@ function write_defs_rules() {
 					  foreach ($prestart_cmd as $command) { $a_command = explode( "|", $command); 
 						   fwrite ($handle1, $a_command[2] . "\n"); }
 			 // zfs prepare 
-					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
+			 // check zfs health 
+					if (false === brig_zfs_check()) {  write_briglog (" zfs not running ", "INFO");} else {
+					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) ) {
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
 						foreach ($a_dataset as $b_dataset) {
 							$c_dataset =  explode("|",$b_dataset);
 							fwrite ($handle1, "zfs set jailed=on " . $c_dataset[0] . "\n");
-							}
-					} 
+							} } }
 			// vnet script
 					   if (isset($out_jail['jail_vnet'] )) {	  
 		 
@@ -971,7 +991,7 @@ function write_defs_rules() {
 						   fwrite( $handle1 ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  
 					    } else {}
 				//zfs   
-					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
+					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_zfs_check())) {
 						
 						fwrite ($handle1, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
@@ -1015,7 +1035,7 @@ function write_defs_rules() {
 						   fwrite ($handle1, $a_command[2] . "\n"); 						   
 						   }
 				//zfs_datasets
-					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
+					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_zfs_check())) {
 						fwrite ($handle1, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
 						foreach ($a_dataset as $b_dataset) {
@@ -1043,7 +1063,7 @@ function write_defs_rules() {
 						 fwrite( $handle1 ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
 						 
 					 }else{}
-					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_datasets_list())) {
+					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
 						fwrite ($handle1, "zfs mount -a");
 					 }
 					 $poststop_cmd = preg_grep("/^afterstop\|/", $out_jail['cmd']);
@@ -1063,8 +1083,67 @@ function write_defs_rules() {
 			
 			 } else {}
 				
-			fwrite ($handle, "}\n"  );	
-
+			fwrite ($handle, "}\n"  );
+			
 			}
 fclose($handle);
+if (is_array ($a_startonboot)) { 
+	$startonboot = explode(" ", $a_startonboot);
+	mwexec("/usr/local/sbin/rconf attribute set jail_list {$startonboot}");  
+	} else { 
+	mwexec("/usr/local/sbin/rconf attribute remove jail_list");
+	}
+
+}
+//  For Ajax
+function get_jailinfo() {
+	global $config;
+	$tabledata = array();
+	if (is_array($config['thebrig']['content']) ) { 
+		array_sort_key($config['thebrig']['content'], "jailno");
+		$jails =  $config['thebrig']['content'];
+		foreach ($jails as $n_jail){
+			$tabledata['name'][$n_jail["jailno"]] = $n_jail['jailname'];
+			if (!is_dir( $n_jail['jailpath'] ."var/run")) 	{
+					$tabledata['built'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['builtports'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['builtsrc'][$n_jail["jailno"]] = 'OFF';
+				}else{
+					$tabledata['built'][$n_jail["jailno"]] = 'ON';
+					if (is_dir( $n_jail['jailpath'] . "usr/ports/Mk")) {
+						$tabledata['builtports'][$n_jail["jailno"]] = "ON";
+						} else {
+						$tabledata['builtports'][$n_jail["jailno"]] = "OFF";
+						}
+					if (is_dir( $n_jail['jailpath'] . "usr/src/sys")) {
+						$tabledata['builtsrc'][$n_jail["jailno"]] = "ON";
+						} else {
+						$tabledata['builtsrc'][$n_jail["jailno"]] = "OFF";
+						}
+				}	
+			$file_id = "/var/run/jail_".$n_jail['jailname'].".id";
+			if (true === is_file($file_id)) {
+			$jail_id = exec ("jls -j ".$n_jail['jailname']. " jid");
+					$sleep_cmd = "ps -o jid,stat -ax -J | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"S\"||\$2~\"I\")&&\$2!~\"S[\+]\"{++c}END{print c}'";
+					$runn_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"R\"||\$2~\"S[\+]\"){++c}END{print c}'";
+					$sleep_cnt = exec ( $sleep_cmd ); 
+					$runn_cnt = exec ( $runn_cmd);
+					$total = intval($sleep_cnt) + intval($runn_cnt);
+					$tabledata['status'][$n_jail["jailno"]] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
+					$tabledata['id'][$n_jail["jailno"]] = $jail_id;
+					$tabledata['ip'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." ip4.addr");
+					$tabledata['hostname'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." host.hostname");
+					$tabledata['path'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." path");
+					$tabledata['file_id'][$n_jail["jailno"]] = $file_id;
+				} else {
+					$tabledata['status'][$n_jail["jailno"]] = 'OFF'; 
+					$tabledata['id'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['ip'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['hostname'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['path'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['file_id'][$n_jail["jailno"]] = false;
+				}
+		}
+	}
+return $tabledata;
 }
