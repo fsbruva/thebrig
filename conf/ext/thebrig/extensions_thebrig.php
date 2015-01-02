@@ -88,6 +88,60 @@ if (isset($_GET['act']) && $_GET['act'] === "del") {
 	header("Location: extensions_thebrig.php");
 	exit;
 }
+function thebrig_process_updatenotification($mode, $data) {
+	global $config;
+
+	$retval = 0;
+
+	switch ($mode) {
+		case UPDATENOTIFY_MODE_NEW:
+			
+			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
+			if (false !== $cnid) {
+				$jail2add = $config['thebrig']['content'][$cnid];
+				// I have these here because the tarballs take some time to get unpacked
+				$commandresolv = "cp /etc/resolv.conf " . $jail2add['jailpath'] . "etc/";
+				mwexec ($commandresolv);
+			}
+			// I have these commands here because it will take some time to untar the jail files
+			break;
+		case UPDATENOTIFY_MODE_MODIFIED:
+			// I have these commands here because it will take some time to untar the jail files
+			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
+			if (false !== $cnid) {
+				$jail2modify = $config['thebrig']['content'][$cnid];
+				// Here we place any tasks that we want to be run after a jail has been modified.
+				// Probably something to see if it was already running, and if so, restart it
+			}
+			break;
+		case UPDATENOTIFY_MODE_DIRTY:
+			// This indicates that we want to delete one or more of the jails
+			$cnid = array_search_ex($data, $config['thebrig']['content'], "uuid");
+			if (false !== $cnid) {
+				$timestamp = date("Y-m-d_H:i:s");
+				$jail2delete = $config['thebrig']['content'][$cnid];
+				mwexec ( "/etc/rc.d/jail stop " . $jail2delete['jailname']);
+				if ( $jail2delete['type'] === "slim") {
+					mwexec("tar -cf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -C " . $jail2delete['jailpath'] . " ./" );
+					mwexec("tar -rf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -X basejail/ -C " . $config['thebrig']['basejail']['folder'] . " ./" );
+					mwexec("xz -S .txz " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar" );
+				}
+				else 
+					mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
+				mwexec ( "umount -a -F /etc/fstab." .  $jail2delete['jailname']);
+				if ( $jail2delete['devfs_enable'] == true )
+					mwexec ( "umount " . $jail2delete['jailpath'] . "dev");
+				mwexec("chflags -R noschg {$jail2delete['jailpath']}");
+				mwexec("rm -rf {$jail2delete['jailpath']}");
+				mwexec( "rm /etc/fstab." . $jail2delete['jailname']);
+				unset($config['thebrig']['content'][$cnid]);
+				write_config();
+			}
+			break;
+	}
+
+	return $retval;
+}
 
 
 include("fbegin.inc");?>
