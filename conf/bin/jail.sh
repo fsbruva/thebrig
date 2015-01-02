@@ -18,7 +18,7 @@
 # REQUIRE: LOGIN cleanvar
 # BEFORE: securelevel
 # KEYWORD: shutdown
-# XQUERY: -i "count(//thebrig/enable) > 0" -o "0" -b
+# XQUERY: -i "count(//thebrig/thebrig_enable) > 0" -o "0" -b
 # RCVAR: thebrig
 
 . /etc/rc.subr
