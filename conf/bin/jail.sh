@@ -18,13 +18,20 @@
 # REQUIRE: LOGIN cleanvar
 # BEFORE: securelevel
 # KEYWORD: shutdown
+# XQUERY: -i "count(//thebrig/enable) > 0" -o "0" -b
+# RCVAR: thebrig
 
 . /etc/rc.subr
 . /etc/util.subr
 . /etc/configxml.subr
 
-name="jail"
-rcvar=jail_enable
+
+# defaults
+jail_list= ${jail_list:-""}
+#  This   ↑ is not fault.  This space allow call any jail, but during start it start jails from jail list
+
+name="thebrig"
+rcvar=thebrig_enable
 
 start_cmd="jail_start"
 stop_cmd="jail_stop"
@@ -67,7 +74,7 @@ jail_stop()
 			continue
 		fi
 
-		eval _zfs=\"\${jail_${_j}_zfs:-}\"
+	#	eval _zfs=\"\${jail_${_j}_zfs:-}\"
 		_jid=`jls -j ${_j} jid 2>/dev/null`
 
 	#	jail -r -f /etc/thebrig.conf  ${_j}  >> /var/log/jail.log 2>&1
