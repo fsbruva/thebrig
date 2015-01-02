@@ -28,15 +28,6 @@ if (isset($_GET['name']) && ! isset($_GET['act'])) {
 	fclose ($handle1);
 }
 
-// sent to page data from config.xml
-$rootfolder = $config['thebrig']['rootfolder'];
-$pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ;
-$pconfig['sethostname'] = isset($config['thebrig']['sethostname']); 
-$pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
-$pconfig['systenv'] = isset($config['thebrig']['systenv']); 
-if (isset ($config['thebrig']['gl_statfs']) )  { $pconfig['gl_statfs']  =  $config['thebrig']['gl_statfs']; } else { $pconfig['gl_statfs']  = 2; }
-//
-
 if (is_ajax()) {
 	$jailinfo = get_jailinfo();
 	render_ajax($jailinfo);
@@ -45,21 +36,18 @@ if (is_ajax()) {
 if ($_POST) {
 	// insert into pconfig changes
 	$pconfig = $_POST;
-
-	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
-	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
-	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
-	$config['thebrig']['systenv'] = isset ( $_POST['systenv'] );
+	$config['thebrig']['parastart'] = isset( $_POST['parastart'] ) ? true : false ;
+	$config['thebrig']['thebrig_enable'] = isset ( $_POST['thebrig_enable'] ) ? true : false ;	
 	$config['thebrig']['gl_statfs'] =  $_POST['gl_statfs'] ;
 	write_config();
 
 	$retval = 0;
 	// This checks to see if any webgui changes require a reboot, and create rc.conf.local
 		if ( !file_exists($d_sysrebootreqd_path) && isset($config['thebrig']['content']) ) {
-		write_rcconflocal();
+		//write_rcconflocal();
 		 write_defs_rules();
 		 write_jailconf ();
-	//	write_jailconf();
+	
 		// OR the return value from the attempt to process the notification
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
 		// Lock the config
@@ -88,6 +76,14 @@ if (isset($_GET['act']) && $_GET['act'] === "del") {
 	header("Location: extensions_thebrig.php");
 	exit;
 }
+// sent to page data from config.xml
+$rootfolder = $config['thebrig']['rootfolder'];
+$pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ? true : false ;
+$pconfig['thebrig_enable'] = isset($config['thebrig']['thebrig_enable']) ? true : false ; 
+//$pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
+//$pconfig['systenv'] = isset($config['thebrig']['systenv']); 
+if (isset ($config['thebrig']['gl_statfs']) )  { $pconfig['gl_statfs']  =  $config['thebrig']['gl_statfs']; } else { $pconfig['gl_statfs']  = 2; }
+
 function thebrig_process_updatenotification($mode, $data) {
 	global $config;
 
@@ -102,6 +98,7 @@ function thebrig_process_updatenotification($mode, $data) {
 				// I have these here because the tarballs take some time to get unpacked
 				$commandresolv = "cp /etc/resolv.conf " . $jail2add['jailpath'] . "etc/";
 				mwexec ($commandresolv);
+				
 			}
 			// I have these commands here because it will take some time to untar the jail files
 			break;
@@ -139,7 +136,8 @@ function thebrig_process_updatenotification($mode, $data) {
 			}
 			break;
 	}
-
+	write_jailconf ();
+	write_defs_rules ();
 	return $retval;
 }
 
@@ -299,6 +297,7 @@ function disable_buttons() {
 								 								
 									    <td width="5%" valign="top" class="listrd"><?php  
 									    $file_jid = $file_id = "/var/run/jail_".$n_jail['jailname'].".id";
+									    // I want use AJAX for buttons also , but I don't know way!!
 	if (!is_file($file_jid)) 
 	{ echo '<center><a href="extensions_thebrig.php?name='.$n_jail['jailname'].'&action=start"><img src="ext/thebrig/on_small.png" title="Jail start" border="0" alt="Jail start" /></a></center>';} 
 	else { echo '<center><a href="extensions_thebrig.php?name='.$n_jail['jailname'].'&action=stop"><img src="ext/thebrig/off_small.png" title="Jail stop" border="0" alt="Jail stop" /></a></center>';} ?>
@@ -369,9 +368,9 @@ function disable_buttons() {
 							<input name="unixiproute" type="checkbox" id="unixiproute" value="yes" <?php if (!empty($pconfig['unixiproute'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROUTE?><br />
 							<input name="systenv" type="checkbox" id="systenv" value="yes" <?php if (!empty($pconfig['systenv'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_IPC?>
 						-->	
-		<input name='thebrig_enable' type='checkbox' class='formfld' id='thebrig_enable' value='yes'  />&nbsp;Allow/disallow start all jails<br />
-		<select name='gl_statfs' class='formfld' id='gl_statfs' ><option value='2' >2</option><option value='1' >1</option><option value='0' >0</option></select>
-		<span class='vexpl'>Choose Global enforce_statfs. Default value =2. Per jail value cannot be less then Clobal value . <br />Value 2 not allow  jail root user mount inside a jail. "High" = 1  and "All" = 0 values allow mount jail-friendly filesystems </span>
+		<input name='thebrig_enable' type='checkbox' class='formfld' id='thebrig_enable' value="" <?php if (!empty($pconfig['thebrig_enable'])) echo "checked=\"checked\""; ?>  />&nbsp;Allow/disallow start all jails<br />
+		<select name='gl_statfs' class='formfld' id='gl_statfs' ><option value='2' <?php if (2 == $pconfig['gl_statfs']) echo "selected"; ?> >2</option><option value='1' <?php if (1 == $pconfig['gl_statfs']) echo "selected"; ?> >1</option><option value='0' <?php if (0 == $pconfig['gl_statfs']) echo "selected"; ?> >0</option></select>
+		<span class='vexpl'>Choose Global enforce_statfs. Default value =2. Jail's value  cannot be less then Global value . <br />Value 2 not allow  jail root user mount inside a jail. "High" = 1  and "All" = 0 values allow mount jail-friendly filesystems </span>
 	</td></tr></table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />

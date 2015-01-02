@@ -102,8 +102,18 @@ function thebrig_populate ($new_location, $old_location)
 	} // end of array if statment
 	// update the value of the postinit command.
 	$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$new_location}conf/bin/thebrig_start.php";
-	// update all the symbolic links and such by executing the startup script from the new location
-	//mwexec("/usr/local/bin/php-cgi /mnt/data/thebrig/conf/bin/thebrig_start.php");
+	// update all the symbolic links and such by executing the shutdown script from the new location
+	//mwexec("/bin/sh /mnt/data/thebrig/conf/bin/thebrig_stop.sh");
+	$i = 0;
+	if ( is_array($config['rc']['shutdown'] ) && is_array( $config['rc']['shutdown']['cmd'] ) ) {
+		for ($i; $i < count($config['rc']['shutdown']['cmd']); $i++) {
+			if (preg_match('/thebrig_stop\.sh/', $config['rc']['shutdown']['cmd'][$i]))
+				unset($config['rc']['shutdown']['cmd'][$i]);	// Disable the old startup
+		 	}	// end for		
+	} // end if (is array)
+	// update the value of the shutdown command.
+	$config['rc']['shutdown']['cmd'][$i] = "/bin/sh {$new_location}conf/bin/thebrig_stop.sh";
+	
 	return 0;
 }	// end of thebrig_populate()
 
@@ -1098,7 +1108,7 @@ function write_defs_rules() {
 			fwrite ($handle, "}\n"  );
 			
 			}
-	fclose($handle);
+fclose($handle);
 if (is_array ($a_startonboot)) { 
 	$startonboot = implode(" ", $a_startonboot);
 	mwexec("/usr/local/sbin/rconf attribute set jail_list {$startonboot}");  
