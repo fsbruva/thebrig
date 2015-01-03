@@ -39,6 +39,7 @@ if ($_POST) {
 	$config['thebrig']['parastart'] = isset( $_POST['parastart'] ) ? true : false ;
 	$config['thebrig']['thebrig_enable'] = isset ( $_POST['thebrig_enable'] ) ? true : false ;	
 	$config['thebrig']['gl_statfs'] =  $_POST['gl_statfs'] ;
+	If ($_POST['compress'] == "yes") $config['thebrig']['compress'] = "yes";
 	write_config();
 
 	$retval = 0;
@@ -51,10 +52,12 @@ if ($_POST) {
 		// OR the return value from the attempt to process the notification
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
 		// Lock the config
-		config_lock();
+		if ( isset($config['thebrig']['thebrig_enable']) ) { $retval = rc_update_rcconf("thebrig", "enable"); } else { $retval = rc_update_rcconf("thebrig", "disable"); }
+		//config_lock();
 		//$retval |= rc_update_service("jail"); // This need be checked.  For jail this way no good
+		 //$retval |= rc_update_rcconf($name,$state);
 		// Unlock the config
-		config_unlock();
+		// config_unlock();
 	}
 	// Set the save message
 	$savemsg = get_std_save_message($retval);
@@ -80,6 +83,8 @@ if (isset($_GET['act']) && $_GET['act'] === "del") {
 $rootfolder = $config['thebrig']['rootfolder'];
 $pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ? true : false ;
 $pconfig['thebrig_enable'] = isset($config['thebrig']['thebrig_enable']) ? true : false ; 
+if ($config['thebrig']['compress']  == "yes" ) $pconfig['compress'] = "yes"; else unset(  $pconfig['compress']);
+//$pconfig['compress'] = ! empty ($config['thebrig']['compress']) ? "yes" : false ; 
 //$pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
 //$pconfig['systenv'] = isset($config['thebrig']['systenv']); 
 if (isset ($config['thebrig']['gl_statfs']) )  { $pconfig['gl_statfs']  =  $config['thebrig']['gl_statfs']; } else { $pconfig['gl_statfs']  = 2; }
@@ -117,17 +122,22 @@ function thebrig_process_updatenotification($mode, $data) {
 			if (false !== $cnid) {
 				$timestamp = date("Y-m-d_H:i:s");
 				$jail2delete = $config['thebrig']['content'][$cnid];
-				mwexec ( "/etc/rc.d/jail stop " . $jail2delete['jailname']);
+				mwexec ( "/etc/rc.d/thebrig stop " . $jail2delete['jailname']);
+				if ( $config['thebrig']['compress'] == "yes")  {
 				if ( $jail2delete['type'] === "slim") {
 					mwexec("tar -cf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -C " . $jail2delete['jailpath'] . " ./" );
 					mwexec("tar -rf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -X basejail/ -C " . $config['thebrig']['basejail']['folder'] . " ./" );
 					mwexec("xz -S .txz " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar" );
 				}
-				else 
+				else {
 					mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
+				}
+				}
 				mwexec ( "umount -a -F /etc/fstab." .  $jail2delete['jailname']);
 				if ( $jail2delete['devfs_enable'] == true )
 					mwexec ( "umount " . $jail2delete['jailpath'] . "dev");
+					
+					
 				mwexec("chflags -R noschg {$jail2delete['jailpath']}");
 				mwexec("rm -rf {$jail2delete['jailpath']}");
 				mwexec( "rm /etc/fstab." . $jail2delete['jailname']);
@@ -136,6 +146,7 @@ function thebrig_process_updatenotification($mode, $data) {
 			}
 			break;
 	}
+	
 	write_jailconf ();
 	write_defs_rules ();
 	return $retval;
@@ -374,6 +385,7 @@ function disable_buttons() {
 	</td></tr></table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />
+					 <input name="compress" type="hidden" value="<?if ($pconfig['compress'] == "yes") echo "yes"; ?>" />
 				</div>
 				
 	</table>

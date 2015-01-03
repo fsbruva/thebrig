@@ -901,7 +901,8 @@ function write_defs_rules() {
  function write_jailconf () {
  	global $config, $g;
  			$startonboot ="";
- 			$file = "/etc/thebrig.conf";
+ 			if (!is_dir($config['thebrig']['rootfolder']."conf/jails")) { mkdir ($config['thebrig']['rootfolder']."conf/jails", 0755);} else {}
+ 			$file =  $config['thebrig']['rootfolder'] ."conf/thebrig.conf";
  			$handle=fopen($file, "w");
  	// copy part of config in temporary array
  			$t_jail = $config['thebrig']['content'];
@@ -944,7 +945,7 @@ function write_defs_rules() {
 				if (is_array($out_jail['param'] )) {
 					foreach ($out_jail['param'] as $a_param ) { fwrite ($handle, "\t". $a_param .";\n"); }  }
 		// create fstab
-				$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
+				$fstabfile=  $config['thebrig']['rootfolder'] . "conf/jails/fstab.{$out_jail['jailname']}";
 				$handle1 = fopen($fstabfile, "w");
 				if  ($out_jail['jail_type'] === "slim") {
 					$basejailfolder	= 	 substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
@@ -969,8 +970,8 @@ function write_defs_rules() {
 		
 				
 				if (TRUE == is_array($out_jail['cmd'])) { $mess = "zfs not working"; $facility = "info"; 
-					  if (!is_dir("/etc/jails")) mkdir( "/etc/jails", 0755);
-					  $commandfile= "/etc/jails/prestart.". $out_jail['jailname'];
+					  //if (!is_dir("/etc/jails")) mkdir( "/etc/jails", 0755);
+					  $commandfile=  $config['thebrig']['rootfolder']."conf/jails/prestart.". $out_jail['jailname'];
 					  $handle1 = fopen( $commandfile, "w");
 					  fwrite ($handle1, "#!/bin/sh\n#\n");
 					  $prestart_cmd = preg_grep("/^prestart\|/", $out_jail['cmd']);
@@ -999,7 +1000,7 @@ function write_defs_rules() {
 					  fclose($handle1);
 					  
 			 // poststart script
-					  $commandfile= "/etc/jails/poststart.". $out_jail['jailname'];
+					  $commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/poststart.". $out_jail['jailname'];
 					  $handle1 = fopen( $commandfile, "w");
 					  fwrite ($handle1, "#!/bin/sh\n#\n");
 					  if (isset($out_jail['jail_vnet'] )) {
@@ -1042,7 +1043,7 @@ function write_defs_rules() {
 						 }
 					 fclose($handle1);
 				 // prestop jail		
-					 $commandfile= "/etc/jails/prestop.". $out_jail['jailname'];
+					 $commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/prestop.". $out_jail['jailname'];
 					 $handle1 = fopen( $commandfile, "w");
 					 fwrite ($handle1, "#!/bin/sh\n#\n");
 					 $prestop_cmd_jail = preg_grep("/^prestop_for_jail\|/", $out_jail['cmd']);
@@ -1075,7 +1076,7 @@ function write_defs_rules() {
 		   
 					fclose($handle1);
 					
-					 $commandfile= "/etc/jails/poststop.". $out_jail['jailname'];
+					 $commandfile=  $config['thebrig']['rootfolder'] ."conf/jails/poststop.". $out_jail['jailname'];
 					 $handle1 = fopen( $commandfile, "w");
 					 fwrite ($handle1, "#!/bin/sh\n#\n");
 					  if (isset($out_jail['jail_vnet'] )) {					 
@@ -1094,12 +1095,12 @@ function write_defs_rules() {
 						   fwrite ($handle1,  $a_command[2] . "\n"); 
 						   }
 					 fclose($handle1);
-					  if (is_file("/etc/jails/prestart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestart =\"/bin/sh /etc/jails/prestart.". $out_jail['jailname'] . "\";\n"); } else {}
+					  if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/prestart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestart =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/prestart.". $out_jail['jailname'] . "\";\n"); } else {}
 					  if (false === isset($out_jail['jail_vnet'] )) { fwrite ($handle, "\texec.start =\"" . $out_jail['exec_start'] . "\";\n"); } else {}
-					  if (is_file("/etc/jails/poststart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststart =\"/bin/sh /etc/jails/poststart.". $out_jail['jailname'] . "\";\n"); } else {}
-					  if (is_file("/etc/jails/prestop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestop =\"/bin/sh /etc/jails/prestop.". $out_jail['jailname'] . "\";\n"); } else {}
+					  if (is_file( $config['thebrig']['rootfolder'] ."conf/jails/poststart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststart =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/poststart.". $out_jail['jailname'] . "\";\n"); } else {}
+					  if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/prestop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestop =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/prestop.". $out_jail['jailname'] . "\";\n"); } else {}
 					  fwrite ($handle, "\texec.stop =\"" . $out_jail['exec_stop'] . "\";\n");
-					 if (is_file("/etc/jails/poststop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststop =\"/bin/sh /etc/jails/poststop.". $out_jail['jailname'] . "\";\n"); } else {}
+					 if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/poststop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststop =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/poststop.". $out_jail['jailname'] . "\";\n"); } else {}
 
 			
 			
