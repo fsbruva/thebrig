@@ -114,6 +114,10 @@ function thebrig_populate ($new_location, $old_location)
 	// update the value of the shutdown command.
 	$config['rc']['shutdown']['cmd'][$i] = "/bin/sh {$new_location}conf/bin/thebrig_stop.sh";
 	
+	if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
+	{ exec ("logger Failed copy rc script");} 
+	chmod("/etc/rc.d/thebrig", 0744);
+	
 	return 0;
 }	// end of thebrig_populate()
 
