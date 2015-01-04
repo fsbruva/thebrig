@@ -916,7 +916,7 @@ function write_defs_rules() {
  				fwrite ($handle, "\thost.hostname =\"" . $out_jail['jailname'] .".". $config['system']['domain'] ."\";\n");
  				fwrite ($handle, "\tenforce_statfs =" . $out_jail['statfs'] .";\n");
  				fwrite ($handle, "\tdevfs_ruleset=" . (4+ $out_jail['jailno']) .";\n");
- 				fwrite ($handle, "\tmount.fstab=\"/etc/fstab." . $out_jail['jailname'] ."\";\n");
+ 				fwrite ($handle, "\tmount.fstab=\"".$config['thebrig']['rootfolder'] ."conf/jails/fstab." . $out_jail['jailname'] ."\";\n");
  				if (isset($out_jail['jail_vnet'] )) {  fwrite ($handle, "\tvnet;\n"); } else {
  				
  					if (count ($out_jail['allowedip'] ) > 1 ) {
