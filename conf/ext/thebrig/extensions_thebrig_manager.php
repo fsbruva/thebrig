@@ -99,6 +99,8 @@ else { // TheBrig has been confirmed
 // We have returned to this page via a POST
 if ($_POST) {
 	unset($input_errors);
+	If (isset($_POST['update']) && $_POST['update'] == "Update" ) {      
+	
 	$pconfig = $_POST;			// move $_POST into the $post config
 	$config_changed = false;	// Keep track if we need to re-write the config
 
@@ -118,16 +120,48 @@ if ($_POST) {
 		} 
 		elseif ( $git_ver > $brig_ver ) {
 			// We want to make sure we can't let the user revert - the code we need to update thebrig will go here.
+			mkdir("/tmp/thebrig000",0777);
+			cmd_exec ("fetch -o /tmp/thebrig000/thebrig.zip https://github.com/fsbruva/thebrig/archive/alcatraz.zip", $output, $tolog );
+			chdir("/tmp/thebrig000");
+			mwexec ("tar -xvf thebrig.zip --exclude='.git*' --strip-components 1");
+			mwexec("rm thebrig.zip");
+			if ($g['arch'] == "x86") { 
+			rename ("/tmp/thebrig000/conf/bin/ftp_i386", "/tmp/thebrig000/conf/bin/ftp" ); 
+			unlink ("/tmp/thebrig000/conf/bin/ftp_amd64"); 
+			}else {
+			rename ("/tmp/thebrig000/conf/bin/ftp_amd64", "/tmp/thebrig000/conf/bin/ftp" ); 
+			unlink ("/tmp/thebrig000/conf/bin/ftp_i386");		
+			}
+			updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");
 			
 		}
 		// User has selected to carry out the update
+/** You realy need write config here? */
 		if ( $config_changed ) {
-			write_config();
+			write_config();  
 		}
 		// Whatever we did, we did it successfully
 		$retval = 0;
-		$savemsg = get_std_save_message($retval);
+		//$savemsg = get_std_save_message($retval);
 	} // end of no input errors
+	}// end of click update
+	If (isset($_POST['cancel']) && $_POST['cancel'] == "Cancel" ) {
+		mwexec ("rm -rf /tmp/thebrig000");
+		updatenotify_delete("thebrig");
+		$savemsg = "Update process aborted";	
+	}
+	If (isset($_POST['agree']) && $_POST['agree'] == "Agree" ) {
+		$cmd = "cp -r /tmp/thebrig000/* ".$config['thebrig']['rootfolder'];
+		file_put_contents ("/tmp/cmdbrig","#!/bin/sh\n" . $cmd);
+		
+		updatenotify_delete("thebrig");
+		mwexec ("sh /tmp/cmdbrig");
+		$savemsg = "Updated";
+		mwexec ("rm -rf /tmp/thebrig000");
+		mwexec ("rm /tmp/cmdbrig");
+		header("Location: extensions_thebrig.php");
+
+	}
 } // end of POST
 
 // Uses the global fbegin include
@@ -188,6 +222,7 @@ function conf_handler() {
 
 	<tr><td class="tabcont">
 		<form action="extensions_thebrig_manager.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
+		<?php if (updatenotify_exists_mode("thebrig", 1 )) print_thebrig_confirm_box();?>
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php 
 			html_titleline(gettext("Update Availability")); 

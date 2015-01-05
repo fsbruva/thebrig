@@ -709,7 +709,7 @@ function thebrig_menu_list ( $list , $list_name , $chosen ) {
 	$menu .= "</select>";
 	return $menu ;
 }
-
+   
 
 function get_nice_filesize ($file) {
 	$dsize = filesize($file);
@@ -813,15 +813,15 @@ function write_rcconflocal () {
 	$startonboot = ltrim( $startonboot );
 	fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
 	fclose($handle);
-}
+}   
 // cmd_exec execute process and have output and error
-//$cmd - proccess
+//$cmd - proccess 
 //$stdout - result
 //$stderr - messages about error
 function cmd_exec($cmd, &$stdout, &$stderr)
 {
-    $outfile = tempnam(".", "cmd");
-    $errfile = tempnam(".", "cmd");
+    $outfile = tempnam("/tmp", "cmd");
+    $errfile = tempnam("/tmp", "cmd");
     $descriptorspec = array(
         0 => array("pipe", "r"),
         1 => array("file", $outfile, "w"),
@@ -848,8 +848,9 @@ function write_briglog ($tolog, $fac) {
 	global $config;
 	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
 	$handle1 = fopen($filelog, "a+");
-	fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog)."\n" ); 
-	fclose ($handle1);
+	foreach ($tolog as $tolog1) {
+	fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog1)."\n" ); }
+	fclose ($handle1); 
 
 }
 //this function check if zfs used by system and defined 1 dataset (+1 as pool )
@@ -969,7 +970,7 @@ function write_defs_rules() {
 				}
 				fclose($handle1);
 				
-				
+				 
 		// commands processing
 		
 				
@@ -1173,4 +1174,11 @@ function get_jailinfo() {
 		}
 	}
 return $tabledata;
+}
+function print_thebrig_confirm_box() {
+	echo "<div id='applybox'>";
+	print_info_box("Do you realy want update TheBrig? ");
+	echo "<input name=\"agree\" type=\"submit\" class=\"formbtn\" id=\"agree\" value=\"Agree\" />";
+	echo "<input name=\"cancel\" type=\"submit\" class=\"formbtn\" id=\"cancel\" value=\"Cancel\" />";
+	echo "</div>";
 }
