@@ -12,6 +12,7 @@ $in_jail_allow = array (
 "allow.raw_sockets",
 "allow.chflags",
 "allow.mount",
+/*allow.mount,tmpfs,*/
 "allow.mount.devfs",
 "allow.mount.nullfs",
 "allow.mount.procfs",
@@ -82,8 +83,6 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['param'] = $a_jail[$cnid]['param'];
 	$pconfig['allowedip'] = $a_jail[$cnid]['allowedip'];  // new entries
 	$pconfig['if'] = $a_jail[$cnid]['if'];
-	//$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
-	//$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
 	$pconfig['jail_vnet'] = isset($a_jail[$cnid]['jail_vnet']);
 	$pconfig['epair_a_ip'] = $a_jail[$cnid]['epair_a_ip'];  // new entries = ip for systemside epair interface
 	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask'];  // new entries mask for systemside epair interface
@@ -99,14 +98,9 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	unset ($pconfig['auxparam']);
 	if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam']))
 		$pconfig['auxparam'] = implode("\n", $a_jail[$cnid]['auxparam']);
-	//$pconfig['exec_prestart'] = $a_jail[$cnid]['exec_prestart'];
 	$pconfig['exec_start'] = $a_jail[$cnid]['exec_start'];
 	$pconfig['cmd'] = $a_jail[$cnid]['cmd'];
-	//$pconfig['afterstart0'] = $a_jail[$cnid]['afterstart0'];
-	//$pconfig['afterstart1'] = $a_jail[$cnid]['afterstart1'];
 	$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
-	//$pconfig['extraoptions'] = $a_jail[$cnid]['extraoptions'];
-	//$pconfig['jail_parameters'] = $a_jail[$cnid]['jail_parameters'];
 	$pconfig['desc'] = $a_jail[$cnid]['desc'];
 	$pconfig['base_ver'] = $a_jail[$cnid]['base_ver'];
 	$pconfig['lib_ver'] = $a_jail[$cnid]['lib_ver'];
@@ -121,7 +115,6 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['zfs_enable'] =  $a_jail[$cnid]['zfs_enable'];
 	if (FALSE == $a_jail[$cnid]['fib']) { unset ($pconfig['fib']);} else {$pconfig['fib'] = $a_jail[$cnid]['fib'];}
 	if (FALSE == $a_jail[$cnid]['ports']) { unset ($pconfig['ports']);} else {$pconfig['ports'] = $a_jail[$cnid]['ports'];}
-	// $pconfig['ports'] = ( isset($a_jail[$cnid]['ports']) ) ? true : false ;
 	// By default, when editing an existing jail, path and name will be read only.
 	$path_ro = true;
 	$name_ro = true;
@@ -149,8 +142,6 @@ else {
 	$pconfig['epair_b_ip'] = "192.168.1.251"; 
 	$pconfig['epair_b_mask'] = "24";	
 	$pconfig['if'] = "";
-	//$pconfig['ipaddr'] = "";
-	//$pconfig['subnet'] = "32";
 	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = true;
 	$pconfig['statfs'] = "2";
@@ -160,13 +151,8 @@ else {
 	unset ($pconfig['rule'] );
 	unset($pconfig['auxparam']);
 	unset($pconfig['cmd']);
-	//$pconfig['exec_prestart'] = "";
 	$pconfig['exec_start'] = "/bin/sh /etc/rc";
-	//$pconfig['afterstart0'] = "";
-	//$pconfig['afterstart1'] = "";
 	$pconfig['exec_stop'] = "/bin/sh /etc/rc.shutdown";
-	//$pconfig['extraoptions'] = "";
-	//$pconfig['jail_parameters'] = "";
 	$pconfig['desc'] = "";
 	$pconfig['base_ver'] = "Unknown";
 	$pconfig['lib_ver'] = "Not Installed";

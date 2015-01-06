@@ -28,40 +28,36 @@ if (isset($_GET['name']) && ! isset($_GET['act'])) {
 	fclose ($handle1);
 }
 
-// sent to page data from config.xml
-$rootfolder = $config['thebrig']['rootfolder'];
-$pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ;
-$pconfig['sethostname'] = isset($config['thebrig']['sethostname']); 
-$pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
-$pconfig['systenv'] = isset($config['thebrig']['systenv']); 
-if (isset ($config['thebrig']['gl_statfs']) )  { $pconfig['gl_statfs']  =  $config['thebrig']['gl_statfs']; } else { $pconfig['gl_statfs']  = 2; }
-//
+if (is_ajax()) {
+	$jailinfo = get_jailinfo();
+	render_ajax($jailinfo);
+}
 
 if ($_POST) {
 	// insert into pconfig changes
 	$pconfig = $_POST;
-
-	$config['thebrig']['parastart'] = isset( $_POST['parastart'] );
-	$config['thebrig']['sethostname'] = isset ( $_POST['sethostname'] );
-	$config['thebrig']['unixiproute'] = isset ( $_POST['unixiproute'] );
-	$config['thebrig']['systenv'] = isset ( $_POST['systenv'] );
+	$config['thebrig']['parastart'] = isset( $_POST['parastart'] ) ? true : false ;
+	$config['thebrig']['thebrig_enable'] = isset ( $_POST['thebrig_enable'] ) ? true : false ;	
 	$config['thebrig']['gl_statfs'] =  $_POST['gl_statfs'] ;
+	If ($_POST['compress'] == "yes") $config['thebrig']['compress'] = "yes";
 	write_config();
 
 	$retval = 0;
 	// This checks to see if any webgui changes require a reboot, and create rc.conf.local
 		if ( !file_exists($d_sysrebootreqd_path) && isset($config['thebrig']['content']) ) {
-		write_rcconflocal();
+		//write_rcconflocal();
 		 write_defs_rules();
 		 write_jailconf ();
-	//	write_jailconf();
+	
 		// OR the return value from the attempt to process the notification
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
 		// Lock the config
-		config_lock();
+		if ( isset($config['thebrig']['thebrig_enable']) ) { $retval = rc_update_rcconf("thebrig", "enable"); } else { $retval = rc_update_rcconf("thebrig", "disable"); }
+		//config_lock();
 		//$retval |= rc_update_service("jail"); // This need be checked.  For jail this way no good
+		 //$retval |= rc_update_rcconf($name,$state);
 		// Unlock the config
-		config_unlock();
+		// config_unlock();
 	}
 	// Set the save message
 	$savemsg = get_std_save_message($retval);
@@ -83,6 +79,15 @@ if (isset($_GET['act']) && $_GET['act'] === "del") {
 	header("Location: extensions_thebrig.php");
 	exit;
 }
+// sent to page data from config.xml
+$rootfolder = $config['thebrig']['rootfolder'];
+$pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ? true : false ;
+$pconfig['thebrig_enable'] = isset($config['thebrig']['thebrig_enable']) ? true : false ; 
+if ($config['thebrig']['compress']  == "yes" ) $pconfig['compress'] = "yes"; else unset(  $pconfig['compress']);
+//$pconfig['compress'] = ! empty ($config['thebrig']['compress']) ? "yes" : false ; 
+//$pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
+//$pconfig['systenv'] = isset($config['thebrig']['systenv']); 
+if (isset ($config['thebrig']['gl_statfs']) )  { $pconfig['gl_statfs']  =  $config['thebrig']['gl_statfs']; } else { $pconfig['gl_statfs']  = 2; }
 
 function thebrig_process_updatenotification($mode, $data) {
 	global $config;
@@ -98,6 +103,7 @@ function thebrig_process_updatenotification($mode, $data) {
 				// I have these here because the tarballs take some time to get unpacked
 				$commandresolv = "cp /etc/resolv.conf " . $jail2add['jailpath'] . "etc/";
 				mwexec ($commandresolv);
+				
 			}
 			// I have these commands here because it will take some time to untar the jail files
 			break;
@@ -116,17 +122,22 @@ function thebrig_process_updatenotification($mode, $data) {
 			if (false !== $cnid) {
 				$timestamp = date("Y-m-d_H:i:s");
 				$jail2delete = $config['thebrig']['content'][$cnid];
-				mwexec ( "/etc/rc.d/jail stop " . $jail2delete['jailname']);
+				mwexec ( "/etc/rc.d/thebrig stop " . $jail2delete['jailname']);
+				if ( $config['thebrig']['compress'] == "yes")  {
 				if ( $jail2delete['type'] === "slim") {
 					mwexec("tar -cf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -C " . $jail2delete['jailpath'] . " ./" );
 					mwexec("tar -rf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar -X basejail/ -C " . $config['thebrig']['basejail']['folder'] . " ./" );
 					mwexec("xz -S .txz " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".tar" );
 				}
-				else 
+				else {
 					mwexec("tar -czf " . $config['thebrig']['rootfolder'] . "work/backup_" . $jail2delete['jailname'] . "_" . $timestamp . ".txz -C " . $jail2delete['jailpath'] . " ./" );
+				}
+				}
 				mwexec ( "umount -a -F /etc/fstab." .  $jail2delete['jailname']);
 				if ( $jail2delete['devfs_enable'] == true )
 					mwexec ( "umount " . $jail2delete['jailpath'] . "dev");
+					
+					
 				mwexec("chflags -R noschg {$jail2delete['jailpath']}");
 				mwexec("rm -rf {$jail2delete['jailpath']}");
 				mwexec( "rm /etc/fstab." . $jail2delete['jailname']);
@@ -135,26 +146,113 @@ function thebrig_process_updatenotification($mode, $data) {
 			}
 			break;
 	}
-
+	
+	write_jailconf ();
+	write_defs_rules ();
 	return $retval;
 }
 
 
-
 include("fbegin.inc");?>
+
+
 <!----- This make "live table" ------>
 <script language="JavaScript">
+$(document).ready(function(){
+	var row_no = $('#onlinetable  tbody tr[name="myjail"]').length;	
+	var gui = new GUI;
+	gui.recall(3000, 3000, 'extensions_thebrig.php', null, function(data) {
+		if (0 <  $('#onlinetable  tbody tr[name="myjail"]').length ) {
+		for ( idx=0; idx<= $('#onlinetable  tbody tr[name="myjail"]').length;  idx++ ) {
+			$('#ajaxjailname'+idx).text(data.name[idx] );
+			if (typeof(data.built[idx]) !== 'undefined') {
+				var value1 = data.built[idx];
+				if (value1 !== 'ON') { 
+					$('#ajaxjailbuiltimg'+ idx).attr('src', 'status_disabled.png'); 
+					$('#ajaxjailbuiltimg'+ idx).attr('title', 'Template?'); 
+				} else {
+					$('#ajaxjailbuiltimg'+ idx).attr('src', 'status_enabled.png');
+					$('#ajaxjailbuiltimg'+ idx).attr('title', 'Build');
+				}			
+			}
+			if (typeof(data.builtports[idx]) !== 'undefined') {
+				var value1 = data.builtports[idx];
+				if (value1 == 'OFF') { 					
+					$('#ajaxjailbuiltports'+ idx).attr('text', ''); 
+				} else {
+					
+					$('#ajaxjailbuiltports'+ idx).text(' + ports');
+				}
+			}
+			if (typeof(data.builtsrc[idx]) !== 'undefined') {
+				var value1 = data.builtsrc[idx];				
+				if (value1 == 'OFF') { 					
+					$('#ajaxjailbuiltsrc'+ idx).attr('text', ''); 
+				} else {
+					$('#ajaxjailbuiltsrc'+ idx).text(' + src');
+				}			
+			}
+			if (typeof(data.status[idx]) !== 'undefined') {
+				var value1 = data.status[idx];				
+				if (value1 != 'OFF') {
+						$('#ajaxjailstatus'+ idx).text(data.status[idx]);
+						$('#ajaxjailstatusimg'+ idx).attr('src', 'status_enabled.png');
+						$('#ajaxjailstatusimg'+ idx).attr('title', 'Created'); 
+					} else {
+						$('#ajaxjailstatusimg'+ idx).attr('src', 'status_disabled.png'); 
+						$('#ajaxjailstatusimg'+ idx).attr('title', 'Stopped'); 
+					}
+			}
+			if (typeof(data.id[idx]) !== 'undefined') {
+				var value1 = data.id[idx];
+				
+				if (value1 != 'OFF') {
+						$('#ajaxjailid'+ idx).text(data.id[idx]);
+					} else {
+						$('#ajaxjailidimg'+ idx).attr('src', 'status_disabled.png'); 
+						$('#ajaxjailidimg'+ idx).attr('title', 'Stopped'); 
+					}
+			}
+			if (typeof(data.id[idx]) !== 'undefined') {
+				var value1 = data.ip[idx];
+				
+				if (value1 != 'OFF') {
+						$('#ajaxjailip'+ idx).text(data.ip[idx]);
+					} else {
+						$('#ajaxjailipimg'+ idx).attr('src', 'status_disabled.png'); 
+						$('#ajaxjailipimg'+ idx).attr('title', 'Stopped'); 
+					}
+			}
+			if (typeof(data.hostname[idx]) !== 'undefined') {
+				var value1 = data.hostname[idx];
+				
+				if (value1 != 'OFF') {
+						$('#ajaxjailhostname'+ idx).text(data.hostname[idx]);
+					} else {
+						$('#ajaxjailhostnameimg'+ idx).attr('src', 'status_disabled.png'); 
+						$('#ajaxjailhostnameimg'+ idx).attr('title', 'Stopped'); 
+					}
+			}
+			if (typeof(data.path[idx]) !== 'undefined') {
+				var value1 = data.path[idx];
+				
+				if (value1 != 'OFF') {
+						$('#ajaxjailpath'+ idx).text(data.path[idx]);
+					} else {
+						$('#ajaxjailpathimg'+ idx).attr('src', 'status_disabled.png'); 
+						$('#ajaxjailpathimg'+ idx).attr('title', 'Stopped'); 
+					}
+			}			
+		}}
+	});
+});	
 function disable_buttons() {
 	document.iform.Submit.disabled = true;
-	document.iform.submit();}
-var auto_refresh = setInterval(
-		function()
-		{
-		$('#loaddiv').load('extensions_thebrig_check.php');
-		}, 5000);
+	document.iform.submit();
+	}
 </script>
 <!--------  This is view ------->
-<form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
+
 <table width="100%" border="0" cellpadding="0" cellspacing="0" >
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
@@ -169,43 +267,62 @@ var auto_refresh = setInterval(
 				</li>
 		</ul>
 	</td></tr>
-	
 	<tr>
-		
-						
 		<td class="tabcont">
-		<?php if ($input_errors) print_input_errors($input_errors);?>
-		<?php if ($errormsg) print_error_box($errormsg);?>
-		<?php if ($savemsg) print_info_box($savemsg);?>
-		<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
-			<table width="100%" border="0" cellpadding="0" cellspacing="0">
-				<tr><?php html_titleline(gettext("On-line view"));?></tr>
-				<tr> <!----  import table and check from another page --->
-					<td class="shadow">
+		<form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
+		      <?php if ($input_errors) print_input_errors($input_errors);?>
+		      <?php if ($errormsg) print_error_box($errormsg);?>
+		      <?php if ($savemsg) print_info_box($savemsg);?>
+		      <?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
+			<table width="100%" border="0" cellpadding="6" cellspacing="0">
+			      <?php html_titleline(gettext("On-line view"));?>
+				<tr><td colspan='2' valign='top' >
+					<table border="0" cellspacing="0" cellpadding="0" width="100%">
+					      <tr> 
+							<td  valign="top">
 					<?php if ( !isset( $config['thebrig']['rootfolder']) ) : ?>
-					<a title="<?=gettext("Configure TheBrig please first");?>
+							<a title="<?=gettext("Configure TheBrig please first");?>
 					<?php elseif ( !isset( $config['thebrig']['content']) ):?>
-					<a title="<?=gettext("Configure at least one jail first"); ?>				
+							<a title="<?=gettext("Configure at least one jail first"); ?>				
 					<?php else:?>
-					<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_check.php");</script></div>
-					<?php endif;?>
-					</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-	
-	<table width="100%" border="0" cellpadding="0" cellspacing="0">
-	<tr><td class="tabcont">
-		<table width="100%" border="0" cellpadding="6" cellspacing="0">
-		<tr><td colspan="2" valign="top" class="optsect_t">
-		<table border="0" cellspacing="0" cellpadding="0" width="100%">
-		
-		<tr><?php html_titleline(gettext("<strong>TheBrig config</strong>"));?>
-	
-		<td align="right" class="optsect_s"></td>
-		</tr>
-				</table></td></tr>
+								<!--<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_check.php");</script></div>-->
+								<table id = 'onlinetable' width="100%" border="0" cellpadding="5" cellspacing="0">
+						
+									<tr><td width="7%"  class="listhdrlr" ><?=gettext("Jail");?></td>
+										<td width="15%" class="listhdrc"><?=gettext("Built");?></td>
+										<td width="24%" class="listhdrc"><?=gettext("Status");?></td>
+										<td width="5%" class="listhdrc"><?=gettext("ID");?></td>
+										<td width="22%" class="listhdrc"><?=gettext("Jail ip");?></td>
+										<td width="12%" class="listhdrc"><?=gettext("Jail hostname");?></td>
+										<td width="22%" class="listhdrc"><?=gettext("Path to jail");?></td>
+										<td width="5%" class="listhdrc"><?=gettext("Action");?></td>
+									</tr>
+			<?php 	foreach ( $config['thebrig']['content'] as $n_jail): ?>					
+									<tr name='myjail' id='myjail'><td width="7%" valign="top" class="listr" name="ajaxjailname<?=$n_jail['jailno']; ?>"  id="ajaxjailname<?=$n_jail['jailno']; ?>" >  </td>
+									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$n_jail['jailno']; ?>" ><span><img id="ajaxjailbuiltimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$n_jail['jailno']; ?>"></span><span id="ajaxjailbuiltsrc<?=$n_jail['jailno']; ?>"></span> </td>
+									    <td width="24%" valign="top" class="listr" name="ajaxjailstatus<?=$n_jail['jailno']; ?>"  > <span><img id="ajaxjailstatusimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$n_jail['jailno']; ?>"></span> </td>
+									    <td width="5%" valign= "top" class="listr" name="ajaxjailid<?=$n_jail['jailno']; ?>" id="ajaxjailid<?=$n_jail['jailno']; ?>"> <img id="ajaxjailidimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
+									    <td width="22%" valign="top" class="listr" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>">  <img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td width="12%" valign="top" class="listr" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"> <img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td width="22%" valign="top" class="listr" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
+								 								
+									    <td width="5%" valign="top" class="listrd"><?php  
+									    $file_jid = $file_id = "/var/run/jail_".$n_jail['jailname'].".id";
+									    // I want use AJAX for buttons also , but I don't know way!!
+	if (!is_file($file_jid)) 
+	{ echo '<center><a href="extensions_thebrig.php?name='.$n_jail['jailname'].'&action=start"><img src="ext/thebrig/on_small.png" title="Jail start" border="0" alt="Jail start" /></a></center>';} 
+	else { echo '<center><a href="extensions_thebrig.php?name='.$n_jail['jailname'].'&action=stop"><img src="ext/thebrig/off_small.png" title="Jail stop" border="0" alt="Jail stop" /></a></center>';} ?>
+									    </td>
+									 </tr>
+			<?php endforeach; ?>
+								</table>
+							<?php endif;?>
+							</td>
+						</tr>
+					</table>
+				</td></tr>
+			<?php html_separator();  ?>
+			<?php html_titleline(gettext("<strong>TheBrig config</strong>"));?>
 					<tr><td width="15%" valign="top" class="vncell"><?=gettext("Jails");?></td>
 						<td width="85%" class="vtable">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -220,7 +337,7 @@ var auto_refresh = setInterval(
 									<td width="14%" class="listhdrr"><?=gettext("Description");?></td>
 									<td width="10%" class="list"></td>
 								</tr>
-																<?php foreach ($a_jail as $jail):?>
+									<?php foreach ($a_jail as $jail):?>
 								<?php $notificationmode = updatenotify_get_mode("thebrig", $jail['uuid']);?>
 								<tr>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['jailno']) ? "*" : $jail['jailno']);?>&nbsp;</td>
@@ -262,15 +379,15 @@ var auto_refresh = setInterval(
 							<input name="unixiproute" type="checkbox" id="unixiproute" value="yes" <?php if (!empty($pconfig['unixiproute'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROUTE?><br />
 							<input name="systenv" type="checkbox" id="systenv" value="yes" <?php if (!empty($pconfig['systenv'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_IPC?>
 						-->	
-						</td>
-						
-					</tr>
-					<?php html_combobox("gl_statfs", gettext("Global information about a mounted file system (statfs)"),  $pconfig['gl_statfs'], array('2' =>'2','1'=> '1', '0'=> '0'), "Choose enforce_statfs. Default value =2. Per jail value cannot be less then Clobal value . Value 2 not allow  jail root user mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount jail-friendly filesystems ", false,false);?>
-		
-				</table>
+		<input name='thebrig_enable' type='checkbox' class='formfld' id='thebrig_enable' value="" <?php if (!empty($pconfig['thebrig_enable'])) echo "checked=\"checked\""; ?>  />&nbsp;Allow/disallow start all jails<br />
+		<select name='gl_statfs' class='formfld' id='gl_statfs' ><option value='2' <?php if (2 == $pconfig['gl_statfs']) echo "selected"; ?> >2</option><option value='1' <?php if (1 == $pconfig['gl_statfs']) echo "selected"; ?> >1</option><option value='0' <?php if (0 == $pconfig['gl_statfs']) echo "selected"; ?> >0</option></select>
+		<span class='vexpl'>Choose Global enforce_statfs. Default value =2. Jail's value  cannot be less then Global value . <br />Value 2 not allow  jail root user mount inside a jail. "High" = 1  and "All" = 0 values allow mount jail-friendly filesystems </span>
+	</td></tr></table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />
+					 <input name="compress" type="hidden" value="<?if ($pconfig['compress'] == "yes") echo "yes"; ?>" />
 				</div>
+				
 	</table>
 	
 </td></tr>

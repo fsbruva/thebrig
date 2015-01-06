@@ -18,29 +18,41 @@ function thebrig_unregister() {
  	// clears the config variables
  	unset( $config['thebrig'] );
  	write_config();
-	// Make the former root folder writeable by all, so that it can be easily deleted.
  	mwexec("/bin/chmod -R 777 {$brigroot}");
-
  	// remove all the webgui stuff (particularly useful for "full" installs
  	
- 	// First, glob all the php files in the webroot array of fully pathed filenames
+ 	// First, glob all the php files from the extensions folder into an array of fully pathed filenames
  	// and work through them one at a time as file. 
-	array_map ( 'unlink' , "/usr/local/www/extensions_thebrig_*.php" );
-
- 	// Check to see if the folder is a folder or symlink and remove it
- 	if ( is_dir( "/usr/local/www/ext/thebrig/" ) ) {
- 		exec ("rm -fr /usr/local/www/ext/thebrig");
- 		}
- 	elseif ( is_link("/usr/local/www/ext/thebrig") ) { 
-		unlink ("/usr/local/www/ext/thebrig");
-		}
+ 	foreach ( glob( "{$brigroot}conf/ext/thebrig/*.php" ) as $file ) {
+ 			// Carry out the string replacement operation. For each file, search for the string 
+ 			//"{$brigroot}conf/ext/thebrig" and replace it with /usr/local/www. This will create a 
+ 			// string that has a fully pathed filename for the extension's webpages (which are 
+ 			// actually symbolic links we need to destroy.
+ 		$file1 = str_replace("{$brigroot}conf/ext/thebrig", "/usr/local/www", $file);
+ 			// only carry out the delete if it is a symbolic link (in case users have customised their own)
+ 		if ( is_link( $file1 ) ) {
+ 			unlink( $file1 ); 	// remove the symbolic link
+ 		} // end if
+ 	} // end for loop
  	
-	# This counts the number of entries in the ext directory. If it is less than or equal to 2,
-	# the directory is empty, and can be removed (see http://www.php.net/manual/en/function.scandir.php)
-	if ( count( scandir( "/usr/local/www/ext/" ) ) <= 2 ){
-		rmdir( "/usr/local/www/ext/" );
-	}	
+ 	// This loops runs for each of the files in the extension folder for TheBrig, and removes
+ 	// all the files
+ 	/*foreach ( glob( "/usr/local/www/ext/thebrig/*" ) as $file ) {
+ 		unlink( $file );
+ 	}
+ 	
 
+ 	// Check to see if the folder is a folder, then remove it
+ 	if ( is_dir( "/usr/local/www/ext/thebrig/" ) ) {
+ 		rmdir( "/usr/local/www/ext/thebrig/" );
+ 		# This counts the number of entries in the ext directory. If it is less than or equal to 2,
+ 		# the directory is empty, and can be removed (see http://www.php.net/manual/en/function.scandir.php)
+ 		if ( count( scandir( "/usr/local/www/ext/" ) ) <= 2 ){
+ 			rmdir( "/usr/local/www/ext/" );
+ 		}
+ 	}*/
+ 	if (is_link("/usr/local/www/ext/thebrig")) { unlink ("/usr/local/www/ext/thebrig");} elseif( is_dir("/usr/local/www/ext/thebrig") ) { exec ("rm -fr /usr/local/www/ext/thebrig");} else {}
+	// Make the former root folder writeable by all, so that it can be easily deleted.
  	header("Location: /");
 		exit;
 } // end of thebrig_unregister function
@@ -91,8 +103,22 @@ function thebrig_populate ($new_location, $old_location)
 	} // end of array if statment
 	// update the value of the postinit command.
 	$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$new_location}conf/bin/thebrig_start.php";
-	// update all the symbolic links and such by executing the startup script from the new location
-	//mwexec("/usr/local/bin/php-cgi /mnt/data/thebrig/conf/bin/thebrig_start.php");
+	// update all the symbolic links and such by executing the shutdown script from the new location
+	//mwexec("/bin/sh /mnt/data/thebrig/conf/bin/thebrig_stop.sh");
+	$i = 0;
+	if ( is_array($config['rc']['shutdown'] ) && is_array( $config['rc']['shutdown']['cmd'] ) ) {
+		for ($i; $i < count($config['rc']['shutdown']['cmd']); $i++) {
+			if (preg_match('/thebrig_stop\.sh/', $config['rc']['shutdown']['cmd'][$i]))
+				unset($config['rc']['shutdown']['cmd'][$i]);	// Disable the old startup
+		 	}	// end for		
+	} // end if (is array)
+	// update the value of the shutdown command.
+	$config['rc']['shutdown']['cmd'][$i] = "/bin/sh {$new_location}conf/bin/thebrig_stop.sh";
+	
+	if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
+	{ exec ("logger Failed copy rc script");} 
+	chmod("/etc/rc.d/thebrig", 0744);
+	
 	return 0;
 }	// end of thebrig_populate()
 
@@ -496,7 +522,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 	exec ( "echo 'syslogd_flags=\"-ss\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
-	exec ( "echo 'cron_flags=\"\$cron_flags -j 20 -J 15\"' >> " . $destination . "etc/rc.conf" );
+	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
 	
 } // end of function
 
@@ -684,7 +710,7 @@ function thebrig_menu_list ( $list , $list_name , $chosen ) {
 	$menu .= "</select>";
 	return $menu ;
 }
-
+   
 
 function get_nice_filesize ($file) {
 	$dsize = filesize($file);
@@ -788,15 +814,15 @@ function write_rcconflocal () {
 	$startonboot = ltrim( $startonboot );
 	fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
 	fclose($handle);
-}
+}   
 // cmd_exec execute process and have output and error
-//$cmd - proccess
+//$cmd - proccess 
 //$stdout - result
 //$stderr - messages about error
 function cmd_exec($cmd, &$stdout, &$stderr)
 {
-    $outfile = tempnam(".", "cmd");
-    $errfile = tempnam(".", "cmd");
+    $outfile = tempnam("/tmp", "cmd");
+    $errfile = tempnam("/tmp", "cmd");
     $descriptorspec = array(
         0 => array("pipe", "r"),
         1 => array("file", $outfile, "w"),
@@ -815,6 +841,24 @@ function cmd_exec($cmd, &$stdout, &$stderr)
     unlink($outfile);
     unlink($errfile);
     return $exit;
+}
+// write message to log. 
+// $tolog - message for store
+//$fac = facility - as ERROR, warning, info... etc
+function write_briglog ($tolog, $fac) {
+	global $config;
+	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
+	$handle1 = fopen($filelog, "a+");
+	foreach ($tolog as $tolog1) {
+	fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog1)."\n" ); }
+	fclose ($handle1); 
+
+}
+//this function check if zfs used by system and defined 1 dataset (+1 as pool )
+function brig_zfs_check() {	
+	$output = array(); $errors = array(); 
+	cmd_exec("zfs list -o jailed,name,mountpoint",$output, $errors);
+	if (3 < count($output) ){ return true; } else { return false;}
 }
 function brig_datasets_list() {
 	global $config;
@@ -863,13 +907,14 @@ function write_defs_rules() {
  function write_jailconf () {
  	global $config, $g;
  			$startonboot ="";
- 			$file = "/etc/thebrig.conf";
+ 			if (!is_dir($config['thebrig']['rootfolder']."conf/jails")) { mkdir ($config['thebrig']['rootfolder']."conf/jails", 0755);} else {}
+ 			$file =  $config['thebrig']['rootfolder'] ."conf/thebrig.conf";
  			$handle=fopen($file, "w");
  	// copy part of config in temporary array
  			$t_jail = $config['thebrig']['content'];
 			array_sort_key($t_jail, "jailno");
 			foreach ($t_jail as $out_jail ) {
- 				If (isset($out_jail['enable'])) {$startonboot = $startonboot . " " .$out_jail['jailname']; } else { $startonboot = $startonboot; 	}
+ 				If (isset($out_jail['enable'])) {$a_startonboot[] = $out_jail['jailname']; } else { }
  				fwrite ($handle, $out_jail['jailname'] . "\t {\n"  );
  				$out_jail_comb = substr($out_jail['jailpath'], 0, strlen($out_jail['jailpath'])-1);
  				fwrite ($handle, "\tpath = \"" . $out_jail_comb . "\";\n");
@@ -877,7 +922,7 @@ function write_defs_rules() {
  				fwrite ($handle, "\thost.hostname =\"" . $out_jail['jailname'] .".". $config['system']['domain'] ."\";\n");
  				fwrite ($handle, "\tenforce_statfs =" . $out_jail['statfs'] .";\n");
  				fwrite ($handle, "\tdevfs_ruleset=" . (4+ $out_jail['jailno']) .";\n");
- 				fwrite ($handle, "\tmount.fstab=\"/etc/fstab." . $out_jail['jailname'] ."\";\n");
+ 				fwrite ($handle, "\tmount.fstab=\"".$config['thebrig']['rootfolder'] ."conf/jails/fstab." . $out_jail['jailname'] ."\";\n");
  				if (isset($out_jail['jail_vnet'] )) {  fwrite ($handle, "\tvnet;\n"); } else {
  				
  					if (count ($out_jail['allowedip'] ) > 1 ) {
@@ -885,9 +930,9 @@ function write_defs_rules() {
  								$b_ips = explode("|", $a_ips);
  								$c_ips = explode ("/", $b_ips[1]);
  								if (is_ipv4addr($c_ips[0])) { 
- 									fwrite ($handle, "\tip4.addr += \"" . $out_jail['allowedip'] . "\";\n");
+ 									fwrite ($handle, "\tip4.addr += \"" . $a_ips . "\";\n");
  								} else {
- 									fwrite ($handle, "\tip6.addr += \"" . $out_jail['allowedip'] ."\";\n");
+ 									fwrite ($handle, "\tip6.addr += \"" . $a_ips ."\";\n");
  								}
 							  // check, if this schema work.  If not --> replace number0 as ip = re|dfgfgfg
  							}
@@ -906,7 +951,7 @@ function write_defs_rules() {
 				if (is_array($out_jail['param'] )) {
 					foreach ($out_jail['param'] as $a_param ) { fwrite ($handle, "\t". $a_param .";\n"); }  }
 		// create fstab
-				$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
+				$fstabfile=  $config['thebrig']['rootfolder'] . "conf/jails/fstab.{$out_jail['jailname']}";
 				$handle1 = fopen($fstabfile, "w");
 				if  ($out_jail['jail_type'] === "slim") {
 					$basejailfolder	= 	 substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
@@ -926,11 +971,13 @@ function write_defs_rules() {
 				}
 				fclose($handle1);
 				
-				
+				 
 		// commands processing
-				if (TRUE == is_array($out_jail['cmd'])) {
-					  if (!is_dir("/etc/jails")) mkdir( "/etc/jails", 0755);
-					  $commandfile= "/etc/jails/prestart.". $out_jail['jailname'];
+		
+				
+				if (TRUE == is_array($out_jail['cmd'])) { $mess = "zfs not working"; $facility = "info"; 
+					  //if (!is_dir("/etc/jails")) mkdir( "/etc/jails", 0755);
+					  $commandfile=  $config['thebrig']['rootfolder']."conf/jails/prestart.". $out_jail['jailname'];
 					  $handle1 = fopen( $commandfile, "w");
 					  fwrite ($handle1, "#!/bin/sh\n#\n");
 					  $prestart_cmd = preg_grep("/^prestart\|/", $out_jail['cmd']);
@@ -938,13 +985,14 @@ function write_defs_rules() {
 					  foreach ($prestart_cmd as $command) { $a_command = explode( "|", $command); 
 						   fwrite ($handle1, $a_command[2] . "\n"); }
 			 // zfs prepare 
-					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
+			 // check zfs health 
+					if (false === brig_zfs_check()) {  write_briglog (" zfs not running ", "INFO");} else {
+					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) ) {
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
 						foreach ($a_dataset as $b_dataset) {
 							$c_dataset =  explode("|",$b_dataset);
 							fwrite ($handle1, "zfs set jailed=on " . $c_dataset[0] . "\n");
-							}
-					} 
+							} } }
 			// vnet script
 					   if (isset($out_jail['jail_vnet'] )) {	  
 		 
@@ -958,7 +1006,7 @@ function write_defs_rules() {
 					  fclose($handle1);
 					  
 			 // poststart script
-					  $commandfile= "/etc/jails/poststart.". $out_jail['jailname'];
+					  $commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/poststart.". $out_jail['jailname'];
 					  $handle1 = fopen( $commandfile, "w");
 					  fwrite ($handle1, "#!/bin/sh\n#\n");
 					  if (isset($out_jail['jail_vnet'] )) {
@@ -972,7 +1020,7 @@ function write_defs_rules() {
 						   fwrite( $handle1 ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  
 					    } else {}
 				//zfs   
-					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
+					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_zfs_check())) {
 						
 						fwrite ($handle1, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
@@ -1001,7 +1049,7 @@ function write_defs_rules() {
 						 }
 					 fclose($handle1);
 				 // prestop jail		
-					 $commandfile= "/etc/jails/prestop.". $out_jail['jailname'];
+					 $commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/prestop.". $out_jail['jailname'];
 					 $handle1 = fopen( $commandfile, "w");
 					 fwrite ($handle1, "#!/bin/sh\n#\n");
 					 $prestop_cmd_jail = preg_grep("/^prestop_for_jail\|/", $out_jail['cmd']);
@@ -1016,7 +1064,7 @@ function write_defs_rules() {
 						   fwrite ($handle1, $a_command[2] . "\n"); 						   
 						   }
 				//zfs_datasets
-					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_datasets_list())) {
+					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_zfs_check())) {
 						fwrite ($handle1, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
 						foreach ($a_dataset as $b_dataset) {
@@ -1034,7 +1082,7 @@ function write_defs_rules() {
 		   
 					fclose($handle1);
 					
-					 $commandfile= "/etc/jails/poststop.". $out_jail['jailname'];
+					 $commandfile=  $config['thebrig']['rootfolder'] ."conf/jails/poststop.". $out_jail['jailname'];
 					 $handle1 = fopen( $commandfile, "w");
 					 fwrite ($handle1, "#!/bin/sh\n#\n");
 					  if (isset($out_jail['jail_vnet'] )) {					 
@@ -1044,7 +1092,7 @@ function write_defs_rules() {
 						 fwrite( $handle1 ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
 						 
 					 }else{}
-					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_datasets_list())) {
+					 if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
 						fwrite ($handle1, "zfs mount -a");
 					 }
 					 $poststop_cmd = preg_grep("/^afterstop\|/", $out_jail['cmd']);
@@ -1053,19 +1101,85 @@ function write_defs_rules() {
 						   fwrite ($handle1,  $a_command[2] . "\n"); 
 						   }
 					 fclose($handle1);
-					  if (is_file("/etc/jails/prestart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestart =\"/bin/sh /etc/jails/prestart.". $out_jail['jailname'] . "\";\n"); } else {}
+					  if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/prestart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestart =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/prestart.". $out_jail['jailname'] . "\";\n"); } else {}
 					  if (false === isset($out_jail['jail_vnet'] )) { fwrite ($handle, "\texec.start =\"" . $out_jail['exec_start'] . "\";\n"); } else {}
-					  if (is_file("/etc/jails/poststart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststart =\"/bin/sh /etc/jails/poststart.". $out_jail['jailname'] . "\";\n"); } else {}
-					  if (is_file("/etc/jails/prestop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestop =\"/bin/sh /etc/jails/prestop.". $out_jail['jailname'] . "\";\n"); } else {}
+					  if (is_file( $config['thebrig']['rootfolder'] ."conf/jails/poststart.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststart =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/poststart.". $out_jail['jailname'] . "\";\n"); } else {}
+					  if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/prestop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.prestop =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/prestop.". $out_jail['jailname'] . "\";\n"); } else {}
 					  fwrite ($handle, "\texec.stop =\"" . $out_jail['exec_stop'] . "\";\n");
-					 if (is_file("/etc/jails/poststop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststop =\"/bin/sh /etc/jails/poststop.". $out_jail['jailname'] . "\";\n"); } else {}
+					 if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/poststop.". $out_jail['jailname'])) { fwrite ($handle, "\texec.poststop =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/poststop.". $out_jail['jailname'] . "\";\n"); } else {}
 
 			
 			
 			 } else {}
 				
-			fwrite ($handle, "}\n"  );	
-
+			fwrite ($handle, "}\n"  );
+			
 			}
 fclose($handle);
+if (is_array ($a_startonboot)) { 
+	$startonboot = implode(" ", $a_startonboot);
+	mwexec("/usr/local/sbin/rconf attribute set jail_list {$startonboot}");  
+	} else { 
+	mwexec("/usr/local/sbin/rconf attribute remove jail_list");
+	}
+
+}
+//  For Ajax
+function get_jailinfo() {
+	global $config;
+	$tabledata = array();
+	if (is_array($config['thebrig']['content']) ) { 
+		array_sort_key($config['thebrig']['content'], "jailno");
+		$jails =  $config['thebrig']['content'];
+		foreach ($jails as $n_jail){
+			$tabledata['name'][$n_jail["jailno"]] = $n_jail['jailname'];
+			if (!is_dir( $n_jail['jailpath'] ."var/run")) 	{
+					$tabledata['built'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['builtports'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['builtsrc'][$n_jail["jailno"]] = 'OFF';
+				}else{
+					$tabledata['built'][$n_jail["jailno"]] = 'ON';
+					if (is_dir( $n_jail['jailpath'] . "usr/ports/Mk")) {
+						$tabledata['builtports'][$n_jail["jailno"]] = "ON";
+						} else {
+						$tabledata['builtports'][$n_jail["jailno"]] = "OFF";
+						}
+					if (is_dir( $n_jail['jailpath'] . "usr/src/sys")) {
+						$tabledata['builtsrc'][$n_jail["jailno"]] = "ON";
+						} else {
+						$tabledata['builtsrc'][$n_jail["jailno"]] = "OFF";
+						}
+				}	
+			$file_id = "/var/run/jail_".$n_jail['jailname'].".id";
+			if (true === is_file($file_id)) {
+			$jail_id = exec ("jls -j ".$n_jail['jailname']. " jid");
+					$sleep_cmd = "ps -o jid,stat -ax -J | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"S\"||\$2~\"I\")&&\$2!~\"S[\+]\"{++c}END{print c}'";
+					$runn_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"R\"||\$2~\"S[\+]\"){++c}END{print c}'";
+					$sleep_cnt = exec ( $sleep_cmd ); 
+					$runn_cnt = exec ( $runn_cmd);
+					$total = intval($sleep_cnt) + intval($runn_cnt);
+					$tabledata['status'][$n_jail["jailno"]] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
+					$tabledata['id'][$n_jail["jailno"]] = $jail_id;
+					$tabledata['ip'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." ip4.addr");
+					$tabledata['hostname'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." host.hostname");
+					$tabledata['path'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." path");
+					$tabledata['file_id'][$n_jail["jailno"]] = $file_id;
+				} else {
+					$tabledata['status'][$n_jail["jailno"]] = 'OFF'; 
+					$tabledata['id'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['ip'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['hostname'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['path'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['file_id'][$n_jail["jailno"]] = false;
+				}
+		}
+	}
+return $tabledata;
+}
+function print_thebrig_confirm_box() {
+	echo "<div id='applybox'>";
+	print_info_box("Do you realy want update TheBrig? ");
+	echo "<input name=\"agree\" type=\"submit\" class=\"formbtn\" id=\"agree\" value=\"Agree\" />";
+	echo "<input name=\"cancel\" type=\"submit\" class=\"formbtn\" id=\"cancel\" value=\"Cancel\" />";
+	echo "</div>";
 }

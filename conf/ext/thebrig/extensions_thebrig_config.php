@@ -9,11 +9,8 @@ if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) {
 	$config['thebrig'] = array();
 }
 
-// attempt to extract the rootfolder from the global config
-$pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
-$pconfig['template'] = $config['thebrig']['template'] ;
-$pconfig['basejail'] = $config['thebrig']['basejail']['folder'] ;
 
+//$pconfig['compress'] = isset($config['thebrig']['compress']) ? true : false;
 
 
 // This determines if there are any thin jails (type = slim), which means we shouldn't
@@ -74,7 +71,8 @@ if ($_POST) {
 	
 	unset($input_errors);
 	$pconfig = $_POST;
-	 
+	unset($pconfig['compress']);
+	if (isset( $_POST['compress'])) { $pconfig['compress'] = "yes"; } else { unset ($pconfig['compress'] ); }
 	if ( $pconfig['remove'] ) {
 		if (is_dir($config['thebrig']['rootfolder']."basejail")) { $cmd = "chflags -R noschg ".$config['thebrig']['rootfolder']."basejail"; mwexec($cmd);} else {}
 		// we want to remove thebrig
@@ -83,6 +81,7 @@ if ($_POST) {
 		header("Location: /");
 		exit;
 	}
+	
 	// Complete all root folder error checking.
 	// Convert root folder after filechoicer
 	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
@@ -147,6 +146,7 @@ if ($_POST) {
 			$langfile = file("ext/thebrig/lang.inc");
 			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
 			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
+			if ($pconfig['compress'] == "yes" ) $config['thebrig']['compress'] = $pconfig['compress']; else unset( $config['thebrig']['compress']);
 			write_config(); // Write the config to disk
 			unlink_if_exists("/tmp/thebrig.tmp");
 		// Whatever we did, we did it successfully
@@ -154,6 +154,12 @@ if ($_POST) {
 		$savemsg = get_std_save_message($retval);
 	} // end of no input errors
 } // end of POST
+// attempt to extract the rootfolder from the global config
+$pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
+$pconfig['template'] = $config['thebrig']['template'] ;
+$pconfig['basejail'] = $config['thebrig']['basejail']['folder'] ;
+if ($config['thebrig']['compress']  == "yes" ) $pconfig['compress'] = "yes"; else unset(  $pconfig['compress']);
+
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE,  _THEBRIG_BASIC_CONFIG, _THEBRIG_VERSION_NBR );
 // Uses the global fbegin include
@@ -205,11 +211,22 @@ function message(obj) {
 	</td></tr>
 
 	<tr><td class="tabcont">
-		<form action="extensions_thebrig_config.php" method="post" name="iform" id="iform">
+		<form action="extensions_thebrig_config.php" method="post" name="iform" id="iform"> 
+	<!--	<form action="test.php" method="post" name="iform" id="iform">-->
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php html_titleline(gettext(_THEBRIG_SETTINGS_BASIC));?>
 		<?php html_inputbox("rootfolder", gettext(_THEBRIG_ROOT), $pconfig['rootfolder'], gettext(_THEBRIG_ROOT_DESC), true, 50);?>
 	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
+		
+		<?php if  ($pconfig['compress'] == "yes") $checkboxstate = "checked"; else $checkboxstate = false; ?>
+		<tr id='compress_tr'>
+	<td width='22%' valign='top' class='vncell'><label for='compress'>Archive</label></td>
+	<td width='78%' class='vtable'>
+		<input name='compress' type='checkbox' class='formfld' id='compress' value='' <?php if  ($pconfig['compress'] == "yes") echo "checked"; else false; ?> />&nbsp;Check, if you want archive jail before delete.
+	</td>
+</tr>
+		<?php
+		//html_checkbox("compress", gettext("Archive"), $checkboxstate ,  "If you want not use archive before delete each jail check it", "",false,"") ; ?>
 		<?php html_separator();?>		
 		<?php html_titleline(gettext("Advanced Jail Locations"));?>
 		<?php html_inputbox("basejail", gettext(_THEBRIG_BASE), $pconfig['basejail'], gettext(_THEBRIG_BASE_DESC), false, 50 , $base_ro );?>
@@ -232,6 +249,7 @@ function message(obj) {
 			 	<input name="Submit" type="submit" class="formbtn" value="<?=_THEBRIG_SAVE;?>" onClick="disable_buttons();">
 			</td>
 		</tr>
+		
 	</table>
 	<?php include("formend.inc");?>
 </form>

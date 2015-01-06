@@ -62,15 +62,11 @@ foreach ( $php_list as $php_file ) {
 	exec ( "ln -s {$thebrig_ext}/{$php_file} /usr/local/www/{$php_file}");
 }
 if ( count ( $config['thebrig']['content'] ) > 0 ) {
-	if ( !is_file ( "/etc/rc.conf.local" ) ) {
-		// This means we are on embedded
-		write_rcconflocal ();
-		array_sort_key($config['thebrig']['content'], "jailno");
-		$a_jail = &$config['thebrig']['content'];
-		foreach ($a_jail as $n_jail) {
-			  if ( isset ($n_jail['enable']) && !empty ($n_jail['exec_prestart'])) {  exec ( $n_jail['exec_prestart']); }
-		}
-		exec ( "/etc/rc.d/thebrig restart" ) ;
-	}
+	write_jailconf ();
+	write_defs_rules ();
+}
+if (isset ( $config['thebrig']['thebrig_enable']) ) {
+		rc_update_service('thebrig');
+		rc_start_service('thebrig');
 }
 ?>
