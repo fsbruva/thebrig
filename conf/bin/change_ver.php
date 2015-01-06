@@ -87,11 +87,11 @@ if (true === isset($config['thebrig']['gl_statfs']) && true == is_array($config[
 		unset ($jail['zfs_datasets']);
 		unset ($jail['fib']);
 	} // end foreach jails
-	fclose $handle;
-	if ($removemessage == 1) exec ("rm /tmp/upgrademessage.txt");
-	exec ("rm /etc/rc.d/jail");
-	exec ("/etc/rc.conf.local");
-	exec ("rm /etc/fstab.*");
+	fclose ($handle);
+	if ($removemessage == 1) exec ("/bin/rm /tmp/upgrademessage.txt");
+	//exec ("/bin/rm /etc/rc.d/jail");
+	exec ("/bin/rm /etc/rc.conf.local");
+	//exec ("/bin/rm /etc/fstab.*");
 	unset ($config['thebrig']);
 	$config['thebrig'] = $oldthebrigconf;
 	$config['thebrig']['version'] = $currentversion;
