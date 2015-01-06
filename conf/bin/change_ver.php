@@ -58,7 +58,7 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 	$newthebrigconf = array();
 	$oldthebrigconf['content'] = array();
 	$oldthebrigconf = $config['thebrig'];
-	$newthebrigconf = $oldthebrigconf
+	$newthebrigconf = $oldthebrigconf;
 	unset($newthebrigconf['content']);
 	unset ($config['thebrig']);
 	write_config();
