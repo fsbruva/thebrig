@@ -7,7 +7,7 @@ $workdir = trim($workdir_1[0]);
 $langfile = file("{$workdir}/temporary/conf/ext/thebrig/lang.inc");
 $version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
 $currentversion=substr($version_1[1],0,3);
-if (true === isset($config['thebrig']['gl_statfs']) && (true == is_array($config['thebrig'])) { 	
+if (true === isset($config['thebrig']['gl_statfs']) && true == is_array($config['thebrig'])) { 	
 	if (is_array($config['thebrig'])) {
 		if ($config['thebrig']['rootfolder']) { 
 			$thebrigrootfolder = $config['thebrig']['rootfolder'];
