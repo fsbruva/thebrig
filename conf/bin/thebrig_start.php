@@ -12,12 +12,15 @@
  * 
  * thebrig_ext	a string containing the real storage location of
  * 				the ext/thebrig folder. It simplifies code.
+ * brig_ver		String (then floating point) version value stored in 
+ * 				the installed copy of TheBrig's lang.inc
  * php_list		An array of all the php files in the ext/thebrig
  * php_file		Variable used to control a "for" loop
  * a_jail		An array of all the jail information from the config.xml
 */
 require_once ("config.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc");
+require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/lang.inc")
 if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
 	{ exec ("logger Failed copy rc script");} 
 chmod("/etc/rc.d/thebrig", 0755);
@@ -45,6 +48,17 @@ if ( is_dir( "/usr/local/www/ext/thebrig") ) {
 /*
  * End of clean-up operations
  */
+ 
+// This checks to make sure the XML config concurs with the 
+// installed version of lang.inc
+$brig_ver = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
+// Convert the string to a float so that it can be used in comparisons
+$brig_ver = 0 + substr($brig_ver[1],0,3);
+if ( ($config['thebrig']['version'] != $brig_ver )){
+	// We need to update the XML config to reflect reality
+	$config['thebrig']['version'] = $brig_ver;
+	write_config();
+} 
 
 // This might be the first extension, so we need to create the folder for it
 exec( "mkdir -p /usr/local/www/ext" );

@@ -112,15 +112,10 @@ if ($_POST) {
 	// We know we got here via "POST" - but we want to make sure the user
 	// clicked the "Update" button.
 	if ( !$input_errors && isset($pconfig['update']) && $pconfig['update']){
-		// This checks to make sure the XML config concurs with the 
-		// installed version of lang.inc, even if we already
-		// have the most recent version
-		if ( ($config['thebrig']['version'] != $brig_ver ) && ($git_ver == $brig_ver)){
-			// We need to update the XML config to reflect reality
-			$config['thebrig']['version'] = $brig_ver;
-			$config_changed = true;
-		} 
-		elseif ( $git_ver > $brig_ver ) {
+		
+		// I moved the version check code to thebrig_start.php
+
+		if ( $git_ver > $brig_ver ) {
 			// We want to make sure we can't let the user revert - the code we need to update thebrig will go here.
 			mkdir("/tmp/thebrig000",0777);
 			cmd_exec ("fetch -o /tmp/thebrig000/thebrig.zip https://github.com/fsbruva/thebrig/archive/alcatraz.zip", $output, $tolog );
@@ -137,14 +132,10 @@ if ($_POST) {
 			updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");
 			
 		}
-		// User has selected to carry out the update
 /** You realy need write config here? */
-		if ( $config_changed ) {
-			write_config();  
-		}
-		// Whatever we did, we did it successfully
-		$retval = 0;
-		//$savemsg = get_std_save_message($retval);
+/* Nope - nothing about the config is changing */
+
+
 	} // end of no input errors
 	}// end of click update
 	If (isset($_POST['cancel']) && $_POST['cancel'] == "Cancel" ) {
