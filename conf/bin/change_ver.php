@@ -55,17 +55,21 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 				} else {}
 		} else  {	exec ("logger Extension homing folder not defined."); exit;} */   /** WOW I'm root on php cli , but I can't copy!! */  
 	$oldthebrigconf = array();
+	$newthebrigconf = array();
 	$oldthebrigconf['content'] = array();
 	$oldthebrigconf = $config['thebrig'];
+	$newthebrigconf = $oldthebrigconf
+	unset($newthebrigconf['content']);
 	unset ($config['thebrig']);
 	write_config();
 	$config['thebrig'] = array();
 	$config['thebrig']['content'] = array();
 // conversion
-	unset ($oldthebrigconf['sethostname']);
-	 unset ($oldthebrigconf['unixiproute']);
-	unset ($oldthebrigconf['systenv']);
-	$oldthebrigconf['gl_statfs'] = 1;
+	unset ($newthebrigconf['sethostname']);
+	 unset ($newthebrigconf['unixiproute']);
+	unset ($newthebrigconf['systenv']);
+	
+	$newthebrigconf['gl_statfs'] = 1;
 	$a_jail = array();
 	foreach ( $oldthebrigconf['content'] as $jail) {
 		$jail['allowedip'] = $jail['if'] ."|". $jail['ipaddr'] ."/". $jail['subnet'] ;
@@ -94,7 +98,9 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 		unset ($jail['attach_params']);
 		unset ($jail['zfs_datasets']);
 		unset ($jail['fib']);
-		$config['thebrig']['content'][] = $jail;
+		$newthebrigconf['content'][] = $jail;
+		// diagnose
+		file_put_contents("/tmp/jailcache.txt" serialize($jail));
 	} // end foreach jails
 	fclose ($handle);
 	if ($removemessage == 0) exec ("/bin/rm /tmp/upgrademessage.txt");
@@ -102,7 +108,7 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 	exec ("/bin/rm /etc/rc.conf.local");
 	exec ("/bin/rm -rf " .$config['thebrig']['rootfolder']."bin");
 	
-	$config['thebrig'] = $oldthebrigconf;
+	$config['thebrig'] = $newthebrigconf;
 	$config['thebrig']['version'] = $currentversion;
 	write_config();
 	file_put_contents("/tmp/thebrigversion", "upgraded");
