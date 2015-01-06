@@ -7,7 +7,7 @@ $workdir = trim($workdir_1[0]);
 $langfile = file("{$workdir}/temporary/conf/ext/thebrig/lang.inc");
 $version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
 $currentversion=substr($version_1[1],0,3);
-if (true === isset($config['thebrig']['gl_statfs']) && true == is_array($config['thebrig'])) { 	
+if (isset($config['thebrig']['gl_statfs'])) { 	
 	if (is_array($config['thebrig'])) {
 		if ($config['thebrig']['rootfolder']) { 
 			$thebrigrootfolder = $config['thebrig']['rootfolder'];
@@ -46,13 +46,14 @@ if (true === isset($config['thebrig']['gl_statfs']) && true == is_array($config[
 	$message = "Warning! Please define parameters for jails manually. \n " ;
 // Begin alcatraz
 // backup config in first
-	if (is_dir ($config['thebrig']['rootfolder'] )) {
+/**	if (is_dir ($config['thebrig']['rootfolder'] )) { */
 // Check tag entry, folder, is writable and make backup
 		/*	if ( ! copy ("/conf/config.xml ", $config['thebrig']['rootfolder']."config.xml.backup"))  {
 				exec ("logger Failed copy rc script. TheBrig root folder not writable"); 
 				exit;
 				} else {}
 		} else  {	exec ("logger Extension homing folder not defined."); exit;} */   /** WOW I'm root on php cli , but I can't copy!! */  
+	$oldthebrigconf = array();	
 	$oldthebrigconf = $config['thebrig'];
 // conversion
 	if (isset ($config['thebrig']['sethostname']))  unset ($oldthebrigconf['sethostname']);
@@ -89,15 +90,16 @@ if (true === isset($config['thebrig']['gl_statfs']) && true == is_array($config[
 	} // end foreach jails
 	fclose ($handle);
 	if ($removemessage == 1) exec ("/bin/rm /tmp/upgrademessage.txt");
-	//exec ("/bin/rm /etc/rc.d/jail");
+	exec ("/bin/rm -rf ".$config['thebrig']['rootfolder']."conf");
 	exec ("/bin/rm /etc/rc.conf.local");
-	//exec ("/bin/rm /etc/fstab.*");
+	exec ("/bin/rm -rf " .$config['thebrig']['rootfolder']."bin");
 	unset ($config['thebrig']);
+	$config['thebrig'] = array();
 	$config['thebrig'] = $oldthebrigconf;
 	$config['thebrig']['version'] = $currentversion;
 	write_config;
-	file_put_contents("/tmp/thebrigversion", "updated");
+	file_put_contents("/tmp/thebrigversion", "upgraded");
 	$message = "We upgrade Thebrig \n";
-}
+
 }
 ?>
