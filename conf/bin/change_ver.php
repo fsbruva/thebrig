@@ -53,29 +53,28 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 				exit;
 				} else {}
 		} else  {	exec ("logger Extension homing folder not defined."); exit;} */   /** WOW I'm root on php cli , but I can't copy!! */  
-	$oldthebrigconf = array();	
-	$oldthebrigconf = $config['thebrig'];
+	
 // conversion
-	if (isset ($config['thebrig']['sethostname']))  unset ($oldthebrigconf['sethostname']);
-	if (isset ($config['thebrig']['unixiproute']))  unset ($oldthebrigconf['unixiproute']);
-	if (isset ($config['thebrig']['systenv']))  unset ($oldthebrigconf['systenv']);
-	$oldthebrigconf['gl_statfs'] = 1;
-	foreach ( $oldthebrigconf['content'] as $jail) {
+	unset ($config['thebrig']['sethostname']);
+	unset ($config['thebrig']['unixiproute']);
+	unset ($config['thebrig']['systenv']);
+	$config['thebrig']['gl_statfs'] = 1;
+	foreach ( $config['thebrig']['content'] as $jail) {
 		$jail['allowedip'] = $jail['if'] ."|". $jail['ipaddr'] ."/". $jail['subnet'] ;
 		unset ($jail['if']);
 		unset ($jail['ipaddr']);
 		unset ($jail['subnet']);
 		$jail['statfs'] =1;
 		$jail['cmd'] = array();
-		if (!empty ( $jail['exec_prestart'])) $jail['cmd'][] = "prestart|0|" .  $oldthebrigconf['exec_prestart'];
+		if (!empty ( $jail['exec_prestart'])) $jail['cmd'][] = "prestart|0|" .  $jail['exec_prestart'];
 		if (!empty ($jail['afterstart0'])) { 
-			$jail['cmd'][] = "afterstart_for_main|0|" .  $oldthebrigconf['afterstart0'];	
-			if (!empty ($jail['afterstart1']))  $jail['cmd'][] = "afterstart_for_main|1|" .  $oldthebrigconf['afterstart1']; 
+			$jail['cmd'][] = "afterstart_for_main|0|" .  $jail['afterstart0'];	
+			if (!empty ($jail['afterstart1']))  $jail['cmd'][] = "afterstart_for_main|1|" .  $jail['afterstart1']; 
 		}
 		if (!empty ($jail['jail_parameters'])) { 
 			$message = "Detected parameters \"" . $jail['jailname']."\" :" . $jail['jail_parameters']."\n" ;
 			fwrite ($handle, $message );
-			$removemessage = 0;
+			//$removemessage = 0;
 		}
 		unset ($jail['exec_prestart']);
 		unset ($jail['afterstart1']);
@@ -92,12 +91,9 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 	if ($removemessage == 1) exec ("/bin/rm /tmp/upgrademessage.txt");
 	exec ("/bin/rm -rf ".$config['thebrig']['rootfolder']."conf");
 	exec ("/bin/rm /etc/rc.conf.local");
-	exec ("/bin/rm -rf " .$config['thebrig']['rootfolder']."bin");
-	unset ($config['thebrig']);
-	$config['thebrig'] = array();
-	$config['thebrig'] = $oldthebrigconf;
+	exec ("/bin/rm -rf " .$config['thebrig']['rootfolder']."bin");	
 	$config['thebrig']['version'] = $currentversion;
-	write_config;
+	write_config();
 	file_put_contents("/tmp/thebrigversion", "upgraded");
 	$message = "We upgrade Thebrig \n";
 
