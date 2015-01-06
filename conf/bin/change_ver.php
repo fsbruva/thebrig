@@ -67,7 +67,7 @@ unset ($oldthebrigconf['unixiproute']);
   unset ($oldthebrigconf['systenv']);
 	$oldthebrigconf['gl_statfs'] = 1;
 	$jail=array();
-	for ($i=0; $i <count($oldthebrigconf['content']); ++$i)  {
+	for ($i=0; $i <count($oldthebrigconf['content']);)  {
 		$jail['allowedip'] = $a_jail[$i]['if'] ."|". $a_jail[$i]['ipaddr'] ."/". $a_jail[$i]['subnet'] ;
 		
 		$jail['statfs'] =1;
@@ -97,6 +97,7 @@ unset ($oldthebrigconf['unixiproute']);
 		unset ( $a_jail[$i]);
 		if (1<count($oldthebrigconf['content'])) { $a_jail[$i] = $jail;} else {$a_jail = $jail;}
 		write_config();
+		 ++$i
 	} // end foreach jails
 	fclose ($handle);
 	if ($removemessage == 0) exec ("/bin/rm /tmp/upgrademessage.txt");
