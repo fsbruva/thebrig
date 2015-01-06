@@ -71,29 +71,31 @@ else { // TheBrig has been confirmed
 			$input_errors[] = _THEBRIG_CHECK_NETWORKING_GIT;
 			$git_ver = _THEBRIG_ERROR;
 		}	// end of fetch failed
+		else {
+			// We need to check to see the file exists, otherwise provide error
+			// This should never happen, but you never know..
+			if ( file_exists( "/tmp/lang.inc" ) ) {
+				// Load the GitHub lang file into an array
+				$gitlangfile = file("/tmp/lang.inc");
+				// If reading the file is successful, do some operations
+				if ( $gitlangfile ) {
+					// Extract the version string from the file ("0.8", "0.9")
+					$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[1]);
+					// Force the version to be a number for comparisons
+					$git_ver = 0 + substr($git_ver[1],0,3);
+				} // end if $gitlangfile
+				else { // Something failed trying to access the GitHub lang file
+					$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
+					$git_ver = _THEBRIG_ERROR;
+				} // end else $gitlangfile
+			} // end if langfile exists
+			else { // The lang file we just downloaded is missing! HOW!
+				$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
+				$git_ver = _THEBRIG_ERROR;
+			} // end else langfile exists	
+		} // end of successful fetch
 	} // end of "Not Post"
 
-	// We need to check to see the file exists, otherwise provide error
-	// This should never happen, but you never know..
-	if ( file_exists( "/tmp/lang.inc" ) ) {
-		// Load the GitHub lang file into an array
-		$gitlangfile = file("/tmp/lang.inc");
-		// If reading the file is successful, do some operations
-		if ( $gitlangfile ) {
-			// Extract the version string from the file ("0.8", "0.9")
-			$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[1]);
-			// Force the version to be a number for comparisons
-			$git_ver = 0 + substr($git_ver[1],0,3);
-		} // end if $gitlangfile
-		else { // Something failed trying to access the GitHub lang file
-			$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
-			$git_ver = _THEBRIG_ERROR;
-		} // end else $gitlangfile
-	} // end if langfile exists
-	else { // The lang file we just downloaded is missing! HOW!
-		$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
-		$git_ver = _THEBRIG_ERROR;
-	} // end else langfile exists
 } // end of "Brig Confirmed"
 
 // We have returned to this page via a POST
@@ -171,8 +173,6 @@ include("fbegin.inc");
 if ( $input_errors ) { 
 	print_input_errors( $input_errors );
 }
-// This will alert the user to unsaved changes, and prompt the changes to be saved.
-elseif ($savemsg) print_info_box($savemsg);
 
 ?> <!-- This is the end of the first bit of html code -->
 
@@ -228,6 +228,7 @@ function conf_handler() {
 			html_titleline(gettext("Update Availability")); 
 			html_text($confconv, gettext("Current Status"),"The latest version on GitHub is: " . $git_ver . "<br /><br />Your version is: " . $brig_ver ); ?> 
 			<tr>
+			<?php if (! $input_errors ) { ?>
 			<td width="22%" valign="top" class="vncell">Update your installation&nbsp;</td>
 			<td width="78%" class="vtable">
 			<?=gettext("Click below to download and install the latest version.");?><br />
@@ -235,7 +236,7 @@ function conf_handler() {
 					<input id="update" name="update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return conf_handler();" /><br />
 				</div>
 			</td>
-			</tr>
+			</tr> <?php } ?>
 		<?php html_separator(); ?>
 	</table><?php include("formend.inc");?>
 </form>

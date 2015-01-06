@@ -45,9 +45,7 @@ if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebri
 
 	// If the thing pulled from the .tmp file is an actual directory, do some stuff
 	if ( is_dir( $config['thebrig']['rootfolder'] ) ) {
-		write_config();		// write the config so it survives reboot
-		thebrig_populate( $config['thebrig']['rootfolder'] , $config['thebrig']['rootfolder'] );
-		unlink_if_exists("/tmp/thebrig.tmp");  // deletes the .tmp file (if it was there)
+		write_config();		// write the config so at least the folder survives reboot
 	}
 	else {
 		// There was a .tmp file, but it didn't have a valid folder within it, which is tough to do, because
@@ -73,7 +71,8 @@ if ($_POST) {
 	$pconfig = $_POST;
 	unset($pconfig['compress']);
 	if (isset( $_POST['compress'])) { $pconfig['compress'] = "yes"; } else { unset ($pconfig['compress'] ); }
-	if ( $pconfig['remove'] ) {
+	if ( isset( $pconfig['remove'] ) && $pconfig['remove'] ) {
+
 		if (is_dir($config['thebrig']['rootfolder']."basejail")) { $cmd = "chflags -R noschg ".$config['thebrig']['rootfolder']."basejail"; mwexec($cmd);} else {}
 		// we want to remove thebrig
 		thebrig_unregister();
@@ -114,20 +113,24 @@ if ($_POST) {
 		}
 	else {
 		// If they haven't set a path for the basejail, then we need to assume one
-		if ( ! isset($pconfig['basejail']) || empty($pconfig['basejail']) ) 
+		if ( ! isset($pconfig['basejail']) || empty($pconfig['basejail']) ) { 
 			$pconfig['basejail']=$pconfig['rootfolder'] . "basejail" ;
+		}
 		
 		// Convert basejail to have trailing /
-		if ( $pconfig['basejail'][strlen($pconfig['basejail'])-1] != "/")  
+		if ( $pconfig['basejail'][strlen($pconfig['basejail'])-1] != "/")  {
 			$pconfig['basejail'] = $pconfig['basejail'] . "/";
+		}
 		
 		// If they haven't set a template path, then we need to assume one
-		if ( ! isset($pconfig['template']) || empty($pconfig['template']) ) 
+		if ( ! isset($pconfig['template']) || empty($pconfig['template']) ) { 
 			$pconfig['template']=$pconfig['rootfolder'] . "template" ;
+		}
 				
 		// Convert template location to have trailing /
-		if ( $pconfig['template'][strlen($pconfig['template'])-1] != "/")  
+		if ( $pconfig['template'][strlen($pconfig['template'])-1] != "/")  {
 			$pconfig['template'] = $pconfig['template'] . "/";
+		}
 		
 	}
 	
@@ -138,7 +141,7 @@ if ($_POST) {
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 			// a jail at the old location. Call thebrig_populate, which will move all the web stuff and create the 
 			// directory tree
-			// Also add startup command when thebrig completly installed
+			// Also add startup command when thebrig completely installed
 			thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] );
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			$config['thebrig']['template'] = $pconfig['template'];
