@@ -372,6 +372,7 @@ function conf_handler() {
 		<td class="tabcont">
 			<form action="extensions_thebrig_update.php" method="post"
 				name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
+				<?php $msg =  _THEBRIG_NOT_CONFIRMED; if (is_file("/tmp/thebrig.tmp")) print_warning_box( $msg); ?>
 				<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php if ( $brig_update_ready == 2 ) {
 			// The necessary binaries for all the update tasks could not be found in any jail.

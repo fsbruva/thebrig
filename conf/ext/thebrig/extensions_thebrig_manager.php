@@ -214,6 +214,7 @@ function conf_handler() {
 	<tr><td class="tabcont">
 		<form action="extensions_thebrig_manager.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
 		<?php if (updatenotify_exists_mode("thebrig", 1 )) print_thebrig_confirm_box();?>
+		<?php $msg =  _THEBRIG_NOT_CONFIRMED; if (is_file("/tmp/thebrig.tmp")) print_warning_box( $msg); ?>
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php 
 			html_titleline(gettext("Update Availability")); 

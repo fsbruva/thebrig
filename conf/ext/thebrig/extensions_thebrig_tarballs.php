@@ -270,6 +270,7 @@ var auto_refresh = setInterval(
 	</td></tr>
 
 	<tr><td class="tabcont">
+	<?php $msg =  _THEBRIG_NOT_CONFIRMED; if (is_file("/tmp/thebrig.tmp")) print_warning_box( $msg); ?>
 		<form action="extensions_thebrig_tarballs.php" method="post" name="iform" id="iform">
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 
