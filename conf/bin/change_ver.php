@@ -95,7 +95,7 @@ unset ($oldthebrigconf['unixiproute']);
 		unset ($jail[$i]['if']);
 		unset ($jail[$i]['ipaddr']);
 		unset ( $a_jail[$i]);
-		if (1<count($oldthebrigconf['content'])) { $a_jail[$i] = $jail;} else {$a_jail = $jail}
+		if (1<count($oldthebrigconf['content'])) { $a_jail[$i] = $jail;} else {$a_jail = $jail;}
 		write_config();
 	} // end foreach jails
 	fclose ($handle);
