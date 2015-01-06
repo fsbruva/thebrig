@@ -59,14 +59,14 @@ if (true === isset($config['thebrig']['gl_statfs']) && true == is_array($config[
 	if (isset ($config['thebrig']['unixiproute']))  unset ($oldthebrigconf['unixiproute']);
 	if (isset ($config['thebrig']['systenv']))  unset ($oldthebrigconf['systenv']);
 	$oldthebrigconf['gl_statfs'] = 1;
-	foreach ($oldthebrigconf['content'] as $jail) {
+	foreach ( $oldthebrigconf['content'] as $jail) {
 		$jail['allowedip'] = $jail['if'] ."|". $jail['ipaddr'] ."/". $jail['subnet'] ;
-		unset $jail['if'];
-		unset $jail['ipaddr'];
-		unset $jail['subnet'];
+		unset ($jail['if']);
+		unset ($jail['ipaddr']);
+		unset ($jail['subnet']);
 		$jail['statfs'] =1;
 		$jail['cmd'] = array();
-		if (!empty ($jail['exec_prestart'])) $jail['cmd'][] = "prestart|0|" .  $oldthebrigconf['exec_prestart'];
+		if (!empty ( $jail['exec_prestart'])) $jail['cmd'][] = "prestart|0|" .  $oldthebrigconf['exec_prestart'];
 		if (!empty ($jail['afterstart0'])) { 
 			$jail['cmd'][] = "afterstart_for_main|0|" .  $oldthebrigconf['afterstart0'];	
 			if (!empty ($jail['afterstart1']))  $jail['cmd'][] = "afterstart_for_main|1|" .  $oldthebrigconf['afterstart1']; 
