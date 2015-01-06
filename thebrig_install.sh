@@ -41,6 +41,12 @@ if [ $2 -eq 3 ]; then
     echo "Retrieving the testing branch as a zip file"
     fetch https://github.com/fsbruva/thebrig/archive/alcatraz.zip || exerr "ERROR: Could not write to install directory!"
     mv alcatraz.zip master.zip
+elif [ $2 -eq 2 ]
+     # Fetch the testing branch as a zip file  I want working branch also for check upgrade
+    echo "Retrieving the testing branch as a zip file"
+    fetch https://github.com/fsbruva/thebrig/archive/working.zip || exerr "ERROR: Could not write to install directory!"
+    mv working.zip master.zip
+    
 else
     # Fetch the master branch as a zip file
     echo "Retrieving the most recent version of TheBrig"
