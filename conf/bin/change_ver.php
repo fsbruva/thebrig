@@ -99,4 +99,5 @@ if (true === isset($config['thebrig']['gl_statfs']) && true == is_array($config[
 	file_put_contents("/tmp/thebrigversion", "updated");
 	$message = "We upgrade Thebrig \n";
 }
+}
 ?>
