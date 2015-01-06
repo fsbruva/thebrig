@@ -44,7 +44,7 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 	$handle=fopen("/tmp/upgrademessage.txt", "w");
 	$removemessage = 1;
 	$message = "Warning! Please define parameters for jails manually. \n " ;
-	$a_jail = &$config['thebrig']['content'];
+//	$a_jail = &$config['thebrig']['content'];
 // Begin alcatraz
 // backup config in first
 /**	if (is_dir ($config['thebrig']['rootfolder'] )) { */
@@ -62,42 +62,39 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 	$config['thebrig'] = array();
 	$config['thebrig']['content'] = array();
 // conversion
- unset ($oldthebrigconf['sethostname']);
-unset ($oldthebrigconf['unixiproute']);
-  unset ($oldthebrigconf['systenv']);
+	unset ($oldthebrigconf['sethostname']);
+	 unset ($oldthebrigconf['unixiproute']);
+	unset ($oldthebrigconf['systenv']);
 	$oldthebrigconf['gl_statfs'] = 1;
-	$jail=array();
-	for ($i=0; $i <count($oldthebrigconf['content']);)  {
-		$jail['allowedip'] = $a_jail[$i]['if'] ."|". $a_jail[$i]['ipaddr'] ."/". $a_jail[$i]['subnet'] ;
-		
+	$a_jail = array();
+	foreach ( $oldthebrigconf['content'] as $jail) {
+		$jail['allowedip'] = $jail['if'] ."|". $jail['ipaddr'] ."/". $jail['subnet'] ;
+		unset ($jail['if']);
+		unset ($jail['ipaddr']);
+		unset ($jail['subnet']);
 		$jail['statfs'] =1;
 		$jail['cmd'] = array();
-		if (!empty ( $a_jail[$i]['exec_prestart'])) $jail['cmd'][] = "prestart|0|" .  $a_jail[$i]['exec_prestart'];
+		if (!empty ( $jail['exec_prestart'])) $jail['cmd'][] = "prestart|0|" .  $jail['exec_prestart'];
 		if (!empty ($jail['afterstart0'])) { 
-			$jail[$i]['cmd'][] = "afterstart_for_main|0|" .  $a_jail['afterstart0'];
-			if (!empty ($a_jail[$i]['afterstart1']))  $jail['cmd'][] = "afterstart_for_main|1|" .  $a_jail[$i]['afterstart1']; 
+			$jail['cmd'][] = "afterstart_for_main|0|" .  $jail['afterstart0'];
+			if (!empty ($jail['afterstart1']))  $jail['cmd'][] = "afterstart_for_main|1|" .  $jail['afterstart1']; 
 		}
-		if (!empty ($jail[$i]['jail_parameters'])) { 
-			$message = "Detected parameters \"" . $a_jail[$i]['jailname']."\" :" . $a_jail[$i]['jail_parameters']."\n" ;
+		if (!empty ($jail['jail_parameters'])) { 
+			$message = "Detected parameters \"" . $jail['jailname']."\" :" . $jail['jail_parameters']."\n" ;
 			fwrite ($handle, $message );
 			//$removemessage = 0;
 		}
-		unset ($jail[$i]['exec_prestart']);
-		unset ($jail[$i]['afterstart1']);
-		unset ($jail[$i]['afterstart0']);
-		unset ($jail[$i]['extraoptions']);
-		unset ($jail[$i]['jail_parameters']);
-		unset ($jail[$i]['image']);
-		unset ($jail[$i]['image_type']);
-		unset ($jail[$i]['attach_params']);
-		unset ($jail[$i]['zfs_datasets']);
-		unset ($jail[$i]['fib']);
-		unset ($jail[$i]['if']);
-		unset ($jail[$i]['ipaddr']);
-		unset ( $a_jail[$i]);
-		if (1<count($oldthebrigconf['content'])) { $a_jail[$i] = $jail;} else {$a_jail = $jail;}
-		write_config();
-		 ++$i
+		unset ($jail['exec_prestart']);
+		unset ($jail['afterstart1']);
+		unset ($jail['afterstart0']);
+		unset ($jail['extraoptions']);
+		unset ($jail['jail_parameters']);
+		unset ($jail['image']);
+		unset ($jail['image_type']);
+		unset ($jail['attach_params']);
+		unset ($jail['zfs_datasets']);
+		unset ($jail['fib']);
+		$config['thebrig']['content'][] = $jail;
 	} // end foreach jails
 	fclose ($handle);
 	if ($removemessage == 0) exec ("/bin/rm /tmp/upgrademessage.txt");
