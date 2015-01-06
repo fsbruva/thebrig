@@ -57,7 +57,9 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 	$oldthebrigconf = array();
 	$oldthebrigconf['content'] = array();
 	$oldthebrigconf = $config['thebrig'];
-	unset ($config['thebrig']);	
+	unset ($config['thebrig']);
+	echo "config reset\n";
+	write_config();
 	$config['thebrig'] = array();
 	$config['thebrig']['content'] = array();
 // conversion

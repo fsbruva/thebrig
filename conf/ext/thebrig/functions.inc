@@ -937,7 +937,7 @@ function write_defs_rules() {
 							  // check, if this schema work.  If not --> replace number0 as ip = re|dfgfgfg
  							}
  				} else { /* if only one address specified */
- 				foreach ($out_jail['allowedip'] as $a_ips ) {
+ 				
 					$b_ips = explode("|", $a_ips);
 					$c_ips = explode ("/", $b_ips[1]);
 					if (is_ipv4addr($c_ips[0])) {
@@ -945,7 +945,7 @@ function write_defs_rules() {
 					} else {
 						fwrite ($handle, "\tip6.addr = \"" . $out_jail['allowedip'][0] . "\";\n");
 						}
-					}
+					
 				} 	/* end of allowed ip */ } /* end of networking */
 				
 				if (is_array($out_jail['param'] )) {
