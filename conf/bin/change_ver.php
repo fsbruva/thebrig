@@ -100,7 +100,7 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 		unset ($jail['fib']);
 		$newthebrigconf['content'][] = $jail;
 		// diagnose
-		file_put_contents("/tmp/jailcache.txt" serialize($jail));
+		file_put_contents("/tmp/jailcache.txt", serialize($jail));
 	} // end foreach jails
 	fclose ($handle);
 	if ($removemessage == 0) exec ("/bin/rm /tmp/upgrademessage.txt");
