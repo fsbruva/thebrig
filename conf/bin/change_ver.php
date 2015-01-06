@@ -48,7 +48,7 @@ if (true === isset($config['thebrig']['gl_statfs']) && true == is_array($config[
 // backup config in first
 	if (is_dir ($config['thebrig']['rootfolder'] )) {
 // Check tag entry, folder, is writable and make backup
-			if ( ! copy ("/conf/config.xml ".$config['thebrig']['rootfolder']."config.xml.backup"))  {
+			if ( ! copy ("/conf/config.xml ", $config['thebrig']['rootfolder']."config.xml.backup"))  {
 				exec ("logger Failed copy rc script. TheBrig root folder not writable"); 
 				exit;
 				} else {}
