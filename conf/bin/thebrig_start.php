@@ -20,7 +20,7 @@
 */
 require_once ("config.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc");
-require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/lang.inc")
+require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/lang.inc");
 if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
 	{ exec ("logger Failed copy rc script");} 
 chmod("/etc/rc.d/thebrig", 0755);
@@ -33,24 +33,27 @@ chmod("/etc/rc.d/thebrig", 0755);
  * 	  file list has changed
  * 
  */
-
+if (g['platform'] == full ) {
 // Get rid of the erroneously created file (by early versions).
 unlink_if_exists ( "/usr/local/www/\*.php" );
 
 // Get a list of all the symlinks or files from TheBrig that are currently 
 // in the webroot, and destroy them
+
 foreach ("/usr/local/www/extensions_thebrig_*.php" as $link) {
 array_map ( 'unlink' , $link );
 }
 
+
+
 // Get rid of old schema - which was a separate copy of entire ext folder
 if ( is_dir( "/usr/local/www/ext/thebrig") ) {
-	exec ( "rm -r /usr/local/www/ext/thebrig");
+	exec ( "rm -rf /usr/local/www/ext/thebrig");
 	}
 /*
  * End of clean-up operations
  */
- 
+} 
 // This checks to make sure the XML config concurs with the 
 // installed version of lang.inc
 $brig_ver = preg_split ( "/v/", _THEBRIG_VERSION_NBR);

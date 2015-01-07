@@ -10,9 +10,6 @@ if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) {
 }
 
 
-//$pconfig['compress'] = isset($config['thebrig']['compress']) ? true : false;
-
-
 // This determines if there are any thin jails (type = slim), which means we shouldn't
 // relocate the basejail. We also need to check and make sure no jails currently live 
 // within thebrig's root folder. 
@@ -22,7 +19,7 @@ if ( !isset($_POST['remove'] ) && is_array(  $config['thebrig']['content'] ) ) {
 	foreach ( $config['thebrig']['content'] as $jail ){
 		if ( $jail['type'] === 'slim' )
 			$base_ro = true;
-		if ( preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
+		if ( 1 == preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
 			$brig_jails=true;
 	}
 }

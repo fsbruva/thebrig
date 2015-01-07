@@ -8,7 +8,10 @@ function thebrig_unregister() {
  	$i = 0;
  	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
  		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
- 			if (preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+ 		
+ 		///TODO - please refer into preg_match manual preg_match() returns 1 if the pattern matches given subject, 0 if it does not, or FALSE if an error occurred.
+ 		// Construction delete ALL cmd
+ 			if (1 == preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
  				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
  		}	// end for
  	} // end if (is array)
@@ -85,7 +88,7 @@ function thebrig_populate ($new_location, $old_location)
 	$i = 0;
 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-			if (preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+			if (1 == preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
 				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
 		 	}	// end for		
 	} // end if (is array)
@@ -97,7 +100,7 @@ function thebrig_populate ($new_location, $old_location)
 		for ($i; $i < count( $config['rc']['postinit']['cmd'] ); $i++) {
 			// This loops through all the post init command script entries, and if it finds thebrig_start.sh (placed by hand), 
 			// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
-			if ( preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
+			if ( 1 == preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
 				break;
 		} // end of for loop
 	} // end of array if statment
@@ -108,7 +111,7 @@ function thebrig_populate ($new_location, $old_location)
 	$i = 0;
 	if ( is_array($config['rc']['shutdown'] ) && is_array( $config['rc']['shutdown']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['shutdown']['cmd']); $i++) {
-			if (preg_match('/thebrig_stop\.sh/', $config['rc']['shutdown']['cmd'][$i]))
+			if (1 == preg_match('/thebrig_stop\.sh/', $config['rc']['shutdown']['cmd'][$i]))
 				unset($config['rc']['shutdown']['cmd'][$i]);	// Disable the old startup
 		 	}	// end for		
 	} // end if (is array)
@@ -995,7 +998,7 @@ function write_defs_rules() {
 							} } }
 			// vnet script
 					   if (isset($out_jail['jail_vnet'] )) {	  
-		 
+						fwrite ($handle1, "sysctl net.inet.ip.forwarding=1 >/dev/null\n");
 						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." create >/dev/null\n");
 						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
 						fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $out_jail['if'] ."\n");						

@@ -44,7 +44,7 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 	$handle=fopen("/tmp/upgrademessage.txt", "w");
 	$removemessage = 1;
 	$message = "Warning! Please define parameters for jails manually. \n " ;
-//	$a_jail = &$config['thebrig']['content'];
+
 // Begin alcatraz
 // backup config in first
 /**	if (is_dir ($config['thebrig']['rootfolder'] )) { */
@@ -53,7 +53,7 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 				exec ("logger Failed copy rc script. TheBrig root folder not writable"); 
 				exit;
 				} else {}
-		} else  {	exec ("logger Extension homing folder not defined."); exit;} */   /** WOW I'm root on php cli , but I can't copy!! */  
+		} else  {	exec ("logger Extension homing folder not defined."); exit;} */   /** WOW I'm root on php cli , but I can't copy!!   But I'll add this*/  
 	$oldthebrigconf = array();
 	$newthebrigconf = array();
 	$oldthebrigconf['content'] = array();
@@ -106,8 +106,7 @@ if (isset($config['thebrig']['gl_statfs']) && is_numeric ($config['thebrig']['gl
 	if ($removemessage == 0) exec ("/bin/rm /tmp/upgrademessage.txt");
 	exec ("/bin/rm -rf ".$config['thebrig']['rootfolder']."conf");
 	exec ("/bin/rm /etc/rc.conf.local");
-	exec ("/bin/rm -rf " .$config['thebrig']['rootfolder']."bin");
-	
+	exec ("/bin/rm -rf " .$config['thebrig']['rootfolder']."bin");	
 	$config['thebrig'] = $newthebrigconf;
 	$config['thebrig']['version'] = $currentversion;
 	write_config();
