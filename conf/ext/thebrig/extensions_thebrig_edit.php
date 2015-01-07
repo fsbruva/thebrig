@@ -720,7 +720,8 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			
 			<?php html_separator();?>
 			<tr id='mounts_separator0'><td colspan='2' valign='top' class='listtopic'>Networking</td></tr>
-			<?php html_checkbox("jail_vnet", gettext("Virtual network"), $pconfig['jail_vnet'], gettext("Enable virtual network stack (vnet)"), "", "","vnet_enable()");?>
+			<?php if (g['arch'] == 'x64') {
+			html_checkbox("jail_vnet", gettext("Virtual network"), $pconfig['jail_vnet'], gettext("Enable virtual network stack (vnet)"), "", "","vnet_enable()");?>
 			<tr id='epair_tr'>
 					<td width='22%' valign='top' class='vncell'><label for='epair'>Epair interface</label></td>
 					<td width='78%' class='vtable'>
@@ -742,8 +743,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 
 					</td>
 				</tr>
-			
-			
+			<?php } ?>			
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Attach to interface"), $pconfig['if'], $a_interface, gettext("Choice interface for virtual net glue"), true);?>
 			<?php //html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IPv4 address"), $pconfig['ipaddr'], $pconfig['subnet'], "", false);?>
