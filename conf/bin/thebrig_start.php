@@ -39,7 +39,9 @@ unlink_if_exists ( "/usr/local/www/\*.php" );
 
 // Get a list of all the symlinks or files from TheBrig that are currently 
 // in the webroot, and destroy them
-array_map ( 'unlink' , "/usr/local/www/extensions_thebrig_*.php" );
+foreach ("/usr/local/www/extensions_thebrig_*.php" as $link) {
+array_map ( 'unlink' , $link );
+}
 
 // Get rid of old schema - which was a separate copy of entire ext folder
 if ( is_dir( "/usr/local/www/ext/thebrig") ) {
