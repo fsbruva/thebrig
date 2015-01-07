@@ -1163,7 +1163,11 @@ function get_jailinfo() {
 					$total = intval($sleep_cnt) + intval($runn_cnt);
 					$tabledata['status'][$n_jail["jailno"]] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
 					$tabledata['id'][$n_jail["jailno"]] = $jail_id;
-					$tabledata['ip'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." ip4.addr");
+					if (1 == exec ("jls -j ".$n_jail['jailname']. " vnet") ) { 
+						$cmd = "jexec ".$n_jail['jailname']." ifconfig epair" . $n_jail["jailno"] ."b | grep inet | awk '{ print \$2}'";
+						exec ($cmd, $result); 
+						$tabledata['ip'][$n_jail["jailno"]] = implode(",", $result); } else {
+					$tabledata['ip'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." ip4.addr"); }
 					$tabledata['hostname'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." host.hostname");
 					$tabledata['path'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." path");
 					$tabledata['file_id'][$n_jail["jailno"]] = $file_id;
