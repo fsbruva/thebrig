@@ -852,8 +852,10 @@ function write_briglog ($tolog, $fac) {
 	global $config;
 	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
 	$handle1 = fopen($filelog, "a+");
-	foreach ($tolog as $tolog1) {
+	if (is_array ($tolog)) { foreach ($tolog as $tolog1) {
 	fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog1)."\n" ); }
+	} else { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog)."\n" ); }
+	
 	fclose ($handle1); 
 
 }
@@ -991,11 +993,18 @@ function write_defs_rules() {
 			 // check zfs health 
 					if (false === brig_zfs_check()) {  write_briglog (" zfs not running ", "INFO");} else {
 					if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) ) {
+						$cachefile = $config['thebrig']['rootfolder']."conf/jails/zfscache.". $out_jail['jailname'];
+						$handle2 = fopen( $cachefile, "w");
+						
 						$a_dataset = explode(";",$out_jail['zfs_datasets']);
 						foreach ($a_dataset as $b_dataset) {
 							$c_dataset =  explode("|",$b_dataset);
 							fwrite ($handle1, "zfs set jailed=on " . $c_dataset[0] . "\n");
-							} } }
+							$mainmountpoint = exec ("zfs get -H mountpoint " . $c_dataset[0] . " | awk '{print \$3}'");
+							fwrite ($handle2, $mainmountpoint . " " . $c_dataset[0] . "\n");
+							
+							} fclose ($handle2);} 
+					}
 			// vnet script
 					   if (isset($out_jail['jail_vnet'] )) {	  
 						fwrite ($handle1, "sysctl net.inet.ip.forwarding=1 >/dev/null\n");
@@ -1075,9 +1084,11 @@ function write_defs_rules() {
 							fwrite ($handle1, "jexec " . $out_jail['jailname'] ." zfs unmount -f " . $c_dataset[1] . "\n");
 							fwrite ($handle1, "zfs unjail \${JID} " . $c_dataset[0] . "\n");
 							fwrite ($handle1, "zfs set jailed=off " . $c_dataset[0] . "\n");
-							fwrite ($handle1, "zfs set mountpoint=/mnt/" . $c_dataset[0] ." ".$c_dataset[0] . "\n");
+							//fwrite ($handle1, "zfs set mountpoint=/mnt/" . $c_dataset[0] ." ".$c_dataset[0] . "\n");
 							}
-						
+						// restore saved mountpoints
+						$cachefile_1 = file ($cachefile);
+						foreach ($cachefile_1 as $line) { fwrite ($handle1, "zfs set mountpoint=" . $line ); }
 					 }
 					   If (isset($out_jail['fdescfs_enable'])) { 
 						  fwrite( $handle1 ,  "umount " . $out_jail['jailpath']."dev/fd\n");
