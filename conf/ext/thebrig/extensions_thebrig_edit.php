@@ -257,6 +257,9 @@ if ($_POST) {
 				$input_errors[] = sprintf( gettext("The selected dataset was previously assigned to another jail. Possible conflict, and therefore assign a different dataset or edit another prison <b>'%s'</b>."),  $check_jail['jailname']);
 				}
 			}
+		// 5. Check for forbidden pathes http://forums.nas4free.org/viewtopic.php?f=66&t=8081
+		$forbiddenpathes = array("/", "/bin", "/sbin", "/lib", "/usr", "/usr/bin", "/usr/sbin", "/usr/lib", "/etc" );
+		if (false !== array_search ( $mountpath1[1], $forbiddenpathes )) $input_errors[] = sprintf( gettext("The specified mount point <i>'%s'</i> is forbidden. Why? <a href=\"http://forums.nas4free.org/viewtopic.php?f=66&t=8081\">I so want!</a>  Please choose another."),  $mountpath1[1]);
 	}
 	}
 	
