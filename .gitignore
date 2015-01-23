@@ -8,6 +8,7 @@
 !conf/ext/thebrig/*
 !conf/bin
 !conf/bin/*
+conf/thebrig.conf
 conf/bin/bspatch
 conf/bin/comm
 conf/bin/ftp_amd64
