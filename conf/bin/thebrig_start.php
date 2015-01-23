@@ -33,7 +33,7 @@ chmod("/etc/rc.d/thebrig", 0755);
  * 	  file list has changed
  * 
  */
-if (g['platform'] == full ) {
+if ( $g['platform'] == full ) {
 // Get rid of the erroneously created file (by early versions).
 unlink_if_exists ( "/usr/local/www/\*.php" );
 
