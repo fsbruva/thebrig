@@ -33,23 +33,21 @@ chmod("/etc/rc.d/thebrig", 0755);
  * 	  file list has changed
  * 
  */
-if ( $g['platform'] == full ) {
-// Get rid of the erroneously created file (by early versions).
-unlink_if_exists ( "/usr/local/www/\*.php" );
+if ( $g['platform'] === 'full' ) {
+	// Get rid of the erroneously created file (by early versions).
+	unlink_if_exists ( "/usr/local/www/\*.php" );
 
-// Get a list of all the symlinks or files from TheBrig that are currently 
-// in the webroot, and destroy them
+	// Get a list of all the symlinks or files from TheBrig that are currently 
+	// in the webroot, and destroy them
 
-foreach ("/usr/local/www/extensions_thebrig_*.php" as $link) {
-array_map ( 'unlink' , $link );
-}
+	foreach ("/usr/local/www/extensions_thebrig_*.php" as $link) {
+		unlink( $link );
+		}
 
-
-
-// Get rid of old schema - which was a separate copy of entire ext folder
-if ( is_dir( "/usr/local/www/ext/thebrig") ) {
-	exec ( "rm -rf /usr/local/www/ext/thebrig");
-	}
+	// Get rid of old schema - which was a separate copy of entire ext folder
+	if ( is_dir( "/usr/local/www/ext/thebrig") ) {
+		exec ( "rm -rf /usr/local/www/ext/thebrig");
+		}
 /*
  * End of clean-up operations
  */
