@@ -3,10 +3,15 @@
 /*
  * File name: 	thebrig_start.php
  * Author:      Matt Kempe, Alexey Kruglov
- * Modified:	Dec 2014
+ * Modified:	Jan 2015
  * 
  * Purpose: 	This script is used to prepare the extension for use by
  * 				Nas4Free's lighttpd webgui server.
+ * 
+ * 				Additionally, it is used to auto-start thebrig service, 
+ * 				which manages jail start/stop/restart operations. Before 
+ * 				script is executed, all jails managed by thebrig must be 
+ * 				stopped!!!
  * 
  * Variables used:
  * 
@@ -42,12 +47,12 @@ if ( $g['platform'] === 'full' ) {
 
 	foreach ("/usr/local/www/extensions_thebrig_*.php" as $link) {
 		unlink( $link );
-		}
+	}
 
 	// Get rid of old schema - which was a separate copy of entire ext folder
 	if ( is_dir( "/usr/local/www/ext/thebrig") ) {
 		exec ( "rm -rf /usr/local/www/ext/thebrig");
-		}
+	}
 /*
  * End of clean-up operations
  */
@@ -78,10 +83,14 @@ foreach ( $php_list as $php_file ) {
 	// Link the real storage location to the webroot
 	exec ( "ln -s {$thebrig_ext}/{$php_file} /usr/local/www/{$php_file}");
 }
+// If the array 'content' has at least one entry, then we need to create
+// the jail config file, and devfs rules.
 if ( count ( $config['thebrig']['content'] ) > 0 ) {
 	write_jailconf ();
 	write_defs_rules ();
 }
+// If thebrig service is enabled, then starting its rc script(s) need to 
+// be updated and run 
 if (isset ( $config['thebrig']['thebrig_enable']) ) {
 		rc_update_service('thebrig');
 		rc_start_service('thebrig');
