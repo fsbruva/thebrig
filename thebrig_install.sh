@@ -76,8 +76,8 @@ then
 			rm conf/bin/ftp_amd64
 		fi
 	cp -r * $BRIG_ROOT/
-	mkdir -p /usr/local/www/ext/thebrig
-	cp $BRIG_ROOT/conf/ext/thebrig/* /usr/local/www/ext/thebrig
+	mkdir -p /usr/local/www/ext
+	ln -s $BRIG_ROOT/conf/ext/thebrig /usr/local/www/ext/thebrig
 	cd /usr/local/www
 	# For each of the php files in the extensions folder
 	for file in /usr/local/www/ext/thebrig/*.php
