@@ -170,6 +170,6 @@ elseif ( is_array($config['thebrig'] ) ) {
 else {
 	// we are here because this is an initial install
 	echo "Hello new user, we will install TheBrig now \n";
-	file_put_contents("/tmp/thebrigversion", "installed"); 
+	file_put_contents("/tmp/thebrigversion", "0"); 
 	}
 ?>

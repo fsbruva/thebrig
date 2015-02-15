@@ -54,7 +54,7 @@ fi
 # the git nonsense
 echo "Unpacking the tarball..."
 tar -xvf master.zip --exclude='.git*' --strip-components 1
-rm master.zip
+#rm master.zip
 
 # Run the change_ver script to deal with different versions of TheBrig
 /usr/local/bin/php-cgi -f conf/bin/change_ver.php
@@ -80,7 +80,7 @@ then
 	cp -r * $BRIG_ROOT/
 
 	# Change_ver didn't update - this is the initial installation
-	if [ "$action" == "installed"]
+	if [ "$action" -eq 0 ]
 	then
 		# Create the symlinks/schema. We can't use thebrig_start since
 		# there is nothing for the brig in the config XML
@@ -111,11 +111,11 @@ fi
 # Clean after work
 cd $START_FOLDER
 # Get rid of staged updates
-rm -r install_stage
-rm /tmp/thebriginstaller
+#rm -r install_stage
+#rm /tmp/thebriginstaller
 if [ -f "$file" ] 
 then 
-	rm /tmp/thebrigversion
+	#rm /tmp/thebrigversion
 fi
 currentdate=`date -j +"%Y-%m-%d %H:%M:%S"`
 echo "[$currentdate]: TheBrig installer!: installer: ${action} successfully" >> $BRIG_ROOT/thebrig.log
