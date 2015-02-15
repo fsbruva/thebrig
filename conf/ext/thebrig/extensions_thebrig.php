@@ -154,7 +154,10 @@ function thebrig_process_updatenotification($mode, $data) {
 
 
 include("fbegin.inc");?>
-
+<?php if ($input_errors) print_input_errors($input_errors);?>
+<?php if ($errormsg) print_error_box($errormsg);?>
+<?php if ($savemsg) print_info_box($savemsg);?>
+<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 
 <!----- This make "live table" ------>
 <script language="JavaScript">
@@ -270,10 +273,6 @@ function disable_buttons() {
 	<tr>
 		<td class="tabcont">
 		<form action="extensions_thebrig.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
-		      <?php if ($input_errors) print_input_errors($input_errors);?>
-		      <?php if ($errormsg) print_error_box($errormsg);?>
-		      <?php if ($savemsg) print_info_box($savemsg);?>
-		      <?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 			<table width="100%" border="0" cellpadding="6" cellspacing="0">
 			      <?php html_titleline(gettext("On-line view"));?>
 				<tr><td colspan='2' valign='top' >
