@@ -57,7 +57,7 @@ tar -xvf master.zip --exclude='.git*' --strip-components 1
 #rm master.zip
 
 # Run the change_ver script to deal with different versions of TheBrig
-/usr/local/bin/php-cgi -f conf/bin/change_ver.php
+/usr/local/bin/php-cgi -n /usr/local/etc/ -e -f conf/bin/change_ver.php
 
 # The file /tmp/thebrigversion should get created by the change_ver script
 # Its existence implies that change_ver.php finished successfully. 
