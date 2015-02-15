@@ -164,7 +164,7 @@ elseif ( is_array($config['thebrig'] ) ) {
 	$config['thebrig'] = $newthebrigconf;
 	$config['thebrig']['version'] = $currentversion;
 	write_config();
-	file_put_contents("/tmp/thebrigversion", "upgraded");
+	file_put_contents("/tmp/thebrigversion", "We think it's upgrade time");
 	$message = "We upgrade Thebrig \n"; // Why do we need this?
 }
 else {
