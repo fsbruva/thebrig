@@ -279,10 +279,10 @@ function disable_buttons() {
 					<table border="0" cellspacing="0" cellpadding="0" width="100%">
 					      <tr> 
 							<td  valign="top">
-					<?php if( !isset( $config['thebrig']['rootfolder'])): ?>
-							<a title="<?php=gettext("Configure TheBrig please first");  ?>"
-					<?php elseif( !isset( $config['thebrig']['content'])): ?>
-							<a title="<?php=gettext("Configure at least one jail first"); ?>"				
+					<?php if( isset( $config['thebrig']['rootfolder'])==false): ?>
+							<a title=<?=gettext("Configure TheBrig please first");?>
+					<?php elseif( !isset( $config['thebrig']['content'])==false): ?>
+							<a title=<?=gettext("Configure at least one jail first");?>				
 					<?php else: ?>
 								<!--<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_check.php");</script></div>-->
 								<table id = 'onlinetable' width="100%" border="0" cellpadding="5" cellspacing="0">
@@ -296,7 +296,7 @@ function disable_buttons() {
 										<td width="22%" class="listhdrc"><?=gettext("Path to jail");?></td>
 										<td width="5%" class="listhdrc"><?=gettext("Action");?></td>
 									</tr>
-			<?php 	foreach( $config['thebrig']['content'] as $n_jail): ?>					
+						<?php foreach( $config['thebrig']['content'] as $n_jail): ?>					
 									<tr name='myjail' id='myjail'><td width="7%" valign="top" class="listr" name="ajaxjailname<?=$n_jail['jailno']; ?>"  id="ajaxjailname<?=$n_jail['jailno']; ?>" >  </td>
 									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$n_jail['jailno']; ?>" ><span><img id="ajaxjailbuiltimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$n_jail['jailno']; ?>"></span><span id="ajaxjailbuiltsrc<?=$n_jail['jailno']; ?>"></span> </td>
 									    <td width="24%" valign="top" class="listr" name="ajaxjailstatus<?=$n_jail['jailno']; ?>"  > <span><img id="ajaxjailstatusimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$n_jail['jailno']; ?>"></span> </td>
