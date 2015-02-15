@@ -58,7 +58,7 @@ tar -xvf master.zip --exclude='.git*' --strip-components 1
 
 # Run the change_ver script to deal with different versions of TheBrig
 # Nas4Free doesn't ship php-cli, so we have to fool it.
-$CHANGE_VER_FILE=$START_FOLDER/install_stage/conf/bin/change_ver.php
+CHANGE_VER_FILE=$START_FOLDER/install_stage/conf/bin/change_ver.php
 
 export REDIRECT_STATUS=200
 export GATEWAY_INTERFACE="CGI/1.1"
