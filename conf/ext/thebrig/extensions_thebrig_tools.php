@@ -235,7 +235,12 @@ if ($_POST['submit'] === "Compress") {
 }
 out1: 
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Tools");
-include("fbegin.inc");?>
+include("fbegin.inc");
+// This will evaluate if there were any input errors from prior to the user clicking "save"
+if ($input_errors) { 
+	print_input_errors($input_errors);
+}
+?>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
@@ -260,7 +265,6 @@ include("fbegin.inc");?>
 	</td></tr>
 	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform">
 		<td class="tabcont">
-			 <?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
 			 <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			 
 			 	<?php html_titleline(gettext("Configuration Backup/Restore"));?>
