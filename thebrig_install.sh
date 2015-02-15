@@ -26,15 +26,16 @@ if [ ! -z $1 ]; then
         echo "Attempting to create a new destination directory....."
         mkdir -p $BRIG_ROOT || exerr "ERROR: Could not create directory!"
     fi
-	mkdir -p temporary || exerr "ERROR: Could not create install directory!"
-	cd temporary || exerr "ERROR: Could not access install directory!"
 #    cd $BRIG_ROOT || exerr "ERROR: Could not access install directory!"
 else
 # We are here because the user did not specify an alternate location. Thus, we should use the 
 # current directory as the root.
     BRIG_ROOT=$START_FOLDER
 fi
-# touch /tmp/thebrig.tmp
+
+# Make and move into the install staging folder
+mkdir -p $START_FOLDER/install_stage || exerr "ERROR: Could not create staging directory!"
+cd $START_FOLDER/install_stage || exerr "ERROR: Could not access staging directory!"
 
 if [ $2 -eq 3 ]; then 
     # Fetch the testing branch as a zip file
@@ -49,7 +50,6 @@ else
     fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
 fi
 
-
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
@@ -59,47 +59,68 @@ rm master.zip
 # Run the change_ver script to deal with different versions of TheBrig
 /usr/local/bin/php-cgi -f conf/bin/change_ver.php
 
+# The file /tmp/thebrigversion should get created by the change_ver script
+# Its existence implies that change_ver.php finished successfully. 
+# No matter what type of install it is, change_ver will backup and remove
+# the old stuff. From this script's perpective, all that needs to happen
+# is to copy the contents of the staging directory to the destination 
+# folder.
+
+# There are two use cases for this file:
+# 1. Brand new install, so there is no config array yet (don't run start)
+# 2. Upgraded install, so change_ver made a backup of the old stuff (run start)
+
 filever="/tmp/thebrigversion"
-# The file /tmp/thebrigversion might get created by the change_ver script
-# Its existence implies that we need to carry out the install procedure
+
 if [ -f "$filever" ]
 then
 	action=`cat ${filever}` 
-	# echo "Thebrig "${action}
-		if [ `uname -p` = "amd64" ]; then
-			echo "Renaming 64 bit ftp binary"
-			mv conf/bin/ftp_amd64 conf/bin/ftp
-			rm conf/bin/ftp_i386
-		else
-			echo "Renaming 32 bit ftp binary"
-			mv conf/bin/ftp_i386 conf/bin/ftp
-			rm conf/bin/ftp_amd64
-		fi
+		
+	if [ `uname -p` = "amd64" ]; then
+		echo "Renaming 64 bit ftp binary"
+		mv conf/bin/ftp_amd64 conf/bin/ftp
+		rm conf/bin/ftp_i386
+	else
+		echo "Renaming 32 bit ftp binary"
+		mv conf/bin/ftp_i386 conf/bin/ftp
+		rm conf/bin/ftp_amd64
+	fi
+	# Copy downloaded version to the install destination
 	cp -r * $BRIG_ROOT/
-	mkdir -p /usr/local/www/ext
-	ln -s $BRIG_ROOT/conf/ext/thebrig /usr/local/www/ext/thebrig
-	cd /usr/local/www
-	# For each of the php files in the extensions folder
-	for file in /usr/local/www/ext/thebrig/*.php
-	do
-	# Check if the link is already there
-		if [ -e "${file##*/}" ]; then
-			rm "${file##*/}"
-		fi
+
+	# Change_ver didn't update - this is the initial installation
+	if [ "$action" == "installed"]
+	then
+		# Create the symlinks/schema. We can't use thebrig_start since
+		# there is nothing for the brig in the config XML
+		mkdir -p /usr/local/www/ext
+		ln -s $BRIG_ROOT/conf/ext/thebrig /usr/local/www/ext/thebrig
+		cd /usr/local/www
+		# For each of the php files in the extensions folder
+		for file in $BRIG_ROOT/conf/ext/thebrig/*.php
+		do
 			# Create link
-		ln -s "$file" "${file##*/}"
+			ln -s "$file" "${file##*/}"
 		done
-	echo $BRIG_ROOT > /tmp/thebrig.tmp
-	echo "Congratulations! Thebrig ${action} . Navigate to rudimentary config tab and push Save "
+		# Store the install destination into the /tmp/thebrig.tmp
+		echo $BRIG_ROOT > /tmp/thebrig.tmp
+		echo "Congratulations! TheBrig was installed. Navigate to rudimentary config tab and push Save."
+	else 
+		# Change_ver upgraded an install, so we need to run thebrig_start
+		# in order to create all the necessary simlinks. Thebrig_start
+		# requires that the XML config has all the needed data.
+		/usr/local/bin/php-cgi -f conf/bin/thebrig_start.php
+		echo "Congratulations! TheBrig was upgraded/reinstalled."
+	fi
 else
-# There was not /tmp/thebrigversion, so we are already using the latest version
-	echo "You use fresh version"
+# There was not /tmp/thebrigversion, so something bad happened in change_ver
+	echo "Something bad happened with change_ver.php. Please re-download and run the install."
 fi
+
 # Clean after work
 cd $START_FOLDER
 # Get rid of staged updates
-rm -Rf temporary/*
-rmdir temporary
+rm -r install_stage
 rm /tmp/thebriginstaller
 if [ -f "$file" ] 
 then 

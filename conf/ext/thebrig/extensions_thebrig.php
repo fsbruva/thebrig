@@ -274,7 +274,7 @@ function disable_buttons() {
 		      <?php if ($errormsg) print_error_box($errormsg);?>
 		      <?php if ($savemsg) print_info_box($savemsg);?>
 		      <?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
-		       <?php $msg =  _THEBRIG_NOT_CONFIRMED; if (is_file("/tmp/thebrig.tmp")) print_warning_box( $msg); ?>
+		      <?php $msg =  _THEBRIG_NOT_CONFIRMED; if (is_file("/tmp/thebrig.tmp")) print_warning_box( $msg); ?>
 			<table width="100%" border="0" cellpadding="6" cellspacing="0">
 			      <?php html_titleline(gettext("On-line view"));?>
 				<tr><td colspan='2' valign='top' >

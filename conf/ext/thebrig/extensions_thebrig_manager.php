@@ -101,8 +101,6 @@ else { // TheBrig has been confirmed
 // We have returned to this page via a POST
 if ($_POST) {
 	unset($input_errors);
-	If (isset($_POST['update']) && $_POST['update'] == "Update" ) {      
-	
 	$pconfig = $_POST;			// move $_POST into the $post config
 	$config_changed = false;	// Keep track if we need to re-write the config
 
@@ -111,7 +109,7 @@ if ($_POST) {
 	// 2. Availability of Github servers
 	// We know we got here via "POST" - but we want to make sure the user
 	// clicked the "Update" button.
-	if ( !$input_errors && isset($pconfig['update']) && $pconfig['update']){
+	if ( !$input_errors && isset($pconfig['update']) && $pconfig['update'] == "Update"){
 		
 		// I moved the version check code to thebrig_start.php
 
@@ -123,23 +121,21 @@ if ($_POST) {
 			mwexec ("tar -xvf thebrig.zip --exclude='.git*' --strip-components 1");
 			mwexec("rm thebrig.zip");
 			if ($g['arch'] == "x86") { 
-			rename ("/tmp/thebrig000/conf/bin/ftp_i386", "/tmp/thebrig000/conf/bin/ftp" ); 
-			unlink ("/tmp/thebrig000/conf/bin/ftp_amd64"); 
-			}else {
-			rename ("/tmp/thebrig000/conf/bin/ftp_amd64", "/tmp/thebrig000/conf/bin/ftp" ); 
-			unlink ("/tmp/thebrig000/conf/bin/ftp_i386");		
+				rename ("/tmp/thebrig000/conf/bin/ftp_i386", "/tmp/thebrig000/conf/bin/ftp" ); 
+				unlink ("/tmp/thebrig000/conf/bin/ftp_amd64"); 
+			}
+			else {
+				rename ("/tmp/thebrig000/conf/bin/ftp_amd64", "/tmp/thebrig000/conf/bin/ftp" ); 
+				unlink ("/tmp/thebrig000/conf/bin/ftp_i386");		
 			}
 			updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");
-			
 		}
-/** You realy need write config here? */
-/* Nope - nothing about the config is changing */
-
-
 	} // end of no input errors
-	}// end of click update
+
+// these posts never get reached... because there is no agree or cancel button that is initiating
+// the post. 
 	If (isset($_POST['cancel']) && $_POST['cancel'] == "Cancel" ) {
-		mwexec ("rm -rf /tmp/thebrig000");
+		//mwexec ("rm -rf /tmp/thebrig000"); Not needed - this folder never gets created
 		updatenotify_delete("thebrig");
 		$savemsg = "Update process aborted";	
 	}

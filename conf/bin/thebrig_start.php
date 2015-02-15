@@ -35,28 +35,30 @@ chmod("/etc/rc.d/thebrig", 0755);
  * These steps serve two purposes:
  * 1. To clean up old versions of TheBrig's file schema
  * 2. To reset all symlinks, in case a new version was installed, and the
- * 	  file list has changed
+ * 	  file list has changed.
  * 
+ * These steps must be carried out on both "full" and "embedded" installs
+ * because we don't necessarily require users to restart Nas4Free.
  */
-if ( $g['platform'] === 'full' ) {
-	// Get rid of the erroneously created file (by early versions).
-	unlink_if_exists ( "/usr/local/www/\*.php" );
+	
+// Get rid of the erroneously created file (by early versions).
+unlink_if_exists ( "/usr/local/www/\*.php" );
 
-	// Get a list of all the symlinks or files from TheBrig that are currently 
-	// in the webroot, and destroy them
+// Get rid of old schema - which was a separate copy of entire ext folder
+if ( is_dir( '/usr/local/www/ext/thebrig') ) {
+	exec ( "rm -rf /usr/local/www/ext/thebrig");
+}
 
-	foreach ("/usr/local/www/extensions_thebrig_*.php" as $link) {
-		unlink( $link );
-	}
+// Get a list of all the symlinks or files from TheBrig that are currently 
+// in the webroot, and destroy them.
+foreach ( glob('/usr/local/www/extensions_thebrig*.php') as $link) {
+	unlink( $link );
+}
 
-	// Get rid of old schema - which was a separate copy of entire ext folder
-	if ( is_dir( "/usr/local/www/ext/thebrig") ) {
-		exec ( "rm -rf /usr/local/www/ext/thebrig");
-	}
 /*
  * End of clean-up operations
  */
-} 
+ 
 // This checks to make sure the XML config concurs with the 
 // installed version of lang.inc
 $brig_ver = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
