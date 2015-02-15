@@ -77,7 +77,7 @@ then
 	action=`cat ${filever}` 
 		
 	# Copy downloaded version to the install destination
-	cp -r * $BRIG_ROOT/
+	cp -r $START_FOLDER/install_stage/* $BRIG_ROOT/
 
 	# Change_ver didn't update - this is the initial installation
 	if [ "$action" -eq 0 ]
