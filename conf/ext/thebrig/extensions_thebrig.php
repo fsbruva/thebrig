@@ -279,10 +279,10 @@ function disable_buttons() {
 					<table border="0" cellspacing="0" cellpadding="0" width="100%">
 					      <tr> 
 							<td  valign="top">
-					<?php if ( !isset( $config['thebrig']['rootfolder']) ) : ?>
-							<a title="<?=gettext("Configure TheBrig please first");?>
-					<?php elseif ( !isset( $config['thebrig']['content']) ):?>
-							<a title="<?=gettext("Configure at least one jail first"); ?>				
+					<?php if ( !isset( $config['thebrig']['rootfolder']) ) {?>
+							<a title="<?php =gettext("Configure TheBrig please first"); } ?>
+					<?php elseif ( !isset( $config['thebrig']['content']) ) { ?>
+							<a title="<?php =gettext("Configure at least one jail first"); } ?>				
 					<?php else:?>
 								<!--<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_check.php");</script></div>-->
 								<table id = 'onlinetable' width="100%" border="0" cellpadding="5" cellspacing="0">
@@ -315,7 +315,7 @@ function disable_buttons() {
 									 </tr>
 			<?php endforeach; ?>
 								</table>
-							<?php endif;?>
+					<?php endif;?>
 							</td>
 						</tr>
 					</table>
