@@ -57,7 +57,16 @@ tar -xvf master.zip --exclude='.git*' --strip-components 1
 #rm master.zip
 
 # Run the change_ver script to deal with different versions of TheBrig
-/usr/local/bin/php-cgi -n /usr/local/etc/ -e -f conf/bin/change_ver.php
+# Nas4Free doesn't ship php-cli, so we have to fool it.
+$CHANGE_VER_FILE=$START_FOLDER/install_stage/conf/bin/change_ver.php
+
+export REDIRECT_STATUS=200
+export GATEWAY_INTERFACE="CGI/1.1"
+export REQUEST_METHOD="GET"
+export SCRIPT_FILENAME=$CHANGE_VER_FILE
+export SCRIPT_PATH=change_ver.php
+export PATH_INFO=$SCRIPT_FILENAME
+/usr/local/bin/php-cgi
 
 # The file /tmp/thebrigversion should get created by the change_ver script
 # Its existence implies that change_ver.php finished successfully. 
