@@ -154,11 +154,13 @@ elseif ( is_array($config['thebrig'] ) ) {
 	} // end foreach jails
 	fclose ( $handle ); // Close the manual upgrade file
 	// Since we had no custom jail parameters, we can get rid of that file
-	if ($removemessage == 1) { exec ("/bin/rm /tmp/upgrademessage.txt"); }
+	if ($removemessage == 1) { unlink ("/tmp/upgrademessage.txt"); }
 	// Get rid of the old files & directories
-	exec ("/bin/rm -rf ".$config['thebrig']['rootfolder']."conf");
+	$old_folders = array ( "bin", "ext", "sbin", "jails", "libexec", );
+	foreach ( $old_folders as $folder ) {
+		exec ("/bin/rm -rf ".$config['thebrig']['rootfolder']."conf/".$folder);
+	}
 	exec ("/bin/rm /etc/rc.conf.local");
-	exec ("/bin/rm -rf " .$config['thebrig']['rootfolder']."bin");	
 	$config['thebrig'] = $newthebrigconf;
 	$config['thebrig']['version'] = $currentversion;
 	write_config();

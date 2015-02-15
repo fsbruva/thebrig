@@ -7,7 +7,7 @@ require_once("ext/thebrig/functions.inc");
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE,  _THEBRIG_TARBALL_MGMT) ;
 // add array Freebsd ftp servers 
-$ftp_servers = array( "ftp1.freebsd.org", "ftp2.freebsd.org", "ftp3.freebsd.org", "ftp4.freebsd.org","ftp5.freebsd.org", "ftp.freebsd.org", "ftp6.freebsd.org","ftp7.freebsd.org","ftp10.FreeBSD.org","ftp11.FreeBSD.org","ftp13.FreeBSD.org","ftp14.FreeBSD.org");
+$ftp_servers = array( "ftp.freebsd.org", "ftp1.freebsd.org", "ftp2.freebsd.org", "ftp3.freebsd.org", "ftp6.freebsd.org","ftp7.freebsd.org","ftp10.FreeBSD.org","ftp11.FreeBSD.org","ftp13.FreeBSD.org");
 // This checks if we have successfully contacted a ftp server - the existence of /tmp/ftpsen gives us a clue about that. If the file
 // exists, then we should read the number stored there - it will tell us which server to use. If it doesn't exist, start at 0.
 if (!is_file("/tmp/ftpsen") ) {file_put_contents ("/tmp/ftpsen", "0" );}
@@ -54,122 +54,56 @@ if ($_POST) {
 			// Specifies the FTP server to contact
 			$ftp_server = $ftp_servers[$ftp_n] ;
 			// Specifies the folder to access
-			$ftp_path = "/pub/FreeBSD/releases/".$arch."/" ;
-			// Method is used from: http://camposer-techie.blogspot.com/2010/08/ejecutando-comandos-sobre-un-programa.html
-			// Creates an array of streams to deal with stdin, stdout and error file.
-			$descriptorspec = array(
-					0 => array( "pipe" , "r" ),  // stdin is a pipe that STDIN will read from
-					1 => array( "pipe" , "w" ),  // stdout is a pipe that STDOUT will write to (write from the process)
-					2 => array( "file" , $config['thebrig']['rootfolder'] . "thebrigerror.txt", "a") // stderr is a file to write to
-			) ;
+			$ftp_path = "/pub/FreeBSD/releases/".$arch."/".$arch."/" ;
+			
+			$raw_document = file_get_contents("http://" . $ftp_server . $ftp_path );
+			// This regex ensures we don't have any 8.x versions. Before
+			// version 9, FreeBSD was not distributed using tarballs.
+			preg_match_all( '/\d?[0-7,9]\.\d-R[A-Z]+\d?(?=<)/',$raw_document , $matches);
+			$matches = $matches[0];
 
-			//Define the command string used to open an ftp connection based on the specified parameters
-			$cmd_str = $config['thebrig']['rootfolder'] . "conf/bin/ftp -a ftp://" . $ftp_server . $ftp_path ;
-
-			// Define an ftp resource stream by running the specified command, using the descriptor spec and
-			// placing the process's IO within pipes. The environment and other_options parameter are NULL.
-			$ftp_proc = proc_open ( $cmd_str , $descriptorspec, $pipes, NULL, NULL) ;
-
-			// Declare the variables needed for the stream_select operation
-			$read = array( $pipes[1] ) ;    // renames the pipe
-			$write = null ;
-			$except = null ;
-			$readTimeout = 10 ;
-
-			//  If the connection cannot be established, then $ftp_proc will be false, and not a resource
-			//  However, this check is mostly uneeded, even if the ftp binary doesn't exist.
-			if ( is_resource( $ftp_proc ) ){
-				// This line is needed to prevent the write operation from setting a lock on the entire process. We need this
-				// process to be written to multiple times. Thus, we take responsibility for managing the inpput and output streams.
-				// In order to do this, we unset the stream block.
-				stream_set_blocking( $pipes[1] , 0 ) ;
-				// The first command we will send is to retreive the directory listing from the ftp server
-				fwrite( $pipes[0] , "ls\n" ) ;
-				// We then need the output to be actually written out of the buffer (send the command)
-				fflush( $pipes[0] ) ;
-				// We then tell PHP that we would like to wait for the change in status of the read pipe (that is, there is data to be
-				// read from the console
-				stream_select( $read , $write , $except , $readTimeout ) ;
-				$k = 0 ;		// Set the index counter to 0
-				// The fgets command extracts the line until the EOL character (CR/LF) is obtained, and stores is as a string
-				// in $raw. Then, due to older versions of "ls" being used on the FreeBSD ftp servers, we need to be careful
-				// that the response we get back is sanitized from a line containing the total bytes (which doesn't have any
-				// meaningful data about the release directory contents.
-				while ( $raw = fgets( $pipes[1]) ) {
-					// Omit the ISO_IMAGES, and README, etc.
-					if ( strpos( $raw , "total" ) === false && strpos( $raw , "-R") !== false ) {
-						// Use a regular expression method to parse the columns, based on white space
-						$line = preg_split( "/[\s]+/" , $raw ) ;
-						// Due to a major configuration change starting with FreeBSD version 9, we need to make sure
-						// that the version (the first character of the directory name) is greater than or equal to 9.
-						// Since the name of the directory is the 8th column, the index is [8][0], and we need to cast it
-						// to an integer.
-						if ( intval( $line[8][0] >= 9 ) ) {
-							// The name of the directory is the 8th (starting at 0) column
-							$result[$k] = $line[8];
-						} // end of test for verion 9 or higher
-					} // end of if statement for ISO_IMAGES, README
-					$k++ ;	// Increment the counter
-				} // end of while loop
-				// Now we need to get data about release candidates. We do this by moving into the arch directory,
-				// and listing the contents.
-				fwrite( $pipes[0] , "cd {$arch}\nls\n" );
-				// We then need the output to be actually written out of the buffer (send the command)
-				fflush( $pipes[0] );
-				// We then tell PHP that we would like to wait for the change in status of the read pipe (that is, there is data to be
-				// read from the console
-				stream_select( $read , $write , $except , $readTimeout );
-				// Read in the responses as before, but append them to the existing array of directory names (thus we don't reset k)
-				while ( $raw = fgets( $pipes[1] )){
-					// Omit the ISO_IMAGES, and README, etc. by checking for the line "total" and -R,
-					// which is present in both -RC and -Release versions.
-					if ( strpos($raw, "total") === false && strpos( $raw , "-R") !== false ) {
-						// Use a regular expression method to parse the columns, based on white space
-						$line = preg_split( "/[\s]+/" , $raw ) ;
-						if ( intval( $line[8][0] >= 9 ) ) {
-							// The name of the directory is the 8th (starting at 0) column
-							$result[$k] = $line[8];
-						} // end of test for verion 9 or higher
+			if ( $matches ){
+				// We need the numeric portion of the release version
+				$rel_numeric = explode ( '-', $rel );
+				// Due to the formatting, we may have duplicates
+				$matches = array_unique ( $matches ) ;
+				// This puts the array in order
+				rsort($matches, SORT_NATURAL);
+				$k = 0;
+				foreach ( $matches as $match_test ) {
+					$matches_numeric = explode ( '-', $match_test );
+					// This checks to make sure we are not trying to download 
+					// a tarball that is newer than our kernel.
+					if ( $matches_numeric[0] <= $rel_numeric[0] ){
+						$result[$k++] = $match_test;
 					}
-					$k++ ; // Increment the counter
-				} // end while loop used to extract stuff from the stream
-					
-				// The process exists, and we successfully got some data
-				if ( $result ){
-					// A valid response was obtained, so we can finish grabbing the other items (manifests, mostly) we need.
-					// Since the latest major release is listed in both releases and arch, we need to sanitize the listing
-					$result = array_unique ( $result ) ;
-					// Keep track of the fact that we have successfully queried the FTP server.
-					$config['thebrig']['ftpquery'] = array() ;
-					// This if statement evaluates whether or not the list of releases contains the same version
-					// kernel of the host. If it's not, then we need to alert the user.
-					if  ( !array_search( $rel , $result ) ) {
-						$input_errors[] = _THEBRIG_MATCH_ERROR ;
-					} // end of if to check for version mismatch
-				} // end of if to check if we got a result
-				else {
-					// This server didn't provide any results - lets try another!
-					$ftp_n++;
-					file_put_contents ("/tmp/ftpsen", $ftp_n );
 				}
-				// Clean up from this attempt (close the process)
-				fclose( $pipes[0] ) ; 					// Close the output pipe
-				$exit_code = proc_close( $ftp_proc) ;	// Close the ftp process
-			} // end of if for the successful creation of the ftp resource
+ 												
+				// Keep track of the fact that we have successfully queried the FTP server.
+				$config['thebrig']['ftpquery'] = array() ;
+				// This if statement evaluates whether or not the list of releases contains the same version
+				// kernel of the host. If it's not, then we need to alert the user.
+				if  ( array_search( $rel , $result )  === false ) {
+					//$input_errors[] = _THEBRIG_MATCH_ERROR ;
+					$input_errors[] = $result[0];
+				} // end of if to check for version mismatch
+			} // end of if to check if we got a result
 			else {
-				// We couldn't create a resource OS permissions problem, so we should try again
-				$input_errors[] = "not a resource!";
+			// This server didn't provide any results - lets try another!
+				$ftp_n++;
+				file_put_contents ("/tmp/ftpsen", $ftp_n );
 			}
-			// much better coding - we continue this loop while we've failed and we still have servers yet to try.
+			
+			
+		// much better coding - we continue this loop while we've failed and we still have servers yet to try.
 		} while ( !$result && ($ftp_n < count ($ftp_servers)) );
 			
 		//$input_errs[] = "outside while and result is ";
 		if ( !$result ){
-			// The process existed, but nothing was obtained into result - thus, there was no data to read
-			// from the ftp server, which is weird because the query is properly formatted. This is an indication of:
+			// The query existed, but nothing was obtained into result - thus, there was no data to read
+			// from the ftp server. This is an indication of:
 			// 1. There is no WAN connection
 			// 2. DNS is misconfigured
-			// 3. The ftp binary that is bundled with theBrig is missing
 			// Try another server
 			// We didn't get a reults AND we tried all the servers we could
 			unlink ("/tmp/ftpsen");

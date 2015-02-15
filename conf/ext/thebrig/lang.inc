@@ -54,7 +54,7 @@
 		define(_THEBRIG_CONF_TB, "Do you really want to delete these tarball(s)?");
 		define(_THEBRIG_FTPQUERY, "Click the query button to get info about available tarballs." );
 		define(_THEBRIG_QUERYBTN, "Query!" );
-		define(_THEBRIG_CHECK_NETWORKING, "There seems to be a networking issue. I can't reach ftp.freebsd.org. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>. If networking is working, then ensure the ftp binary is present.<br>Alternatively, try it again to see if there was some transient network problem.");
+		define(_THEBRIG_CHECK_NETWORKING, "There seems to be a networking issue. I can't reach ftp.freebsd.org. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>.<br>Alternatively, try it again to see if there was some transient network problem.");
 		define(_THEBRIG_CHECK_NETWORKING_GIT, "There seems to be a networking issue. I can't reach GitHub to retrieve the file. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>. <br>Alternatively, try it again to see if there was some transient network problem.");
 		define(_THEBRIG_GIT_LANG_FAIL, "The fetch succeeded, but the file is missing or not accessible. Please try again!");
 		define(_THEBRIG_ERROR, "ERROR!");

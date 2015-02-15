@@ -76,15 +76,6 @@ if [ -f "$filever" ]
 then
 	action=`cat ${filever}` 
 		
-	if [ `uname -p` = "amd64" ]; then
-		echo "Renaming 64 bit ftp binary"
-		mv conf/bin/ftp_amd64 conf/bin/ftp
-		rm conf/bin/ftp_i386
-	else
-		echo "Renaming 32 bit ftp binary"
-		mv conf/bin/ftp_i386 conf/bin/ftp
-		rm conf/bin/ftp_amd64
-	fi
 	# Copy downloaded version to the install destination
 	cp -r * $BRIG_ROOT/
 

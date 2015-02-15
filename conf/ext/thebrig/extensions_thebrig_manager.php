@@ -120,14 +120,6 @@ if ($_POST) {
 			chdir("/tmp/thebrig000");
 			mwexec ("tar -xvf thebrig.zip --exclude='.git*' --strip-components 1");
 			mwexec("rm thebrig.zip");
-			if ($g['arch'] == "x86") { 
-				rename ("/tmp/thebrig000/conf/bin/ftp_i386", "/tmp/thebrig000/conf/bin/ftp" ); 
-				unlink ("/tmp/thebrig000/conf/bin/ftp_amd64"); 
-			}
-			else {
-				rename ("/tmp/thebrig000/conf/bin/ftp_amd64", "/tmp/thebrig000/conf/bin/ftp" ); 
-				unlink ("/tmp/thebrig000/conf/bin/ftp_i386");		
-			}
 			updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");
 		}
 	} // end of no input errors
