@@ -23,7 +23,7 @@ include ("config.inc");
 
 // Initial value for brig version so that numeric comparisons don't fail
 $thebrigversion=0;
-// Creates an array from the contents of theinstaller, then trims it 
+// Creates an array from the contents of thebriginstaller, then trims it 
 $workdir_f = file("/tmp/thebriginstaller");
 $workdir = trim($workdir_f[0]);
 
@@ -36,36 +36,28 @@ $git_ver=substr($git_ver_s[1],0,3);
 // to check if we are at a version <1.0. 
 if ( is_array($config['thebrig']) && isset($config['thebrig']['gl_statfs']) && 
 	is_numeric ($config['thebrig']['gl_statfs'])  ) {
-	if ($config['thebrig']['rootfolder']) { 
-		$thebrigrootfolder = $config['thebrig']['rootfolder'];
-		$thebrigversion = $config['thebrig']['version'];
-		if ($thebrigversion >= $git_ver) {
-			$message = "No need updates \n"; 
-			if (is_file("/tmp/thebrigversion") ) { unlink ("/tmp/thebrigversion"); }
-			// goto met1; <-- this is bad way. if/elseif/else is mutually exclusive
-		}
-		elseif ( $thebrigversion == 1 )  {
-			$message = "You use first thebrig version \n";
-			$config['thebrig']['version'] = $git_ver;
-			write_config();
-			file_put_contents("/tmp/thebrigversion", "updated");
-		}
-		else {
-			// Either there isn's a 
-			$message = "You use thebrig's beta version, we reinstall it \n";
-			$config['thebrig']['version'] = $git_ver;
-			write_config();
-			file_put_contents("/tmp/thebrigversion", "updated");
-		}
-	} // end of 'rootfolder' check
-	else { 
-		$message = "Something is amiss with your installation"; 
-		unlink ("/tmp/thebrigversion");
+	// We're using a "modern" version - post Feb 2015
+	$thebrigversion = $config['thebrig']['version'];
+	if ($thebrigversion >= $git_ver) {
+		// In this case, nothing about the config should change, since we
+		// are using the same version. Since we downloaded a new tarball,
+		// we are going to clear out the old files, copy known good ones,
+		// and re-create the symlinks
+		$message = "Looks like we're re-installing! \n"; 
+		file_put_contents("/tmp/thebrig_action", "2");
 	}
+	else {
+		// We are older than github, so we have some work to do...
+		$message = "You are using and outdating version, so we'll upgrade \n";
+		file_put_contents("/tmp/thebrig_action", "1");
+		// Future code necessary for major/minor upgrades goes here.
+	}
+	$config['thebrig']['version'] = $git_ver;
+	write_config();
 	echo $message;
 }  // End of gl_statfs check
 elseif ( is_array($config['thebrig'] ) ) { 
-	// We are here gl_statfs is not set, or is not numeric. However, 
+	// Config key for gl_statfs is not set, or is not numeric. However, 
 	// the XML config has some data about TheBrig. This means 
 	// it was the previous version (< 1.0) of thebrig
 	
@@ -77,19 +69,27 @@ elseif ( is_array($config['thebrig'] ) ) {
 		} // end for
 	} // end of check to make sure there are jails running 
 			
+	// This is in case there are some unknown jail parameters in the config
+	// file. We create the file, but also mark it for deletion.
 	$handle=fopen("/tmp/upgrademessage.txt", "w");
 	$removemessage = 1;
 	$message = "Warning! Please define the following parameters for jails manually. \n " ;
+	fwrite ( $handle, $message );
 
 // Begin alcatraz
 // backup config in first
+/*
+ * TODO: Need to add XML config backup
+ * 
+ */
 /**	if (is_dir ($config['thebrig']['rootfolder'] )) { */
 // Check tag entry, folder, is writable and make backup
 		/*	if ( ! copy ("/conf/config.xml ", $config['thebrig']['rootfolder']."config.xml.backup"))  {
 				exec ("logger Failed copy rc script. TheBrig root folder not writable"); 
 				exit;
-				} else {}
-		} else  {	exec ("logger Extension homing folder not defined."); exit;} */   /** WOW I'm root on php cli , but I can't copy!!   But I'll add this*/  
+				} else {} */
+				
+	// Create storage bins for old and new config - initialize variables
 	$oldthebrigconf = array();
 	$newthebrigconf = array();
 	$oldthebrigconf['content'] = array();
@@ -99,16 +99,17 @@ elseif ( is_array($config['thebrig'] ) ) {
 	// Remove data about the jails from the new config array
 	unset ( $newthebrigconf['content'] );
 	unset ( $config['thebrig'] ); // Delete thebrig's config data
-	write_config(); // write changes (in case the upgrade fails)
+	// WHY DO WE NEED? write_config(); // write changes (in case the upgrade fails)
+	// Initialize variables
 	$config['thebrig'] = array();
 	$config['thebrig']['content'] = array();
-// conversion
+// conversion - begin updating XML config to 1.0 schema
 	
-	// Delete un-used config keys
+	// Delete un-used global config keys
 	unset ($newthebrigconf['sethostname']);
 	unset ($newthebrigconf['unixiproute']);
 	unset ($newthebrigconf['systenv']);
-	
+	// Add new global config parameter
 	$newthebrigconf['gl_statfs'] = 1;
 	// Go through each of the jail's data from the old config
 	foreach ( $oldthebrigconf['content'] as $jail) {
@@ -153,8 +154,13 @@ elseif ( is_array($config['thebrig'] ) ) {
 		file_put_contents("/tmp/jailcache.txt", serialize($jail), FILE_APPEND);
 	} // end foreach jails
 	fclose ( $handle ); // Close the manual upgrade file
-	// Since we had no custom jail parameters, we can get rid of that file
-	if ($removemessage == 1) { unlink ("/tmp/upgrademessage.txt"); }
+	// We had custom jail parameters, we need to alert the user
+	if ($removemessage == 0) { 
+		echo "There were config settings we couldn't understand \n";
+		echo "Please view the details at /tmp/upgrademessage.txt \n";
+	}
+	else { unlink ("/tmp/upgrademessage.txt"); }
+		
 	// Get rid of the old files & directories
 	$old_folders = array ( "bin", "ext", "sbin", "jails", "libexec", );
 	foreach ( $old_folders as $folder ) {
@@ -164,12 +170,13 @@ elseif ( is_array($config['thebrig'] ) ) {
 	$config['thebrig'] = $newthebrigconf;
 	$config['thebrig']['version'] = $currentversion;
 	write_config();
-	file_put_contents("/tmp/thebrigversion", "We think it's upgrade time");
-	$message = "We upgrade Thebrig \n"; // Why do we need this?
+	// Let thebrig_install.sh know that this is an upgrade
+	file_put_contents("/tmp/thebrig_action", "1");
 }
 else {
-	// we are here because this is an initial install
-	echo "Hello new user, we will install TheBrig now \n";
-	file_put_contents("/tmp/thebrigversion", "0"); 
+	// we are here because this is an initial install 
+	// That is, there was nothing in the XML config yet.
+	echo "Hello, we will begin installing TheBrig now \n";
+	file_put_contents("/tmp/thebrig_action", "0"); 
 	}
 ?>
