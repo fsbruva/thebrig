@@ -40,11 +40,8 @@ function thebrig_unregister() {
  	
 
  	// Check to see if the folder is a folder, then remove it
- 	if ( is_link( "/usr/local/www/ext/thebrig/" ) ) {
- 		mwexec( "rm /usr/local/www/ext/thebrig" );
- 	}
- 	elseif ( is_dir("/usr/local/www/ext/thebrig") ){
-		mwexec( "rm -r /usr/local/www/ext/thebrig/" );
+	if ( is_dir("/usr/local/www/ext/thebrig") ){
+		mwexec( "rm /usr/local/www/ext/thebrig" );
 	}
  	# This counts the number of entries in the ext directory. If it is less than or equal to 2,
  	# the directory is empty, and can be removed (see http://www.php.net/manual/en/function.scandir.php)
