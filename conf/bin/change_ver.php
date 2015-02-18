@@ -92,7 +92,6 @@ elseif ( is_array($config['thebrig'] ) ) {
 	// Create storage bins for old and new config - initialize variables
 	$oldthebrigconf = array();
 	$newthebrigconf = array();
-	$oldthebrigconf['content'] = array();
 	// Read in the current brig configuration as both new and old
 	$oldthebrigconf = $config['thebrig'];
 	$newthebrigconf = $oldthebrigconf;
