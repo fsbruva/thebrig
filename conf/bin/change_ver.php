@@ -112,7 +112,7 @@ elseif ( is_array($config['thebrig'] ) ) {
 	$newthebrigconf['gl_statfs'] = 1;
 	// This is stupid - but if they immediately try to install again, it
 	// will fail.
-	if (isset( $oldthebrigconf['content'] ) {
+	if (isset( $oldthebrigconf['content'] ) ) {
 		// Go through each of the jail's data from the old config
 		foreach ( $oldthebrigconf['content'] as $jail) {
 			// IP address conversion
