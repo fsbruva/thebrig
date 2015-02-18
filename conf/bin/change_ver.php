@@ -111,48 +111,52 @@ elseif ( is_array($config['thebrig'] ) ) {
 	unset ($newthebrigconf['systenv']);
 	// Add new global config parameter
 	$newthebrigconf['gl_statfs'] = 1;
-	// Go through each of the jail's data from the old config
-	foreach ( $oldthebrigconf['content'] as $jail) {
-		// IP address conversion
-		$jail['allowedip'] = $jail['if'] ."|". $jail['ipaddr'] ."/". $jail['subnet'] ;
-		$jail['statfs'] = 1;
-		$jail['cmd'] = array();
-		// Prestart conversion
-		if (!empty ( $jail['exec_prestart'])) {
-			$jail['cmd'][] = "prestart|0|" .  $jail['exec_prestart'];
-		}
-		// Post Start command conversion
-		if (!empty ($jail['afterstart0'])) { 
-			$jail['cmd'][] = "afterstart_for_main|0|" .  $jail['afterstart0'];
-			if (!empty ($jail['afterstart1'])) {
-				$jail['cmd'][] = "afterstart_for_main|1|" .  $jail['afterstart1'];
-			} 
-		}
-		if (!empty ($jail['jail_parameters'])) { 
-			$message = "Detected parameters \"" . $jail['jailname']."\" :" . $jail['jail_parameters']."\n" ;
-			fwrite ($handle, $message );
-			$removemessage = 0;
-		}
-		
-		// Remove unused/outdated configuration keys
-		unset ($jail['if']);
-		unset ($jail['ipaddr']);
-		unset ($jail['subnet']);
-		unset ($jail['exec_prestart']);
-		unset ($jail['afterstart1']);
-		unset ($jail['afterstart0']);
-		unset ($jail['extraoptions']);
-		unset ($jail['jail_parameters']);
-		unset ($jail['image']);
-		unset ($jail['image_type']);
-		unset ($jail['attach_params']);
-		unset ($jail['zfs_datasets']);
-		unset ($jail['fib']);
-		// Save the updated jail as a new array under 'content'
-		$newthebrigconf['content'][] = $jail;
-		// diagnose
-		file_put_contents("/tmp/jailcache.txt", serialize($jail), FILE_APPEND);
-	} // end foreach jails
+	// This is stupid - but if they immediately try to install again, it
+	// will fail.
+	if (isset( $oldthebrigconf['content'] ) {
+		// Go through each of the jail's data from the old config
+		foreach ( $oldthebrigconf['content'] as $jail) {
+			// IP address conversion
+			$jail['allowedip'] = $jail['if'] ."|". $jail['ipaddr'] ."/". $jail['subnet'] ;
+			$jail['statfs'] = 1;
+			$jail['cmd'] = array();
+			// Prestart conversion
+			if (!empty ( $jail['exec_prestart'])) {
+				$jail['cmd'][] = "prestart|0|" .  $jail['exec_prestart'];
+			}
+			// Post Start command conversion
+			if (!empty ($jail['afterstart0'])) { 
+				$jail['cmd'][] = "afterstart_for_main|0|" .  $jail['afterstart0'];
+				if (!empty ($jail['afterstart1'])) {
+					$jail['cmd'][] = "afterstart_for_main|1|" .  $jail['afterstart1'];
+				} 
+			}
+			if (!empty ($jail['jail_parameters'])) { 
+				$message = "Detected parameters \"" . $jail['jailname']."\" :" . $jail['jail_parameters']."\n" ;
+				fwrite ($handle, $message );
+				$removemessage = 0;
+			}
+			
+			// Remove unused/outdated configuration keys
+			unset ($jail['if']);
+			unset ($jail['ipaddr']);
+			unset ($jail['subnet']);
+			unset ($jail['exec_prestart']);
+			unset ($jail['afterstart1']);
+			unset ($jail['afterstart0']);
+			unset ($jail['extraoptions']);
+			unset ($jail['jail_parameters']);
+			unset ($jail['image']);
+			unset ($jail['image_type']);
+			unset ($jail['attach_params']);
+			unset ($jail['zfs_datasets']);
+			unset ($jail['fib']);
+			// Save the updated jail as a new array under 'content'
+			$newthebrigconf['content'][] = $jail;
+			// diagnose
+			file_put_contents("/tmp/jailcache.txt", serialize($jail), FILE_APPEND);
+		} // end foreach jails
+	}
 	fclose ( $handle ); // Close the manual upgrade file
 	// We had custom jail parameters, we need to alert the user
 	if ($removemessage == 0) { 
