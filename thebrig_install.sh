@@ -100,7 +100,7 @@ export REQUEST_METHOD="GET"
 export SCRIPT_FILENAME=$STAGE_BIN_PATH/$CHANGE_VER_FILE
 export SCRIPT_PATH=$CHANGE_VER_FILE
 export PATH_INFO=$SCRIPT_FILENAME
-/usr/local/bin/php-cgi
+/usr/local/bin/php-cgi -q
 
 # The file /tmp/thebrigversion should get created by the change_ver script
 # Its existence implies that change_ver.php finished successfully. 
@@ -155,7 +155,7 @@ then
 		export SCRIPT_FILENAME=$STAGE_BIN_PATH/$THEBRIG_START_FILE
 		export SCRIPT_PATH=$THEBRIG_START_FILE
 		export PATH_INFO=$SCRIPT_FILENAME
-		/usr/local/bin/php-cgi
+		/usr/local/bin/php-cgi -q
 		# "1" means we had an older version. "2" means we re-installed
 		if [ "$ACTION" -eq 1 ]
 		then
