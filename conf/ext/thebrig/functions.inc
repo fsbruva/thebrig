@@ -104,7 +104,7 @@ function thebrig_populate ($new_location, $old_location)
 	$i = 0;
 	if ( is_array($config['rc']['shutdown'] ) && is_array( $config['rc']['shutdown']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['shutdown']['cmd']); $i++) {
-			if (1 == preg_match('/thebrig_stop\.sh/', $config['rc']['shutdown']['cmd'][$i]))
+			if (1 === preg_match('/thebrig_stop\.sh/', $config['rc']['shutdown']['cmd'][$i]))
 				unset($config['rc']['shutdown']['cmd'][$i]);	// Disable the old startup
 		 	}	// end for		
 	} // end if (is array)
@@ -723,6 +723,7 @@ function get_nice_filesize ($file) {
 		return "$dsize KB";
 	}
 }
+/*
 function write_rcconflocal () {
 	global $config, $g;
 	$testarray = array();
@@ -811,6 +812,8 @@ function write_rcconflocal () {
 	fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
 	fclose($handle);
 }   
+*/
+
 // cmd_exec execute process and have output and error
 //$cmd - proccess 
 //$stdout - result
