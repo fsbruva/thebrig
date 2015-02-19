@@ -24,7 +24,7 @@
  * a_jail		An array of all the jail information from the config.xml
 */
 header_remove('x-powered-by');
-header_remove('Content-type');
+header_remove('Content-Type');
 require_once ("config.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/lang.inc");
