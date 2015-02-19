@@ -23,6 +23,7 @@
  * php_file		Variable used to control a "for" loop
  * a_jail		An array of all the jail information from the config.xml
 */
+header_remove('x-powered-by');
 require_once ("config.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/lang.inc");
