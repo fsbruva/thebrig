@@ -18,8 +18,9 @@
  * git_ver			String (then floating point) version value within the
  * 					github version of TheBrig's lang.inc.
 */
-header_remove('x-powered-by');
+header_remove("x-powered-by");
 header("content-type: none");
+header_remove("content-type");
 include ("config.inc");
 
 // Initial value for brig version so that numeric comparisons don't fail
