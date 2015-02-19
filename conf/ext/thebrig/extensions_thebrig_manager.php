@@ -95,7 +95,21 @@ else { // TheBrig has been confirmed
 			} // end else langfile exists	
 		} // end of successful fetch
 	} // end of "Not Post"
-
+	mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
+	if ( $fetch_ret_val == 1 ) {
+				// We couldn't get the file from GitHub. We might not have 
+				// connectivity to Github, the file wasn't found, there was 
+				// a DNS issue, or something else went wrong.
+				$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
+				$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
+				
+	}	// end of fetch failed
+	else {
+		// Fetch succeeded
+		mwexec ("chmod a+x /tmp/thebrig_install.sh");
+		//header("Location: extensions_thebrig.php");
+		//updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");			
+	}
 } // end of "Brig Confirmed"
 
 // We have returned to this page via a POST
@@ -109,33 +123,36 @@ if ($_POST) {
 	// 2. Availability of Github servers
 	// We know we got here via "POST" - but we want to make sure the user
 	// clicked the "Update" button.
-	if ( !$input_errors && isset($pconfig['update']) && $pconfig['update'] == "Update"){
+	if ( isset($pconfig['thebrig_update']) && $pconfig['thebrig_update'] ){
 		
 		// I moved the version check code to thebrig_start.php
 
-		if ( $git_ver > $brig_ver ) {
+		if ( $pconfig['thebrig_git_ver_post'] >= $brig_ver ) {
 			// We want to make sure we can't let the user revert - the code we need to update thebrig will go here.
 			/*mkdir("/tmp/thebrig000",0777);
 			cmd_exec ("fetch -o /tmp/thebrig000/thebrig.zip https://github.com/fsbruva/thebrig/archive/alcatraz.zip", $output, $tolog );
 			chdir("/tmp/thebrig000");
 			mwexec ("tar -xvf thebrig.zip --exclude='.git*' --strip-components 1");
 			mwexec("rm thebrig.zip"); */
-			
-			mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/conf/ext/thebrig/install.sh" , $garbage , $fetch_ret_val ) ;
+			mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
 			// $result will be "1" if fetch didn't do something properly
 			if ( $fetch_ret_val == 1 ) {
 				// We couldn't get the file from GitHub. We might not have 
 				// connectivity to Github, the file wasn't found, there was 
 				// a DNS issue, or something else went wrong.
 				$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
+				$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
+				
 			}	// end of fetch failed
 			else {
 				// Fetch succeeded
 				mwexec ("chmod a+x /tmp/thebrig_install.sh");
-				updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");			
+				//header("Location: extensions_thebrig.php");
+				//updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");			
 			}
-			
-
+		}
+		else {
+			header("Location: exec.php");
 		}
 	} // end of no input errors
 
@@ -215,7 +232,7 @@ function conf_handler() {
 	</td></tr>
 
 	<tr><td class="tabcont">
-		<form action="extensions_thebrig_manager.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
+		<form action="exec.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
 		<?php if (updatenotify_exists_mode("thebrig", 1 )) print_thebrig_confirm_box();?>
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php 
@@ -227,8 +244,10 @@ function conf_handler() {
 			<td width="78%" class="vtable">
 			<?=gettext("Click below to download and install the latest version.");?><br />
 				<div id="submit_x">
-					<input id="update" name="update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return print_thebrig_confirm_box();" /><br />
+					<input id="thebrig_update" name="thebrig_update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return confirm('<?=_THEBRIG_INFO_TB;?>');" /><br />
 				</div>
+				<input name="thebrig_git_ver_post" type="hidden" value="<?=$git_ver;?>" />
+				<input name="txtCommand" type="hidden" value="<?="sh /tmp/thebrig_install.sh {$config['thebrig']['rootfolder']} 3";?>" />
 			</td>
 			</tr> <?php } ?>
 		<?php html_separator(); ?>
