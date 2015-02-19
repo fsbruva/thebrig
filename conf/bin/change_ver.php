@@ -19,7 +19,7 @@
  * 					github version of TheBrig's lang.inc.
 */
 header_remove('x-powered-by');
-header_remove('content-type');
+header_remove('Content-type:');
 include ("config.inc");
 
 // Initial value for brig version so that numeric comparisons don't fail
