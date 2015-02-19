@@ -1,4 +1,4 @@
-#!/usr/local/bin/php-cgi -f
+#!/usr/local/bin/php-cgi -q -f
 <?php
 /*
  * File name: 	thebrig_start.php
@@ -24,7 +24,8 @@
  * a_jail		An array of all the jail information from the config.xml
 */
 header_remove('x-powered-by');
-header('Content-Type:');
+header("content-type: none");
+header_remove("content-type");
 require_once ("config.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/lang.inc");
