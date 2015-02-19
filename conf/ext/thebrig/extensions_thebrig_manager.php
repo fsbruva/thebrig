@@ -107,11 +107,9 @@ else { // TheBrig has been confirmed
 	else {
 		// Fetch succeeded
 		mwexec ("chmod a+x /tmp/thebrig_install.sh");
-		//header("Location: extensions_thebrig.php");
-		//updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");			
 	}
 } // end of "Brig Confirmed"
-
+/*
 // We have returned to this page via a POST
 if ($_POST) {
 	unset($input_errors);
@@ -129,11 +127,11 @@ if ($_POST) {
 
 		if ( $pconfig['thebrig_git_ver_post'] >= $brig_ver ) {
 			// We want to make sure we can't let the user revert - the code we need to update thebrig will go here.
-			/*mkdir("/tmp/thebrig000",0777);
-			cmd_exec ("fetch -o /tmp/thebrig000/thebrig.zip https://github.com/fsbruva/thebrig/archive/alcatraz.zip", $output, $tolog );
-			chdir("/tmp/thebrig000");
-			mwexec ("tar -xvf thebrig.zip --exclude='.git*' --strip-components 1");
-			mwexec("rm thebrig.zip"); */
+			//mkdir("/tmp/thebrig000",0777);
+			//cmd_exec ("fetch -o /tmp/thebrig000/thebrig.zip https://github.com/fsbruva/thebrig/archive/alcatraz.zip", $output, $tolog );
+			//chdir("/tmp/thebrig000");
+			//mwexec ("tar -xvf thebrig.zip --exclude='.git*' --strip-components 1");
+			//mwexec("rm thebrig.zip"); 
 			mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
 			// $result will be "1" if fetch didn't do something properly
 			if ( $fetch_ret_val == 1 ) {
@@ -164,30 +162,30 @@ if ($_POST) {
 		$savemsg = "Update process aborted";	
 	}
 	If (isset($_POST['agree']) && $_POST['agree'] == "Agree" ) {
-		/* $cmd = "cp -r /tmp/thebrig000/* ".$config['thebrig']['rootfolder'];
+		$cmd = "cp -r /tmp/thebrig000/* ".$config['thebrig']['rootfolder'];
 		file_put_contents ("/tmp/cmdbrig","#!/bin/sh\n" . $cmd);
 		
 		updatenotify_delete("thebrig");
 		mwexec ("sh /tmp/cmdbrig");
 		$savemsg = "Updated";
 		mwexec ("rm -rf /tmp/thebrig000");
-		mwexec ("rm /tmp/cmdbrig"); */
+		mwexec ("rm /tmp/cmdbrig"); 
 		header("Location: extensions_thebrig.php"); 
 
 	}
-} // end of POST
+} // end of POST *//
 
 // Uses the global fbegin include
 include("fbegin.inc");
 
 // This will evaluate if there were any input errors from prior to the user clicking "save"
-if ( $input_errors ) { 
+/*if ( $input_errors ) { 
 	print_input_errors( $input_errors );
-}
+}*/
 
 ?> <!-- This is the end of the first bit of html code -->
 
-<!-- This function allows the pages to render the buttons impotent whilst carrying out various functions -->
+<!-- This function allows the pages to render the buttons impotent whilst carrying out various functions 
 <script language="JavaScript">
 function checkBeforeSubmit() {
 	if ( document.iform.beenSubmitted )
@@ -206,7 +204,7 @@ function conf_handler() {
 	}
 }
 
-</script>
+</script> -->
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
@@ -232,8 +230,8 @@ function conf_handler() {
 	</td></tr>
 
 	<tr><td class="tabcont">
-		<form action="exec.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
-		<?php if (updatenotify_exists_mode("thebrig", 1 )) print_thebrig_confirm_box();?>
+		<form action="exec.php" method="post" name="iform" id="iform" >
+		<!-- <?php// if (updatenotify_exists_mode("thebrig", 1 )) print_thebrig_confirm_box();?> -->
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php 
 			html_titleline(gettext("Update Availability")); 
@@ -246,7 +244,6 @@ function conf_handler() {
 				<div id="submit_x">
 					<input id="thebrig_update" name="thebrig_update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return confirm('<?=_THEBRIG_INFO_TB;?>');" /><br />
 				</div>
-				<input name="thebrig_git_ver_post" type="hidden" value="<?=$git_ver;?>" />
 				<input name="txtCommand" type="hidden" value="<?="sh /tmp/thebrig_install.sh {$config['thebrig']['rootfolder']} 3";?>" />
 			</td>
 			</tr> <?php } ?>
