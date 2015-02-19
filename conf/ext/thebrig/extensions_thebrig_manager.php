@@ -227,7 +227,7 @@ function conf_handler() {
 			<td width="78%" class="vtable">
 			<?=gettext("Click below to download and install the latest version.");?><br />
 				<div id="submit_x">
-					<input id="update" name="update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return conf_handler();" /><br />
+					<input id="update" name="update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return print_thebrig_confirm_box();" /><br />
 				</div>
 			</td>
 			</tr> <?php } ?>
