@@ -281,7 +281,7 @@ function disable_buttons() {
 							<td  valign="top">
 					<?php if( isset( $config['thebrig']['rootfolder'])==false): ?>
 							<a title=<?=gettext("Configure TheBrig please first");?>
-					<?php elseif( !isset( $config['thebrig']['content'])==false): ?>
+					<?php elseif( isset( $config['thebrig']['content'])==false): ?>
 							<a title=<?=gettext("Configure at least one jail first");?>				
 					<?php else: ?>
 								<!--<div id="loaddiv" style="display: block;"><script>$('#loaddiv').load("extensions_thebrig_check.php");</script></div>-->
