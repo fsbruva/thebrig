@@ -115,12 +115,27 @@ if ($_POST) {
 
 		if ( $git_ver > $brig_ver ) {
 			// We want to make sure we can't let the user revert - the code we need to update thebrig will go here.
-			mkdir("/tmp/thebrig000",0777);
+			/*mkdir("/tmp/thebrig000",0777);
 			cmd_exec ("fetch -o /tmp/thebrig000/thebrig.zip https://github.com/fsbruva/thebrig/archive/alcatraz.zip", $output, $tolog );
 			chdir("/tmp/thebrig000");
 			mwexec ("tar -xvf thebrig.zip --exclude='.git*' --strip-components 1");
-			mwexec("rm thebrig.zip");
-			updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");
+			mwexec("rm thebrig.zip"); */
+			
+			mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/conf/ext/thebrig/install.sh" , $garbage , $fetch_ret_val ) ;
+			// $result will be "1" if fetch didn't do something properly
+			if ( $fetch_ret_val == 1 ) {
+				// We couldn't get the file from GitHub. We might not have 
+				// connectivity to Github, the file wasn't found, there was 
+				// a DNS issue, or something else went wrong.
+				$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
+			}	// end of fetch failed
+			else {
+				// Fetch succeeded
+				mwexec ("chmod a+x /tmp/thebrig_install.sh");
+				updatenotify_set("thebrig", UPDATENOTIFY_MODE_MODIFIED, "update");			
+			}
+			
+
 		}
 	} // end of no input errors
 
@@ -132,15 +147,15 @@ if ($_POST) {
 		$savemsg = "Update process aborted";	
 	}
 	If (isset($_POST['agree']) && $_POST['agree'] == "Agree" ) {
-		$cmd = "cp -r /tmp/thebrig000/* ".$config['thebrig']['rootfolder'];
+		/* $cmd = "cp -r /tmp/thebrig000/* ".$config['thebrig']['rootfolder'];
 		file_put_contents ("/tmp/cmdbrig","#!/bin/sh\n" . $cmd);
 		
 		updatenotify_delete("thebrig");
 		mwexec ("sh /tmp/cmdbrig");
 		$savemsg = "Updated";
 		mwexec ("rm -rf /tmp/thebrig000");
-		mwexec ("rm /tmp/cmdbrig");
-		header("Location: extensions_thebrig.php");
+		mwexec ("rm /tmp/cmdbrig"); */
+		header("Location: extensions_thebrig.php"); 
 
 	}
 } // end of POST
