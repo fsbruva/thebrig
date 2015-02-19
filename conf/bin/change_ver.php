@@ -1,4 +1,4 @@
-#!/usr/local/bin/php-cgi -q
+#!/usr/local/bin/php-cgi -q -f
 <?php
 
 /*
@@ -19,7 +19,7 @@
  * 					github version of TheBrig's lang.inc.
 */
 header_remove('x-powered-by');
-header_remove();
+header("content-type: none");
 include ("config.inc");
 
 // Initial value for brig version so that numeric comparisons don't fail
