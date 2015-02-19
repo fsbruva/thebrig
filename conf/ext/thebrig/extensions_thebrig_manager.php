@@ -94,20 +94,21 @@ else { // TheBrig has been confirmed
 				$git_ver = _THEBRIG_ERROR;
 			} // end else langfile exists	
 		} // end of successful fetch
-	} // end of "Not Post"
-	mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
-	if ( $fetch_ret_val == 1 ) {
-				// We couldn't get the file from GitHub. We might not have 
-				// connectivity to Github, the file wasn't found, there was 
-				// a DNS issue, or something else went wrong.
-				$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
-				$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
+		mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
+		if ( $fetch_ret_val == 1 ) {
+			// We couldn't get the file from GitHub. We might not have 
+			// connectivity to Github, the file wasn't found, there was 
+			// a DNS issue, or something else went wrong.
+			$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
+			$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
 				
-	}	// end of fetch failed
-	else {
-		// Fetch succeeded
-		mwexec ("chmod a+x /tmp/thebrig_install.sh");
-	}
+		}	// end of fetch failed
+		else {
+			// Fetch succeeded
+			mwexec ("chmod a+x /tmp/thebrig_install.sh");
+		}
+	} // end of "Not Post"
+
 } // end of "Brig Confirmed"
 
 // Uses the global fbegin include
@@ -156,7 +157,7 @@ if ( $input_errors ) {
 			<td width="78%" class="vtable">
 			<?=gettext("Click below to download and install the latest version.");?><br />
 				<div id="submit_x">
-					<input id="thebrig_update" name="thebrig_update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return confirm('<?=_THEBRIG_INFO_TB;?>');" /><br />
+					<input id="thebrig_update" name="thebrig_update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return confirm('<?=_THEBRIG_INFO_MGR;?>');" /><br />
 				</div>
 				<input name="txtCommand" type="hidden" value="<?="sh /tmp/thebrig_install.sh {$config['thebrig']['rootfolder']} 3";?>" />
 			</td>

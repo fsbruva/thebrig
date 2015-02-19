@@ -64,6 +64,7 @@
 		define(_THEBRIG_VERSION, 'TheBrig Version ' . _THEBRIG_VERSION_NBR);
 		define(_THEBRIG_MATCH_ERROR, "There seem to be no matching releases for your kernel. See the documentation regarding kernel/jail binary mismatch");
 		define(_THEBRIG_INFO_TB, "The selected packages will be downloaded as a background job. Please check back in a few moments.");
+		define(_THEBRIG_INFO_MGR, "Any jails running will be stopped, and the latest version will be downloaded. Are you sure you want to continue?");
 		define(_THEBRIG_JAIL_PARALLEL, "Start all jails in parallel");
 		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
