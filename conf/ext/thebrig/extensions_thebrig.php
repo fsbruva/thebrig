@@ -297,7 +297,7 @@ function disable_buttons() {
 										<td width="5%" class="listhdrc"><?=gettext("Action");?></td>
 									</tr>
 						<?php foreach( $config['thebrig']['content'] as $n_jail): ?>					
-									<tr name='myjail' id='myjail'><td width="7%" valign="top" class="listr" name="ajaxjailname<?=$n_jail['jailno']; ?>"  id="ajaxjailname<?=$n_jail['jailno']; ?>" >  </td>
+									<tr name='myjail' id='myjail'><td width="7%" valign="top" class="listlr" name="ajaxjailname<?=$n_jail['jailno']; ?>"  id="ajaxjailname<?=$n_jail['jailno']; ?>" >  </td>
 									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$n_jail['jailno']; ?>" ><span><img id="ajaxjailbuiltimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$n_jail['jailno']; ?>"></span><span id="ajaxjailbuiltsrc<?=$n_jail['jailno']; ?>"></span> </td>
 									    <td width="24%" valign="top" class="listr" name="ajaxjailstatus<?=$n_jail['jailno']; ?>"  > <span><img id="ajaxjailstatusimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$n_jail['jailno']; ?>"></span> </td>
 									    <td width="5%" valign= "top" class="listr" name="ajaxjailid<?=$n_jail['jailno']; ?>" id="ajaxjailid<?=$n_jail['jailno']; ?>"> <img id="ajaxjailidimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
@@ -339,12 +339,12 @@ function disable_buttons() {
 									<?php foreach ($a_jail as $jail):?>
 								<?php $notificationmode = updatenotify_get_mode("thebrig", $jail['uuid']);?>
 								<tr>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['jailno']) ? "*" : $jail['jailno']);?>&nbsp;</td>
+									<td class="<?=$enable?"listr":"listlrd";?>"><?=htmlspecialchars(empty($jail['jailno']) ? "*" : $jail['jailno']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['jailname']);?>&nbsp;</td>
 									<?php if (is_array($jail['allowedip'])) $networks = implode(",", $jail['allowedip']); ?>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['allowedip']) ? "*" : $networks);?>&nbsp;</td>  
 									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(isset($jail['enable']) ? "YES" : "NO");?></td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(isset($jail['zfs_datasets']) ? "used" : "no") ;?>&nbsp;</td>
+									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(isset($jail['zfs_datasets']) ? "USED" : "NO") ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($jail['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['jailpath']);?>&nbsp;</td>
 									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
