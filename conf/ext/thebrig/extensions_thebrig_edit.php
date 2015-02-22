@@ -31,10 +31,10 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 
 // This determines if the page was arrived at because of an edit (the UUID of the jail)
 // was passed to the page) or for a new creation.
-if (isset($_GET['uuid'])) $uuid = $_GET['uuid']; // Use the existing jail's UUID
+if (isset($_GET['uuid'])){ $uuid = $_GET['uuid'];} // Use the existing jail's UUID
 	
 	
-if (isset($_POST['uuid'])) $uuid = $_POST['uuid']; // Use the new jail's UUID
+if (isset($_POST['uuid'])) {$uuid = $_POST['uuid']; }// Use the new jail's UUID
 	
 	
 
@@ -173,7 +173,6 @@ else {
 
 if ($_POST) {
 	unset($input_errors);
-	
 	if (isset($_POST['Cancel']) && $_POST['Cancel']) {
 		header("Location: extensions_thebrig.php");
 		exit;
@@ -498,7 +497,8 @@ if ($_POST) {
 		
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-
+		write_defs_rules();
+		write_jailconf ();
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
@@ -519,9 +519,7 @@ function thebrig_get_next_jailnumber() {
 	}
 	return $jailno;
 }
-
 ?>
-
 <?php include("fbegin.inc");?>
 <script type="text/javascript">//<![CDATA[
 $(document).ready(function(){
@@ -794,7 +792,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			} //endif ?>	
 				</table>
 				<div id="submit">
-					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" onclick="onsubmit_cmd(); onsubmit_allowedip(); onsubmit_rule(); onsubmit_param();onsubmit_zfs_dataset();"/>
+					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" onclick="onsubmit_cmd(); onsubmit_allowedip(); onsubmit_rule(); onsubmit_param();"/>
 					<input name="Cancel" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
 					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="Fstab editor">
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
