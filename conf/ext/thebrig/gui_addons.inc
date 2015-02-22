@@ -89,9 +89,10 @@ class HTMLBrigCommandBox extends HTMLBaseControl {
 		echo "    </script>\n";
 		echo "    <table><tr><td width='40%' color='red'><center><b>In jail</b></center>\n";
 		echo "    <select name='{$ctrlname}[]' class='formfld' id='{$ctrlname}' multiple='multiple'  style='width: 350px' onchange='onchange_{$ctrlname}()'>\n";
+		if (isset($value) ){
 		foreach ($value as $valuek => $valuev) {
 			echo "      <option value='{$valuev}' {$optparam}>{$valuev}</option>\n";
-		}
+		}}
 		echo "    </select>\n";
 		echo "    <input name='{$ctrlname}deletebtn' type='button' class='formbtn' id='{$ctrlname}deletebtn' value='".htmlspecialchars(gettext("Delete"), ENT_QUOTES)."' onclick='onclick_delete_{$ctrlname}()' /><br />\n";
 		echo "    </td>\n";
@@ -189,9 +190,10 @@ class HTMLBrigdevfs extends HTMLBaseControl {
 		echo "    </script>\n";
 		echo "    <table><tr><td width='40%' color='red'><center><b>In jail</b></center>\n";
 		echo "    <select name='{$ctrlname}[]' class='formfld' id='{$ctrlname}' multiple='multiple' size='4' style='width: 350px' onchange='onchange_{$ctrlname}()'>\n";
+		if (isset($value)) {
 		foreach ($value as $valuek => $valuev) {
 			echo "      <option value='{$valuev}' {$optparam}>{$valuev}</option>\n";
-		}
+		}}
 		echo "    </select><br />\n";
 		echo "    <input name='{$ctrlname}deletebtn' type='button' class='formbtn' id='{$ctrlname}deletebtn' value='".htmlspecialchars(gettext("Delete"), ENT_QUOTES)."' onclick='onclick_delete_{$ctrlname}()' />\n";
 		echo "    </td>\n";
@@ -283,9 +285,10 @@ class HTMLBrigNetworkBox extends HTMLBaseControl {
 		echo "    </script>\n";
 		echo "    <table><tr><td width='40%' color='red'><center><b>In jail</b></center>\n";
 		echo "    <select name='{$ctrlname}[]' class='formfld' id='{$ctrlname}' multiple='multiple'  style='width: 350px' onchange='onchange_{$ctrlname}()'>\n";
+		if (isset($value)) {
 		foreach ($value as $valuek => $valuev) {
 			echo "      <option value='{$valuev}' {$optparam}>{$valuev}</option>\n";
-		}
+		}}
 		echo "    </select>\n";
 		echo "    <input name='{$ctrlname}deletebtn' type='button' class='formbtn' id='{$ctrlname}deletebtn' value='".htmlspecialchars(gettext("Delete"), ENT_QUOTES)."' onclick='onclick_delete_{$ctrlname}()' /><br />\n";
 		echo "    </td>\n";
@@ -364,7 +367,7 @@ class HTMLOptionsBox extends HTMLBaseControl {
 		echo "    </script>\n";
 		echo "    <table><tr><td width='40%' color='red'><center><b>In jail</b></center>\n";
 		echo "    <select name='{$ctrlname}[]' class='formfld' id='{$ctrlname}' multiple='multiple' size='8' style='width: 350px' >\n";
-		if (is_array($value)) { foreach ($value as $valuek => $valuev) {
+		if (isset($value)) { foreach ($value as $valuek => $valuev) {
 			echo "      <option value='{$valuev}' >{$valuev}</option>\n";
 				      }
 			}
@@ -475,9 +478,10 @@ class HTMLzfs_set extends HTMLBaseControl {
 		echo "    </script>\n";
 		echo "    <table><tr><td width='40%' color='red'><center><b>In jail</b></center>\n";
 		echo "    <select name='{$ctrlname}[]' class='formfld' id='{$ctrlname}' multiple='multiple'  style='width: 350px' onchange='onchange_{$ctrlname}()'>\n";
+		if (isset($value)) {
 		foreach ($value as $valuek => $valuev) {
 			echo "      <option value='{$valuev}' {$optparam}>{$valuev}</option>\n";
-		}
+		}}
 		echo "    </select>\n";
 		echo "    <input name='{$ctrlname}deletebtn' type='button' class='formbtn' id='{$ctrlname}deletebtn' value='".htmlspecialchars(gettext("Delete"), ENT_QUOTES)."' onclick='onclick_delete_{$ctrlname}()' /><br />\n";
 		echo "    </td>\n";
@@ -489,10 +493,10 @@ class HTMLzfs_set extends HTMLBaseControl {
 		echo "    <td width='40%'><table><tr><td width='50%'><center>datasets</center></td><td>Jail's mount point</td></tr>\n";
 		
 		echo "    <tr><td width='40%'><select name='{$ctrlname}filetype' class='formfld' id='{$ctrlname}filetype' >\n ";
-		
+		if (isset($value)){
 		foreach ($options as $optionsv) {
 		echo "      <option value='{$optionsv[2]}' {$optparam}>{$optionsv[2]}</option>\n";
-			}
+			}}
 		
 		
 		echo "    </select></td><td><input name='{$ctrlname}data' type='text' class='formfld' id='{$ctrlname}data' size='30' value='' /></td></tr></table>\n";
