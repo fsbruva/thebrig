@@ -103,14 +103,6 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['exec_stop'] = $a_jail[$cnid]['exec_stop'];
 	$pconfig['desc'] = $a_jail[$cnid]['desc'];
 	$pconfig['base_ver'] = $a_jail[$cnid]['base_ver'];
-	$pconfig['lib_ver'] = $a_jail[$cnid]['lib_ver'];
-	$pconfig['src_ver'] = $a_jail[$cnid]['src_ver'];
-	$pconfig['doc_ver'] = $a_jail[$cnid]['doc_ver'];
-	$pconfig['image'] = $a_jail[$cnid]['image'];
-	$pconfig['image_type'] = $a_jail[$cnid]['image_type'];
-	$pconfig['attach_params'] = $a_jail[$cnid]['attach_params'];
-	$pconfig['attach_blocking'] = $a_jail[$cnid]['attach_blocking'];
-	$pconfig['force_blocking'] = $a_jail[$cnid]['force_blocking'];
 	$pconfig['zfs_dataset'] = explode (";", $a_jail[$cnid]['zfs_datasets']);
 	$pconfig['zfs_enable'] =  $a_jail[$cnid]['zfs_enable'];
 	if (FALSE == $a_jail[$cnid]['fib']) { unset ($pconfig['fib']);} else {$pconfig['fib'] = $a_jail[$cnid]['fib'];}
@@ -155,15 +147,6 @@ else {
 	$pconfig['exec_stop'] = "/bin/sh /etc/rc.shutdown";
 	$pconfig['desc'] = "";
 	$pconfig['base_ver'] = "Unknown";
-	$pconfig['lib_ver'] = "Not Installed";
-	$pconfig['src_ver'] = "Not Installed";
-	$pconfig['doc_ver'] = "Not Installed";
-	$pconfig['image'] = "";
-	$pconfig['image_type'] = "";
-	$pconfig['attach_params'] = "";
-	$pconfig['attach_blocking'] = "";
-	$pconfig['force_blocking'] = "";
-	$pconfig['zfs_datasets'] = "";
 	unset ($pconfig['zfs_enable']);
 	unset ($pconfig['fib']);
 	$path_ro = false;
@@ -325,7 +308,7 @@ if ($_POST) {
 				$base_count++;
 				$pconfig['base_ver'] = $file_split[2] . "-" . $file_split[3]; 
 			}
-			elseif ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'lib32.txz') == 0 ){
+		/*	elseif ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'lib32.txz') == 0 ){
 				$lib_count++;
 				$pconfig['lib_ver'] = $file_split[2] . "-" . $file_split[3] ;
 			}
@@ -342,7 +325,7 @@ if ($_POST) {
 				$pconfig['lib_ver'] = "Unknown";
 				$pconfig['src_ver'] = "Unknown";
 				$pconfig['doc_ver'] = "Unknown";
-			}
+			} */
 		} // End of foreach
 		// Need to deal with keeping track of the lib version as the same as the base version
 		if ( $myarch != "amd64" ){
@@ -453,14 +436,6 @@ if ($_POST) {
 		//$jail['jail_parameters'] = $pconfig['jail_parameters'];
 		$jail['desc'] = $pconfig['desc'];
 		$jail['base_ver'] = $pconfig['base_ver'];
-		$jail['lib_ver'] = $pconfig['lib_ver'];
-		$jail['src_ver'] = $pconfig['src_ver'];
-		$jail['doc_ver'] = $pconfig['doc_ver'];
-		$jail['image'] = $pconfig['image'];
-		$jail['image_type'] = $pconfig['image_type'];
-		$jail['attach_params'] = $pconfig['attach_params'];
-		$jail['attach_blocking'] = $pconfig['attach_blocking'];
-		$jail['force_blocking'] = $pconfig['force_blocking'];
 		// compress array to string
 		if (!empty( $zfsdataset1 )) { $jail['zfs_datasets'] = implode(";", $zfsdataset1); } else { unset ($jail['zfs_datasets']);}
 		$jail['zfs_enable'] = !empty($pconfig['zfs_enable']) ? true : false;
@@ -497,8 +472,7 @@ if ($_POST) {
 		
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-		write_defs_rules();
-		write_jailconf ();
+
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
