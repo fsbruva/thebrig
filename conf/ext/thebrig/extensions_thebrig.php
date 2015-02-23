@@ -162,7 +162,7 @@ include("fbegin.inc");?>
 <script language="JavaScript">
 $(document).ready(function(){
 	var gui = new GUI;
-	gui.recall(50, 3000, 'extensions_thebrig_ajax.php', null, function(data) {
+	gui.recall(3000, 3000, 'extensions_thebrig_ajax.php', null, function(data) {
 		if ( typeof(data) !== 'undefined' ) {
 		for ( idx=1; idx<= data.rowcount;  idx++ ) {
 			$('#ajaxjailname'+idx).text(data.name[idx] );
@@ -258,21 +258,22 @@ $(document).ready(function(){
 					}
 			}
 		}
-			
-		$(".jail_stop").click(function(){
-		var $tr = $(this).closest('tr');
-		var name = $tr.children(':eq(0)').text();
-		brig_action(name , 'onestop');
-		});	
-	
-		$(".jail_start").click(function(){
-		var $tr = $(this).closest('tr');
-		var name = $tr.children(':eq(0)').text();
-		brig_action(name , 'onestart');
-		});
+
+
 	}});
 });
 
+	$(".jail_stop").live( 'click' , function(){
+	var $tr = $(this).closest('tr');
+	var name = $tr.children(':eq(0)').text();
+	brig_action(name , 'onestop');
+});	
+	
+$(".jail_start").live( 'click', function(){
+	var $tr = $(this).closest('tr');
+	var name = $tr.children(':eq(0)').text();
+	brig_action(name , 'onestart');
+});	
 	
 
 function brig_action(name, act) {
