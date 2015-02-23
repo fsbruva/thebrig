@@ -967,7 +967,7 @@ function write_defs_rules() {
 		$fstab_handle = fopen($fstabfile, "w");
 		if  ($out_jail['jail_type'] === "slim") {
 			$basejailfolder	= substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
-			fwrite( $fstab_handle1 ,  $basejailfolder . " " .  $out_jail['jailpath'] . "basejail nullfs ro 0 0\n");
+			fwrite( $fstab_handle ,  $basejailfolder . " " .  $out_jail['jailpath'] . "basejail nullfs ro 0 0\n");
 		}
 		if (TRUE == is_array($out_jail['auxparam'])) {
 			foreach ($out_jail['auxparam'] as $fstab) {  fwrite ($fstab_handle, $fstab."\n"); }
@@ -1163,7 +1163,7 @@ function write_defs_rules() {
 		if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/prestop.". $out_jail['jailname'])) { 
 			fwrite ($conf_handle, "\texec.prestop =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/prestop.". $out_jail['jailname'] . "\";\n"); 
 		} 
-		fwrite ($handle, "\texec.stop =\"" . $out_jail['exec_stop'] . "\";\n");
+		fwrite ($conf_handle, "\texec.stop =\"" . $out_jail['exec_stop'] . "\";\n");
 		if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/poststop.". $out_jail['jailname'])) { 
 			fwrite ($conf_handle, "\texec.poststop =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/poststop.". $out_jail['jailname'] . "\";\n"); 
 		}
