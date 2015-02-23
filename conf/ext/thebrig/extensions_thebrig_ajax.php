@@ -83,13 +83,9 @@ if (is_ajax()) {
 			//cmd_exec( $cmd_string,$a_tolog, $err_log);
 			//mwexec ( 'rm $jail_JID' );
 		}
-			
 		// Next lines write messages to log
 		cmd_exec("sh /etc/rc.d/thebrig {$jailcmd} {$jailname}",$a_tolog, $err_log);
-		$filelog = $config['thebrig']['rootfolder']."thebrig.log";
-		$log_handle = fopen($filelog, "a+");
-		foreach ($err_log as $tolog ) { fwrite ($log_handle, "[".date("Y/m/d H:i:s")."]: TheBrig error!: ".trim($tolog)."\n" ); }
-		fclose ($log_handle);
+		write_briglog($err_log, "ERROR");
 	}
 	else {
 		$jailinfo = get_jailinfo();

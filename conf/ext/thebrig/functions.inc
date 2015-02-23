@@ -737,19 +737,19 @@ function write_rcconflocal () {
 	} else {fwrite($handle, "jail_enable=\"NO\"\n");
 	}
 	If (isset($config['thebrig']['parastart'])) {
-		fwrite ($handle, "jail_parallel_start=\"YES\"\n");
+		//fwrite ($handle, "jail_parallel_start=\"YES\"\n");
 	} else {fwrite($handle, "jail_parallel_start=\"NO\"\n");
 	}
 	If (isset($config['thebrig']['sethostname'])) {
-		fwrite ($handle, "jail_set_hostname_allow=\"YES\"\n");
+		//fwrite ($handle, "jail_set_hostname_allow=\"YES\"\n");
 	} else {fwrite($handle, "jail_set_hostname_allow=\"NO\"\n");
 	}
 	If (isset($config['thebrig']['unixiproute'])) {
-		fwrite ($handle, "jail_socket_unixiproute_only=\"YES\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=1");
+		//fwrite ($handle, "jail_socket_unixiproute_only=\"YES\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=1");
 	} else {fwrite($handle, "jail_socket_unixiproute_only=\"NO\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=0");
 	}
 	If (isset($config['thebrig']['systenv'])) {
-		fwrite ($handle, "jail_sysvipc_allow=\"YES\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=1");
+		//fwrite ($handle, "jail_sysvipc_allow=\"YES\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=1");
 	} else {fwrite($handle, "jail_sysvipc_allow=\"NO\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=0");
 	}
 	// I explode multi array to small arrays and replace tag [cell(n)] to [number] number is 1,2,3,4...
@@ -764,16 +764,17 @@ function write_rcconflocal () {
 		$out_jail_comb = substr($out_jail['jailpath'], 0, strlen($out_jail['jailpath'])-1);
 		fwrite ($handle, "jail_{$out_jail['jailname']}_rootdir=\"{$out_jail_comb}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_hostname=\"{$out_jail['jailname']}.{$config['system']['domain']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_interface=\"{$out_jail['if']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_ip=\"{$out_jail['ipaddr']}/{$out_jail['subnet']}\"\n");
+		//fwrite ($handle, "jail_{$out_jail['jailname']}_interface=\"{$out_jail['if']}\"\n");
+		fwrite ($handle, "jail_{$out_jail['jailname']}_ip=\"{$out_jail['allowedip']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_start=\"{$out_jail['exec_start']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_afterstart0=\"{$out_jail['afterstart0']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_afterstart1=\"{$out_jail['afterstart1']}\"\n");
 		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_stop=\"{$out_jail['exec_stop']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_parameters=\"{$out_jail['jail_parameters']}\"\n");
+		//fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
+		
 		fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"/etc/fstab.{$out_jail['jailname']}\"\n");
+		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"{$config['thebrig']['rootfolder']}.conf/jails/fstab.{$out_jail['jailname']}\"\n");
+		/*
+		 * //fwrite ($handle, "jail_{$out_jail['jailname']}_parameters=\"{$out_jail['jail_parameters']}\"\n");
+		// need a FOR loop to run through all the parameters
 		If (isset($out_jail['jail_mount'])) {
 			fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
 		} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");
@@ -787,7 +788,8 @@ function write_rcconflocal () {
 			fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
 		} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");
 		}
-		$fstabfile= "/etc/fstab.{$out_jail['jailname']}";
+		
+		$fstabfile= "{$config['thebrig']['rootfolder']}.conf/jails/fstab.{$out_jail['jailname']}";
 		$handle1 = fopen($fstabfile, "w");
 		if  ($out_jail['jail_type'] === "slim") {
 			$basejailfolder	= 	 substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
@@ -797,14 +799,14 @@ function write_rcconflocal () {
 			foreach ($out_jail['auxparam'] as $fstab) {
 				fwrite ($handle1, $fstab."\n");
 			}
-		} else {}
+		} 
 		if (isset($out_jail['ports'])) { 
-		$portsjailfolder	= 	$config['thebrig']['rootfolder']."conf/ports";
-		fwrite( $handle1 ,  $portsjailfolder . " " .  $out_jail['jailpath'] . "usr/ports nullfs ro 0 0\n");
-		} else {}
-		if  (($out_jail['jail_type'] === "slim") || ($out_jail['jail_type'] === "full")) {
-			If (isset($out_jail['devfs_enable'])) { fwrite( $handle1 ,  "devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n");} else {}
-			If (isset($out_jail['proc_enable'])) { fwrite( $handle1 ,  "procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} else {}
+			$portsjailfolder = $config['thebrig']['rootfolder']."conf/ports";
+			fwrite( $handle1 ,  $portsjailfolder . " " .  $out_jail['jailpath'] . "usr/ports nullfs ro 0 0\n");
+		} 
+		if  ((strcmp($out_jail['jail_type'],"slim") == 0 || ( strcmp($out_jail['jail_type'], "full") == 0) {
+			if (isset($out_jail['devfs_enable'])) { fwrite( $handle1 ,  "devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n");} 
+			if (isset($out_jail['proc_enable'])) { fwrite( $handle1 ,  "procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} 
 			}
 		fclose($handle1);
 	}
@@ -848,12 +850,14 @@ function write_briglog ($tolog, $fac) {
 	global $config;
 	$filelog = $config['thebrig']['rootfolder']."thebrig.log";
 	$handle1 = fopen($filelog, "a+");
-	if (is_array ($tolog)) { foreach ($tolog as $tolog1) {
-	fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog1)."\n" ); }
-	} else { fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog)."\n" ); }
-	
+	if (is_array ($tolog)) { 
+		foreach ($tolog as $tolog1) {
+		fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog1)."\n" ); }
+	} 
+	else { 
+		fwrite ($handle1, "[".date("Y/m/d H:i:s")."]: TheBrig " .$fac . ": ".trim($tolog)."\n" ); 
+	}
 	fclose ($handle1); 
-
 }
 //this function check if zfs used by system and defined 1 dataset (+1 as pool )
 function brig_zfs_check() {	
