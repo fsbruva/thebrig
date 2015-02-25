@@ -44,6 +44,16 @@ STAT=$(procstat -f $$ | grep -E "/"$(basename $0)"$")
 FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
 START_FOLDER=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
 
+# First stop any users older than 9.3 from installing
+MAJ_REL=$(uname -r | cut -d- f1 | cut -d. -f1)
+MIN_REL=$(uname -r | cut -d- f1 | cut -d. -f2)
+
+# Prevent users from breaking their system
+if [ $MAJ_REL -lt 9 -o $MIN_REL -lt 3 ]; then
+	echo "ERROR: This version of TheBrig is incompatible with your system!"
+	exerr "ERROR: Please upgrade Nas4Free to version 9.3 or higher!"
+fi
+
 # Store the script's current location in a file
 echo $START_FOLDER > /tmp/thebriginstaller
 
@@ -59,7 +69,6 @@ if [ ! -z $1 ]; then
         echo "Attempting to create a new destination directory....."
         mkdir -p $BRIG_ROOT || exerr "ERROR: Could not create directory!"
     fi
-#    cd $BRIG_ROOT || exerr "ERROR: Could not access install directory!"
 else
 # We are here because the user did not specify an alternate location. Thus, we should use the 
 # current directory as the root.
@@ -73,8 +82,14 @@ cd $START_FOLDER/install_stage || exerr "ERROR: Could not access staging directo
 if [ $2 -eq 3 ]; then 
     # Fetch the testing branch as a zip file
     echo "Retrieving the unstable branch as a zip file"
+    echo "If you aren't a developer for TheBrig, is a bad idea!"
+    echo "Please re-install according to the documentation..."
     fetch https://github.com/fsbruva/thebrig/archive/alcatraz.zip || exerr "ERROR: Could not write to install directory!"
     mv alcatraz.zip master.zip
+elif [ $# -gt 1 -o $2 -eq 2 ]; then
+	echo "ERROR: You are attempting an obsolete installation method!!"
+	echo "ERROR: If you were following an online tutorial, alert the author!"
+	exerr "ERROR: The method you attempted is not supported!"
 else
     # Fetch the master branch as a zip file
     echo "Retrieving the most recent stable version of TheBrig"
