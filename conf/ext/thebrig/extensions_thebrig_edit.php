@@ -28,6 +28,38 @@ if (is_file("/tmp/tempjail")){unlink ("/tmp/tempjail");}
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
 } // end of elseif
+else {
+	$pglocalheader= <<< EOD
+<style type="text/css">
+.modal {
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 ) 
+                url('ext/thebrig/ajax-loader.gif') 
+                50% 50% 
+                no-repeat;
+}
+
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading {
+    overflow: hidden;   
+}
+
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modal {
+    display: block;
+}
+</style>
+'<script type="text/javascript" src="ext/thebrig/spin.min.js"></script>'
+EOD;
+}
 
 // This determines if the page was arrived at because of an edit (the UUID of the jail)
 // was passed to the page) or for a new creation.
@@ -451,9 +483,9 @@ if ($_POST) {
 		elseif ( $jail['jail_type'] === "slim" ) {
 			// We know we're making a slim jail now
 			$config['thebrig']['basejail']['base_ver'] = $pconfig['base_ver'];
-			$config['thebrig']['basejail']['lib_ver'] = $pconfig['lib_ver'];
-			$config['thebrig']['basejail']['src_ver'] = $pconfig['src_ver'];
-			$config['thebrig']['basejail']['doc_ver'] = $pconfig['doc_ver'];
+			//$config['thebrig']['basejail']['lib_ver'] = $pconfig['lib_ver'];
+			//$config['thebrig']['basejail']['src_ver'] = $pconfig['src_ver'];
+			//$config['thebrig']['basejail']['doc_ver'] = $pconfig['doc_ver'];
 			if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 ) 
 				thebrig_split_world($pconfig['jailpath'] , true , $files_selected );
 			elseif (  $pconfig['source'] === "template" )
@@ -469,10 +501,8 @@ if ($_POST) {
 			$a_jail[] = $jail;
 			$mode = UPDATENOTIFY_MODE_NEW;
 		}
-		
 		updatenotify_set("thebrig", $mode, $jail['uuid']);
 		write_config();
-
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
@@ -496,6 +526,22 @@ function thebrig_get_next_jailnumber() {
 ?>
 <?php include("fbegin.inc");?>
 <script type="text/javascript">//<![CDATA[
+function submitted() {
+	if (confirm("Your jail will now be installed/updated. If you have selected tarballs for unpacking")) {
+        //alert("Clicked Ok");
+        $body = $("body");
+		$body.addClass("loading");
+		onsubmit_cmd(); 
+		onsubmit_allowedip(); 
+		onsubmit_rule(); 
+		onsubmit_param(); 
+		//onsubmit_zfs();
+        return true;
+    } else {
+        alert("Clicked Cancel");
+        return false;
+    }
+}
 $(document).ready(function(){
 	var gui = new GUI;
 	$('#jail_type').change(function() {
@@ -628,7 +674,7 @@ function jail_mount_enable() {
 			showElementById('statfs_tr','show');
 			break;
 		}
-	}
+}
 function helpbox() { alert("Slim - This is a fully functional jail, but when first installed, only occupies about 2 MB in its folder.\n\n full - This is a full sized jail, about 300 MB per jail, and is completely self contained.\n\n Linux - jail for Linux, such Debian.\n\n custom- this only create jail folder and make simulation without install. Usefull for migrate jails." ); }
 function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$pconfig['uuid'];?>&act=editor" }
 //]]>
@@ -686,7 +732,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
 			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), $pconfig['proc_enable'], "", "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", " ", " ");?>
 			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), $pconfig['fdescfs_enable'], "", "", " ");?>
-			<?php if (FALSE != ($datasets_list = brig_datasets_list())) {
+			<?php if (FALSE !== ($datasets_list = brig_datasets_list())) {
 			html_checkbox("zfs_enable", gettext("Enable mount zfs dataset"), isset($pconfig['zfs_enable']) ? true : false, "", "", " ");
 			html_zfs_box("zfs_dataset", gettext("ZFS dataset, mounted to jail"), $pconfig['zfs_dataset'], $datasets_list, false, false); 
 			} else { echo " <input name='zfs_enable' type='hidden' value='' />";}
@@ -766,13 +812,13 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			} //endif ?>	
 				</table>
 				<div id="submit">
-					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" onclick="onsubmit_cmd(); onsubmit_allowedip(); onsubmit_rule(); onsubmit_param();"/>
+					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" onclick="return submitted();"/>
 					<input name="Cancel" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
 					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="Fstab editor">
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
 					<input name="http_redirect" type="hidden" value="extensions_thebrig.php" />
 					
-					<?php if ( TRUE == isset( $pconfig['ports'])) { ?>
+					<?php if ( TRUE === isset( $pconfig['ports'])) { ?>
 						<input name="ports" type="hidden" value="<?= true;?>" />
 					<?php }?>
 					<?php if ( isset($uuid) && (FALSE !== $cnid)) { ?>
@@ -785,4 +831,6 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 		</td>
 	</tr>
 </table>
+
 <?php include("fend.inc");?>
+<div class="modal"><!-- This is for blocking page when user clicks add/save --></div>
