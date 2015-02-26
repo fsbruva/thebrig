@@ -16,9 +16,8 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
 } 
 else {
-	$pglocalheader=array( '<script type="text/javascript" src="ext/thebrig/spin.min.js"></script>' );
-	//updatenotify_delete("thebrig");
-	}
+	//$pglocalheader=array( );
+}
 
 if (is_ajax()) {
 	$jailinfo = get_jailinfo();
@@ -86,9 +85,6 @@ $rootfolder = $config['thebrig']['rootfolder'];
 $pconfig['parastart'] = isset( $config['thebrig']['parastart'] ) ? true : false ;
 $pconfig['thebrig_enable'] = isset($config['thebrig']['thebrig_enable']) ? true : false ; 
 if ($config['thebrig']['compress']  == "yes" ) $pconfig['compress'] = "yes"; else unset(  $pconfig['compress']);
-//$pconfig['compress'] = ! empty ($config['thebrig']['compress']) ? "yes" : false ; 
-//$pconfig['unixiproute'] = isset($config['thebrig']['unixiproute']); 
-//$pconfig['systenv'] = isset($config['thebrig']['systenv']); 
 if (isset ($config['thebrig']['gl_statfs']) )  { $pconfig['gl_statfs']  =  $config['thebrig']['gl_statfs']; } else { $pconfig['gl_statfs']  = 2; }
 
 function thebrig_process_updatenotification($mode, $data) {
@@ -162,7 +158,7 @@ include("fbegin.inc");?>
 <script language="JavaScript">
 $(document).ready(function(){
 	var gui = new GUI;
-	gui.recall(3000, 3000, 'extensions_thebrig_ajax.php', null, function(data) {
+	gui.recall(500, 3000, 'extensions_thebrig_ajax.php', null, function(data) {
 		if ( typeof(data) !== 'undefined' ) {
 		for ( idx=1; idx<= data.rowcount;  idx++ ) {
 			$('#ajaxjailname'+idx).text(data.name[idx] );
@@ -262,8 +258,7 @@ $(document).ready(function(){
 
 	}});
 });
-
-	$(".jail_stop").live( 'click' , function(){
+$(".jail_stop").live( 'click' , function(){
 	var $tr = $(this).closest('tr');
 	var name = $tr.children(':eq(0)').text();
 	brig_action(name , 'onestop');
@@ -274,7 +269,6 @@ $(".jail_start").live( 'click', function(){
 	var name = $tr.children(':eq(0)').text();
 	brig_action(name , 'onestart');
 });	
-	
 
 function brig_action(name, act) {
     return $.ajax({
@@ -316,9 +310,6 @@ function disable_buttons() {
 			<table width="100%" border="0" cellpadding="6" cellspacing="0">
 			      <?php html_titleline(gettext("On-line view"));?>
 				<tr><td colspan='2' valign='top' >
-		<!--		<table border="0" cellspacing="0" cellpadding="0" width="100%">
-					      <tr> 
-							<td  valign="top"> -->
 					<?php if( isset( $config['thebrig']['rootfolder'])==false): ?>
 							<a title=<?=gettext("Configure TheBrig please first");?>
 					<?php elseif( isset( $config['thebrig']['content'])==false): ?>
@@ -344,23 +335,12 @@ function disable_buttons() {
 									    <td width="22%" valign="top" class="listrc" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>">  <img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
 									    <td width="12%" valign="top" class="listrc" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"> <img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
 									    <td width="22%" valign="top" class="listrc" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
-								 								
-									    
 										<td width="5%" valign="top" class="listrd" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
-											<?php  
-//									    $file_jid = $file_id = "/var/run/jail_".$n_jail['jailname'].".id";
-									    // I want use AJAX for buttons also , but I don't know way!!
-	//if (!is_file($file_jid)) 
-	//{ echo '<center><a href="extensions_thebrig.php?name='.$n_jail['jailname'].'&action=start"><img src="ext/thebrig/on_small.png" title="Jail start" border="0" alt="Jail start" /></a></center>';} 
-	//else { echo '<center><a href="extensions_thebrig.php?name='.$n_jail['jailname'].'&action=stop"><img src="ext/thebrig/off_small.png" title="Jail stop" border="0" alt="Jail stop" /></a></center>';} ?>
-									    </td>
+										</td>
 									 </tr>
 			<?php endforeach; ?>
 								</table>
 					<?php endif;?>
-				<!--			</td>
-						</tr>
-					</table> -->
 				</td></tr>
 			<?php html_separator();  ?>
 			<?php html_titleline(gettext("<strong>TheBrig config</strong>"));?>
