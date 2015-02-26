@@ -84,7 +84,7 @@ if (is_ajax()) {
 			//mwexec ( 'rm $jail_JID' );
 		}
 		// Next lines write messages to log
-		cmd_exec("sh /etc/rc.d/thebrig {$jailcmd} {$jailname}",$a_tolog, $err_log);
+		cmd_exec("/etc/rc.d/thebrig {$jailcmd} {$jailname}",$a_tolog, $err_log);
 		write_briglog($err_log, "ERROR");
 	}
 	else {
