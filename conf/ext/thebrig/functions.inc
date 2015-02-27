@@ -737,98 +737,6 @@ function get_nice_filesize ($file) {
 		return "$dsize KB";
 	}
 }
-/*
-function write_rcconflocal () {
-	global $config, $g;
-	$testarray = array();
-	$startonboot ="";
-	// copy part of config in temporary array
-	$testarray = $config['thebrig']['content'];
-	$file = "/etc/rc.conf.local";
-	$handle=fopen($file, "w");
-	If (isset($config['thebrig'])) {
-		fwrite ($handle, "jail_enable=\"YES\"\n");
-	} else {fwrite($handle, "jail_enable=\"NO\"\n");
-	}
-	If (isset($config['thebrig']['parastart'])) {
-		//fwrite ($handle, "jail_parallel_start=\"YES\"\n");
-	} else {fwrite($handle, "jail_parallel_start=\"NO\"\n");
-	}
-	If (isset($config['thebrig']['sethostname'])) {
-		//fwrite ($handle, "jail_set_hostname_allow=\"YES\"\n");
-	} else {fwrite($handle, "jail_set_hostname_allow=\"NO\"\n");
-	}
-	If (isset($config['thebrig']['unixiproute'])) {
-		//fwrite ($handle, "jail_socket_unixiproute_only=\"YES\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=1");
-	} else {fwrite($handle, "jail_socket_unixiproute_only=\"NO\"\n"); exec ("/sbin/sysctl security.jail.socket_unixiproute_only=0");
-	}
-	If (isset($config['thebrig']['systenv'])) {
-		//fwrite ($handle, "jail_sysvipc_allow=\"YES\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=1");
-	} else {fwrite($handle, "jail_sysvipc_allow=\"NO\"\n"); exec ("/sbin/sysctl security.jail.sysvipc_allowed=0");
-	}
-	// I explode multi array to small arrays and replace tag [cell(n)] to [number] number is 1,2,3,4...
-	// with this trick I can make simple loop for write config
-	array_sort_key($testarray, "jailno");
-	foreach ($testarray as $out_jail ) {
-		If (isset($out_jail['enable'])) {
-			$startonboot = "{$startonboot} {$out_jail['jailname']}";
-		} else {$startonboot = $startonboot;
-		}
-		fwrite ($handle, "##{$k}###########{$out_jail['jailname']}####{$out_jail['desc']}#####\n");
-		$out_jail_comb = substr($out_jail['jailpath'], 0, strlen($out_jail['jailpath'])-1);
-		fwrite ($handle, "jail_{$out_jail['jailname']}_rootdir=\"{$out_jail_comb}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_hostname=\"{$out_jail['jailname']}.{$config['system']['domain']}\"\n");
-		//fwrite ($handle, "jail_{$out_jail['jailname']}_interface=\"{$out_jail['if']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_ip=\"{$out_jail['allowedip']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_start=\"{$out_jail['exec_start']}\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_exec_stop=\"{$out_jail['exec_stop']}\"\n");
-		//fwrite ($handle, "jail_{$out_jail['jailname']}_flags=\"{$out_jail['extraoptions']}\"\n");
-		
-		fwrite($handle, "jail_{$out_jail['jailname']}_fdescfs_enable=\"NO\"\n");
-		fwrite ($handle, "jail_{$out_jail['jailname']}_fstab=\"{$config['thebrig']['rootfolder']}.conf/jails/fstab.{$out_jail['jailname']}\"\n");
-		/*
-		 * //fwrite ($handle, "jail_{$out_jail['jailname']}_parameters=\"{$out_jail['jail_parameters']}\"\n");
-		// need a FOR loop to run through all the parameters
-		If (isset($out_jail['jail_mount'])) {
-			fwrite ($handle, "jail_{$out_jail['jailname']}_mount_enable=\"YES\"\n");
-		} else {fwrite($handle, "jail_{$out_jail['jailname']}_mount_enable=\"NO\"\n");
-		}
-		fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_ruleset=\"{$out_jail['devfsrules']}\"\n");
-		If (isset($out_jail['devfs_enable'])) {
-			fwrite ($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"YES\"\n");
-		} else {fwrite($handle, "jail_{$out_jail['jailname']}_devfs_enable=\"NO\"\n");
-		}
-		If (isset($out_jail['proc_enable'])) {
-			fwrite ($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"YES\"\n");
-		} else {fwrite($handle, "jail_{$out_jail['jailname']}_procfs_enable=\"NO\"\n");
-		}
-		
-		$fstabfile= "{$config['thebrig']['rootfolder']}.conf/jails/fstab.{$out_jail['jailname']}";
-		$handle1 = fopen($fstabfile, "w");
-		if  ($out_jail['jail_type'] === "slim") {
-			$basejailfolder	= 	 substr($config['thebrig']['basejail']['folder'], 0, strlen($config['thebrig']['basejail']['folder'])-1);
-			fwrite( $handle1 ,  $basejailfolder . " " .  $out_jail['jailpath'] . "basejail nullfs ro 0 0\n");
-		}
-		if (TRUE == is_array($out_jail['auxparam'])) {
-			foreach ($out_jail['auxparam'] as $fstab) {
-				fwrite ($handle1, $fstab."\n");
-			}
-		} 
-		if (isset($out_jail['ports'])) { 
-			$portsjailfolder = $config['thebrig']['rootfolder']."conf/ports";
-			fwrite( $handle1 ,  $portsjailfolder . " " .  $out_jail['jailpath'] . "usr/ports nullfs ro 0 0\n");
-		} 
-		if  ((strcmp($out_jail['jail_type'],"slim") == 0 || ( strcmp($out_jail['jail_type'], "full") == 0) {
-			if (isset($out_jail['devfs_enable'])) { fwrite( $handle1 ,  "devfs " .  $out_jail['jailpath'] . "dev devfs rw 0 0\n");} 
-			if (isset($out_jail['proc_enable'])) { fwrite( $handle1 ,  "procfs " .  $out_jail['jailpath'] . "proc procfs rw 0 0\n");} 
-			}
-		fclose($handle1);
-	}
-	$startonboot = ltrim( $startonboot );
-	fwrite ($handle, "jail_list=\"{$startonboot}\"\n");
-	fclose($handle);
-}   
-*/
 
 // cmd_exec execute process and have output and error
 //$cmd - proccess 
@@ -875,19 +783,30 @@ function write_briglog ($tolog, $fac) {
 }
 //this function check if zfs used by system and defined 1 dataset (+1 as pool )
 function brig_zfs_check() {	
-	$output = array(); $errors = array(); 
-	cmd_exec("zfs list -o jailed,name,mountpoint",$output, $errors);
-	if (3 < count($output) ){ return true; } else { return false;}
+	$pool_names = array(); $dataset_names = array(); $errors = array(); 
+	cmd_exec("zpool list -Ho name",$pool_names, $errors);
+	cmd_exec("zfs list -Ho jailed,name,mountpoint",$dataset_names, $errors);
+	if ( 0 < ( (count($dataset_names)) - (count($pool_names)) ) ){ return true; } else { return false;}
 }
 function brig_datasets_list() {
 	global $config;
-	$output = array(); $errors = array(); 
-	cmd_exec("zfs list -o jailed,name,mountpoint",$output, $errors);
-	if (3 < count($output) ){
-	for ($i=1; $i < count($output);) { 
-		$stripped = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $output[$i]);
-		$cell[$i] = explode (" ", $stripped);
-		++$i;
+	$pool_names = array(); $dataset_names = array(); $errors = array(); 
+	// Using the -H option removes the headers, and uses a single \t between
+	// column entries
+	cmd_exec("zpool list -Ho name",$pool_names, $errors);
+	cmd_exec("zfs list -Ho jailed,name,mountpoint",$dataset_names, $errors);
+	$pool_count = count($pool_names);
+	$dataset_count = count($dataset_names);
+	$unique_count = $dataset_count - $pool_count ;
+	if (0 < $unique_count ){
+		for ($i=0; $i < $dataset_count;$i++) { 
+			$cell[$i] = explode ( "\t" , $dataset_names[$i]);
+			for ($k=0; $k<$pool_count;$k++){
+				// Remove the pools from the list of datasets
+				if ( strcmp( $cell[$i][1] , rtrim($pool_names[$k]) ) === 0 ) {
+					unset ( $cell[$i]);
+				}
+			}
 		}
 		foreach ($cell as $cells ) { $cell1[] = array_filter($cells); }
 		for ($i=0; $i< count($cell1);) { 
@@ -895,12 +814,11 @@ function brig_datasets_list() {
 			$pattern1 = preg_quote($pattern1, '/' );
 			$pattern = "/".$pattern1."/"; 
 			$match = preg_match($pattern, $config['thebrig']['rootfolder']);
-			if (1 == $match) { unset ($cell1[$i]); } 
-			++$i;
+			if (1 === $match) { unset ($cell1[$i]); } 
+			$i++;
 			}
 		$cell1 =  array_filter($cell1);
 		foreach ($cell1 as $cells ) { $datasets_list[] = array_filter($cells); }
-												
 	return $datasets_list;
 	} else { return false; }
 }
