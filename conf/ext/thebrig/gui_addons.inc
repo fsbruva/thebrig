@@ -2,6 +2,9 @@
 /* 
     gui_addons.inc
 
+	Copyright (c) 2015 Matt Kempe & Alexey Kruglov
+	All rights reserved. 
+
 	Part of NAS4Free (http://www.nas4free.org).
 	Copyright (c) 2012-2015 The NAS4Free Project <info@nas4free.org>.
 	All rights reserved.
