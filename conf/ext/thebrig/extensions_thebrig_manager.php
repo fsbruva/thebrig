@@ -4,31 +4,46 @@ require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
 /*
- * File name: 	extensions_thebrig_manager.php
- * Author: 		Matt Kempe, Alexey Kruglov
- * Modified:	Dec 2014
- * 
- * Purpose: 	This page is used to update all the files of TheBrig's
- * 				extension. 
- * 
- * Variables used:	
- * 
- * input_errors		Nas4Free array with error messages
- * pgtitle			Array to label page using lang.inc
- * pconfig			Nas4Free array containing $_POST data
- * config_changed	Boolean variable to track if the Nas4Free config.xml 
- * 					needs to have changes written to it
- * brig_ver			String (then floating point) version value stored in 
- * 					the installed copy of TheBrig's lang.inc
- * gitlangfile		File descriptor for accessing the github version of 
- * 					TheBrig's lang.inc (online version)
- * git_ver			String (then floating point) version value within the
- * 					github version of TheBrig's lang.inc. (Also displays
- * 					an error message when the fetch fails.
- * fetch_args		String of OS version dependent arguments to pass to
- * 					fetch so that it will work.
- * fetch_ret_val	Integer to receive the program return status from 
- * 					the call to fetch.
+  File name: 	extensions_thebrig_manager.php
+  Author: 		Matt Kempe, Alexey Kruglov
+  Modified:		Dec 2014
+  
+	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+  
+  Purpose: 	This page is used to update all the files of TheBrig's
+  				extension. 
+  
+  Variables used:	
+  
+  input_errors		Nas4Free array with error messages
+  pgtitle			Array to label page using lang.inc
+  pconfig			Nas4Free array containing $_POST data
+  config_changed	Boolean variable to track if the Nas4Free config.xml 
+  					needs to have changes written to it
+  brig_ver			String (then floating point) version value stored in 
+  					the installed copy of TheBrig's lang.inc
+  gitlangfile		File descriptor for accessing the github version of 
+  					TheBrig's lang.inc (online version)
+  git_ver			String (then floating point) version value within the
+  					github version of TheBrig's lang.inc. (Also displays
+  					an error message when the fetch fails.
+  fetch_args		String of OS version dependent arguments to pass to
+  					fetch so that it will work.
+  fetch_ret_val		Integer to receive the program return status from 
+  					the call to fetch.
+  
  */
 	
 // Display the page title, based on the constants defined in lang.inc
