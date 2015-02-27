@@ -1,6 +1,6 @@
 <?php
 /*
- * extensions_thebrig_edit.php
+	file: extensions_thebrig_edit.php
 	
 	  	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
 
@@ -476,12 +476,8 @@ if ($_POST) {
 			
 		$jail['cmd'] = $pconfig['cmd'];
 		$jail['exec_start'] = $pconfig['exec_start'];
-		//$jail['afterstart0'] = $pconfig['afterstart0'];    
-		//$jail['afterstart1'] = $pconfig['afterstart1'];
 		$jail['exec_stop'] = $pconfig['exec_stop'];
 		if (empty ($pconfig['extraoptions'])) { $pconfig['extraoptions'] = "-l -U root -n ".$pconfig['jailname'];} else {}
-		//$jail['extraoptions'] = $pconfig['extraoptions'];
-		//$jail['jail_parameters'] = $pconfig['jail_parameters'];
 		$jail['desc'] = $pconfig['desc'];
 		$jail['base_ver'] = $pconfig['base_ver'];
 		// compress array to string
@@ -499,9 +495,6 @@ if ($_POST) {
 		elseif ( $jail['jail_type'] === "slim" ) {
 			// We know we're making a slim jail now
 			$config['thebrig']['basejail']['base_ver'] = $pconfig['base_ver'];
-			//$config['thebrig']['basejail']['lib_ver'] = $pconfig['lib_ver'];
-			//$config['thebrig']['basejail']['src_ver'] = $pconfig['src_ver'];
-			//$config['thebrig']['basejail']['doc_ver'] = $pconfig['doc_ver'];
 			if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 ) 
 				thebrig_split_world($pconfig['jailpath'] , true , $files_selected );
 			elseif (  $pconfig['source'] === "template" )
@@ -543,20 +536,24 @@ function thebrig_get_next_jailnumber() {
 <?php include("fbegin.inc");?>
 <script type="text/javascript">//<![CDATA[
 function submitted() {
-	if (confirm("Your jail will now be installed/updated. If you have selected tarballs for unpacking")) {
-        //alert("Clicked Ok");
-        $body = $("body");
+	var tarball_count=0;
+	$("input[name='formFiles[]']:checked").each( function(){
+		tarball_count++;  // count the selected tarballs
+	});
+	if ( tarball_count == 0 || 
+	(tarball_count > 0 && confirm ("Your jail will now be built/updated. Please be patient, and do not navigate away from this page or close your browser. This may take up to 2 minutes.")) ) {
+		$body = $("body");
 		$body.addClass("loading");
 		onsubmit_cmd(); 
 		onsubmit_allowedip(); 
 		onsubmit_rule(); 
 		onsubmit_param(); 
-		//onsubmit_zfs();
-        return true;
-    } else {
-        alert("Clicked Cancel");
-        return false;
-    }
+		if ( $('#zfs_enable').is(":visible") == true ) {
+			onsubmit_zfs();
+		}	
+		return true;
+	}
+	else { return false; }
 }
 $(document).ready(function(){
 	var gui = new GUI;
@@ -711,15 +708,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
      <!--  <form action="test.php" method="post" name="iform" id="iform"> -->
       <input name="jailpath" type="hidden" value="<?=$pconfig['jailpath'];?>" />
 					<input name="base_ver" type="hidden" value="<?=$pconfig['base_ver'];?>" />
-					<input name="lib_ver" type="hidden" value="<?=$pconfig['lib_ver'];?>" />
-					<input name="doc_ver" type="hidden" value="<?=$pconfig['doc_ver'];?>" />
-					<input name="src_ver" type="hidden" value="<?=$pconfig['src_ver'];?>" />
-					<input name="image" type="hidden" value="<?=$pconfig['image'];?>" />
-					<input name="image_type" type="hidden" value="<?=$pconfig['image_type'];?>" />
-					<input name="attach_params" type="hidden" value="<?=$pconfig['attach_params'];?>" />
-					<input name="force_blocking" type="hidden" value="<?=$pconfig['force_blocking'];?>" />					
 					<input name="fib" type="hidden" value="<?=$pconfig['fib'];?>" />
-					<input name="attach_blocking" type="hidden" value="<?=$pconfig['attach_blocking'];?>" />
       	<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
         <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			<?php html_titleline(gettext("Jail parameters"));?>
@@ -758,7 +747,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_separator();?>
 			<tr id='mounts_separator0'><td colspan='2' valign='top' class='listtopic'>Networking</td></tr>
 			<?php if ($g['arch'] == 'x64') {
-			html_checkbox("jail_vnet", gettext("Virtual network"), $pconfig['jail_vnet'], gettext("Enable virtual network stack (vnet)"), "", "","vnet_enable()");?>
+			html_checkbox("jail_vnet", gettext("Virtual network"), $pconfig['jail_vnet'], gettext("Enable virtual network stack (vnet)"), "", ""," ");?>
 			<tr id='epair_tr'>
 					<td width='22%' valign='top' class='vncell'><label for='epair'>Epair interface</label></td>
 					<td width='78%' class='vtable'>
