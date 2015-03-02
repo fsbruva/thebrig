@@ -33,11 +33,11 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 else {
 	//$pglocalheader=array( );
 }
-
+/*
 if (is_ajax()) {
 	$jailinfo = get_jailinfo();
 	render_ajax($jailinfo);
-}
+} */
 
 if (isset($_GET['apply']) && $_GET['apply']){
 	mwexec('touch /tmp/in_get');
@@ -295,7 +295,16 @@ function brig_action(name, act) {
             }
     });
 }
-	
+
+function jail_delete() {
+	var compress = $("[name='compress']").val();
+	if ( compress === "yes" ){
+		return confirm('<?=gettext("Do you really want to delete this jail? An archive will be created just in case. It can be removed later.");?>');
+	}
+	else {
+		return confirm('<?=gettext("The selected jail will be removed, with no backup created. If you want to keep a backup, please visit the Rudimentary Config Page.");?>');
+	}	
+}
 function disable_buttons() {
 	document.iform.Submit.disabled = true;
 	document.iform.submit();
@@ -388,7 +397,7 @@ function disable_buttons() {
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
 										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="e.gif" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>&nbsp;
-										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return confirm('<?=gettext("Do you really want to delete this jail? I will archive file just in case. It can be removed later. ");?>')"><img src="x.gif" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>&nbsp;
+										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return jail_delete();"><img src="x.gif" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>&nbsp;
 										<a href="extensions_thebrig_fstab.php?act=editor&amp;uuid=<?=$jail['uuid'];?>"><img src="ext/thebrig/fstab.png" title="<?=gettext("Edit fstab for this jail");?>" border="0" alt="<?=gettext("Edit jail's fstab");?>" /></a>
 									</td>
 									<?php else:?>
