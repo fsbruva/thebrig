@@ -239,7 +239,7 @@ function message(obj) {
 		<tr id='compress_tr'>
 	<td width='22%' valign='top' class='vncell'><label for='compress'>Archive</label></td>
 	<td width='78%' class='vtable'>
-		<input name='compress' type='checkbox' class='formfld' id='compress' value='' <?php if  ($pconfig['compress'] == "yes") echo "checked"; else false; ?> />&nbsp;Check, if you want archive jail before delete.
+		<input name='compress' type='checkbox' class='formfld' id='compress' value='' <?php if  ($pconfig['compress'] == "yes") echo "checked"; else false; ?> />&nbsp;Check if you want a backup archive of jail created before deletion.
 	</td>
 </tr>
 		<?php
