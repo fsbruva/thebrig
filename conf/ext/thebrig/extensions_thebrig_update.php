@@ -42,20 +42,27 @@ if ($brig_update_ready == 0 ){
 	$brig_update_db = $brig_root . "conf/db/freebsd-update/";
 
 	// See my above comments for why the if() that used to live here is no longer needed
-	if (!is_array($config['thebrig']['content'])) {$input_errors[] = "Not defined any jail. I don't know what you want "; goto out;}
-	array_sort_key($config['thebrig']['content'], "jailno");
-	$a_jail = &$config['thebrig']['content'];
-	$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
+	if (!is_array($config['thebrig']['content'])) {
+		// THis is impossible, as the link to this page is dead if there are no jails. However, if the user types this
+		// URL into the address bar manually, then I suppose they might be able to cause some trouble. I modified the 
+		// if ($_POST) to skip if there are no jails defined.
+		$input_errors[] = "There are no jails defined/created. Updating is impossible until there is at least one."; 
+	}
+	else {
+		array_sort_key($config['thebrig']['content'], "jailno");
+		$a_jail = &$config['thebrig']['content'];
+		$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
 
 
-	$basedir_hash = exec ( "echo " . $a_jail[0]['jailpath'] . " | sha256 -q" );
-	if ( is_link ( $a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) ) {
+		$basedir_hash = exec ( "echo " . $a_jail[0]['jailpath'] . " | sha256 -q" );
+		if ( is_link ( $a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) ) {
 		//$input_errors[]=$a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback";
+		}
 	}
 }
 
 // User has clicked a button
-if ($_POST) {
+if ($_POST && is_array( is_array($config['thebrig']['content'])) ) {
 	unset($input_errors);
 	$pconfig = $_POST;
 	$config_changed = false;		// Keep track if we need to re-write the config
@@ -217,15 +224,19 @@ if ($_POST) {
 			}
 			
 			$response = 0;
-			if ( count ( $input_errors ) == 0)
-				$response = thebrig_update($basedir_list, $workdir_list , $conffile_list, $pconfig['update_op']);
-			else 
-				$input_errors[] = "No action was taken because of the above errors.";
+			if ( count ( $input_errors ) == 0) {
+				$response = thebrig_update($basedir_list, $workdir_list , $conffile_list, $pconfig['update_op']); 
+			}
+			else {
+				$input_errors[] = "No action was taken because of the above errors."; 
+			}
 			
-			if ( $response == 1)
+			if ( $response == 1) {
 				$input_errors[] = "Something bad happened while attempting to prep for the update operation";
-			elseif ( $response == 2 )
-			$input_errors[] = "Something bad happened while attempting to return Nas4Free to its previous state";
+			}
+			elseif ( $response == 2 ) {
+				$input_errors[] = "Something bad happened while attempting to return Nas4Free to its previous state";
+			}
 		} // enf of else
 	} // end of update_op
 
@@ -293,7 +304,6 @@ if ($_POST) {
 		$savemsg = get_std_save_message($retval);
 	} // end of no input errors
 } // end of POST
-out:
 // Uses the global fbegin include
 include("fbegin.inc");
 
