@@ -558,7 +558,7 @@ function conf_handler() {
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars( $file_summary);?>&nbsp;</td>
 									<td class="listbg"><?=htmlspecialchars($config['thebrig']['template_ver']);?>&nbsp;</td>
 								</tr>
-								<?}?>
+				<?} // This is the end of the row test for the TEMPLATE ?>
 							</table> <br> <b><?=gettext("Please note: ")?> </b> <?=gettext("Selecting a thin jail for any update operation will mandate that all other thin jails be updated as well.")?>
 					
 					</tr>

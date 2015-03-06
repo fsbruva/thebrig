@@ -77,7 +77,13 @@ else { // TheBrig has been confirmed
 			// we need to tell fetch to not verify certificates
 			$fetch_args = "--no-verify-peer";	
 		}
-		mwexec2 ( "fetch {$fetch_args} -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/alcatraz/conf/ext/thebrig/lang.inc" , $garbage , $fetch_ret_val ) ;
+		$connected = false;
+		
+		if ( $connected === true ) {
+			mwexec2 ( "fetch {$fetch_args} -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/alcatraz/conf/ext/thebrig/lang.inc" , $garbage , $fetch_ret_val ) ;
+		}
+		else { $fetch_ret_val = 1; }
+			
 		// $result will be "1" if fetch didn't do something properly
 		if ( $fetch_ret_val == 1 ) {
 			// We couldn't get the file from GitHub. We might not have 
@@ -107,21 +113,24 @@ else { // TheBrig has been confirmed
 			else { // The lang file we just downloaded is missing! HOW!
 				$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
 				$git_ver = _THEBRIG_ERROR;
-			} // end else langfile exists	
-		} // end of successful fetch
-		mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
-		if ( $fetch_ret_val == 1 ) {
-			// We couldn't get the file from GitHub. We might not have 
-			// connectivity to Github, the file wasn't found, there was 
-			// a DNS issue, or something else went wrong.
-			$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
-			$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
+			} // end else langfile exists
+			
+			// Go get the install file and make it executable - only if we can successfully get the files we need.
+			mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
+			if ( $fetch_ret_val == 1 ) {
+				// We couldn't get the file from GitHub. We might not have 
+				// connectivity to Github, the file wasn't found, there was 
+				// a DNS issue, or something else went wrong.
+				$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
+				$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
 				
-		}	// end of fetch failed
-		else {
+			}	// end of fetch failed
+			else {
 			// Fetch succeeded
-			mwexec ("chmod a+x /tmp/thebrig_install.sh");
-		}
+				mwexec ("chmod a+x /tmp/thebrig_install.sh");
+			}	
+		} // end of successful fetch
+
 	} // end of "Not Post"
 
 } // end of "Brig Confirmed"
