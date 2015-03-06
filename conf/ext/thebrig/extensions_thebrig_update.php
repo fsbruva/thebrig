@@ -408,20 +408,28 @@ function conf_handler() {
 			$my_arch = exec ( "uname -m");
 			$my_rel = exec ( "uname -r");
 			$my_rel_cut = exec ("uname -r | cut -d- -f1-2" ) ;     // Obtain the current kernel release
-			exec ( "fetch -o /tmp/latest.ssl http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch ."/latest.ssl");
-			exec ( "fetch -o /tmp/pub.ssl http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch ."/pub.ssl");
+			
+			$connected = false;
+			
+			if ( $connected == true ) {
+				exec ( "fetch -o /tmp/latest.ssl http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch ."/latest.ssl");
+				exec ( "fetch -o /tmp/pub.ssl http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch ."/pub.ssl");
+			}
+			
+			if (file_exists ( "/tmp/pub.ssl" ) && file_exists("/tmp/latest.ssl") ) {
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then
 			// converts that from an epoch second to a usable date.
-			exec (  $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
-			. "/tmp/pub.ssl -verify < "
-			. "/tmp/latest.ssl  > /tmp/update.tag" );
-			$EOL_date= exec( "date -j -r `cat /tmp/update.tag  | cut -f 6 -d '|'`");
-			$tag_rel = exec ( "cat /tmp/update.tag | cut -f 3 -d '|'");
-			$tag_patch = exec ( "cat /tmp/update.tag | cut -f 4 -d '|'");
-			//exec ("rm /tmp/latest.ssl"); 	// Get rid of the latest tag
-			//exec ("rm /tmp/pub.ssl"); 	// Get rid of the latest tag
-			//exec ( "rm /tmp/update.tag");
-
+				exec (  $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
+				. "/tmp/pub.ssl -verify < "
+				. "/tmp/latest.ssl  > /tmp/update.tag" );
+				$EOL_date= exec( "date -j -r `cat /tmp/update.tag  | cut -f 6 -d '|'`");
+				$tag_rel = exec ( "cat /tmp/update.tag | cut -f 3 -d '|'");
+				$tag_patch = exec ( "cat /tmp/update.tag | cut -f 4 -d '|'");
+				//exec ("rm /tmp/latest.ssl"); 	// Get rid of the latest tag
+				//exec ("rm /tmp/pub.ssl"); 	// Get rid of the latest tag
+				//exec ( "rm /tmp/update.tag");
+			}
+			else { $EOL_date = "N/A"; $tag_rel = "0" ; $tag_patch = "0 -- Unknown - check networking!!"; }
 
 			html_titleline(gettext("Update"));
 			html_text($confconv, gettext("Current Status"),gettext("The latest version on the FTP server is: ") . $tag_rel . "-p" . $tag_patch . "<br /><br />" . gettext("The update on the FTP server is valid until: ") . $EOL_date );
