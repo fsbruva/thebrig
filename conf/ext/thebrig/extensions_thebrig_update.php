@@ -409,6 +409,7 @@ function conf_handler() {
 			$my_rel = exec ( "uname -r");
 			$my_rel_cut = exec ("uname -r | cut -d- -f1-2" ) ;     // Obtain the current kernel release
 			
+			// Some sort of connection test?
 			$connected = false;
 			
 			if ( $connected == true ) {
