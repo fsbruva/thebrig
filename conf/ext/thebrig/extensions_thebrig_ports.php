@@ -257,32 +257,43 @@ function conf_handler() {
 		}
 		else {
 			// All the binaries were found, and able to be moved into thebrig's working directory.
-			if ( file_exists ( $brig_port_db . "tag"))
+			if ( file_exists ( $brig_port_db . "tag")) {
 				// Extract the most recent tag's date, and convert from Unix epoch to a readable date
 				$tagdate= exec( "date -j -r `cut -f 2 -d '|' < " . $brig_port_db . "tag`");
-			else
+			}
+			else {
 				$tagdate = "Never";
+			}
+			// Some sort of connectivity test
+			$connected = false;
+			if ( $connected ) {
+				// Obtain latest update, if we can
+				exec ( "fetch -o /tmp/latest.ssl http://portsnap.freebsd.org/latest.ssl");
+				exec ( "fetch -o /tmp/pub.ssl http://portsnap.freebsd.org/pub.ssl");
+			}
 			
-			
-			// Obtain latest update, if we can
-			exec ( "fetch -o /tmp/latest.ssl http://portsnap.freebsd.org/latest.ssl");
-			exec ( "fetch -o /tmp/pub.ssl http://portsnap.freebsd.org/pub.ssl");
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then 
 			// converts that from an epoch second to a usable date.
-			$most_date= exec( "date -j -r `" . $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
+			if ( file_exists ("/tmp/latest.ssl") && file_exists("/tmp/pub.ssl") ) {
+				$most_date= exec( "date -j -r `" . $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
 					. "/tmp/pub.ssl -verify < "
 					. "/tmp/latest.ssl | cut -f 2 -d '|'`");
-			exec ("rm /tmp/latest.ssl"); 	// Get rid of the latest tag
-			exec ("rm /tmp/pub.ssl"); 	// Get rid of the latest tag
-			
+				exec ("rm /tmp/latest.ssl"); 	// Get rid of the latest tag
+				exec ("rm /tmp/pub.ssl"); 	// Get rid of the latest tag
+			}
+			else {
+				$most_date = "Unknown - Do we have Internet?";
+			}
 			// We need to check if we have ever extracted a snapshot successfully
-			if ( file_exists ( $brig_root. "conf/ports/.portsnap.INDEX"))
+			if ( file_exists ( $brig_root. "conf/ports/.portsnap.INDEX")) {
 				$extractdate= date ("D M d H:i:s T Y" ,filemtime( $brig_root. "conf/ports/.portsnap.INDEX" )); // extract and convert the timestamp
-			else 
+			}
+			else {
 				$extractdate = "Never";
+			}
 			
 			html_titleline(gettext("Portstree")); 
-				html_text($confconv, gettext("Current Status"),gettext("The latest snapshot available for download is dated: ") . $most_date . "<br /><br />" .gettext("You have downloaded a snapshot that was released: ") . $tagdate . "<br /><br />" . gettext("The last time you applied a downloaded snapshot was: ") . $extractdate );
+			html_text($confconv, gettext("Current Status"),gettext("The latest snapshot available for download is dated: ") . $most_date . "<br /><br />" .gettext("You have downloaded a snapshot that was released: ") . $tagdate . "<br /><br />" . gettext("The last time you applied a downloaded snapshot was: ") . $extractdate );
 			// We have never gotten a tag before - we need to fetch and extract a copy first
 			if ( $tagdate === "Never"){ ?>
 					<tr>
@@ -333,7 +344,6 @@ function conf_handler() {
 								<tr>
 									<td width="4%" class="listhdrlr">&nbsp;</td>
 									<td width="10%" class="listhdrr"><?=gettext("Name");?></td>
-									<td width="15%" class="listhdrr"><?=gettext("IP");?></td>
 									<td width="12%" class="listhdrr"><?=gettext("Hostname");?></td>
 									<td width="19%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?>
 									</td>
@@ -347,7 +357,6 @@ function conf_handler() {
 										value=<?php echo "{$a_jail[$k]['uuid']}";?>
 										<?php  echo ( isset( $a_jail[$k]['ports'] ) ? "checked=\"checked\"" :  "" ) ; ?>>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['jailname']);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['ipaddr'] . " / " . $a_jail[$k]['subnet']) ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($a_jail[$k]['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['jailpath']);?>&nbsp;</td>
 									<td class="listbg"><?=htmlspecialchars($a_jail[$k]['desc']);?>&nbsp;</td>
