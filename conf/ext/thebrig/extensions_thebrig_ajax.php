@@ -103,6 +103,13 @@ if (is_ajax()) {
 		cmd_exec("/etc/rc.d/thebrig {$jailcmd} {$jailname}",$a_tolog, $err_log);
 		write_briglog($err_log, "ERROR");
 	}
+	elseif ( isset ($_GET['ports']) {
+		// This is the code to detect if we have a connection to the portsnap server
+		
+	}
+	elseif ( isset ($_GET['update']) {
+		// This is the code to detect if we have a connection to the FreeBSD update server
+	}
 	else {
 		$jailinfo = get_jailinfo();
 		render_ajax($jailinfo);
