@@ -521,6 +521,7 @@ function conf_handler() {
 									<td class="listbg"><?=htmlspecialchars($a_jail[$k]['base_ver']);?>&nbsp;</td>
 								</tr>
 				<?php endfor; 
+				if ( is_dir( $config['thebrig']['template'] . "/var/run" ) ) {
 				if ( file_exists ( $config['thebrig']['template'] . "/var/db/freebsd-update/tag")){
 				// Extract the most recent tag's date, and convert from Unix epoch to a readable date
 					$tag_full = explode( "|", file_get_contents($config['thebrig']['template'] . "/var/db/freebsd-update/tag")) ;
@@ -557,9 +558,11 @@ function conf_handler() {
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars( $file_summary);?>&nbsp;</td>
 									<td class="listbg"><?=htmlspecialchars($config['thebrig']['template_ver']);?>&nbsp;</td>
 								</tr>
+								<?}?>
 							</table> <br> <b><?=gettext("Please note: ")?> </b> <?=gettext("Selecting a thin jail for any update operation will mandate that all other thin jails be updated as well.")?>
 					
 					</tr>
+					
 					<tr>
 						<td width="22%" valign="top" class="vncell">Fetch the
 							Updates&nbsp;</td>
