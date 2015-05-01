@@ -72,12 +72,14 @@ else { // TheBrig has been confirmed
 		mwexec2("uname -r | cut -d- -f1" , $rel ) ; 		// Obtain the current kernel release
 		// If the string compare yields anything other than "0", we 
 		// are not 9.1
-		if ( strcmp($rel[0], "9.1") != 0 ) {
+		if ( floatval($rel[0]) <= 9.1)  {
 			// FreeBSD above 9.1 has issues fetching from GitHub, so 
 			// we need to tell fetch to not verify certificates
 			$fetch_args = "--no-verify-peer";	
+			$connected = false;
 		}
-		$connected = false;
+		
+		else $connected = true ;
 		
 		if ( $connected === true ) {
 			mwexec2 ( "fetch {$fetch_args} -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/alcatraz/conf/ext/thebrig/lang.inc" , $garbage , $fetch_ret_val ) ;
@@ -101,7 +103,7 @@ else { // TheBrig has been confirmed
 				// If reading the file is successful, do some operations
 				if ( $gitlangfile ) {
 					// Extract the version string from the file ("0.8", "0.9")
-					$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[1]);
+					$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[18]);
 					// Force the version to be a number for comparisons
 					$git_ver = 0 + substr($git_ver[1],0,3);
 				} // end if $gitlangfile
