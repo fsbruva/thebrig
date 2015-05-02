@@ -62,7 +62,7 @@ if ($brig_update_ready == 0 ){
 }
 
 // User has clicked a button
-if ($_POST && is_array( is_array($config['thebrig']['content'])) ) {
+if ($_POST && is_array( $config['thebrig']['content']))  {
 	unset($input_errors);
 	$pconfig = $_POST;
 	$config_changed = false;		// Keep track if we need to re-write the config
@@ -72,6 +72,7 @@ if ($_POST && is_array( is_array($config['thebrig']['content'])) ) {
 		if ( isset ( $config['thebrig']['updatecron'] ) && !isset($_POST['updatecron'] )){
 			//Cron is enabled in the existing config, but not on the form - we need to turn it off
 			$config_changed=true;
+			unset($config['thebrig']['updatecron']);
 			// This will search the existing cronjobs to find the appropriate index to place the portsnap command
 			$i = 0;
 			// Don't want to attempt array operations if there are no cronjobs.
@@ -84,9 +85,10 @@ if ($_POST && is_array( is_array($config['thebrig']['content'])) ) {
 				} // end of for loop
 			} // end of array if statment
 		} // end of turning off cron
-		elseif ( !isset ( $config['thebrig']['updatecron'] ) && isset($pconfig['updatecron'] ) ) {
+		elseif ( !isset ( $config['thebrig']['updatecron'] ) && isset($_POST['updatecron'] ) ) {
 			// Cron is disabled in the existing config, but selected on the form - we need to turn it on
 			$config_changed=true;
+			$config['thebrig']['updatecron'] = true;
 			$brig_cron_job = array();
 			// Build the cronjob we want to insert.
 			$brig_cron_job['enable']="";
@@ -120,7 +122,8 @@ if ($_POST && is_array( is_array($config['thebrig']['content'])) ) {
 			$config['cron']['job'][$i] = $brig_cron_job;
 		} // end of "turning on" cron
 		// Store the fact that we have the cronjob. If we haven't made a change, this won't matter, because the write won't occur.
-		$config['thebrig']['updatecron'] = isset( $pconfig['updatecron'] );
+		// $config['thebrig']['updatecron'] = isset( $pconfig['updatecron'] );
+		else {}
 	} // end of "clicked submit"
 
 	$base_selected = false;
@@ -418,15 +421,12 @@ function conf_handler() {
 			$my_arch = exec ( "uname -m");
 			$my_rel = exec ( "uname -r");
 			$my_rel_cut = exec ("uname -r | cut -d- -f1-2" ) ;     // Obtain the current kernel release
-			
+			$release_update_path = "http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch;
 			// Some sort of connection test?
-			$connected = false;
-			
-			if ( $connected == true ) {
-				exec ( "fetch -o /tmp/latest.ssl http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch ."/latest.ssl");
-				exec ( "fetch -o /tmp/pub.ssl http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch ."/pub.ssl");
-			}
-			
+			if (false != file_get_contents($release_update_path ."/pub.ssl")) {
+				exec ( "fetch -o /tmp/latest.ssl ". $release_update_path ."/latest.ssl");
+				exec ( "fetch -o /tmp/pub.ssl ". $release_update_path ."/pub.ssl");
+			}			
 			if (file_exists ( "/tmp/pub.ssl" ) && file_exists("/tmp/latest.ssl") ) {
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then
 			// converts that from an epoch second to a usable date.
@@ -450,7 +450,7 @@ function conf_handler() {
 						</td>
 						<td width="85%" class="vtable"><input name="updatecron"
 							type="checkbox" id="updatecron" value="yes"
-							<?php if (!empty($pconfig['updatecron'])) echo "checked=\"checked\""; ?> />
+							<?php if (!empty($pconfig['updatecron'])) echo " checked=\"checked\""; ?> />
 							<?=_THEBRIG_UPDATE_CRON?> <input id="save" name="save"
 							type="submit" class="formbtn" value="<?=gettext("Save");?>"
 							onClick="return conf_handler();" />
