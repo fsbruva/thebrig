@@ -69,7 +69,7 @@ if ($_POST) {
 				for ($i; $i < count( $config['cron']['job'] ); $i++) {
 					// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 					// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
-					if ( 1 == preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
+					if ( 1 === preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
 						unset($config['cron']['job'][$i]);
 				} // end of for loop
 			} // end of array if statment
@@ -103,7 +103,7 @@ if ($_POST) {
 				for ($i; $i < count( $config['cron']['job'] ); $i++) {
 					// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 					// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
-					if ( 1== preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
+					if ( 1 === preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
 						break;
 				} // end of for loop
 			} // end of array if statment
@@ -169,8 +169,8 @@ if ($_POST) {
 	if ( !$input_errors ){
 		// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 		if ( $config_changed ) {
-			write_config();
-			write_rcconflocal();
+			write_config ();
+			write_jailconf ();
 		}
 		// Whatever we did, we did it successfully
 		$retval = 0;
