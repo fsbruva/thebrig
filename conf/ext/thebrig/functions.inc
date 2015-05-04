@@ -829,6 +829,7 @@ function write_defs_rules() {
 	$handle = fopen($file, "w");
 	fwrite($handle, "##Thebrig rulesets##");
 	$jails = $config['thebrig']['content'];
+	if (count($jails) > 0) {
 	array_sort_key($jails, "jailno");
 	foreach ($jails as $out_jail ) {
 		$ruleset_mumber = 4+$out_jail['jailno'];
@@ -839,6 +840,9 @@ function write_defs_rules() {
 			  }	  
 	 }
 	 fclose($handle);
+	 } else {
+	 unlink_if_exists("/etc/devfs.rules");
+	 }
 }
 
  function write_jailconf () {
@@ -851,6 +855,7 @@ function write_defs_rules() {
  	$conf_handle=fopen($conf_file, "w");
  // copy part of config in temporary array
  	$t_jail = $config['thebrig']['content'];
+ 	if (count($t_jail) > 0) {
 	array_sort_key($t_jail, "jailno");
 	foreach ($t_jail as $out_jail ) {
 		if (isset($out_jail['enable'])) {
@@ -1113,6 +1118,11 @@ function write_defs_rules() {
 	else { 
 		mwexec("/usr/local/sbin/rconf attribute remove jail_list");
 	}
+	} else {
+	//in case delete last jail, bug https://github.com/fsbruva/thebrig/issues/20
+	unlink_if_exists($config['thebrig']['rootfolder'] ."conf/thebrig.conf");
+	}
+	
 }
 
 function print_thebrig_confirm_box() {
