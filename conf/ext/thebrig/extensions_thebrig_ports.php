@@ -264,14 +264,11 @@ function conf_handler() {
 			else {
 				$tagdate = "Never";
 			}
-			// Some sort of connectivity test
-			$connected = false;
-			if ( $connected ) {
-				// Obtain latest update, if we can
+			// Connectivity test
+			if (false != file_get_contents("http://portsnap.freebsd.org/pub.ssl")) {
 				exec ( "fetch -o /tmp/latest.ssl http://portsnap.freebsd.org/latest.ssl");
 				exec ( "fetch -o /tmp/pub.ssl http://portsnap.freebsd.org/pub.ssl");
-			}
-			
+			}	
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then 
 			// converts that from an epoch second to a usable date.
 			if ( file_exists ("/tmp/latest.ssl") && file_exists("/tmp/pub.ssl") ) {
