@@ -256,7 +256,7 @@
 		define(_SRVSLIM_CORRUPT_TARBALL, "The file you tried to install seems to be corrupt. Please download and try again: ");
 		define(_SRVSLIM_RELOAD_PAGE, " (<a href='/services_slimserver.php'>Update status</a>)");
 		define(_THEBRIG_INSTALL_BUTTON, "Install" );
-		define(__THEBRIG_FETCH_BUTTON, "Fetch");
+		define(_THEBRIG_FETCH_BUTTON, "Fetch");
 		define(_THEBRIG_SAVE_BUTTON, "Save");
 		define(_THEBRIG_FETCHUPDATE_BUTTON, "Fetch & Update");
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
