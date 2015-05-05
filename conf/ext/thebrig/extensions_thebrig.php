@@ -19,11 +19,8 @@
 */
 require("auth.inc");
 require("guiconfig.inc");
-require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
-//include("trap.php"); 
-require_once("XML/Serializer.php");
-require_once("XML/Unserializer.php");
+
 
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 
@@ -429,7 +426,7 @@ function disable_buttons() {
 		<span class='vexpl'>Choose Global enforce_statfs. Default value =2. Jail's value  cannot be less then Global value . <br />Value 2 not allow  jail root user mount inside a jail. "High" = 1  and "All" = 0 values allow mount jail-friendly filesystems </span>
 	</td></tr></table>
 				<div id="submit">
-					<input name="Submit" type="submit" class="formbtn" value="<?=gettext("Save ");?>" />
+					<input name="Submit" type="submit" class="formbtn" value="<?=_THEBRIG_SAVE_BUTTON;?>" />
 					 <input name="compress" type="hidden" value="<?if ($pconfig['compress'] == "yes") echo "yes"; ?>" />
 				</div>
 				

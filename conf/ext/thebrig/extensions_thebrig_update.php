@@ -18,7 +18,7 @@
 */
 require("auth.inc");
 require("guiconfig.inc");
-require_once("ext/thebrig/lang.inc");
+//require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
 
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
@@ -64,6 +64,8 @@ if ($brig_update_ready == 0 ){
 // User has clicked a button
 if ($_POST && is_array( $config['thebrig']['content']))  {
 	unset($input_errors);
+	file_put_contents("/tmp/post.php", serialize($_POST));
+	print_r($_POST);
 	$pconfig = $_POST;
 	$config_changed = false;		// Keep track if we need to re-write the config
 	$formjails = $_POST['formJails'];
@@ -156,7 +158,7 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 				}
 				// We are attempting to install updates that don't exist
 				// Check for the existence of the -install link 
-				if ( ! is_link ( $my_jail['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-install" ) && $pconfig['update_op'] == "Install") {
+				if ( ! is_link ( $my_jail['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-install" ) && $pconfig['update_op'] == _THEBRIG_INSTALL_BUTTON ) {
 				// We are attempting to rollback a jail that can't be
 					$input_errors[] = "The jail named " . $my_jail['jailname'] . " does not have any updates ready for installation. <br>Please run 'fetch' for this jail.";
 					break;
@@ -191,7 +193,7 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 				$basedir_hash = exec ( "echo " . $basejail . " | sha256 -q" );
 				// Check for the existence of the -install link - if it's there, and we want to install, then it's valid. Likewise,
 				// if there is a rollback link, and we want to do that, then we should allow the action to take place.
-				if (( is_link ( $brig_update_db . $basedir_hash . "-install" ) && $pconfig['update_op'] == "Install") 
+				if (( is_link ( $brig_update_db . $basedir_hash . "-install" ) && $pconfig['update_op'] == _THEBRIG_INSTALL_BUTTON ) 
 					|| (is_link ( $my_jail['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) && $pconfig['update_op'] == "Rollback") ){
 					// We are attempting to rollback a jail that can't be
 					$basejail = $config['thebrig']['basejail'];
@@ -214,7 +216,7 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 				// First calculate the unique hash for the install/rollback links
 				$basedir_hash = exec ( "echo " . $template_dir . " | sha256 -q" );
 				// Check for the existence of the -install link
-				if ( ! is_link ( $template_dir . "var/db/freebsd-update/" . $basedir_hash . "-install" ) && $pconfig['update_op'] == "Install") {
+				if ( ! is_link ( $template_dir . "var/db/freebsd-update/" . $basedir_hash . "-install" ) && $pconfig['update_op'] == _THEBRIG_INSTALL_BUTTON ) {
 					// We are attempting to install a jail that doesn't have any updates pending
 					$input_errors[] = "The TEMPLATE jail does not have any updates ready for installation. <br>Please run 'fetch' for this jail.";
 				}
@@ -249,7 +251,8 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 		// Now we have to do the accounting to make sure the config reflects all we know about the installation, if we carried out a
 		// "install" or "fetch & install" operation. We do this by trusting the tag if the "rollback" is present in the working directory,
 		// indicating installation success
-		if ( $pconfig['update_op'] == "Install" ) {
+		if ( $pconfig['update_op'] == _THEBRIG_INSTALL_BUTTON ) {
+		file_put_contents('/tmp/install.txt',  $pconfig['update_op'] . ":= "._THEBRIG_INSTALL_BUTTON);
 			// Need to cycle through all the jails (again)
 			foreach ( $a_jail as &$my_jail ) {
 				// This if gets entered the jail is checked and is fullsized, OR is thin and we selected to upgrade them all
@@ -579,7 +582,7 @@ function conf_handler() {
 						<td width="78%" class="vtable"><?=gettext("Click below to perform an 'on-demand' fetch for the selected jails.");?><br>
 							<div id="submit_x">
 								<input id="fupdate" name="update_op" type="submit"
-									class="formbtn" value="<?=gettext("Fetch");?>"
+									class="formbtn" value="<?=_THEBRIG_FETCH_BUTTON;?>"
 									onClick="return conf_handler();" /><br />
 							</div>
 						</td>
@@ -590,8 +593,8 @@ function conf_handler() {
 							Updates&nbsp;</td>
 						<td width="78%" class="vtable"><?=gettext("Click below to install the pending update to the selected jail(s).");?><br />
 							<div id="submit_x">
-								<input id="update" name="update_op" type="submit"
-									class="formbtn" value="<?=gettext("Install");?>"
+								<input id="update" name="update_op" type="submit" form="iform"
+									class="formbtn" value="<?=_THEBRIG_INSTALL_BUTTON;?>"
 									onClick="return conf_handler();" /><br />
 							</div>
 						</td>
