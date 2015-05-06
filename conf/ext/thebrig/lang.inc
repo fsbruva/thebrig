@@ -259,6 +259,7 @@
 		define(_THEBRIG_FETCH_BUTTON, "Fetch");
 		define(_THEBRIG_SAVE_BUTTON, "Save");
 		define(_THEBRIG_FETCHUPDATE_BUTTON, "Fetch & Update");
+		define(_THEBRIG_UPDATE_BUTTON, "Update");
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
 	}
 ?>

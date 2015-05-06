@@ -148,28 +148,34 @@ if ( $input_errors ) {
 ?> <!-- This is the end of the first bit of html code -->
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
-	<tr><td class="tabnavtbl">
-		<ul id="tabnav">
-			<li class="tabinact">
-				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
-			</li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a>
-			</li>
-			<li class="tabact">
-				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
-			</li>
-			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
-		</ul>
-	</td></tr>
-	<tr><td class="tabnavtbl">
-		<ul id="tabnav2">
-			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
-			<li class="tabact"><a href="extensions_thebrig_manager.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_MANAGER;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
-		</ul>
-	</td></tr>
+	<tr>
+		<td class="tabnavtbl">
+			<ul id="tabnav">
+				<li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?>
+					</span> </a>
+				</li>
+				<li class="tabact"><a href="extensions_thebrig_ports.php"><span><?=_THEBRIG_UPDATES;?>
+					</span> </a>
+				</li>
+				<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?>
+					</span> </a>
+				</li>
+				<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<td class="tabnavtbl">
+			<ul id="tabnav2">
+				<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATER;?>
+					</span> </a></li>
+				<li class="tabinact"><a href="extensions_thebrig_ports.php"
+					title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_PORTS;?> </span>
+				</a></li>
+				<li class="tabact"><a href="extensions_thebrig_manager.php"><span><?=_THEBRIG_MANAGER;?></span></a></li>
+			</ul>
+		</td>
+	</tr>
 
 	<tr><td class="tabcont">
 		<form action="exec.php" method="post" name="iform" id="iform" >
@@ -183,7 +189,7 @@ if ( $input_errors ) {
 			<td width="78%" class="vtable">
 			<?=gettext("Click below to download and install the latest version.");?><br />
 				<div id="submit_x">
-					<input id="thebrig_update" name="thebrig_update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return confirm('<?=_THEBRIG_INFO_MGR;?>');" /><br />
+					<input id="thebrig_update" name="thebrig_update" type="submit" class="formbtn" value="<?=_THEBRIG_UPDATE_BUTTON;?>" onClick="return confirm('<?=_THEBRIG_INFO_MGR;?>');" /><br />
 				</div>
 				<input name="txtCommand" type="hidden" value="<?="sh /tmp/thebrig_install.sh {$config['thebrig']['rootfolder']} 3";?>" />
 			</td>
