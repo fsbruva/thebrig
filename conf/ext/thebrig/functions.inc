@@ -16,6 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+require_once("lang.inc");
 function thebrig_unregister() {
  	global $config;
  	
@@ -227,12 +228,12 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 				exec("mkdir -p " . $work_dir[$k] );
 
 			switch ( $action ){
-				case "Fetch":
+				case _THEBRIG_FETCH_BUTTON:
 					// Fetch only
 					$command_fetch= $command_prefix . " fetch";
 					exec($command_fetch);
 					break;
-				case "Install":
+				case _THEBRIG_INSTALL_BUTTON:
 					// Update
 					$command_update= $command_prefix . " install";
 					exec($command_update);
@@ -287,7 +288,7 @@ function thebrig_portsnap ( $ports_dir , $work_dir , $conf_file , $action ) {
 				$command_fetch= $command_prefix . " fetch";
 				exec($command_fetch);
 				break;
-			case "Update":
+			case _THEBRIG_UPDATE_BUTTON:
 				// Update
 				$command_update= $command_prefix . " update";
 				exec($command_update);
@@ -297,7 +298,7 @@ function thebrig_portsnap ( $ports_dir , $work_dir , $conf_file , $action ) {
 				$command_fetch= $command_prefix . " fetch extract";
 				mwexec($command_fetch );
 				break;
-			case "Fetch & Update":
+			case _THEBRIG_FETCHUPDATE_BUTTON:
 				// Update --> fetch & update
 				$command_fetch= $command_prefix . " fetch update";
 				mwexec($command_fetch);
@@ -829,6 +830,7 @@ function write_defs_rules() {
 	$handle = fopen($file, "w");
 	fwrite($handle, "##Thebrig rulesets##");
 	$jails = $config['thebrig']['content'];
+	if (count($jails) > 0) {
 	array_sort_key($jails, "jailno");
 	foreach ($jails as $out_jail ) {
 		$ruleset_mumber = 4+$out_jail['jailno'];
@@ -839,6 +841,9 @@ function write_defs_rules() {
 			  }	  
 	 }
 	 fclose($handle);
+	 } else {
+	 unlink_if_exists("/etc/devfs.rules");
+	 }
 }
 
  function write_jailconf () {
@@ -851,6 +856,7 @@ function write_defs_rules() {
  	$conf_handle=fopen($conf_file, "w");
  // copy part of config in temporary array
  	$t_jail = $config['thebrig']['content'];
+ 	if (count($t_jail) > 0) {
 	array_sort_key($t_jail, "jailno");
 	foreach ($t_jail as $out_jail ) {
 		if (isset($out_jail['enable'])) {
@@ -1113,6 +1119,11 @@ function write_defs_rules() {
 	else { 
 		mwexec("/usr/local/sbin/rconf attribute remove jail_list");
 	}
+	} else {
+	//in case delete last jail, bug https://github.com/fsbruva/thebrig/issues/20
+	unlink_if_exists($config['thebrig']['rootfolder'] ."conf/thebrig.conf");
+	}
+	
 }
 
 function print_thebrig_confirm_box() {

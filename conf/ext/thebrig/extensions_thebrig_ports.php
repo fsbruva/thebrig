@@ -20,7 +20,6 @@
  */
 require("auth.inc");
 require("guiconfig.inc");
-require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
 
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
@@ -236,6 +235,7 @@ function conf_handler() {
 				<li class="tabact"><a href="extensions_thebrig_ports.php"
 					title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_PORTS;?> </span>
 				</a></li>
+				<li class="tabinact"><a href="extensions_thebrig_manager.php"><span><?=_THEBRIG_MANAGER;?></span></a></li>
 			</ul>
 		</td>
 	</tr>
@@ -312,7 +312,7 @@ function conf_handler() {
 						<td width="78%" class="vtable"><?=gettext("Click below to perform an 'on-demand' fetch and update of the exising ports tree."); ?><br />
 							<div id="submit_x">
 								<input id="fupdate" name="port_op" type="submit" class="formbtn"
-									value="<?=gettext("Fetch & Update");?>"
+									value="<?=_THEBRIG_FETCHUPDATE_BUTTON;?>"
 									onClick="return conf_handler();" /><br />
 							</div>
 						</td>
@@ -323,7 +323,7 @@ function conf_handler() {
 						<td width="78%" class="vtable"><?=gettext("Click below to update of the exising ports tree using the most recently downloaded snapshot.");?><br />
 							<div id="submit_x">
 								<input id="update" name="port_op" type="submit" class="formbtn"
-									value="<?=gettext("Update");?>"
+									value="<?=_THEBRIG_UPDATE_BUTTON;?>"
 									onClick="return conf_handler();" /><br />
 							</div>
 						</td>

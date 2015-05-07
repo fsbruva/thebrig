@@ -215,7 +215,7 @@ var auto_refresh = setInterval(
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav2">
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"  title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_manager.php"><span><?=_THEBRIG_MANAGER;?></span></a></li>
+			
 			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
