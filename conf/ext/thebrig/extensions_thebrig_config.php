@@ -36,7 +36,7 @@ if ( !isset($_POST['remove'] ) && is_array(  $config['thebrig']['content'] ) ) {
 	foreach ( $config['thebrig']['content'] as $jail ){
 		if ( $jail['type'] === 'slim' )
 			$base_ro = true;
-		if ( 1 == preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
+		if ( 1 === preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
 			$brig_jails=true;
 	}
 }
