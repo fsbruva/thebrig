@@ -96,7 +96,7 @@ function thebrig_populate ($new_location, $old_location)
 	$i = 0;
 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-			if (1 == preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+			if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
 				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
 		 	}	// end for		
 	} // end if (is array)
