@@ -36,7 +36,9 @@ function thebrig_unregister() {
  	// clears the config variables
  	unset( $config['thebrig'] );
  	write_config();
- 	mwexec("/bin/chmod -R 777 {$brigroot}");
+ 	// We don't need to chmod the files in the brigroot. Causes more issues
+ 	// than it fixes/prevents
+ 	// mwexec("/bin/chmod -R 777 {$brigroot}");
  	// remove all the webgui stuff (particularly useful for "full" installs)
  	
  	// First, glob all the php files from the extensions folder into an array of fully pathed filenames
