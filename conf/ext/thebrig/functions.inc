@@ -1125,10 +1125,10 @@ function write_defs_rules() {
 	fclose($conf_handle);
 	if (is_array ($a_startonboot)) { 
 		$startonboot = implode(" ", $a_startonboot);
-		mwexec("/usr/local/sbin/rconf attribute set jail_list {$startonboot}");  
+		mwexec("/usr/local/sbin/rconf attribute set thebrig_list {$startonboot}");  
 	} 
 	else { 
-		mwexec("/usr/local/sbin/rconf attribute remove jail_list");
+		mwexec("/usr/local/sbin/rconf attribute remove thebrig_list");
 	}
 	} else {
 	//in case delete last jail, bug https://github.com/fsbruva/thebrig/issues/20
