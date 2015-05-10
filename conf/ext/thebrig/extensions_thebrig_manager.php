@@ -72,67 +72,47 @@ else { // TheBrig has been confirmed
 		mwexec2("uname -r | cut -d- -f1" , $rel ) ; 		// Obtain the current kernel release
 		// If the string compare yields anything other than "0", we 
 		// are not 9.1
-		if ( floatval($rel[0]) <= 9.1)  {
+		if ( floatval($rel[0]) >= 9.1)  {
 			// FreeBSD above 9.1 has issues fetching from GitHub, so 
 			// we need to tell fetch to not verify certificates
 			$fetch_args = "--no-verify-peer";	
-			$connected = false;
 		}
-		
-		else $connected = true ;
-		
-		if ( $connected === true ) {
+		// Before we attempt to download anything, we need to see if we 
+		// even have DNS/internet
+		$connected = @fsockopen("www.github.com", 80); 
+		if ( $connected ) {
+			fclose($connected);
+			// Go get the lang.inc file
 			mwexec2 ( "fetch {$fetch_args} -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/alcatraz/conf/ext/thebrig/lang.inc" , $garbage , $fetch_ret_val ) ;
-		}
-		else { $fetch_ret_val = 1; }
-			
-		// $result will be "1" if fetch didn't do something properly
-		if ( $fetch_ret_val == 1 ) {
-			// We couldn't get the file from GitHub. We might not have 
+			// Needless error checking
+			if ( is_file("/tmp/lang.inc") ) {
+				$gitlangfile = file("/tmp/lang.inc");
+				// Extract the version string from the file ("0.8", "0.9")
+				$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[18]);
+				// Force the version to be a number for comparisons
+				$git_ver = 0 + substr($git_ver[1],0,3);
+				// Go get the install file and make it executable - only if we can successfully get the files we need.
+				mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
+				if ( is_file("/tmp/thebrig_install.sh" ) ) {
+					// Fetch of install.sh succeeded
+					mwexec ("chmod a+x /tmp/thebrig_install.sh");
+				}	// end of install.sh fetch success
+				else {
+					// We couldn't get the file from GitHub. We might not have 
+					// connectivity to Github, the file wasn't found, there was 
+					// a DNS issue, or something else went wrong.
+					$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
+					$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
+				}  // end of failed install.sh fetch	
+			} // end of successful lang.inc fetch
+		} // end of successful internet connectivity test
+		else { 
+			// We couldn't get the lang file from GitHub. We might not have 
 			// connectivity to Github, the file wasn't found, there was 
 			// a DNS issue, or something else went wrong.
 			$input_errors[] = _THEBRIG_CHECK_NETWORKING_GIT;
 			$git_ver = _THEBRIG_ERROR;
-		}	// end of fetch failed
-		else {
-			// We need to check to see the file exists, otherwise provide error
-			// This should never happen, but you never know..
-			if ( file_exists( "/tmp/lang.inc" ) ) {
-				// Load the GitHub lang file into an array
-				$gitlangfile = file("/tmp/lang.inc");
-				// If reading the file is successful, do some operations
-				if ( $gitlangfile ) {
-					// Extract the version string from the file ("0.8", "0.9")
-					$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[18]);
-					// Force the version to be a number for comparisons
-					$git_ver = 0 + substr($git_ver[1],0,3);
-				} // end if $gitlangfile
-				else { // Something failed trying to access the GitHub lang file
-					$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
-					$git_ver = _THEBRIG_ERROR;
-				} // end else $gitlangfile
-			} // end if langfile exists
-			else { // The lang file we just downloaded is missing! HOW!
-				$input_errors[] = _THEBRIG_GIT_LANG_FAIL;
-				$git_ver = _THEBRIG_ERROR;
-			} // end else langfile exists
-			
-			// Go get the install file and make it executable - only if we can successfully get the files we need.
-			mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
-			if ( $fetch_ret_val == 1 ) {
-				// We couldn't get the file from GitHub. We might not have 
-				// connectivity to Github, the file wasn't found, there was 
-				// a DNS issue, or something else went wrong.
-				$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
-				$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
-				
-			}	// end of fetch failed
-			else {
-			// Fetch succeeded
-				mwexec ("chmod a+x /tmp/thebrig_install.sh");
-			}	
-		} // end of successful fetch
-
+		}	// end of lang.inc fetch failed
 	} // end of "Not Post"
 
 } // end of "Brig Confirmed"
