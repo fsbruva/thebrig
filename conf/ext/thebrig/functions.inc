@@ -107,7 +107,7 @@ function thebrig_populate ($new_location, $old_location)
 	$i = 0;
 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-			if (1 == preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+			if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
 				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
 		 	}	// end for		
 	} // end if (is array)
@@ -119,7 +119,7 @@ function thebrig_populate ($new_location, $old_location)
 		for ($i; $i < count( $config['rc']['postinit']['cmd'] ); $i++) {
 			// This loops through all the post init command script entries, and if it finds thebrig_start.sh (placed by hand), 
 			// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
-			if ( 1 == preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
+			if ( 1 === preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
 				break;
 		} // end of for loop
 	} // end of array if statment
