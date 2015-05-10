@@ -338,13 +338,13 @@ function disable_buttons() {
 					<?php else: ?>
 								<table id = 'onlinetable' width="100%" border="0" cellpadding="5" cellspacing="0">
 						
-									<tr><td width="7%"  class="listhdrlr" ><?=gettext("Jail");?></td>
-										<td width="15%" class="listhdrc"><?=gettext("Built");?></td>
+									<tr><td width="7%"  class="listhdrlr" ><?=_THEBRIG_JAIL;?></td>
+										<td width="15%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE1;?></td>
 										<td width="24%" class="listhdrc"><?=gettext("Status");?></td>
 										<td width="5%" class="listhdrc"><?=gettext("ID");?></td>
-										<td width="22%" class="listhdrc"><?=gettext("Jail ip");?></td>
-										<td width="12%" class="listhdrc"><?=gettext("Jail hostname");?></td>
-										<td width="22%" class="listhdrc"><?=gettext("Path to jail");?></td>
+										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE2;?></td>
+										<td width="12%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE3;?></td>
+										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
 										<td width="5%" class="listhdrc"><?=gettext("Action");?></td>
 									</tr>
 						<?php foreach( $config['thebrig']['content'] as $n_jail): ?>					
@@ -364,15 +364,15 @@ function disable_buttons() {
 					<?php endif;?>
 				</td></tr>
 			<?php html_separator();  ?>
-			<?php html_titleline(gettext("<strong>TheBrig config</strong>"));?>
-					<tr><td width="15%" valign="top" class="vncell"><?=gettext("Jails");?></td>
+			<?php html_titleline(_THEBRIG_TABLE1_TITLE);?>
+					<tr><td width="15%" valign="top" class="vncell"><?=_THEBRIG_JAILS;?></td>
 						<td width="85%" class="vtable">
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td width="3%" class="listhdrlr">&nbsp;</td>
 									<td width="5%" class="listhdrr"><?=gettext("Name");?></td>
 									<td width="12%" class="listhdrr"><?=gettext("Interface");?></td>
-									<td width="9%" class="listhdrr"><?=gettext("Start on boot");?></td>
+									<td width="9%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE1;?></td>
 									<td width="16%" class="listhdrr"><?=gettext("Datasets");?></td>
 									<td width="10%" class="listhdrr"><?=gettext("Hostname");?></td>
 									<td width="15%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?></td>
@@ -414,16 +414,16 @@ function disable_buttons() {
 						</td>
 					</tr>
 					<tr>
-						<td width="15%" valign="top" class="vncell"><?=gettext("Globals");?></td>
+						<td width="15%" valign="top" class="vncell"><?=_THEBRIG_GLOBALS_TITLE;?></td>
 						<td width="85%" class="vtable">
-							<input name="parastart" type="checkbox" id="parastart" value="yes" <?php if (!empty($pconfig['parastart'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_PARALLEL?><br />
-						<!---	<input name="sethostname" type="checkbox" id="sethostname" value="yes" <?php if (!empty($pconfig['sethostname'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROOT_HOST?><br />
+						<!---		<input name="parastart" type="checkbox" id="parastart" value="yes" <?php // if (!empty($pconfig['parastart'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_PARALLEL?><br />
+						<input name="sethostname" type="checkbox" id="sethostname" value="yes" <?php if (!empty($pconfig['sethostname'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROOT_HOST?><br />
 							<input name="unixiproute" type="checkbox" id="unixiproute" value="yes" <?php if (!empty($pconfig['unixiproute'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROUTE?><br />
 							<input name="systenv" type="checkbox" id="systenv" value="yes" <?php if (!empty($pconfig['systenv'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_IPC?>
 						-->	
-		<input name='thebrig_enable' type='checkbox' class='formfld' id='thebrig_enable' value="" <?php if (!empty($pconfig['thebrig_enable'])) echo "checked=\"checked\""; ?>  />&nbsp;Allow/disallow start all jails<br />
+		<input name='thebrig_enable' type='checkbox' class='formfld' id='thebrig_enable' value="" <?php if (!empty($pconfig['thebrig_enable'])) echo "checked=\"checked\""; ?>  />&nbsp;<?=_THEBRIG_GLOBALS_ENABLE?><br />
 		<select name='gl_statfs' class='formfld' id='gl_statfs' ><option value='2' <?php if (2 == $pconfig['gl_statfs']) echo "selected"; ?> >2</option><option value='1' <?php if (1 == $pconfig['gl_statfs']) echo "selected"; ?> >1</option><option value='0' <?php if (0 == $pconfig['gl_statfs']) echo "selected"; ?> >0</option></select>
-		<span class='vexpl'>Choose Global enforce_statfs. Default value =2. Jail's value  cannot be less then Global value . <br />Value 2 not allow  jail root user mount inside a jail. "High" = 1  and "All" = 0 values allow mount jail-friendly filesystems </span>
+		<span class='vexpl'><?=_THEBRIG_GLOBALS_STATFS?> </span>
 	</td></tr></table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=_THEBRIG_SAVE_BUTTON;?>" />
