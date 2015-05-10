@@ -426,23 +426,25 @@ function conf_handler() {
 			$my_rel = exec ( "uname -r");
 			$my_rel_cut = exec ("uname -r | cut -d- -f1-2" ) ;     // Obtain the current kernel release
 			$release_update_path = "http://update.freebsd.org/" . $my_rel_cut . "/". $my_arch;
-			// Some sort of connection test?
-			if (false != file_get_contents($release_update_path ."/pub.ssl")) {
-				exec ( "fetch -o /tmp/latest.ssl ". $release_update_path ."/latest.ssl");
-				exec ( "fetch -o /tmp/pub.ssl ". $release_update_path ."/pub.ssl");
+			// Connectivity test
+			$connected = @fsockopen("update.freebsd.org", 80); 
+			if ( $connected ) {
+				fclose($connected);
+				exec ( "fetch -o /tmp/update_latest.ssl ". $release_update_path ."/latest.ssl");
+				exec ( "fetch -o /tmp/update_pub.ssl ". $release_update_path ."/pub.ssl");
 			}			
-			if (file_exists ( "/tmp/pub.ssl" ) && file_exists("/tmp/latest.ssl") ) {
+			if (file_exists ( "/tmp/update_pub.ssl" ) && file_exists("/tmp/update_latest.ssl") ) {
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then
 			// converts that from an epoch second to a usable date.
 				exec (  $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
-				. "/tmp/pub.ssl -verify < "
-				. "/tmp/latest.ssl  > /tmp/update.tag" );
+				. "/tmp/update_pub.ssl -verify < "
+				. "/tmp/update_latest.ssl  > /tmp/update.tag" );
 				$EOL_date= exec( "date -j -r `cat /tmp/update.tag  | cut -f 6 -d '|'`");
 				$tag_rel = exec ( "cat /tmp/update.tag | cut -f 3 -d '|'");
 				$tag_patch = exec ( "cat /tmp/update.tag | cut -f 4 -d '|'");
-				//exec ("rm /tmp/latest.ssl"); 	// Get rid of the latest tag
-				//exec ("rm /tmp/pub.ssl"); 	// Get rid of the latest tag
-				//exec ( "rm /tmp/update.tag");
+				exec ("rm /tmp/latest.ssl"); 	// Get rid of the latest tag
+				exec ("rm /tmp/pub.ssl"); 	// Get rid of the latest tag
+				exec ( "rm /tmp/update.tag");
 			}
 			else { $EOL_date = "N/A"; $tag_rel = "0" ; $tag_patch = "0 -- Unknown - check networking!!"; }
 

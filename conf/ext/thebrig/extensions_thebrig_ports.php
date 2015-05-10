@@ -265,18 +265,20 @@ function conf_handler() {
 				$tagdate = "Never";
 			}
 			// Connectivity test
-			if (false != file_get_contents("http://portsnap.freebsd.org/pub.ssl")) {
-				exec ( "fetch -o /tmp/latest.ssl http://portsnap.freebsd.org/latest.ssl");
-				exec ( "fetch -o /tmp/pub.ssl http://portsnap.freebsd.org/pub.ssl");
+			$connected = @fsockopen("portsnap.freebsd.org", 80); 
+			if ( $connected ) {
+				fclose($connected);
+				exec ( "fetch -o /tmp/portsnap_latest.ssl http://portsnap.freebsd.org/latest.ssl");
+				exec ( "fetch -o /tmp/portsnap_pub.ssl http://portsnap.freebsd.org/pub.ssl");
 			}	
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then 
 			// converts that from an epoch second to a usable date.
-			if ( file_exists ("/tmp/latest.ssl") && file_exists("/tmp/pub.ssl") ) {
+			if ( file_exists ("/tmp/portsnap_latest.ssl") && file_exists("/tmp/portsnap_pub.ssl") ) {
 				$most_date= exec( "date -j -r `" . $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
-					. "/tmp/pub.ssl -verify < "
-					. "/tmp/latest.ssl | cut -f 2 -d '|'`");
-				exec ("rm /tmp/latest.ssl"); 	// Get rid of the latest tag
-				exec ("rm /tmp/pub.ssl"); 	// Get rid of the latest tag
+					. "/tmp/portsnap_pub.ssl -verify < "
+					. "/tmp/portsnap_latest.ssl | cut -f 2 -d '|'`");
+				exec ("rm /tmp/portsnap_latest.ssl"); 	// Get rid of the latest tag
+				exec ("rm /tmp/portsnap_pub.ssl"); 	// Get rid of the latest tag
 			}
 			else {
 				$most_date = "Unknown - Do we have Internet?";
