@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-require_once("lang.inc");
+require("lang.inc");
 function thebrig_unregister() {
  	global $config;
  	
@@ -36,9 +36,7 @@ function thebrig_unregister() {
  	// clears the config variables
  	unset( $config['thebrig'] );
  	write_config();
- 	// We don't need to chmod the files in the brigroot. Causes more issues
- 	// than it fixes/prevents
- 	// mwexec("/bin/chmod -R 777 {$brigroot}");
+ 	mwexec("/bin/chmod -R 777 {$brigroot}");
  	// remove all the webgui stuff (particularly useful for "full" installs)
  	
  	// First, glob all the php files from the extensions folder into an array of fully pathed filenames
@@ -84,18 +82,9 @@ function thebrig_populate ($new_location, $old_location)
 
 	// This indicates that the folders are actually different
 	if ( strcmp ( realpath($old_location) , realpath($new_location) ) ){
-		mwexec("/bin/mv {$old_location}/conf {$new_location}");	// moves the conf
-		mwexec("/bin/mv {$old_location}/work {$new_location}");	// moves the work folder
-		mwexec("/bin/mv {$old_location}/thebrig.log {$new_location}");	// moves the log
-		mwexec("/bin/mv {$old_location}/thebrig_install.sh {$new_location}");	// moves the install script
-		mwexec("/bin/mv {$old_location}/README {$new_location}");	// moves the install script
-		mwexec("/bin/mv {$old_location}/COPYRIGHT {$new_location}");	// moves the install script
-		// Remove the former brig files/directory only if it's empty!
-		// This counts the number of entries in the ext directory. If it is less than or equal to 2,
-		//the directory is empty, and can be removed (see http://www.php.net/manual/en/function.scandir.php)
-		if ( count( scandir( "{$old_location}" ) ) <= 2 ){
-			mwexec( "/bin/rm -r {$old_location}");						// get rid of the old folder
-		}
+		mwexec("/bin/mv {$old_location}conf {$new_location}");	// moves the conf
+		mwexec("/bin/mv {$old_location}work {$new_location}");	// moves the work folder
+		mwexec( "/bin/rm -r {$old_location}");						// get rid of the old folder
 	}	// moves data from and removes the old directory 
 	
 	// Create the work directory if it doesn't already exist
@@ -107,7 +96,7 @@ function thebrig_populate ($new_location, $old_location)
 	$i = 0;
 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-			if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+			if (1 == preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
 				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
 		 	}	// end for		
 	} // end if (is array)
@@ -304,7 +293,7 @@ function thebrig_portsnap ( $ports_dir , $work_dir , $conf_file , $action ) {
 				$command_update= $command_prefix . " update";
 				exec($command_update);
 				break;
-			case "Fetch & Install":
+			case _THEBRIG_FETCHEXTRACT_BUTTON:
 				// Install --> fetch & extract
 				$command_fetch= $command_prefix . " fetch extract";
 				mwexec($command_fetch );
