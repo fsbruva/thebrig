@@ -22,34 +22,48 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
-require_once("XML/Serializer.php");
-require_once("XML/Unserializer.php");
+//require_once("XML/Serializer.php");
+//require_once("XML/Unserializer.php");
 if ( !is_dir ( $config['thebrig']['rootfolder']."/work") ) { $input_errors[] = _THEBRIG_NOT_CONFIRMED; }
 $swich_converted = "0";
 
 if (isset($_POST['export']) && $_POST['export']) {
-	$options = array(
-			XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
-			XML_SERIALIZER_OPTION_INDENT           => "\t",
-			XML_SERIALIZER_OPTION_LINEBREAKS       => "\n",
-			XML_SERIALIZER_OPTION_XML_ENCODING     => "UTF-8",
-			XML_SERIALIZER_OPTION_ROOT_NAME        => get_product_name(),
-			XML_SERIALIZER_OPTION_ROOT_ATTRIBS     => array("version" => get_product_version(), "revision" => get_product_revision()),
-			XML_SERIALIZER_OPTION_DEFAULT_TAG      => "content",
-			XML_SERIALIZER_OPTION_MODE             => XML_SERIALIZER_MODE_DEFAULT,
-			XML_SERIALIZER_OPTION_IGNORE_FALSE     => true,
-			XML_SERIALIZER_OPTION_CONDENSE_BOOLS   => true,
-	);
 
-	$serializer = new XML_Serializer($options);
-	$status = $serializer->serialize($config['thebrig']['content']);
+$doc = new DOMDocument('1.0', 'UTF-8');
+	$doc->formatOutput = true;
+	$elm = $doc->createElement(get_product_name());
+	$elm->setAttribute('version', get_product_version());
+	$elm->setAttribute('revision', get_product_revision());
+	$node = $doc->appendChild($elm);
 
-	if (@PEAR::isError($status)) {
-		$errormsg = $status->getMessage();
+	// export as XML
+	array_sort_key($config['thebrig']['content'], "jailno");
+	foreach ($config['thebrig']['content'] as $k => $v) {
+		$elm = $doc->createElement('jail');
+		foreach ($v as $k2 => $v2) {
+			if (is_array($v2)) {
+					foreach ($v2 as $k3 => $v3) {
+						$elm2 = $doc->createElement($k2, htmlentities($v3));
+						$elm->appendChild($elm2);
+						//print_r($v3);
+					}
+			}	else {
+			
+			$elm2 = $doc->createElement($k2, $v2);
+			$elm->appendChild($elm2);
+			}
+			
+			
+		}
+		$node->appendChild($elm);
+	}
+	$xml = $doc->saveXML();
+	if ($xml === FALSE) {
+		$errormsg = gettext("Invalid file format.");
 	} else {
 		$ts = date("YmdHis");
 		$fn = "thebrig-{$config['system']['hostname']}.{$config['system']['domain']}-{$ts}.jails";
-		$data = $serializer->getSerializedData();
+		$data = $xml;
 		$fs = strlen($data);
 
 		header("Content-Type: application/octet-stream");
@@ -59,40 +73,50 @@ if (isset($_POST['export']) && $_POST['export']) {
 		echo $data;
 
 		exit;
+
 	}
-} else if (isset($_POST['import']) && $_POST['import']) {
-	if (is_uploaded_file($_FILES['jailsfile']['tmp_name'])) {
-		$options = array(
-				XML_UNSERIALIZER_OPTION_COMPLEXTYPE => 'array',
-				XML_UNSERIALIZER_OPTION_ATTRIBUTES_PARSE => true,
-				XML_UNSERIALIZER_OPTION_FORCE_ENUM  => $listtags,
-		);
-
-		$unserializer = new XML_Unserializer($options);
-		$status = $unserializer->unserialize($_FILES['jailsfile']['tmp_name'], true);
-
-		if (@PEAR::isError($status)) {
-			$errormsg = $status->getMessage();
-		} 
-		else {
-			// Take care array already exists.
-			if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content'])) {
-				$config['thebrig']['content'] = array();
+} elseif (isset($_POST['import']) && $_POST['import']) {
+		if (is_uploaded_file($_FILES['jailsfile']['tmp_name'])) {
+			
+			// import from XML
+		$xml = file_get_contents($_FILES['jailsfile']['tmp_name']);
+		$doc = new DOMDocument();
+		$data = array();
+		$data['content'] = array();
+		if ($doc->loadXML($xml) != FALSE) {
+			$doc->normalizeDocument();
+			$jails = $doc->getElementsByTagName('jail');
+			
+			foreach ($jails as $jail) {
+				$a = array();
+				foreach ($jail->childNodes as $node) {
+					if ($node->nodeType != XML_ELEMENT_NODE)
+						continue;
+					$name = !empty($node->nodeName) ? (string)$node->nodeName : '';
+					$value = !empty($node->nodeValue) ? (string)$node->nodeValue : '';
+					if (!empty($name))
+						$a[$name] = $value;
+				}
+				$data['content'][] = $a;
 			}
+		}
 
-			$data = $unserializer->getUnserializedData();
+		if (empty($data['content'])) {
+			$input_errors[] = gettext("Invalid file format.");
+		} else {
+			// Take care array already exists.
+			if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content'])) $config['thebrig']['content'] = array();
 
 			// Import jails.
-			foreach ($data['content'] as $jail) {
+			foreach ($data as $jail) {
 				// Check if jail already exists.
 				$index = array_search_ex($jail['uuid'], $config['thebrig']['content'], "uuid");
 				if (false !== $index) {
 					// Create new uuid and mark jail as duplicate (modify description).
-					$content['uuid'] = uuid();
-					$content['desc'] = gettext("*** Imported duplicate ***") . " {$jail['desc']}";
+					$jail['uuid'] = uuid();
+					$jail['desc'] = "*** Imported duplicate ***" . $jail['desc'];
 				}
-				$config['thebrig']['content'][] = $jail;
-
+				$config['thebrig']['content'] = $jail;
 				updatenotify_set("thebrig", UPDATENOTIFY_MODE_NEW, $jail['uuid']);
 			}
 
@@ -102,10 +126,10 @@ if (isset($_POST['export']) && $_POST['export']) {
 			exit;
 		}
 	} else {
-		$errormsg = sprintf("%s %s", gettext("Failed to upload file."),
-				$g_file_upload_error[$_FILES['jailsfile']['error']]);
+		$input_errors[] = sprintf("%s %s", gettext("Failed to upload file."),
+			$g_file_upload_error[$_FILES['jailsfile']['error']]);
 	}
-}
+} else {}
 
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Tools");
 include("fbegin.inc");
@@ -113,7 +137,9 @@ include("fbegin.inc");
 if ($input_errors) { 
 	print_input_errors($input_errors);
 }
+
 ?>
+<?php if ($errormsg) print_error_box($errormsg);?>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
@@ -135,7 +161,8 @@ if ($input_errors) {
 			<li class="tabact"><a href="extensions_thebrig_tools.php"  title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
-	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform">
+	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
+	
 		<td class="tabcont">
 			 <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			 
@@ -154,11 +181,11 @@ if ($input_errors) {
 						<td width="78%" class="vtable">
 							<?=gettext("Restore jails config from XML.");?><br />
 							<div id="submit">
-								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="40" accept="*.jails" />&nbsp;
+								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="45" accept="*.jails" />&nbsp;
 								<input name="import" type="submit" class="formbtn" id="import" value="<?=gettext("Import");?>" /><br />
 							</div>
 						</td>
-					</tr>     
+					</tr>		
 			 </table>
 		</td>
 	<?php include("formend.inc");?>
