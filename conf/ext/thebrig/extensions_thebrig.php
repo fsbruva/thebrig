@@ -44,7 +44,6 @@ if (isset($_GET['apply']) && $_GET['apply']){
 if ($_POST) {
 	// insert into pconfig changes
 	$pconfig = $_POST;
-	//$config['thebrig']['parastart'] = isset( $_POST['parastart'] ) ? true : false ;
 	$config['thebrig']['thebrig_enable'] = isset ( $_POST['thebrig_enable'] ) ? true : false ;	
 	$config['thebrig']['gl_statfs'] =  $_POST['gl_statfs'] ;
 	If ($_POST['compress'] == "yes") { $config['thebrig']['compress'] = "yes"; }
@@ -328,7 +327,7 @@ function disable_buttons() {
 			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
 			} else {} ?>
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=_THEBRIG_LOG;?></span></a></li>
 					</span> </a>
 				</li>
 		</ul>
@@ -339,7 +338,7 @@ function disable_buttons() {
 			<?php if (updatenotify_exists("thebrig")) print_config_change_box();?>
 
 			<table width="100%" border="0" cellpadding="6" cellspacing="0">
-			      <?php html_titleline(gettext("On-line view"));?>
+			      <?php html_titleline(_THEBRIG_ONLINETABLE_TITLE);?>
 				<tr><td colspan='2' valign='top' >
 					<?php if( isset( $config['thebrig']['rootfolder'])==false): ?>
 							<a title=<?=gettext("Configure TheBrig please first");?>
@@ -348,14 +347,14 @@ function disable_buttons() {
 					<?php else: ?>
 								<table id = 'onlinetable' width="100%" border="0" cellpadding="5" cellspacing="0">
 						
-									<tr><td width="7%"  class="listhdrlr" ><?=_THEBRIG_JAIL;?></td>
+									<tr><td width="7%"  class="listhdrlr" ><?=_THEBRIG_TABLE1_TITLE1;?></td>
 										<td width="15%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE1;?></td>
-										<td width="24%" class="listhdrc"><?=gettext("Status");?></td>
-										<td width="5%" class="listhdrc"><?=gettext("ID");?></td>
+										<td width="24%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE5;?></td>
+										<td width="5%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE6;?></td>
 										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE2;?></td>
 										<td width="12%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE3;?></td>
 										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
-										<td width="5%" class="listhdrc"><?=gettext("Action");?></td>
+										<td width="5%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE7;?></td>
 									</tr>
 						<?php foreach( $config['thebrig']['content'] as $n_jail): ?>					
 									<tr name='myjail<?=$n_jail['jailno']; ?>' id='myjail<?=$n_jail['jailno']; ?>'>
@@ -380,13 +379,13 @@ function disable_buttons() {
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td width="3%" class="listhdrlr">&nbsp;</td>
-									<td width="5%" class="listhdrr"><?=gettext("Name");?></td>
-									<td width="12%" class="listhdrr"><?=gettext("Interface");?></td>
-									<td width="9%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE1;?></td>
-									<td width="16%" class="listhdrr"><?=gettext("Datasets");?></td>
-									<td width="10%" class="listhdrr"><?=gettext("Hostname");?></td>
-									<td width="15%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?></td>
-									<td width="14%" class="listhdrr"><?=gettext("Description");?></td>
+									<td width="5%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE1;?></td>
+									<td width="12%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE2;?></td>
+									<td width="9%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE3;?></td>
+									<td width="16%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE4;?></td>
+									<td width="10%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE5;?></td>
+									<td width="15%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE6;?></td>
+									<td width="14%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE7;?></td>
 									<td width="10%" class="list"></td>
 								</tr>
 									<?php foreach ($a_jail as $jail):?>

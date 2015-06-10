@@ -19,192 +19,138 @@
 	define(_THEBRIG_VERSION_NBR, 'v0.9');	
 		
 	if ($config['system']['language'] == 'ru') { 
-		define(_THEBRIG_INSTALL_BUTTON, "Установить" );
-		define(_THEBRIG_FETCH_BUTTON, "Стырить");
-		define(_THEBRIG_SAVE_BUTTON, "Заныкать");
-		define(_THEBRIG_FETCHUPDATE_BUTTON, "Скачать и обновить");
-		define(_THEBRIG_UPDATE_BUTTON, "Обновить");
-		define(_THEBRIG_TITLE, "Тюряга");
-		define(_THEBRIG_NOT_INSTALLED, "Что-то случилось с инсталяций, наверное не судьба.  Придется давить кнопки по-новой");
-		define(_THEBRIG_NOT_CONFIRMED, "Ура, зароботало!! <br>Осталось только пойти на страницу <a href='/extensions_thebrig_config.php'>Системной конфигурации </a> п просто нажать кнопку  \"Сохранить\".");
-		define(_THEBRIG_INSTALL, "Построить этот наш особый мир");
-		define(_THEBRIG_DONT_CHANGE, "Оставить как есть");
-		define(_THEBRIG_MAINTENANCE, "Текуший ремонт");
-		define(_THEBRIG_UPDATES , "Обновки");
-		define(_THEBRIG_PORTS, "Порты");
-		define(_THEBRIG_PORT_CRON, "Enable 2:47 a.m. daily cron fetch of port tree.");
-		define(_THEBRIG_UPDATE_CRON, "Enable 1:28 a.m. Tuesday weekly cron fetch of updates for all jails.");
-		define(_THEBRIG_UPDATER , "Обновить мир");
-		define(_THEBRIG_MANAGER , "TheBrig Manager");
-		define(_THEBRIG_MANAGER_TITLE , "Manager");
-		define(_THEBRIG_JAIL, "Jail" );
-		define(_THEBRIG_EDIT, "Edit" );
-		define(_THEBRIG_ADD, "Add" );
-		define(_THEBRIG_TOOLS, "Backup/Restore");
-		define(_THEBRIG_NO_BASE, "Creating a jail requires at least one \"base\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
-		define(_THEBRIG_NO_LIB32, "As this is 64 bit Nas4free, creating a jail requires at least one \"lib32\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
-		define(_THEBRIG_BASIC_CONFIG, "Rudimentary Config");
-		define(_THEBRIG_JAILS, "Сидельцы");
-		define(_THEBRIG_SETTINGS_BASIC, "Basic Settings");
-		define(_THEBRIG_CLEANUP, "Uninstall TheBrig");
-		define(_THEBRIG_CLEANUP_DESC, "Remove TheBrig integration from NAS4Free. This will leave the installation folder untouched - remove the files using Windows Explorer, FTP or some other tool of your choice.<br><br><b>Please note</b>: this page will no longer be available. You'll have to re-run TheBrig installation to get it back on your NAS4Free.");
-		define(_THEBRIG_ROOT, "Installation folder");
-		define(_THEBRIG_ROOT_DESC, "Please define TheBrig's jail installation folder. </br><b>Please note:</b> TheBrig will not work properly if this value is empty or incorrect.");
-		define(_THEBRIG_BASE, "Basejail Location"); 
-		define(_THEBRIG_BASE_DESC, "Sets the alternate location for the shared basejail. Default is a folder named basejail within TheBrig's installation folder. </br><b>Please note:</b> This value cannot be edited while there are any thin jails.");
-		define(_THEBRIG_NONEXISTENT_FOLDER, "Folder does not exist!");
-		define(_THEBRIG_SAVE, "Save");
-		define(_THEBRIG_JAIL_ALREADY, "It appears that at least one jail has already been created. TheBrig does not support moving its installation folder once jails have been created, or if either the basejail or templates have files.</br> If you wish to move the installation folder, you must delete all jails first.");
-		define(_THEBRIG_EXTN, "Приблуды");
-		define(_THEBRIG_TARBALL_MGMT, "Tarball Management");
-		define(_THEBRIG_NOTWRITABLE_FOLDER, "Either the old or new folder is not writable!");
-		define(_THEBRIG_CURRENT_TB, "Existing Tarballs");
-		define(_THEBRIG_OFFICIAL_TB, "Official FreeBSD Flavor");
-		define(_THEBRIG_CUSTOM_TB, "Custom Flavor (Homegrown)");
-		define(_THEBRIG_PARTIAL_TB, "Official FreeBSD (in progress)");
-		define(_THEBRIG_NO_TB, "There are no tarballs available. Please choose some archives and download them using the button below.<br><br>");
-		define(_THEBRIG_NO_CUST_TB, "There are no custom tarballs available. This is an advanced feature, so don't worry about it.<br><br>");
-		define(_THEBRIG_NO_PART_TB, "There are no partial tarballs. This indicates there are no downloads in progress.<br><br>Or, if you recently fetched a tarball, you will need to refresh this page to have it show up in the list of existing tarballs.");
-		define(_THEBRIG_DELETE_TB, "Delete Selected Tarballs");
-		define(_THEBRIG_DELETE_ERROR, "You selected deletion without naming files.");
-		define(_THEBRIG_REMOTE_TB, "Remote Tarballs");
-		define(_THEBRIG_REMOTE_AVAIL, "Available Tarballs");
-		define(_THEBRIG_REMOTE_ACTIVE, "Active Downloads");
-		define(_THEBRIG_REMOTE_INST, "The ftp server has not been queried (yet). Press the \"Query\" button below to begin the download process.<br><br>");
-		define(_THEBRIG_TB_WAIT, "Updating in 1 second...");
-		define(_THEBRIG_CONF_TB, "Do you really want to delete these tarball(s)?");
-		define(_THEBRIG_FTPQUERY, "Click the query button to get info about available tarballs." );
-		define(_THEBRIG_QUERYBTN, "Query!" );
-		define(_THEBRIG_CHECK_NETWORKING, "There seems to be a networking issue. I can't reach ftp.freebsd.org. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>.<br>Alternatively, try it again to see if there was some transient network problem.");
-		define(_THEBRIG_CHECK_NETWORKING_GIT, "There seems to be a networking issue. I can't reach GitHub to retrieve the file. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>. <br>Alternatively, try it again to see if there was some transient network problem.");
-		define(_THEBRIG_GIT_LANG_FAIL, "The fetch succeeded, but the file is missing or not accessible. Please try again!");
-		define(_THEBRIG_ERROR, "ERROR!");
-		define(_THEBRIG_FETCH, "Fetch!");
-		define(_THEBRIG_FETCH_ERROR, "You selected to fetch without selecting any files.");
-		define(_THEBRIG_DELETE_FAIL, "Could not delete file: ");
-		define(_THEBRIG_VERSION, 'TheBrig Version ' . _THEBRIG_VERSION_NBR);
-		define(_THEBRIG_MATCH_ERROR, "There seem to be no matching releases for your kernel. See the documentation regarding kernel/jail binary mismatch");
-		define(_THEBRIG_INFO_TB, "The selected packages will be downloaded as a background job. Please check back in a few moments.");
-		define(_THEBRIG_INFO_MGR, "Any jails running will be stopped, and the latest version will be downloaded. Are you sure you want to continue?");
-		define(_THEBRIG_JAIL_PARALLEL, "Start all jails in parallel");
-		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
-		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
-		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
-		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
-		define(_THEBRIG_ONLINETABLE_TITLE2, "IP");
-		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail Hostname");
-		define(_THEBRIG_ONLINETABLE_TITLE4, "Path");
-		define(_THEBRIG_TABLE1_TITLE1, "Start on Boot");
-		define(_THEBRIG_GLOBALS_TITLE, "Globals");
-		define(_THEBRIG_GLOBALS_ENABLE, "Allow/disallow start of all jails");
-		define(_THEBRIG_GLOBALS_STATFS, "Choose Global enforce_statfs. Default value: 2. Jail's value cannot be less then Global value. <br> Value of 2 will not allow jail root user to mount inside a jail. 'High' = 1 and 'All' = 0 values allow users to mount jail-friendly filesystems");
-		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
-	}
-	elseif ($config['system']['language'] == 'ge') { 
-		define(_THEBRIG_INSTALL_BUTTON, "Установить" );
-		define(_THEBRIG_FETCH_BUTTON, "Стырить");
-		define(_THEBRIG_SAVE_BUTTON, "Save");
-		define(_THEBRIG_FETCHUPDATE_BUTTON, "Fatch & Install");
-		define(_THEBRIG_UPDATE_BUTTON, "Update");
-		define(_THEBRIG_TITLE, "Кича");
-		define(_THEBRIG_NOT_INSTALLED, "Что-то случилось с инсталяций, наверное не судьба.  Придется давить кнопки по-новой");
-		define(_THEBRIG_NOT_CONFIRMED, "Ура, зароботало!! <br>Осталось только пойти на страницу <a href='/extensions_thebrig_config.php'>Системной конфигурации </a> п просто нажать кнопку  \"Сохранить\".");
-		define(_THEBRIG_INSTALL, "Построить этот наш особый мир");
-		define(_THEBRIG_DONT_CHANGE, "Оставить как есть");
-		define(_THEBRIG_MAINTENANCE, "Текуший ремонт");
-		define(_THEBRIG_UPDATES , "Обновки");
-		define(_THEBRIG_PORTS, "Порты");
-		define(_THEBRIG_PORT_CRON, "Enable 2:47 a.m. daily cron fetch of port tree.");
-		define(_THEBRIG_UPDATE_CRON, "Enable 1:28 a.m. Tuesday weekly cron fetch of updates for all jails.");
-		define(_THEBRIG_UPDATER , "Обновить мир");
-		define(_THEBRIG_MANAGER , "TheBrig Manager");
-		define(_THEBRIG_MANAGER_TITLE , "Manager");
-		define(_THEBRIG_JAIL, "Jail" );
-		define(_THEBRIG_EDIT, "Edit" );
-		define(_THEBRIG_ADD, "Add" );
-		define(_THEBRIG_TOOLS, "Backup/Restore");
-		define(_THEBRIG_NO_BASE, "Creating a jail requires at least one \"base\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
-		define(_THEBRIG_NO_LIB32, "As this is 64 bit Nas4free, creating a jail requires at least one \"lib32\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
-		define(_THEBRIG_BASIC_CONFIG, "Rudimentary Config");
-		define(_THEBRIG_JAILS, "Current Jails");
-		define(_THEBRIG_SETTINGS_BASIC, "Basic Settings");
-		define(_THEBRIG_CLEANUP, "Uninstall TheBrig");
-		define(_THEBRIG_CLEANUP_DESC, "Remove TheBrig integration from NAS4Free. This will leave the installation folder untouched - remove the files using Windows Explorer, FTP or some other tool of your choice.<br><br><b>Please note</b>: this page will no longer be available. You'll have to re-run TheBrig installation to get it back on your NAS4Free.");
-		define(_THEBRIG_ROOT, "Installation folder");
-		define(_THEBRIG_ROOT_DESC, "Please define TheBrig's jail installation folder. </br><b>Please note:</b> TheBrig will not work properly if this value is empty or incorrect.");
-		define(_THEBRIG_BASE, "Basejail Location"); 
-		define(_THEBRIG_BASE_DESC, "Sets the alternate location for the shared basejail. Default is a folder named basejail within TheBrig's installation folder. </br><b>Please note:</b> This value cannot be edited while there are any thin jails.");
-		define(_THEBRIG_NONEXISTENT_FOLDER, "Folder does not exist!");
-		define(_THEBRIG_SAVE, "Save");
-		define(_THEBRIG_JAIL_ALREADY, "It appears that at least one jail has already been created. TheBrig does not support moving its installation folder once jails have been created, or if either the basejail or templates have files.</br> If you wish to move the installation folder, you must delete all jails first.");
+		include_once("ext/thebrig/lang.ru.inc");
+	} else {
+	/** All pages  */
 		define(_THEBRIG_EXTN, "Extensions");
-		define(_THEBRIG_TARBALL_MGMT, "Tarball Management");
-		define(_THEBRIG_NOTWRITABLE_FOLDER, "Either the old or new folder is not writable!");
-		define(_THEBRIG_CURRENT_TB, "Existing Tarballs");
-		define(_THEBRIG_OFFICIAL_TB, "Official FreeBSD Flavor");
-		define(_THEBRIG_CUSTOM_TB, "Custom Flavor (Homegrown)");
-		define(_THEBRIG_PARTIAL_TB, "Official FreeBSD (in progress)");
-		define(_THEBRIG_NO_TB, "There are no tarballs available. Please choose some archives and download them using the button below.<br><br>");
-		define(_THEBRIG_NO_CUST_TB, "There are no custom tarballs available. This is an advanced feature, so don't worry about it.<br><br>");
-		define(_THEBRIG_NO_PART_TB, "There are no partial tarballs. This indicates there are no downloads in progress.<br><br>Or, if you recently fetched a tarball, you will need to refresh this page to have it show up in the list of existing tarballs.");
-		define(_THEBRIG_DELETE_TB, "Delete Selected Tarballs");
-		define(_THEBRIG_DELETE_ERROR, "You selected deletion without naming files.");
-		define(_THEBRIG_REMOTE_TB, "Remote Tarballs");
-		define(_THEBRIG_REMOTE_AVAIL, "Available Tarballs");
-		define(_THEBRIG_REMOTE_ACTIVE, "Active Downloads");
-		define(_THEBRIG_REMOTE_INST, "The ftp server has not been queried (yet). Press the \"Query\" button below to begin the download process.<br><br>");
-		define(_THEBRIG_TB_WAIT, "Updating in 1 second...");
-		define(_THEBRIG_CONF_TB, "Do you really want to delete these tarball(s)?");
-		define(_THEBRIG_FTPQUERY, "Click the query button to get info about available tarballs." );
-		define(_THEBRIG_QUERYBTN, "Query!" );
-		define(_THEBRIG_CHECK_NETWORKING, "There seems to be a networking issue. I can't reach ftp.freebsd.org. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>.<br>Alternatively, try it again to see if there was some transient network problem.");
-		define(_THEBRIG_CHECK_NETWORKING_GIT, "There seems to be a networking issue. I can't reach GitHub to retrieve the file. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>. <br>Alternatively, try it again to see if there was some transient network problem.");
-		define(_THEBRIG_GIT_LANG_FAIL, "The fetch succeeded, but the file is missing or not accessible. Please try again!");
-		define(_THEBRIG_ERROR, "ERROR!");
-		define(_THEBRIG_FETCH, "Fetch!");
-		define(_THEBRIG_FETCH_ERROR, "You selected to fetch without selecting any files.");
-		define(_THEBRIG_DELETE_FAIL, "Could not delete file: ");
-		define(_THEBRIG_VERSION, 'TheBrig Version ' . _THEBRIG_VERSION_NBR);
-		define(_THEBRIG_MATCH_ERROR, "There seem to be no matching releases for your kernel. See the documentation regarding kernel/jail binary mismatch");
-		define(_THEBRIG_INFO_TB, "The selected packages will be downloaded as a background job. Please check back in a few moments.");
-		define(_THEBRIG_INFO_MGR, "Any jails running will be stopped, and the latest version will be downloaded. Are you sure you want to continue?");
-		define(_THEBRIG_JAIL_PARALLEL, "Start all jails in parallel");
-		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
-		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
-		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
-		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
-		define(_THEBRIG_ONLINETABLE_TITLE2, "IP");
-		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail Hostname");
-		define(_THEBRIG_ONLINETABLE_TITLE4, "Path");
-		define(_THEBRIG_TABLE1_TITLE1, "Start on Boot");
-		define(_THEBRIG_GLOBALS_TITLE, "Globals");
-		define(_THEBRIG_GLOBALS_ENABLE, "Allow/disallow start of all jails");
-		define(_THEBRIG_GLOBALS_STATFS, "Choose Global enforce_statfs. Default value: 2. Jail's value cannot be less then Global value. <br> Value of 2 will not allow jail root user to mount inside a jail. 'High' = 1 and 'All' = 0 values allow users to mount jail-friendly filesystems");
-		
-		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
-	}
-	else {
 		define(_THEBRIG_TITLE, "TheBrig");
-		define(_THEBRIG_NOT_INSTALLED, "Something went awry with TheBrig's installation. Please attempt to re-install");
-		define(_THEBRIG_NOT_CONFIRMED, "It appears you just finished installing TheBrig! <br>Please confirm the install location by visiting the <a href='/extensions_thebrig_config.php'>Rudimentary Config</a> page and click \"Save\".");
-		define(_THEBRIG_INSTALL, "Install the jail tarball");
-		define(_THEBRIG_DONT_CHANGE, "Keep existing - don't change");
+		define(_THEBRIG_LOG, "Log");
 		define(_THEBRIG_MAINTENANCE, "Maintenance");
 		define(_THEBRIG_UPDATES , "Updates");
+		
+		
+	/** Main page */
+	
+		define(_THEBRIG_ONLINETABLE_TITLE, "On-line view");
+		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
+		define(_THEBRIG_ONLINETABLE_TITLE2, "Jail ip");
+		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail hostname");
+		define(_THEBRIG_ONLINETABLE_TITLE4, "Path to jail");
+		define(_THEBRIG_ONLINETABLE_TITLE5, "Status");
+		define(_THEBRIG_ONLINETABLE_TITLE6, "ID");
+		define(_THEBRIG_ONLINETABLE_TITLE7, "Action");
+		define(_THEBRIG_TABLE1_TITLE,"TheBrig config");
+		define(_THEBRIG_JAILS, "Jails" );
+		define(_THEBRIG_TABLE1_TITLE3,"Start on boot");
+		define(_THEBRIG_TABLE1_TITLE1,"Jail name");
+		define(_THEBRIG_TABLE1_TITLE2,"Network");		
+		define(_THEBRIG_TABLE1_TITLE4,"ZFS");
+		define(_THEBRIG_TABLE1_TITLE5,"Hostname");
+		define(_THEBRIG_TABLE1_TITLE6,"Path to jail");
+		define(_THEBRIG_TABLE1_TITLE7,"Description");
+		define(_THEBRIG_GLOBALS_TITLE,"Globals");
+		define(_THEBRIG_GLOBALS_ENABLE,"Allow start all jails");
+		define(_THEBRIG_GLOBALS_STATFS,"Choose Global enforce_statfs. Default value =2. Jail's value  cannot be less then Global value . <br />Value 2 not allow  jail root user mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount jail-friendly filesystems");
+
+		/** Edit page */
+		define('_THEBRIG_EDIT', "Edit" );
+		define('_THEBRIG_ADD', "Add" );
+		define('_THEBRIG_JAIL', "Jail" );
+		define ('_THEBRIG_JAIL_PARAMETERS', "Jail parameters");
+		define (_THEBRIG_JAIL_NUMBER, "Jail number");
+		define (_THEBRIG_JAIL_NUMBER_EXPL, "The jail number determines the order of the jail.");
+		define (_THEBRIG_TABLE1_TITLE1_EXPL, "The jail's  name.");
+		define (_THEBRIG_JAIL_TYPE, "Jail Type \n <input type=\"button\" onclick=\"helpbox()\" value=\"Help\" />");
+		define (_THEBRIG_JAIL_TYPE_EXPL, "Choose jail type ");
+		define(_THEBRIG_TABLE1_TITLE3_EXPL,"Check it if you want start current jail automatically with main system ");
+		define(_THEBRIG_ONLINETABLE_TITLE4_EXPL, "Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}jail_name/");
+		define('_THEBRIG_J_ALLOW', "In jail allow:" );
+		define('_THEBRIG_J_OPTION', "In jail" ); //  insert into jscript page
+		define('_THEBRIG_J_MOUNTFSTAB', "mount/umount jail's fs");
+		define('_THEBRIG_J_MOUNTFSTAB_EXPL', "Enable the jail to automount its fstab file. <font color=\"red\">This is not optional for slim jails.</color> " );
+		define('_THEBRIG_J_STATFS', "Information about a mounted file system (statfs)");
+		define('_THEBRIG_J_STATFS_EXPL', "Choose enforce_statfs. Default value =2. It not allow for <b>jail user</b> mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount <font color=\"red\">jail-friendly</color> filesystems");
+		define('_THEBRIG_J_DEVFS', "Enable mount devfs");
+		define('_THEBRIG_J_DEVFS_EXPL', "Use to mount the device file system inside the jail. <br /><b>This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.</b>");
+		define('_THEBRIG_J_DEVFSRULES', "Devfs ruleset");
+		define('_THEBRIG_J_DEVFSRULES_EXPL', "Define additional rules for current jail.");
+		define('_THEBRIG_J_PROCFS', "Enable mount procfs");
+		define('_THEBRIG_J_PROCFS_EXPL', "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>");
+		define('_THEBRIG_J_FDESCFS',  "Enable mount fdescfs");
+		define('_THEBRIG_J_FDESCFS_NOTE', "Some command (as join) and programm (as bash) require mount syntetic descriptors filesystem ");		
+		define('_THEBRIG_J_ZFS', "Enable mount zfs dataset");		
+		define('_THEBRIG_J_ZFS_MOUNTED', "ZFS dataset, mounted to jail");
+		define('_THEBRIG_J_FSTAB', "Fstab for current jail");
+		define('_THEBRIG_J_FSTAB_EXPL', " This will be added to fstab. Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> <p> Also you can use fstab editor ");
+		define('_THEBRIG_J_VNET', "Virtual network");
+		define('_THEBRIG_J_VNET_EXPL', "Enable virtual network stack (vnet)");
+		define('_THEBRIG_VNET_LAN', "Attach to interface");
+		define('_THEBRIG_VNET_LAN_EXPL', "Choice interface for virtual net glue");
+		
+		define('_THEBRIG_J_NETWORK', "Jail Network settings");
+		define('_THEBRIG_J_COMMAND', "Commands");
+		define('_THEBRIG_J_COMMANDS', "Jail  commands");
+		define('_THEBRIG_J_STARTCOMMAND', "Jail start command");
+		define('_THEBRIG_J_STARTCOMMAND_EXPL', "command to execute,  when a jail start. /etc/rc command load rc scripts.");
+		define('_THEBRIG_J_STOPCOMMAND', "User command stop");
+		define('_THEBRIG_J_STOPCOMMAND_EXPL',  "command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script");
+		define('_THEBRIG_J_DESCRIPTION', "Description");
+		define('_THEBRIG_J_DESCRIPTION_EXPL', "You may enter a description here for your reference.");
+		
+		define('_THEBRIG_J_SRC_TITLE', "Installation Source");
+		define('_THEBRIG_J_SRC', "Jail Source");
+		define('_THEBRIG_SRC_EXPL', "Choose jail source. Selecting 'From Template' will clone the jail specified by the template folder." );
+		
+		
+		
+		
+	/** Buttons */
+		define(_THEBRIG_INSTALL_BUTTON, "Install" );
+		define(_THEBRIG_FETCH_BUTTON, "Fetch");
+		define(_THEBRIG_SAVE_BUTTON, "Save");
+		define(_THEBRIG_ADD_BUTTON, "Add");
+		define(_THEBRIG_CANCEL_BUTTON, "Cancel");
+		define(_THEBRIG_FSTAB_BUTTON, "Fstab editor");
+		define(_THEBRIG_FETCHUPDATE_BUTTON, "Fetch & Update");
+		define(_THEBRIG_UPDATE_BUTTON, "Update");
+		define(_THEBRIG_FETCHEXTRACT_BUTTON, "Fetch & extract");
+	/** Error messages */	
+		define(_THEBRIG_NOT_INSTALLED, "Something went awry with TheBrig's installation. Please attempt to re-install");
+		define(_THEBRIG_NO_BASE, "Creating a jail requires at least one \"base\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
+		define(_THEBRIG_NO_LIB32, "As this is 64 bit Nas4free, creating a jail requires at least one \"lib32\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
+		define(_THEBRIG_NO_JAILLOCATION, "The specified jail location does not exist - probably because you imported the jail's config. Please choose another.");
+		define(_THEBRIG_DUPLICATE_NAME, "The specified jailname is a duplicate - probably because you imported the jail's config. Please choose another.");
+		define(_THEBRIG_INVALID_MOUNTPOINT, "The attribute into zfs mount point <i>'%s'</i> contains invalid characters .");
+		define(_THEBRIG_CONFLICT_DATASET, "The selected dataset was previously assigned to another jail. Possible conflict, and therefore assign a different dataset or edit another prison <b>'%s'</b>.");
+		define(_THEBRIG_FORBIDDEN_MOUNTPOINT, "The specified mount point <i>'%s'</i> is forbidden. Why? <a href=\"http://forums.nas4free.org/viewtopic.php?f=66&t=8081\">I so want!</a>  Please choose another.");
+		define(_THEBRIG_DUPLICATE_COMMAND, "Duplicate command detected, please inspect command values.");
+		define(_THEBRIG_JAILNAME_INUSE, "The specified jailname is already in use. Please choose another.");
+		define(_THEBRIG_JAILNAME_RESERVED, "The specified jailname is reserved. Please choose another.");
+		define(_THEBRIG_LOCATION_RESERVED, "The specified jail location is reserved. Please choose another.");
+		define(_THEBRIG_LIB32_SELECTED, "The specified jail location is reserved. Please choose another.");
+		define(_THEBRIG_2TARBALS_SELECTED,  "You have selected more than one of a given tarball type!!  Please select only one of each type");
+		define(_THEBRIG_CREATEFOLDERERROR, "Could not create directory for jail to live in!");
+		define(_THEBRIG_NOT_CONFIRMED, "It appears you just finished installing TheBrig! <br>Please confirm the install location by visiting the <a href='/extensions_thebrig_config.php'>Rudimentary Config</a> page and click \"Save\".");
+		
+	/**Messages */	
+	
+		
+		define(_THEBRIG_TYPEHELP, "Slim - This is a fully functional jail, but when first installed, only occupies about 2 MB in its folder.\\n\\n full - This is a full sized jail, about 300 MB per jail, and is completely self contained.\\n\\n Linux - jail for Linux, such Debian.\\n\\n custom- this only create jail folder and make simulation without install. Usefull for migrate jails.");
+		
+		define(_THEBRIG_INSTALL, "Install the jail tarball");
+		define(_THEBRIG_DONT_CHANGE, "Keep existing - don't change");
+
+
 		define(_THEBRIG_PORTS, "Central Ports");
 		define(_THEBRIG_PORT_CRON, "Enable 2:47 a.m. daily cron fetch of port tree.");
 		define(_THEBRIG_UPDATE_CRON, "Enable 1:28 a.m. Tuesday weekly cron fetch of updates for all jails.");
 		define(_THEBRIG_UPDATER , "FreeBSD Update");
 		define(_THEBRIG_MANAGER , "TheBrig Manager");
 		define(_THEBRIG_MANAGER_TITLE , "Manager");
-		define(_THEBRIG_JAIL, "Jail" );
-		define(_THEBRIG_EDIT, "Edit" );
-		define(_THEBRIG_ADD, "Add" );
+		
 		define(_THEBRIG_TOOLS, "Backup/Restore");
-		define(_THEBRIG_NO_BASE, "Creating a jail requires at least one \"base\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
-		define(_THEBRIG_NO_LIB32, "As this is 64 bit Nas4free, creating a jail requires at least one \"lib32\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
 		define(_THEBRIG_BASIC_CONFIG, "Rudimentary Config");
-		define(_THEBRIG_JAILS, "Current Jails");
+		define(_THEBRIG_JAILS_TAB, "Current Jails");
 		define(_THEBRIG_SETTINGS_BASIC, "Basic Settings");
 		define(_THEBRIG_CLEANUP, "Uninstall TheBrig");
 		define(_THEBRIG_CLEANUP_DESC, "Remove TheBrig integration from NAS4Free. This will leave the installation folder untouched - remove the files using Windows Explorer, FTP or some other tool of your choice.<br><br><b>Please note</b>: this page will no longer be available. You'll have to re-run TheBrig installation to get it back on your NAS4Free.");
@@ -215,7 +161,7 @@
 		define(_THEBRIG_NONEXISTENT_FOLDER, "Folder does not exist!");
 		define(_THEBRIG_SAVE, "Save");
 		define(_THEBRIG_JAIL_ALREADY, "It appears that at least one jail has already been created. TheBrig does not support moving its installation folder once jails have been created, or if either the basejail or templates have files.</br> If you wish to move the installation folder, you must delete all jails first.");
-		define(_THEBRIG_EXTN, "Extensions");
+		
 		define(_THEBRIG_TARBALL_MGMT, "Tarball Management");
 		define(_THEBRIG_NOTWRITABLE_FOLDER, "Either the old or new folder is not writable!");
 		define(_THEBRIG_CURRENT_TB, "Existing Tarballs");
@@ -250,19 +196,7 @@
 		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
 		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
-		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
-		define(_THEBRIG_ONLINETABLE_TITLE2, "IP");
-		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail Hostname");
-		define(_THEBRIG_ONLINETABLE_TITLE4, "Path");
-		define(_THEBRIG_TABLE1_TITLE1, "Start on Boot");
-		define(_THEBRIG_GLOBALS_TITLE, "Globals");
-		define(_THEBRIG_GLOBALS_ENABLE, "Allow/disallow start of all jails");
-		define(_THEBRIG_GLOBALS_STATFS, "Choose Global enforce_statfs. Default value: 2. Jail's value cannot be less then Global value. <br> Value of 2 will not allow jail root user to mount inside a jail. 'High' = 1 and 'All' = 0 values allow users to mount jail-friendly filesystems");
-		define(_THEBRIG_INSTALL_BUTTON, "Install" );
-		define(_THEBRIG_FETCH_BUTTON, "Fetch");
-		define(_THEBRIG_SAVE_BUTTON, "Save");
-		define(_THEBRIG_FETCHUPDATE_BUTTON, "Fetch & Update");
-		define(_THEBRIG_UPDATE_BUTTON, "Update");
+		define(_THEBRIG_TITLE, "TheBrig");		
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
-	}
+		}
 ?>

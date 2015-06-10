@@ -20,9 +20,10 @@
 	*/
 require("auth.inc");
 require("guiconfig.inc");
-require_once("ext/thebrig/lang.inc");
-require_once("ext/thebrig/functions.inc");
+//require_once("ext/thebrig/lang.inc");
+require("ext/thebrig/functions.inc");
 require("ext/thebrig/gui_addons.inc");
+
 $in_jail_allow = array (
 "allow.sysvipc",
 "allow.raw_sockets",
@@ -560,64 +561,10 @@ $(document).ready(function(){
 	$('#jail_type').change(function() {
 		switch ($('#jail_type').val()) {
 	case "slim":
-		$('#mounts_separator_empty').show();
-		$('#mounts_separator').show();
 		$('#jail_mount_tr').hide();
-		$('#devfs_enable_tr').show();
-		$('#proc_enable_tr').show();
-		$('#fdescfs_enable_tr').show();
-		$('#install_source_empty').show();
-		$('#install_source').show();
-		$('#source_tr').show();
-		$('#official_tr').show();
-		$('#jail_mount').attr('checked', true);
-
-
 		break;
 	case "full":	
-		$('#mounts_separator_empty').show();
-		$('#mounts_separator').show();
 		$('#jail_mount_tr').show();
-		$('#devfs_enable_tr').show();
-		$('#proc_enable_tr').show();
-		$('#fdescfs_enable_tr').show();
-		$('#install_source_empty').show();
-		$('#install_source').show();
-		$('#source_tr').show();
-		$('#official_tr').show();
-
-
-
-		break;
-	case "linux":	
-		$('#mounts_separator_empty').hide();
-		$('#mounts_separator').hide();
-		$('#jail_mount_tr').hide();
-		$('#devfs_enable_tr').hide();
-		$('#proc_enable_tr').hide();
-		$('#fdescfs_enable_tr').hide();
-		$('#install_source_empty').hide();
-		$('#install_source').hide();
-		$('#source_tr').hide();
-		$('#official_tr').hide();
-		$('#jail_mount').prop('checked', true);
-		$('#devfs_enable').prop('checked', true);
-		$('#proc_enable').prop('checked', true);
-		break;	
-	case "custom":
-		$('#mounts_separator_empty').show();
-		$('#mounts_separator').show();
-		$('#jail_mount_tr').show();
-		$('#devfs_enable_tr').show();
-		$('#proc_enable_tr').show();
-		$('#fdescfs_enable_tr').hide();
-		$('#install_source_empty').hide();
-		$('#install_source').hide();
-		$('#source_tr').hide();
-		$('#official_tr').hide();
-
-
-
 		break;
 		}
 	});
@@ -688,7 +635,7 @@ function jail_mount_enable() {
 			break;
 		}
 }
-function helpbox() { alert("Slim - This is a fully functional jail, but when first installed, only occupies about 2 MB in its folder.\n\n full - This is a full sized jail, about 300 MB per jail, and is completely self contained.\n\n Linux - jail for Linux, such Debian.\n\n custom- this only create jail folder and make simulation without install. Usefull for migrate jails." ); }
+function helpbox() { alert("Slim - This is a fully functional jail, but when first installed, only occupies about 2 MB in its folder.\n\n full - This is a full sized jail, about 300 MB per jail, and is completely self contained."); }
 function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$pconfig['uuid'];?>&act=editor" }
 //]]>
 </script>
@@ -711,43 +658,44 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 					<input name="fib" type="hidden" value="<?=$pconfig['fib'];?>" />
       	<?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
         <table width="100%" border="0" cellpadding="6" cellspacing="0">
-			<?php html_titleline(gettext("Jail parameters"));?>
-        	<?php html_inputbox("jailno", gettext("Jail number"), $pconfig['jailno'], gettext("The jail number determines the order of the jail."), true, 10);?>
-			<?php html_inputbox("jailname", gettext("Jail name "), $pconfig['jailname'], gettext("The jail's  name."), true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
-			<?php html_combobox("jail_type", gettext("Jail Type \n <input type=\"button\" onclick=\"helpbox()\" value=\"Help\" />"), $pconfig['jail_type'], array('slim' =>'Slim','full'=> 'Full', 'linux'=> 'Linux', 'custom'=> 'Custom'), "Choose jail type ", true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
+			<?php html_titleline(_THEBRIG_JAIL_PARAMETERS);?>
+        	<?php html_inputbox("jailno", _THEBRIG_JAIL_NUMBER, $pconfig['jailno'], _THEBRIG_JAIL_NUMBER_EXPL,true, 10, true);?>
+			<?php html_inputbox("jailname", _THEBRIG_TABLE1_TITLE1, $pconfig['jailname'], _THEBRIG_TABLE1_TITLE1_EXPL, true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
+			<?php html_combobox("jail_type", _THEBRIG_JAIL_TYPE, $pconfig['jail_type'], array('slim' =>'Slim','full'=> 'Full'), _THEBRIG_JAIL_TYPE_EXPL, true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
 			
-			<?php html_checkbox("enable", gettext("Jail start on boot"),			!empty($pconfig['enable']) ? true : false, gettext("Enable"), "");?>
-			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>
-			<?php html_optionsbox("param", gettext("In jail allow"), $pconfig['param'], $in_jail_allow, false, false); ?>
+			<?php html_checkbox("enable", _THEBRIG_TABLE1_TITLE3,			!empty($pconfig['enable']) ? true : false, _THEBRIG_TABLE1_TITLE3_EXPL, "");?>
+			<?php html_inputbox("jailpath", _THEBRIG_ONLINETABLE_TITLE4, $pconfig['jailpath'], _THEBRIG_ONLINETABLE_TITLE4_EXPL, false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>
+			<?php html_optionsbox("param", _THEBRIG_J_ALLOW , $pconfig['param'], $in_jail_allow, false, false); ?>
 			
 			<tr id='mounts_separator_empty'>	<td colspan='2' class='list' height='6'></td>
 			<tr id='mounts_separator'><td colspan='2' valign='top' class='listtopic'>Mounts</td></tr>
 				
- 			<?php html_checkbox("jail_mount", gettext("mount/umount jail's fs"), $pconfig['jail_mount'], gettext("Enable the jail to automount its fstab file. <b>This is not optional for slim jails.</b> "),false , false, "jail_mount_enable()");?>
+ 			<?php html_checkbox("jail_mount", _THEBRIG_J_MOUNTFSTAB, $pconfig['jail_mount'], _THEBRIG_J_MOUNTFSTAB_EXPL,false, false, "jail_mount_enable()");?>
  			<?php for ($i = $config['thebrig']['gl_statfs']; $i <= 2; ) { $combovalues[$i] = $i ; $i++; }  
  			
- 			html_combobox("statfs", gettext("information about a mounted file system (statfs)"),  $pconfig['statfs'], /*array('2' =>'2','1'=> '1', '0'=> '0')*/ $combovalues , "Choose enforce_statfs. Default value =2. It not allow for jail user mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount jail-friendly filesystems  ", false,false);?>
+ 			html_combobox("statfs", _THEBRIG_J_STATFS, $pconfig['statfs'], $combovalues , _THEBRIG_J_STATFS_EXPL, false,false);?>
 		
- 			<?php //html_combobox("devfs_enable", gettext("Enable mount devfs \n <input type=\"button\" onclick=\"helpbox()\" value=\"Help\" />"), $pconfig['devfs_enable'], array('parent' =>'Main devfs','standart'=> 'Standart', 'custom'=> 'With ruleset'), "Choose devfs type", false,false,"devfs_change()");?>
+ 			<?php//html_combobox("devfs_enable", gettext("Enable mount devfs \n <input type=\"button\" onclick=\"helpboxdevfs()\" value=\"Help\" />"), $pconfig['devfs_enable'], array('parent' =>'Main devfs','standart'=> 'Standart', 'custom'=> 'With ruleset'), "Choose devfs type", false,false,"devfs_change()");?>
 			
-			<?php html_checkbox("devfs_enable", gettext("Enable mount devfs"), $pconfig['devfs_enable'], gettext("Use to mount the device file system inside the jail. <br><b>This must be checked if you want 'ps', 'top' or most rc.d scripts to function inside jail.</b>"), "", "", "");?>
-	<?php html_brigdevfs_box("rule", gettext("Devfs ruleset"), !empty($pconfig['rule']) ? $pconfig['rule'] : array(), gettext("Define additional rules for current jail."), false);?>
+			<?php html_checkbox("devfs_enable", _THEBRIG_J_DEVFS, $pconfig['devfs_enable'], _THEBRIG_J_DEVFS_EXPL, "", "", "");?>
+	<?php html_brigdevfs_box("rule", _THEBRIG_J_DEVFSRULES, !empty($pconfig['rule']) ? $pconfig['rule'] : array(), _THEBRIG_J_DEVFSRULES_EXPL, false);?>
 							
 			
 			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
-			<?php html_checkbox("proc_enable", gettext("Enable mount procfs"), $pconfig['proc_enable'], "", "<font color=magenta>if this checked, TheBrig will add entry to fstab automatically</color>", " ", " ");?>
-			<?php html_checkbox("fdescfs_enable", gettext("Enable mount fdescfs"), $pconfig['fdescfs_enable'], "", "", " ");?>
+			<?php html_checkbox("proc_enable", _THEBRIG_J_PROCFS, $pconfig['proc_enable'], "", _THEBRIG_J_PROCFS_EXPL, " ", " ");?>
+			<?php html_checkbox("fdescfs_enable", _THEBRIG_J_FDESCFS, $pconfig['fdescfs_enable'], "", _THEBRIG_J_FDESCFS_NOTE, " ");?>
 			<?php if (FALSE !== ($datasets_list = brig_datasets_list())) {
-			html_checkbox("zfs_enable", gettext("Enable mount zfs dataset"), isset($pconfig['zfs_enable']) ? true : false, "", "", " ");
-			html_zfs_box("zfs_dataset", gettext("ZFS dataset, mounted to jail"), $pconfig['zfs_dataset'], $datasets_list, false, false); 
+			html_checkbox("zfs_enable", _THEBRIG_J_ZFS, isset($pconfig['zfs_enable']) ? true : false, "", "", " ");
+			html_zfs_box("zfs_dataset", _THEBRIG_J_ZFS_MOUNTED, $pconfig['zfs_dataset'], $datasets_list, false, false); 
 			} else { echo " <input name='zfs_enable' type='hidden' value='' />";}
-			
 			?>
-			
+			<?php html_textarea("auxparam", _THEBRIG_J_FSTAB, $pconfig['auxparam'] , _THEBRIG_J_FSTAB_EXPL, false, 65, 5, false, false);?>
+
 			<?php html_separator();?>
 			<tr id='mounts_separator0'><td colspan='2' valign='top' class='listtopic'>Networking</td></tr>
 			<?php if ($g['arch'] == 'x64') {
-			html_checkbox("jail_vnet", gettext("Virtual network"), $pconfig['jail_vnet'], gettext("Enable virtual network stack (vnet)"), "", ""," ");?>
+			html_checkbox("jail_vnet", _THEBRIG_J_VNET, $pconfig['jail_vnet'], _THEBRIG_J_VNET_EXPL
+, "", ""," ");?>
 			<tr id='epair_tr'>
 					<td width='22%' valign='top' class='vncell'><label for='epair'>Epair interface</label></td>
 					<td width='78%' class='vtable'>
@@ -766,36 +714,30 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 							 </td></tr>
 						  </table>
 						 
-
+						<span class='vexpl'><?="All scripts TheBrig create automatically"?></span>
 					</td>
 				</tr>
 						
-			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
-			<?php html_combobox("if", gettext("Attach to interface"), $pconfig['if'], $a_interface, gettext("Choice interface for virtual net glue"), true);?>
+			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); 
+			for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { 
+			$a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
+			<?php html_combobox("if", _THEBRIG_VNET_LAN, $pconfig['if'], $a_interface, _THEBRIG_VNET_LAN_EXPL, true);?>
 			<?php } ?>
-			<?php //html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IPv4 address"), $pconfig['ipaddr'], $pconfig['subnet'], "", false);?>
+			<?php //html_ipv4addrbox("ipaddr", "subnet", _THEBRIG_NETWORK gettext("Jail IPv4 address"), $pconfig['ipaddr'], $pconfig['subnet'], "", false);?>
 			<?php // html_ipv6addrbox("ipaddr6", "subnet6", gettext("Jail IPv6 address"), $pconfig['ipaddr6'], $pconfig['subnet6'], "", false);?>
-			<?php  html_brig_network_box("allowedip",  gettext("Jail Network settings"), $pconfig['allowedip'], "", false, false) ; ?>
+			<?php  html_brig_network_box("allowedip",  _THEBRIG_J_NETWORK, $pconfig['allowedip'], "May be multiple IPs and LANs", false, false) ; ?>
 				
 			<?php html_separator();?>
-			<?php html_titleline(gettext("Fstab"));?>
-			<?php html_textarea("auxparam", gettext("Fstab"), $pconfig['auxparam'] , sprintf(gettext(" This will be added to fstab.  Format: device &lt;space&gt; mount-point as full path &lt;space&gt; fstype &lt;space&gt; options &lt;space&gt; dumpfreq &lt;space&gt; passno. <a href=http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/mount-unmount.html target=\"_blank\">Manual</a> <p> Also you can use fstab editor ")), false, 65, 5, false, false);?>
-			<?php html_separator();?>
-			<?php html_titleline(gettext("Commands"));?>
+			<?php html_titleline(_THEBRIG_J_COMMAND);?>
 			
-			<?php html_brig_command_box("cmd",  gettext("Jail  commands"), $pconfig['cmd'], "",  false,  false); ?>
-			<?php //html_inputbox("exec_prestart", gettext("Jail prestart command"), $pconfig['exec_prestart'], gettext("NAS4Free command to execute  <b>before</b> starting the jail. May be user's script"), false, 50);?>
-			<?php html_inputbox("exec_start", gettext("Jail start command"), $pconfig['exec_start'], gettext("command to execute  when starting the jail. /etc/rc command load rc scripts."), false, 50);?>
-			<?php //html_inputbox("afterstart0", gettext("User command 0"), $pconfig['afterstart0'], gettext("command to execute after the one for starting the jail."), false, 50);?>
-			<?php //html_inputbox("afterstart1", gettext("User command 1"), $pconfig['afterstart1'], gettext("command to execute after the one for starting the jail."), false, 50);?>
-			<?php html_inputbox("exec_stop", gettext("User command stop"), $pconfig['exec_stop'] , gettext("command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script"), false, 50);?>
-			<?php //html_inputbox("extraoptions", gettext("Options. "),  $pconfig['extraoptions'], gettext("Add to rc.conf.local variable jail_jailname_flags. Example: -l -U root -n {jailname}"), false, 40);?>
-			<?php //html_inputbox("jail_parameters", gettext("Addition Parameters "),  $pconfig['jail_parameters'], gettext("Add to rc.conf.local variable jail_parameters. Must be separated by space. See <a href=http://www.freebsd.org/cgi/man.cgi?query=jail&sektion=8>jail(8)</a>"), false, 80);?>
-			<?php html_inputbox("desc", gettext("Description"), $pconfig['desc'], gettext("You may enter a description here for your reference."), false, 50);?>
+			<?php html_brig_command_box("cmd",  _THEBRIG_J_COMMANDS, $pconfig['cmd'], "User can define commands for execute during  start/stop jail.  May be script.",  false,  false); ?>
+			<?php html_inputbox("exec_start", _THEBRIG_J_STARTCOMMAND, $pconfig['exec_start'], _THEBRIG_J_STARTCOMMAND_EXPL, false, 50);?>
+			<?php html_inputbox("exec_stop", _THEBRIG_J_STOPCOMMAND, $pconfig['exec_stop'] ,_THEBRIG_J_STOPCOMMAND_EXPL, false, 50);?>
+			<?php html_inputbox("desc", _THEBRIG_J_DESCRIPTION, $pconfig['desc'], _THEBRIG_J_DESCRIPTION_EXPL, false, 50);?>
 			<!-- in edit mode user not have access to extract binaries. I strongly disagree. -->
 			<tr id='install_source_empty'><td colspan='2' class='list' height='12'></td></tr>
-			<tr id='install_source'><td colspan='2' valign='top' class='listtopic'>Installation Source</td></tr>
-			<?php html_combobox("source", gettext("Jail Source"), $pconfig['source'], array('tarballs' =>'From Archive','template'=> 'From Template'), gettext("Choose jail source. Selecting 'From Template' will clone the jail specified by the template folder." ), true, false , "source_change()" );?>
+			<tr id='install_source'><td colspan='2' valign='top' class='listtopic'><?=_THEBRIG_J_SRC_TITLE;?></td></tr>
+			<?php html_combobox("source", _THEBRIG_J_SRC, $pconfig['source'], array('tarballs' =>'From Archive','template'=> 'From Template'), _THEBRIG_SRC_EXPL, true, false , "source_change()" );?>
 			<?php
 			// This obtains a list of files that match the criteria (named anything FreeBSD*)
 			// within the /work folder.
@@ -817,9 +759,9 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			} //endif ?>	
 				</table>
 				<div id="submit">
-					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? gettext("Save") : gettext("Add")?>" onclick="return submitted();"/>
-					<input name="Cancel" type="submit" class="formbtn" value="<?=gettext("Cancel");?>" />
-					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="Fstab editor">
+					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? _THEBRIG_SAVE_BUTTON : _THEBRIG_ADD_BUTTON?>" onclick="return submitted();"/>
+					<input name="Cancel" type="submit" class="formbtn" value="<?=_THEBRIG_CANCEL_BUTTON;?>" />
+					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="<?=_THEBRIG_FSTAB_BUTTON;?>">
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
 					<input name="http_redirect" type="hidden" value="extensions_thebrig.php" />
 					
