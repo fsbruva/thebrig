@@ -90,14 +90,14 @@
 		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
 		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
-		
-		define(_SRVSLIM_MODULE_VERSION_CONFLICT, "Warning - the Logitech Media Server version you're trying to run is not compatible with this SlimNAS version. If you encounter problems running it, please update SlimNAS or revert to a compatible Logitech Media Server. Thanks for your understanding.");
-		define(_SRVSLIM_NO_SLIMNAS, "There's no updated SlimNAS package available for installation.");
-		define(_SRVSLIM_UPDATE_SLIMNAS, "Update SlimNAS<br>(<a href='http://www.herger.net/SlimNAS' target='_blank'>check for new version</a>)");
-		define(_SRVSLIM_CORRUPT_TARBALL, "The file you tried to install seems to be corrupt. Please download and try again: ");
-		define(_SRVSLIM_RELOAD_PAGE, " (<a href='/services_slimserver.php'>Update status</a>)");
-		
-		
+		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
+		define(_THEBRIG_ONLINETABLE_TITLE2, "IP");
+		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail Hostname");
+		define(_THEBRIG_ONLINETABLE_TITLE4, "Path");
+		define(_THEBRIG_TABLE1_TITLE1, "Start on Boot");
+		define(_THEBRIG_GLOBALS_TITLE, "Globals");
+		define(_THEBRIG_GLOBALS_ENABLE, "Allow/disallow start of all jails");
+		define(_THEBRIG_GLOBALS_STATFS, "Choose Global enforce_statfs. Default value: 2. Jail's value cannot be less then Global value. <br> Value of 2 will not allow jail root user to mount inside a jail. 'High' = 1 and 'All' = 0 values allow users to mount jail-friendly filesystems");
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
 	}
 	elseif ($config['system']['language'] == 'ge') { 
@@ -172,13 +172,14 @@
 		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
 		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
-		
-		define(_SRVSLIM_MODULE_VERSION_CONFLICT, "Warning - the Logitech Media Server version you're trying to run is not compatible with this SlimNAS version. If you encounter problems running it, please update SlimNAS or revert to a compatible Logitech Media Server. Thanks for your understanding.");
-		define(_SRVSLIM_NO_SLIMNAS, "There's no updated SlimNAS package available for installation.");
-		define(_SRVSLIM_UPDATE_SLIMNAS, "Update SlimNAS<br>(<a href='http://www.herger.net/SlimNAS' target='_blank'>check for new version</a>)");
-		define(_SRVSLIM_CORRUPT_TARBALL, "The file you tried to install seems to be corrupt. Please download and try again: ");
-		define(_SRVSLIM_RELOAD_PAGE, " (<a href='/services_slimserver.php'>Update status</a>)");
-		
+		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
+		define(_THEBRIG_ONLINETABLE_TITLE2, "IP");
+		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail Hostname");
+		define(_THEBRIG_ONLINETABLE_TITLE4, "Path");
+		define(_THEBRIG_TABLE1_TITLE1, "Start on Boot");
+		define(_THEBRIG_GLOBALS_TITLE, "Globals");
+		define(_THEBRIG_GLOBALS_ENABLE, "Allow/disallow start of all jails");
+		define(_THEBRIG_GLOBALS_STATFS, "Choose Global enforce_statfs. Default value: 2. Jail's value cannot be less then Global value. <br> Value of 2 will not allow jail root user to mount inside a jail. 'High' = 1 and 'All' = 0 values allow users to mount jail-friendly filesystems");
 		
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
 	}
@@ -249,12 +250,14 @@
 		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
 		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
-		
-		define(_SRVSLIM_MODULE_VERSION_CONFLICT, "Warning - the Logitech Media Server version you're trying to run is not compatible with this SlimNAS version. If you encounter problems running it, please update SlimNAS or revert to a compatible Logitech Media Server. Thanks for your understanding.");
-		define(_SRVSLIM_NO_SLIMNAS, "There's no updated SlimNAS package available for installation.");
-		define(_SRVSLIM_UPDATE_SLIMNAS, "Update SlimNAS<br>(<a href='http://www.herger.net/SlimNAS' target='_blank'>check for new version</a>)");
-		define(_SRVSLIM_CORRUPT_TARBALL, "The file you tried to install seems to be corrupt. Please download and try again: ");
-		define(_SRVSLIM_RELOAD_PAGE, " (<a href='/services_slimserver.php'>Update status</a>)");
+		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
+		define(_THEBRIG_ONLINETABLE_TITLE2, "IP");
+		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail Hostname");
+		define(_THEBRIG_ONLINETABLE_TITLE4, "Path");
+		define(_THEBRIG_TABLE1_TITLE1, "Start on Boot");
+		define(_THEBRIG_GLOBALS_TITLE, "Globals");
+		define(_THEBRIG_GLOBALS_ENABLE, "Allow/disallow start of all jails");
+		define(_THEBRIG_GLOBALS_STATFS, "Choose Global enforce_statfs. Default value: 2. Jail's value cannot be less then Global value. <br> Value of 2 will not allow jail root user to mount inside a jail. 'High' = 1 and 'All' = 0 values allow users to mount jail-friendly filesystems");
 		define(_THEBRIG_INSTALL_BUTTON, "Install" );
 		define(_THEBRIG_FETCH_BUTTON, "Fetch");
 		define(_THEBRIG_SAVE_BUTTON, "Save");

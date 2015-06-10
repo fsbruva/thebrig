@@ -44,7 +44,7 @@ if (isset($_GET['apply']) && $_GET['apply']){
 if ($_POST) {
 	// insert into pconfig changes
 	$pconfig = $_POST;
-	$config['thebrig']['parastart'] = isset( $_POST['parastart'] ) ? true : false ;
+	//$config['thebrig']['parastart'] = isset( $_POST['parastart'] ) ? true : false ;
 	$config['thebrig']['thebrig_enable'] = isset ( $_POST['thebrig_enable'] ) ? true : false ;	
 	$config['thebrig']['gl_statfs'] =  $_POST['gl_statfs'] ;
 	If ($_POST['compress'] == "yes") { $config['thebrig']['compress'] = "yes"; }
@@ -426,11 +426,6 @@ function disable_buttons() {
 					<tr>
 						<td width="15%" valign="top" class="vncell"><?=_THEBRIG_GLOBALS_TITLE;?></td>
 						<td width="85%" class="vtable">
-						<!---		<input name="parastart" type="checkbox" id="parastart" value="yes" <?php // if (!empty($pconfig['parastart'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_PARALLEL?><br />
-						<input name="sethostname" type="checkbox" id="sethostname" value="yes" <?php if (!empty($pconfig['sethostname'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROOT_HOST?><br />
-							<input name="unixiproute" type="checkbox" id="unixiproute" value="yes" <?php if (!empty($pconfig['unixiproute'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_ROUTE?><br />
-							<input name="systenv" type="checkbox" id="systenv" value="yes" <?php if (!empty($pconfig['systenv'])) echo "checked=\"checked\""; ?> /><?=_THEBRIG_JAIL_IPC?>
-						-->	
 		<input name='thebrig_enable' type='checkbox' class='formfld' id='thebrig_enable' value="" <?php if (!empty($pconfig['thebrig_enable'])) echo "checked=\"checked\""; ?>  />&nbsp;<?=_THEBRIG_GLOBALS_ENABLE?><br />
 		<select name='gl_statfs' class='formfld' id='gl_statfs' ><option value='2' <?php if (2 == $pconfig['gl_statfs']) echo "selected"; ?> >2</option><option value='1' <?php if (1 == $pconfig['gl_statfs']) echo "selected"; ?> >1</option><option value='0' <?php if (0 == $pconfig['gl_statfs']) echo "selected"; ?> >0</option></select>
 		<span class='vexpl'><?=_THEBRIG_GLOBALS_STATFS?> </span>
