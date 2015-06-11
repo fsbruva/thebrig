@@ -126,12 +126,11 @@ $doc = new DOMDocument('1.0', 'UTF-8');
 			exit;
 		}
 	} else {
-		$input_errors[] = sprintf("%s %s", gettext("Failed to upload file."),
-			$g_file_upload_error[$_FILES['jailsfile']['error']]);
+		$input_errors[] = sprintf("%s %s", _THEBRIG_FILED_UPLOAD, $g_file_upload_error[$_FILES['jailsfile']['error']]);
 	}
 } else {}
 
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Tools");
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_TOOLS);
 include("fbegin.inc");
 // This will evaluate if there were any input errors from prior to the user clicking "save"
 if ($input_errors) { 
@@ -149,7 +148,7 @@ if ($input_errors) {
 			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
 			} else {} ?>
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=_THEBRIG_LOG;?></span></a></li>
 
 		</ul>
 	    </td>
@@ -166,23 +165,22 @@ if ($input_errors) {
 		<td class="tabcont">
 			 <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			 
-			 	<?php html_titleline(gettext("Configuration Backup/Restore"));?>
+			 	<?php html_titleline(_THEBRIG_LOG_TITLELINE);?>
 			 	<tr>
-						<td width="22%" valign="top" class="vncell">Backup Existing Config&nbsp;</td>
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_BACKUP_CONFIG;?></td>
 						<td width="78%" class="vtable">
-							<?=gettext("Make a backup of the existing configuration.");?><br />
+							<?=_THEBRIG_BACKUP_CONFIG_EXPL;?><br />
 							<div id="submit">
-								<input name="export" type="submit" class="formbtn" value="<?=gettext("Export");?>" /><br />
+								<input name="export" type="submit" class="formbtn" value="<?=_THEBRIG_EXPORT_BUTTON;?>" /><br />
 							</div>
 						</td>
 					</tr>
 					<tr>
-						<td width="22%" valign="top" class="vncell">Restore&nbsp;</td>
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_RESTORE_CONFIG;?></td>
 						<td width="78%" class="vtable">
-							<?=gettext("Restore jails config from XML.");?><br />
 							<div id="submit">
 								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="45" accept="*.jails" />&nbsp;
-								<input name="import" type="submit" class="formbtn" id="import" value="<?=gettext("Import");?>" /><br />
+								<input name="import" type="submit" class="formbtn" id="import" value="<?=_THEBRIG_IMPORT_CONFIG;?>" /><br />
 							</div>
 						</td>
 					</tr>		

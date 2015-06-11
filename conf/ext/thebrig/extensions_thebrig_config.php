@@ -113,7 +113,7 @@ if ($_POST) {
 	}
 	// We also need to see if there is enough space on the target disk.
 	elseif ( disk_free_space ( $pconfig['rootfolder'] ) < 200000000 && !isset($pconfig['remove']) ) {
-		$input_errors[] = "There is not enough space on the target disk!";
+		$input_errors[] = _THEBRIG_NOTENOUGHSPACE;
 	}
 	
 	// The folder supplied by the user is a valid folder, so we can continue our input validations
@@ -198,7 +198,8 @@ function disable_buttons() {
 	document.iform.submit();}
 function message(obj) {
 	if (obj.checked) {
-		alert('If you want to uninstall the TheBrig, please make sure that all jails have been removed');
+		var phpVar = <?php echo json_encode(_THEBRIG_DELETE_WARN);?>;
+		alert(phpVar);
 	}
 		return true;
 }
@@ -213,7 +214,7 @@ function message(obj) {
 			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
 			} else {} ?>
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=_THEBRIG_LOG;?></span></a></li>
 					</span> </a>
 				</li>
 		</ul>
@@ -233,24 +234,16 @@ function message(obj) {
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php html_titleline(gettext(_THEBRIG_SETTINGS_BASIC));?>
 		<?php html_inputbox("rootfolder", gettext(_THEBRIG_ROOT), $pconfig['rootfolder'], gettext(_THEBRIG_ROOT_DESC), true, 50);?>
-	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
-		
-		<?php if  ($pconfig['compress'] == "yes") $checkboxstate = "checked"; else $checkboxstate = false; ?>
 		<tr id='compress_tr'>
-	<td width='22%' valign='top' class='vncell'><label for='compress'>Archive</label></td>
+	<td width='22%' valign='top' class='vncell'><label for='compress'><?=_THEBRIG_ARCHIVE_ASK;?></label></td>
 	<td width='78%' class='vtable'>
-		<input name='compress' type='checkbox' class='formfld' id='compress' value='' <?php if  ($pconfig['compress'] == "yes") echo "checked"; else false; ?> />&nbsp;Check if you want a backup archive of jail created before deletion.
-	</td>
+		<input name='compress' type='checkbox' class='formfld' id='compress' value='' <?php if  ($pconfig['compress'] == "yes") echo "checked"; else false; ?> />&nbsp;<?=_THEBRIG_ARCHIVE_EXPL;?> </td>
 </tr>
-		<?php
-		//html_checkbox("compress", gettext("Archive"), $checkboxstate ,  "If you want not use archive before delete each jail check it", "",false,"") ; ?>
-		<?php html_separator();?>		
-		<?php html_titleline(gettext("Advanced Jail Locations"));?>
-		<?php html_inputbox("basejail", gettext(_THEBRIG_BASE), $pconfig['basejail'], gettext(_THEBRIG_BASE_DESC), false, 50 , $base_ro );?>
-	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
-		<?php html_inputbox("template", gettext("Template Location"), $pconfig['template'], gettext("Sets the alternate location for the buildworld jail template. Default is in a folder named template within TheBrig's installation folder."), false, 50);?>
-	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
-		<?php html_separator();?>
+	<?php html_separator();?>		
+		<?php html_titleline(_THEBRIG_LOC_TITLE);?>
+		<?php html_inputbox("basejail", _THEBRIG_BASE, $pconfig['basejail'], _THEBRIG_BASE_DESC, false, 50 , $base_ro );?>
+	 	<?php html_inputbox("template", _THEBRIG_LOC_TEMP, $pconfig['template'], _THEBRIG_LOC_TEMP_EXPL, false, 50);?>
+	 	<?php html_separator();?>
 		<?php html_titleline(gettext(_THEBRIG_CLEANUP));?>
 		
 		<!-- This is the row beneath the title -->

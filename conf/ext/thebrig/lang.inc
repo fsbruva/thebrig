@@ -27,7 +27,8 @@
 		define(_THEBRIG_LOG, "Log");
 		define(_THEBRIG_MAINTENANCE, "Maintenance");
 		define(_THEBRIG_UPDATES , "Updates");
-		
+		define(_THEBRIG_TOOLS, "Backup/Restore");
+
 		
 	/** Main page */
 	
@@ -95,12 +96,26 @@
 		define('_THEBRIG_J_STOPCOMMAND', "User command stop");
 		define('_THEBRIG_J_STOPCOMMAND_EXPL',  "command to execute in jail for stopping. Usually <i>/bin/sh /etc/rc.shutdown</i>, but can defined by user for execute prestop script");
 		define('_THEBRIG_J_DESCRIPTION', "Description");
-		define('_THEBRIG_J_DESCRIPTION_EXPL', "You may enter a description here for your reference.");
-		
+		define('_THEBRIG_J_DESCRIPTION_EXPL', "You may enter a description here for your reference.");		
 		define('_THEBRIG_J_SRC_TITLE', "Installation Source");
 		define('_THEBRIG_J_SRC', "Jail Source");
 		define('_THEBRIG_SRC_EXPL', "Choose jail source. Selecting 'From Template' will clone the jail specified by the template folder." );
-		
+	
+	/** Tools page */	
+		define(_THEBRIG_LOG_TITLELINE, "Configuration Backup/Restore");
+		define(_THEBRIG_BACKUP_CONFIG, "Backup Existing Config");
+		define(_THEBRIG_BACKUP_CONFIG_EXPL, "Make a backup of the existing configuration.");
+		define(_THEBRIG_RESTORE_CONFIG, "Restore jail's configuration from saved xml");
+		define(_THEBRIG_IMPORT_CONFIG, "Import");
+		define(_THEBRIG_FILED_UPLOAD, "Failed to upload file.");
+	
+	/** Config page */	
+		define(_THEBRIG_ARCHIVE_ASK, "Archive");
+		define(_THEBRIG_ARCHIVE_EXPL,  "Check if you want a backup archive of jail created before deletion.");	
+		define(_THEBRIG_LOC_TITLE, "Advanced Jail Locations");
+		define(_THEBRIG_LOC_TEMP, "Template Location");
+		define(_THEBRIG_LOC_TEMP_EXPL, "Sets the alternate location for the buildworld jail template. Default is in a folder named template within TheBrig's installation folder.");
+		define(_THEBRIG_DELETE_WARN,'If you want to uninstall the TheBrig, please make sure that all jails have been removed');
 		
 		
 		
@@ -114,6 +129,9 @@
 		define(_THEBRIG_FETCHUPDATE_BUTTON, "Fetch & Update");
 		define(_THEBRIG_UPDATE_BUTTON, "Update");
 		define(_THEBRIG_FETCHEXTRACT_BUTTON, "Fetch & extract");
+		define(_THEBRIG_EXPORT_BUTTON, "Export");
+		
+		
 	/** Error messages */	
 		define(_THEBRIG_NOT_INSTALLED, "Something went awry with TheBrig's installation. Please attempt to re-install");
 		define(_THEBRIG_NO_BASE, "Creating a jail requires at least one \"base\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
@@ -131,7 +149,7 @@
 		define(_THEBRIG_2TARBALS_SELECTED,  "You have selected more than one of a given tarball type!!  Please select only one of each type");
 		define(_THEBRIG_CREATEFOLDERERROR, "Could not create directory for jail to live in!");
 		define(_THEBRIG_NOT_CONFIRMED, "It appears you just finished installing TheBrig! <br>Please confirm the install location by visiting the <a href='/extensions_thebrig_config.php'>Rudimentary Config</a> page and click \"Save\".");
-		
+		define(_THEBRIG_NOTENOUGHSPACE, "There is not enough space on the target disk!");
 	/**Messages */	
 	
 		
@@ -148,7 +166,6 @@
 		define(_THEBRIG_MANAGER , "TheBrig Manager");
 		define(_THEBRIG_MANAGER_TITLE , "Manager");
 		
-		define(_THEBRIG_TOOLS, "Backup/Restore");
 		define(_THEBRIG_BASIC_CONFIG, "Rudimentary Config");
 		define(_THEBRIG_JAILS_TAB, "Current Jails");
 		define(_THEBRIG_SETTINGS_BASIC, "Basic Settings");
@@ -196,7 +213,13 @@
 		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
 		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
-		define(_THEBRIG_TITLE, "TheBrig");		
+		define(_THEBRIG_TITLE, "TheBrig");
+		define(_SRVSLIM_MODULE_VERSION_CONFLICT, "Warning - the Logitech Media Server version you're trying to run is not compatible with this SlimNAS version. If you encounter problems running it, please update SlimNAS or revert to a compatible Logitech Media Server. Thanks for your understanding.");
+		define(_SRVSLIM_NO_SLIMNAS, "There's no updated SlimNAS package available for installation.");
+		define(_SRVSLIM_UPDATE_SLIMNAS, "Update SlimNAS<br>(<a href='http://www.herger.net/SlimNAS' target='_blank'>check for new version</a>)");
+		define(_SRVSLIM_CORRUPT_TARBALL, "The file you tried to install seems to be corrupt. Please download and try again: ");
+		define(_SRVSLIM_RELOAD_PAGE, " (<a href='/services_slimserver.php'>Update status</a>)");
+		
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
 		}
 ?>
