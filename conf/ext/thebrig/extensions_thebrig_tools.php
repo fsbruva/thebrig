@@ -158,6 +158,8 @@ if ($input_errors) {
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
 			<li class="tabact"><a href="extensions_thebrig_tools.php"  title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_TOOLS;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_translator.php"><span>Translator</span></a></li>
+
 		</ul>
 	</td></tr>
 	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
@@ -183,7 +185,9 @@ if ($input_errors) {
 								<input name="import" type="submit" class="formbtn" id="import" value="<?=_THEBRIG_IMPORT_CONFIG;?>" /><br />
 							</div>
 						</td>
-					</tr>		
+					</tr>
+				<?php html_separator();
+				html_text("translatorprompt", "New tab - translator", "If you want to have TheBrig on your language, you can try to translate TheBrig.<p>Translator have 3 buttons - Save template, Delete template and Create lang file.<p>You can save your work, as template, default /usr/local/www/ext/thebrig/lang.tmpl for tomorrow - translator will load it automatically.  When all messages will translate, you can create lang file. <b>Warning/</b> This action delete your template.<p>File will create as /usr/local/www/ext/thebrig/<font color='red'>your_language</font>_lang.inc. Send it to developers, we include it to TheBrig. ");?>
 			 </table>
 		</td>
 	<?php include("formend.inc");?>
