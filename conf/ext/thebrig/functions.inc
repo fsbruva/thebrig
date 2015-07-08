@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-require("lang.inc");
+include_once( "ext/thebrig/lang.inc");
 function thebrig_unregister() {
  	global $config;
  	
@@ -307,7 +307,8 @@ function thebrig_portsnap ( $ports_dir , $work_dir , $conf_file , $action ) {
 			case _THEBRIG_FETCHEXTRACT_BUTTON:
 				// Install --> fetch & extract
 				$command_fetch= $command_prefix . " fetch extract";
-				mwexec($command_fetch );
+				file_put_contents ('/tmp/portscommand.txt', $command_fetch);
+				exec($command_fetch );
 				break;
 			case _THEBRIG_FETCHUPDATE_BUTTON:
 				// Update --> fetch & update

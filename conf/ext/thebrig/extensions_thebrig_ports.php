@@ -159,9 +159,9 @@ if ($_POST) {
 		// We want to fetch AND extract the tree for the first time
 		$response = thebrig_portsnap($brig_root . "conf/ports", $brig_port_db , $brig_root . "conf/portsnap.conf", $pconfig['port_op']);
 		if ( $response == 1)
-			$input_errors[] = "Something bad happened while attempting to prep for the update operation";
+			$input_errors[] = _THEBRIG_NOPREPARE_UPDATE;
 		elseif ( $response == 2 )
-		$input_errors[] = "Something bad happened while attempting to return Nas4Free to its previous state";
+		$input_errors[] = _THEBRIG_NORETURN_UPDATE;
 	}
 
 	// There are no input errors detected.
@@ -223,7 +223,7 @@ function conf_handler() {
 				<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?>
 					</span> </a>
 				</li>
-				<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+				<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=_THEBRIG_LOG;?></span></a></li>
 			</ul>
 		</td>
 	</tr>
@@ -247,13 +247,13 @@ function conf_handler() {
 				<table width="100%" border="0" cellpadding="6" cellspacing="0">
 					<?php if ( $brig_update_ready == 2 ) {
 			// The necessary binaries for all the update tasks could not be found in any jail.
-			html_titleline(gettext("ERROR!"));
-			html_text($confconv, gettext("Unable to Continue"),"In order to begin configuration and update tasks for a common ports tree, you need to have at least one configured and filled jail!");
+			html_titleline(_THEBRIG_ERROR);
+			html_text($confconv, _THEBRIG_UNABLECONTINUE,_THEBRIG_UNABLECONTINUE_EXPL1);
 		}
 		elseif ( $brig_update_ready == 1 ){
 			// The necessary binaries for all the update tasks could not be copied into thebrig's working directory.
-			html_titleline(gettext("ERROR! ... Like, a HUGE error!"));
-			html_text($confconv, gettext("Unable to Continue"),"For some reason, Nas4Free cannot be prepared for portsnap tasks. This is highly suspect, as the copying was attempted by root.");
+			html_titleline(_THEBRIG_HUGEERROR);
+			html_text($confconv, _THEBRIG_UNABLECONTINUE,_THEBRIG_UNABLECONTINUE_EXPL2);
 		}
 		else {
 			// All the binaries were found, and able to be moved into thebrig's working directory.
@@ -262,7 +262,7 @@ function conf_handler() {
 				$tagdate= exec( "date -j -r `cut -f 2 -d '|' < " . $brig_port_db . "tag`");
 			}
 			else {
-				$tagdate = "Never";
+				$tagdate = _THEBRIG_TAG_NEVER;
 			}
 			// Connectivity test
 			$connected = @fsockopen("portsnap.freebsd.org", 80); 
@@ -288,20 +288,19 @@ function conf_handler() {
 				$extractdate= date ("D M d H:i:s T Y" ,filemtime( $brig_root. "conf/ports/.portsnap.INDEX" )); // extract and convert the timestamp
 			}
 			else {
-				$extractdate = "Never";
+				$extractdate = _THEBRIG_TAG_NEVER;
 			}
 			
-			html_titleline(gettext("Portstree")); 
-			html_text($confconv, gettext("Current Status"),gettext("The latest snapshot available for download is dated: ") . $most_date . "<br /><br />" .gettext("You have downloaded a snapshot that was released: ") . $tagdate . "<br /><br />" . gettext("The last time you applied a downloaded snapshot was: ") . $extractdate );
+			html_titleline(_THEBRIG_PORTSTREE_TITLE); 
+			html_text($confconv, _THEBRIG_PORTCURRENTSTATUS,_THEBRIG_PORTDOWNLOADABLE . $most_date . "<br /><br />" . _THEBRIG_PORTDOWNLOADED . $tagdate . "<br /><br />" . _THEBRIG_PORTAPPLIED . $extractdate );
 			// We have never gotten a tag before - we need to fetch and extract a copy first
-			if ( $tagdate === "Never"){ ?>
+			if ( $tagdate === _THEBRIG_TAG_NEVER){ ?>
 					<tr>
-						<td width="22%" valign="top" class="vncell">Fetch and Extract the
-							tree&nbsp;</td>
-						<td width="78%" class="vtable"><?=gettext("The first step to using a central ports tree is to fetch and extract the snapshot of the ports tree. <br /><b>This step should only need to be done the very first time, as it will overwrite anything in the ports tree directory!</b>");?><br />
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_FETCH_FIRST1;?>&nbsp;</td>
+						<td width="78%" class="vtable"><?=_THEBRIG_FETCH_FIRST2;?><br />
 							<div id="submit_x">
 								<input id="finstall" name="port_op" type="submit"
-									class="formbtn" value="<?=gettext("Fetch & Install");?>"
+									class="formbtn" value="<?=_THEBRIG_FETCHEXTRACT_BUTTON;?>"
 									onClick="return conf_handler();" /><br />
 							</div></td>
 					</tr>
@@ -309,9 +308,8 @@ function conf_handler() {
 			else {
 				// We have tag meaning we have downloaded & extracted a copy of the tree before - now we just want to update it.?>
 					<tr>
-						<td width="22%" valign="top" class="vncell">Fetch and Update the
-							tree&nbsp;</td>
-						<td width="78%" class="vtable"><?=gettext("Click below to perform an 'on-demand' fetch and update of the exising ports tree."); ?><br />
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_FETCH_UPDATE1;?>&nbsp;</td>
+						<td width="78%" class="vtable"><?=_THEBRIG_FETCH_UPDATE2; ?><br />
 							<div id="submit_x">
 								<input id="fupdate" name="port_op" type="submit" class="formbtn"
 									value="<?=_THEBRIG_FETCHUPDATE_BUTTON;?>"
@@ -321,8 +319,8 @@ function conf_handler() {
 					</tr>
 
 					<tr>
-						<td width="22%" valign="top" class="vncell">Update the tree&nbsp;</td>
-						<td width="78%" class="vtable"><?=gettext("Click below to update of the exising ports tree using the most recently downloaded snapshot.");?><br />
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_UPDATETREE1;?>&nbsp;</td>
+						<td width="78%" class="vtable"><?=_THEBRIG_UPDATETREE2;?><br />
 							<div id="submit_x">
 								<input id="update" name="port_op" type="submit" class="formbtn"
 									value="<?=_THEBRIG_UPDATE_BUTTON;?>"
@@ -332,21 +330,17 @@ function conf_handler() {
 					</tr>
 					<?php 
 			html_separator();
-			html_titleline(gettext("Jails"));?>
+			html_titleline(_THEBRIG_JAILS);?>
 					<tr>
-						<td width="15%" valign="top" class="vncell"><?=gettext("Ports Tree Enabling");?>
-						</td>
-						<td width="85%" class="vtable">Please choose which of the
-							following jails should have access to the shared ports tree:<br />
-							<br />
+						<td width="15%" valign="top" class="vncell"><?=_THEBRIG_ENABLE_PORTSTREE1;?></td>
+						<td width="85%" class="vtable"><?=_THEBRIG_ENABLE_PORTSTREE2;?><br /><br />
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td width="4%" class="listhdrlr">&nbsp;</td>
-									<td width="10%" class="listhdrr"><?=gettext("Name");?></td>
-									<td width="12%" class="listhdrr"><?=gettext("Hostname");?></td>
-									<td width="19%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?>
-									</td>
-									<td width="19%" class="listhdrr"><?=gettext("Description");?></td>
+									<td width="10%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE1;?></td>
+									<td width="12%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE5;?></td>
+									<td width="19%" class="listhdrr"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
+									<td width="19%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE7;?></td>
 									<td width="5%" class="list"></td>
 								</tr>
 								<?php $k = 0; for( $k; $k < count ( $a_jail ) ; $k ++ ) { ?>
@@ -362,16 +356,14 @@ function conf_handler() {
 
 								</tr>
 								<?php } ?>
-							</table> <br> <br> <b><?=gettext("Please note: ");?> </b> <?=gettext("Selecting a jail to have access to the portstree will result in a non-standard make.conf");?>
+							</table> <br> <br> <?=_THEBRIG_PORTSNOTE;?>
 					
 					
 					<tr>
-						<td width="15%" valign="top" class="vncell"><?=gettext("Cronjob");?>
-						</td>
-						<td width="85%" class="vtable"><input name="portscron"
-							type="checkbox" id="portscron" value="yes"
+						<td width="15%" valign="top" class="vncell"><?=_THEBRIG_PORTCRON;?></td>
+						<td width="85%" class="vtable"><input name="portscron" type="checkbox" id="portscron" value="yes"
 							<?php if (!empty($pconfig['portscron'])) echo "checked=\"checked\""; ?> />
-							<?=_THEBRIG_PORT_CRON?><br />
+							<?=_THEBRIG_PORT_CRON;?><br />
 						</td>
 					</tr>
 

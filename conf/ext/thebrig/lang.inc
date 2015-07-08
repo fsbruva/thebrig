@@ -116,9 +116,24 @@
 		define(_THEBRIG_LOC_TEMP, "Template Location");
 		define(_THEBRIG_LOC_TEMP_EXPL, "Sets the alternate location for the buildworld jail template. Default is in a folder named template within TheBrig's installation folder.");
 		define(_THEBRIG_DELETE_WARN,'If you want to uninstall the TheBrig, please make sure that all jails have been removed');
-		
-		
-		
+	/** Portsnap page */
+		define(_THEBRIG_TAG_NEVER, "Never");
+		define(_THEBRIG_PORTSTREE_TITLE, "Portstree");
+		define(_THEBRIG_PORTCURRENTSTATUS, "Current Status");
+		define(_THEBRIG_PORTDOWNLOADABLE, "The latest snapshot available for download is dated: ");
+		define(_THEBRIG_PORTDOWNLOADED, "You have downloaded a snapshot that was released: ");
+		define(_THEBRIG_PORTAPPLIED, "The last time you applied a downloaded snapshot was: ");
+		define(_THEBRIG_FETCH_FIRST1, "Fetch and Extract the tree");
+		define(_THEBRIG_FETCH_FIRST2, "The first step to using a central ports tree is to fetch and extract the snapshot of the ports tree. <br /><b>This step should only need to be done the very first time, as it will overwrite anything in the ports tree directory!</b>");
+		define(_THEBRIG_FETCH_UPDATE1, "Fetch and Update the tree");
+		define(_THEBRIG_FETCH_UPDATE2, "Click below to perform an 'on-demand' fetch and update of the exising ports tree.");
+		define(_THEBRIG_UPDATETREE1, "Update the tree");
+		define(_THEBRIG_UPDATETREE2, "Click below to update of the exising ports tree using the most recently downloaded snapshot.");
+		define(_THEBRIG_ENABLE_PORTSTREE1, "Ports Tree Enabling");
+		define(_THEBRIG_ENABLE_PORTSTREE2, "Please choose which of the following jails should have access to the shared ports tree:");
+		define(_THEBRIG_PORTSNOTE, "<font color='red'><b>Please note: </b></font> Selecting a jail to have access to the portstree will result in a non-standard make.conf");
+		define(_THEBRIG_PORTCRON, "Cronjob");
+		define(_THEBRIG_PORT_CRON, "Enable 2:47 a.m. daily cron fetch of port tree.");
 	/** Buttons */
 		define(_THEBRIG_INSTALL_BUTTON, "Install" );
 		define(_THEBRIG_FETCH_BUTTON, "Fetch");
@@ -133,6 +148,8 @@
 		
 		
 	/** Error messages */	
+		define(_THEBRIG_ERROR, "ERROR!");
+		define(_THEBRIG_HUGEERROR, "ERROR! ... Like, a HUGE error!");
 		define(_THEBRIG_NOT_INSTALLED, "Something went awry with TheBrig's installation. Please attempt to re-install");
 		define(_THEBRIG_NO_BASE, "Creating a jail requires at least one \"base\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
 		define(_THEBRIG_NO_LIB32, "As this is 64 bit Nas4free, creating a jail requires at least one \"lib32\" tarball. Please visit the <a href='/extensions_thebrig_tarballs.php'>Tarball Management</a> page and download one.");
@@ -145,11 +162,14 @@
 		define(_THEBRIG_JAILNAME_INUSE, "The specified jailname is already in use. Please choose another.");
 		define(_THEBRIG_JAILNAME_RESERVED, "The specified jailname is reserved. Please choose another.");
 		define(_THEBRIG_LOCATION_RESERVED, "The specified jail location is reserved. Please choose another.");
-		define(_THEBRIG_LIB32_SELECTED, "The specified jail location is reserved. Please choose another.");
+		//define(_THEBRIG_LIB32_SELECTED, "The specified jail location is reserved. Please choose another.");
 		define(_THEBRIG_2TARBALS_SELECTED,  "You have selected more than one of a given tarball type!!  Please select only one of each type");
 		define(_THEBRIG_CREATEFOLDERERROR, "Could not create directory for jail to live in!");
 		define(_THEBRIG_NOT_CONFIRMED, "It appears you just finished installing TheBrig! <br>Please confirm the install location by visiting the <a href='/extensions_thebrig_config.php'>Rudimentary Config</a> page and click \"Save\".");
 		define(_THEBRIG_NOTENOUGHSPACE, "There is not enough space on the target disk!");
+		define(_THEBRIG_NORETURN_UPDATE, "Something bad happened while attempting to return Nas4Free to its previous state");
+		define(_THEBRIG_NOPREPARE_UPDATE, "Something bad happened while attempting to prep for the update operation");
+		
 	/**Messages */	
 	
 		
@@ -201,7 +221,10 @@
 		define(_THEBRIG_CHECK_NETWORKING, "There seems to be a networking issue. I can't reach ftp.freebsd.org. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>.<br>Alternatively, try it again to see if there was some transient network problem.");
 		define(_THEBRIG_CHECK_NETWORKING_GIT, "There seems to be a networking issue. I can't reach GitHub to retrieve the file. Please check <a href='/system.php'>DNS</a> and other <a href='/interfaces_lan.php'>networking settings</a>. <br>Alternatively, try it again to see if there was some transient network problem.");
 		define(_THEBRIG_GIT_LANG_FAIL, "The fetch succeeded, but the file is missing or not accessible. Please try again!");
-		define(_THEBRIG_ERROR, "ERROR!");
+		
+		define(_THEBRIG_UNABLECONTINUE, "Unable to Continue");
+		define(_THEBRIG_UNABLECONTINUE_EXPL1, "In order to begin configuration and update tasks for a common ports tree, you need to have at least one configured and filled jail!");
+		define(_THEBRIG_UNABLECONTINUE_EXPL2, "For some reason, Nas4Free cannot be prepared for portsnap tasks. This is highly suspect, as the copying was attempted by root.");
 		define(_THEBRIG_FETCH, "Fetch!");
 		define(_THEBRIG_FETCH_ERROR, "You selected to fetch without selecting any files.");
 		define(_THEBRIG_DELETE_FAIL, "Could not delete file: ");
@@ -212,14 +235,7 @@
 		define(_THEBRIG_JAIL_PARALLEL, "Start all jails in parallel");
 		define(_THEBRIG_JAIL_ROOT_HOST, "Allow root user in a jail to change its hostname");
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
-		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");
-		define(_THEBRIG_TITLE, "TheBrig");
-		define(_SRVSLIM_MODULE_VERSION_CONFLICT, "Warning - the Logitech Media Server version you're trying to run is not compatible with this SlimNAS version. If you encounter problems running it, please update SlimNAS or revert to a compatible Logitech Media Server. Thanks for your understanding.");
-		define(_SRVSLIM_NO_SLIMNAS, "There's no updated SlimNAS package available for installation.");
-		define(_SRVSLIM_UPDATE_SLIMNAS, "Update SlimNAS<br>(<a href='http://www.herger.net/SlimNAS' target='_blank'>check for new version</a>)");
-		define(_SRVSLIM_CORRUPT_TARBALL, "The file you tried to install seems to be corrupt. Please download and try again: ");
-		define(_SRVSLIM_RELOAD_PAGE, " (<a href='/services_slimserver.php'>Update status</a>)");
-		
+		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");		
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
 		}
 ?>
