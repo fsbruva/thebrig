@@ -143,7 +143,11 @@ if ($_POST) {
 					// Create directory, remove anything within the directory, and mount the ports
 					exec ( "mkdir " . $my_jail['jailpath'] . "usr/ports");
 					exec ( "rm -r " . $my_jail['jailpath'] . "usr/ports/*");
-					exec ( "mount -t nullfs -r " . $brig_root . "conf/ports " . $my_jail['jailpath'] . "usr/ports");
+				// Update running jail
+					$jail_id = "/var/run/jail_".$my_jail['jailname'].".id";
+					if (true === is_file($jail_id)) {
+						exec ( "mount -t nullfs -r " . $brig_root . "conf/ports " . $my_jail['jailpath'] . "usr/ports");
+					}
 					// Make backup of existing make file for later
 					if ( file_exists($my_jail['jailpath'] . "etc/make.conf"))
 						exec("mv " . $my_jail['jailpath'] . "etc/make.conf " . $my_jail['jailpath'] . "etc/make.conf.bak");
