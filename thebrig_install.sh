@@ -45,11 +45,11 @@ FULL_PATH=$(echo $STAT | sed -r s/'^([^\/]+)\/'/'\/'/1 2>/dev/null)
 START_FOLDER=$(dirname $FULL_PATH | sed 's|/thebrig_install.sh||')
 
 # First stop any users older than 9.3 from installing
-MAJ_REL=$(uname -r | cut -d- f1 | cut -d. -f1)
-MIN_REL=$(uname -r | cut -d- f1 | cut -d. -f2)
+MAJ_REL=$(uname -r | cut -d- -f1 | cut -d. -f1)
+MIN_REL=$(uname -r | cut -d- -f1 | cut -d. -f2)
 
 # Prevent users from breaking their system
-if [ $MAJ_REL -lt 9 -o $MIN_REL -lt 3 ]; then
+if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then
 	echo "ERROR: This version of TheBrig is incompatible with your system!"
 	exerr "ERROR: Please upgrade Nas4Free to version 9.3 or higher!"
 fi

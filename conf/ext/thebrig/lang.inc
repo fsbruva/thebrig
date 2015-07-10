@@ -134,6 +134,28 @@
 		define(_THEBRIG_PORTSNOTE, "<font color='red'><b>Please note: </b></font> Selecting a jail to have access to the portstree will result in a non-standard make.conf");
 		define(_THEBRIG_PORTCRON, "Cronjob");
 		define(_THEBRIG_PORT_CRON, "Enable 2:47 a.m. daily cron fetch of port tree.");
+	/** Freebsd-update page */
+		define(_THEBRIG_FBSDVERSION, "The latest version on the FTP server is: ");
+		define(_THEBRIG_FBSDVERSION_VALID, "The update on the FTP server is valid until: ");
+		define(_THEBRIG_UPDATEOP, "Update Operations");
+		define(_THEBRIG_UPDATEOP_EXPL, "Please choose which of the following jails should have the update action carried out:");
+		define(_THEBRIG_UPDATETABLE1, "Last Check for Updates");
+		define(_THEBRIG_UPDATETABLE2, "Downloaded Version");
+		define(_THEBRIG_UPDATETABLE3, "Files Affected by Pending Update");
+		define(_THEBRIG_UPDATETABLE4, "Installed Version");
+		define(_THEBRIG_NOUPDATE, "No updates pending");
+		define(_THEBRIG_UPDATETABLE_NOTE, "<font color='red'><b>Please note:</b></font> Selecting a slim jail for any update operation will mandate that all other slim jails be updated as well.");
+		define(_THEBRIG_UPDATE_FETCH, "Fetch the Updates");
+		define(_THEBRIG_UPDATE_FETCHEXPL, "Click below to perform an 'on-demand' fetch for the selected jails.");
+		define(_THEBRIG_UPDATE_INSTALL, "Install the Updates");
+		define(_THEBRIG_UPDATE_INSTALLEXPL, "Click below to install the pending update to the selected jail(s).");
+		define(_THEBRIG_UPDATE_DETAILS, "Update Details");
+		define(_THEBRIG_UPDATE_DETAILS_EXPL, "Choose jail to view more information regarding a pending update.");
+		define(_THEBRIG_UPDATE_DETAILS1, "Impact of Update");
+		define(_THEBRIG_UPDATE_DETAILS2, "Added");
+		define(_THEBRIG_UPDATE_DETAILS3, "Updated");
+		define(_THEBRIG_UPDATE_DETAILS4, "Removed");
+		
 	/** Buttons */
 		define(_THEBRIG_INSTALL_BUTTON, "Install" );
 		define(_THEBRIG_FETCH_BUTTON, "Fetch");
@@ -169,6 +191,13 @@
 		define(_THEBRIG_NOTENOUGHSPACE, "There is not enough space on the target disk!");
 		define(_THEBRIG_NORETURN_UPDATE, "Something bad happened while attempting to return Nas4Free to its previous state");
 		define(_THEBRIG_NOPREPARE_UPDATE, "Something bad happened while attempting to prep for the update operation");
+		define(_THEBRIG_JAILSNODEFINED, "There are no jails defined/created. Updating is impossible until there is at least one.");
+		define(_THEBRIG_NEEDSELECT, "You need to select a jail to carry out operations on!");
+		define(_THEBRIG_NOUPDATESREADY, sprintf("The jail named <i>'%s'</i> does not have any updates ready for installation. <br>Please run 'fetch' for this jail.",$my_jail['jailname']));
+		define(_THEBRIG_NOROLLBACK, sprintf("The jail named <i>'%s'</i> cannot have its installation rolled back. <br>Sorry.",$my_jail['jailname']));
+		define(_THEBRIG_NOUPDATESREADY_TEMPLATE, "The TEMPLATE jail does not have any updates ready for installation. <br>Please run 'fetch' for this jail.");
+		define(_THEBRIG_NOROLLBACK_TEMPLATE, "The TEMPLATE jail cannot have its installation rolled back. <br>Sorry.");
+		define(_THEBRIG_ABOVEERROR, "No action was taken because of the above errors.");
 		
 	/**Messages */	
 	
@@ -225,6 +254,9 @@
 		define(_THEBRIG_UNABLECONTINUE, "Unable to Continue");
 		define(_THEBRIG_UNABLECONTINUE_EXPL1, "In order to begin configuration and update tasks for a common ports tree, you need to have at least one configured and filled jail!");
 		define(_THEBRIG_UNABLECONTINUE_EXPL2, "For some reason, Nas4Free cannot be prepared for portsnap tasks. This is highly suspect, as the copying was attempted by root.");
+		define(_THEBRIG_UNABLECONTINUE_EXPL3, "In order to begin configuration and update tasks for freebsd-update, you need to have at least one configured and filled jail!");
+		define(_THEBRIG_UNABLECONTINUE_EXPL4, "For some reason, Nas4Free cannot be prepared for update tasks. This is highly suspect, as the copying was attempted by root.");
+
 		define(_THEBRIG_FETCH, "Fetch!");
 		define(_THEBRIG_FETCH_ERROR, "You selected to fetch without selecting any files.");
 		define(_THEBRIG_DELETE_FAIL, "Could not delete file: ");

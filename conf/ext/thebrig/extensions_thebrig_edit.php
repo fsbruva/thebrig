@@ -218,7 +218,7 @@ if ($_POST) {
 	unset ($pconfig['zfs_datasetfiletype']);
 	unset ($pconfig['zfs_datasetdata']); 
 	
-	/*explode network entries and check IP addres.  I check if address, if not more then 1 IP adresses specified, and not more then 1 address in jails set.*/
+	/*explode network entries and check IP address.  I check if address, if not more then 1 IP adresses specified, and not more then 1 address in jails set.*/
 	if (is_array( $pconfig['allowedip'] ) && !isset($pconfig['jail_vnet'])) {
 	foreach ($pconfig['allowedip'] as $a_ips ) {
 		  $b_ips = explode("|", $a_ips);
