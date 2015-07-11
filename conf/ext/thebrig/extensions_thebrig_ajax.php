@@ -60,6 +60,7 @@ function get_jailinfo() {
 			$tabledata['status'][$n_jail["jailno"]] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
 			$tabledata['id'][$n_jail["jailno"]] = $jail_id;
 			if (1 == exec ("jls -j ".$n_jail['jailname']. " vnet") ) { 
+				unset ($result);
 				$cmd = "jexec ".$n_jail['jailname']." ifconfig epair" . $n_jail["jailno"] ."b | grep inet | awk '{ print \$2}'";
 				exec ($cmd, $result); 
 				$tabledata['ip'][$n_jail["jailno"]] = implode(",", $result); } else {
