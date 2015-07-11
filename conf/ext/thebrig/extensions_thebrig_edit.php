@@ -184,6 +184,7 @@ if ($_POST) {
 	$thebrig_names = array ("basejail" , "work" , "conf" , "template" ); 
 	$thebrig_dirs = $thebrig_names + array ( "conf/ext" , "conf/bin");
 	$thebrig_dirs = preg_replace("/(.+)/", $config['thebrig']['rootfolder'] . "$1/", $thebrig_dirs, 1);
+	$thebrig_dirs[] = $config['thebrig']['rootfolder'];
 	
 	if ( array_search ($pconfig['jailname'], $thebrig_names ) !== FALSE)
 		$input_errors[] = "The specified jailname is reserved. Please choose another.";
@@ -267,10 +268,6 @@ if ($_POST) {
 		$input_errors[] = "Could not create directory for jail to live in!";
 	}
 		
-	// Validate if jail number is unique in order to reorder the jails (if necessary)
-	// Alexey - why do we care about the jail number or the uuid?
-	// Why not use the name?
-	
 	// a_jail is the list of all jails, sorted by their jail number
 	
 	if ( empty( $input_errors )) {
