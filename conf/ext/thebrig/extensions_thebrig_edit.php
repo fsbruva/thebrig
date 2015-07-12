@@ -170,17 +170,18 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 }
 // In this case, the $uuid isn't set (this is a new jail), so set some default values
 else {
+	$next_jailnumber = thebrig_get_next_jailnumber();
 	$pconfig['uuid'] = uuid();
 	$pconfig['enable'] = false;
-	$pconfig['jailno'] = thebrig_get_next_jailnumber();
-	$pconfig['jailname'] = "";
+	$pconfig['jailno'] = $next_jailnumber;
+	$pconfig['jailname'] = "jail".$next_jailnumber;
 	$pconfig['jail_type']="Slim";
 	$pconfig['param'] = array("allow.mount", "allow.mount.devfs");
 	unset ($pconfig['allowedip']);
 	unset ($pconfig['jail_vnet']);
 	$pconfig['epair_a_ip'] = "192.168.1.251"; 
 	$pconfig['epair_a_mask'] = "24"; 
-	$pconfig['epair_b_ip'] = "192.168.1.251"; 
+	$pconfig['epair_b_ip'] = "192.168.1.252"; 
 	$pconfig['epair_b_mask'] = "24";	
 	$pconfig['if'] = "";
 	$pconfig['jailpath']="";
@@ -217,7 +218,10 @@ if ($_POST) {
 	unset ($pconfig['cmddatanice']);
 	unset ($pconfig['zfs_datasetfiletype']);
 	unset ($pconfig['zfs_datasetdata']); 
-	
+	// Check is jailname defined
+	if (!isset($pconfig['jailname']) || ($pconfig['jailname'] === "")) {
+			$input_errors[] = sprintf( gettext("The attribute '%s' is required."), "Jail name");
+		}
 	/*explode network entries and check IP address.  I check if address, if not more then 1 IP adresses specified, and not more then 1 address in jails set.*/
 	if (is_array( $pconfig['allowedip'] ) && !isset($pconfig['jail_vnet'])) {
 	foreach ($pconfig['allowedip'] as $a_ips ) {
