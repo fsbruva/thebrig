@@ -69,6 +69,8 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['if'] = $a_jail[$cnid]['if'];
 	$pconfig['ipaddr'] = $a_jail[$cnid]['ipaddr'];
 	$pconfig['subnet'] = $a_jail[$cnid]['subnet'];
+	$pconfig['ip6addr'] = $a_jail[$cnid]['ip6addr'];
+	$pconfig['subnet6'] = $a_jail[$cnid]['subnet6'];
 	$pconfig['jailpath'] = $a_jail[$cnid]['jailpath'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['devfs_enable'] = isset($a_jail[$cnid]['devfs_enable']);
@@ -121,6 +123,8 @@ else {
 	$pconfig['if'] = "";
 	$pconfig['ipaddr'] = "";
 	$pconfig['subnet'] = "32";
+	$pconfig['ip6addr'] = "";
+	$pconfig['subnet6'] = "64";
 	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = true;
 	$pconfig['devfs_enable'] = false;
@@ -191,7 +195,12 @@ if ($_POST) {
 		
 	// Check to see if duplicate ip addresses:
 	$index = array_search_ex($pconfig['ipaddr'], $a_jail, "ipaddr");
-	if ( FALSE !== $index ) {
+	if(isset($pconfig['ip6addr']))
+		$index6 = array_search_ex($pconfig['ip6addr'], $a_jail, "ip6addr");
+	else
+		$index6= FALSE;
+
+	if ( FALSE !== $index || FALSE !== $index6 ) {
 		// If $index is not null, then there is a name conflict
 		if (!(isset($uuid) && (FALSE !== $cnid )))
 			// This means we are not editing an existing jail - we are creating a new one
@@ -316,6 +325,8 @@ if ($_POST) {
 		$jail['if'] = $pconfig['if'];
 		$jail['ipaddr'] = $pconfig['ipaddr'];
 		$jail['subnet'] = $pconfig['subnet'];
+		$jail['ip6addr'] = $pconfig['ip6addr'];
+		$jail['subnet6'] = $pconfig['subnet6'];
 		$jail['jailpath'] = $pconfig['jailpath'];
 		$jail['devfsrules'] = $pconfig['dst'];
 		$jail['jail_mount'] = isset($pconfig['jail_mount']) ? true : false;
@@ -522,7 +533,8 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_combobox("jail_type", gettext("Jail Type \n <input type=\"button\" onclick=\"helpbox()\" value=\"Help\" />"), $pconfig['jail_type'], array('slim' =>'Slim','full'=> 'Full', 'linux'=> 'Linux', 'custom'=> 'Custom'), "Choose jail type ", true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", gettext("Jail Interface"), $pconfig['if'], $a_interface, gettext("Choose jail interface"), true);?>
-			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IP address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
+			<?php html_ipv4addrbox("ipaddr", "subnet", gettext("Jail IPv4 address"), $pconfig['ipaddr'], $pconfig['subnet'], "", true);?>
+			<?php html_ipv6addrbox("ip6addr", "subnet6", gettext("Jail IPv6 address"), $pconfig['ip6addr'], $pconfig['subnet6'], "", true);?>
 			<?php html_checkbox("enable", gettext("Jail start on boot"),			!empty($pconfig['enable']) ? true : false, gettext("Enable"), "");?>
 			<?php html_inputbox("jailpath", gettext("Jail Location"), $pconfig['jailpath'], gettext("Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}{jail_name}/."), false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>
 			<?php html_separator();?>
