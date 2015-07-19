@@ -58,7 +58,7 @@ else { // TheBrig has been confirmed
 	// Get the string version of the installed software
 	$brig_ver = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
 	// Convert the string to a float so that it can be used in comparisons
-	$brig_ver = 0 + substr($brig_ver[1],0,3);
+	$brig_ver = 0 + substr($brig_ver[1],0,4);
 	
 	if ( !$_POST ) {
 		// $_POST not being set means we haven't clicked a button - so 
@@ -90,7 +90,7 @@ else { // TheBrig has been confirmed
 				// Extract the version string from the file ("0.8", "0.9")
 				$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[18]);
 				// Force the version to be a number for comparisons
-				$git_ver = 0 + substr($git_ver[1],0,3);
+				$git_ver = 0 + substr($git_ver[1],0,4);
 				// Go get the install file and make it executable - only if we can successfully get the files we need.
 				mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
 				if ( is_file("/tmp/thebrig_install.sh" ) ) {
