@@ -61,6 +61,7 @@ if ($_POST) {
 		// Lock the config
 		if ( isset($config['thebrig']['thebrig_enable']) ) { 
 			file_put_contents($brig_test, "brig is enabled and retval is:{$retval} \n");
+			$retval |= rc_update_rcconf("thebrig", "enable");
 			} 
 		else { 
 			$retval |= rc_update_rcconf("thebrig", "disable"); 

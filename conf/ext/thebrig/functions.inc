@@ -978,12 +978,23 @@ function write_defs_rules() {
 		if (isset($out_jail['jail_vnet'] )) {	
 			$delete_cmd = false;  
 			fwrite ($cmd_handle, "sysctl net.inet.ip.forwarding=1 >/dev/null\n");
-			fwrite ($cmd_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." create >/dev/null\n");
-			fwrite ($cmd_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
-			fwrite ($cmd_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $out_jail['if'] ."\n");						
-			fwrite ($cmd_handle, "ifconfig epair" . $out_jail['jailno']." create\n");
-			fwrite ($cmd_handle, "ifconfig bridge" .($out_jail['jailno']+10) . " addm epair" . $out_jail['jailno']."a\n");
-			fwrite ($cmd_handle, "ifconfig epair". $out_jail['jailno']."a up\n");
+			fwrite ($cmd_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");
+			//fwrite ($cmd_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`");
+			fwrite ($cmd_handle, "if [ -z \${bridge} ]; then\n");
+			fwrite ($cmd_handle, "\tifconfig bridge20 create > /dev/null 2> /dev/null\n");
+			fwrite ($cmd_handle, "\tifconfig bridge20 inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
+			fwrite ($cmd_handle, "\tifconfig bridge20 addm " . $out_jail['if']."\n");
+			fwrite ($cmd_handle, "\tifconfig bridge20 up\n");
+			fwrite ($cmd_handle, "fi\n");
+   
+   
+   
+
+			//fwrite ($cmd_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." create >/dev/null\n");
+			//fwrite ($cmd_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $out_jail['if'] ."\n");						
+			fwrite ($cmd_handle, "ifconfig epair" . $out_jail['jailno']." create up\n");
+			fwrite ($cmd_handle, "ifconfig bridge20 addm epair" . $out_jail['jailno']."a\n");
+			// fwrite ($cmd_handle, "ifconfig epair". $out_jail['jailno']."a up\n");
 		}  
 		fclose($cmd_handle);
 		if ( $delete_cmd == true ) { unlink ($commandfile); }
@@ -999,7 +1010,7 @@ function write_defs_rules() {
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default " . $out_jail['epair_a_ip'] . "\n");
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");
-				//fwrite ($handle1, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $config['interfaces']['lan']['if'] ."\n");
+			//fwrite ($post_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $config['interfaces']['lan']['if'] ."\n");
 		}					
 		if (isset($out_jail['fdescfs_enable'])) { 
 			$delete_post = false;
@@ -1085,10 +1096,10 @@ function write_defs_rules() {
 		$delete_after=true;
 		if (isset($out_jail['jail_vnet'] )) {
 			$delete_after=false;					 
-			fwrite( $after_handle ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem epair".$out_jail['jailno']."a\n");
+			fwrite( $after_handle ,  "ifconfig bridge20 deletem epair".$out_jail['jailno']."a\n");
 			fwrite( $after_handle ,  "ifconfig epair". $out_jail['jailno']."a destroy\n");
-			fwrite( $after_handle ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem " . $out_jail['if'] ."\n");
-			fwrite( $after_handle ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
+			//fwrite( $after_handle ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem " . $out_jail['if'] ."\n");
+			//fwrite( $after_handle ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
 		}
 		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
 			$delete_after=false;
@@ -1100,6 +1111,7 @@ function write_defs_rules() {
 			$a_command = explode( "|", $command); 
 			fwrite ($after_handle,  $a_command[2] . "\n"); 
 		}
+		fwrite ($after_handle, "rm -f /var/run/jail_{$out_jail['jailname']}.id\n");
 		fclose($after_handle);
 		
 		if ( $delete_after == true ) { unlink($commandfile); }
