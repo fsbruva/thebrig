@@ -32,7 +32,7 @@ $workdir = trim($workdir_f[0]);
 // Read the contents of the downloaded lang file, then extract the version
 $gitlangfile = file("{$workdir}/install_stage/conf/ext/thebrig/lang.inc");
 $git_ver_s = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[1]);
-$git_ver=substr($git_ver_s[1],0,3);
+$git_ver=substr($git_ver_s[1],0,4);
 
 // We enter this if gl_statfs key is set and its value is numeric - this is done
 // to check if we are at a version <1.0. 
