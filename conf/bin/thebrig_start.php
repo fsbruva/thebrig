@@ -66,7 +66,7 @@ foreach ( glob('/usr/local/www/extensions_thebrig*.php') as $link) {
 // installed version of lang.inc
 $brig_ver = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
 // Convert the string to a float so that it can be used in comparisons
-$brig_ver = 0 + substr($brig_ver[1],0,3);
+$brig_ver = 0 + substr($brig_ver[1],0,4);
 if ( ($config['thebrig']['version'] != $brig_ver )){
 	// We need to update the XML config to reflect reality
 	$config['thebrig']['version'] = $brig_ver;
