@@ -978,24 +978,17 @@ function write_defs_rules() {
 		if (isset($out_jail['jail_vnet'] )) {	
 			$delete_cmd = false;  
 			fwrite ($cmd_handle, "sysctl net.inet.ip.forwarding=1 >/dev/null\n");
-			fwrite ($cmd_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");
-			//fwrite ($cmd_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`");
+			fwrite ($cmd_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");			
 			fwrite ($cmd_handle, "if [ -z \${bridge} ]; then\n");
-			fwrite ($cmd_handle, "\tifconfig bridge20 create > /dev/null 2> /dev/null\n");
-			fwrite ($cmd_handle, "\tifconfig bridge20 inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
-			fwrite ($cmd_handle, "\tifconfig bridge20 addm " . $out_jail['if']."\n");
-			fwrite ($cmd_handle, "\tifconfig bridge20 up\n");
+			fwrite ($cmd_handle, "\tbridge=\"bridge20\"\n");
+			fwrite ($cmd_handle, "\tifconfig \${bridge} create > /dev/null 2> /dev/null\n");
+			fwrite ($cmd_handle, "\tifconfig \${bridge} addm " . $out_jail['if']."\n");
+			fwrite ($cmd_handle, "\tifconfig \${bridge} inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
+			fwrite ($cmd_handle, "\tifconfig \${bridge} up\n");
 			fwrite ($cmd_handle, "fi\n");
-   
-   
-   
-
-			//fwrite ($cmd_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." create >/dev/null\n");
-			//fwrite ($cmd_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $out_jail['if'] ."\n");						
 			fwrite ($cmd_handle, "ifconfig epair" . $out_jail['jailno']." create up\n");
-			fwrite ($cmd_handle, "ifconfig bridge20 addm epair" . $out_jail['jailno']."a\n");
-			// fwrite ($cmd_handle, "ifconfig epair". $out_jail['jailno']."a up\n");
-		}  
+			fwrite ($cmd_handle, "ifconfig \${bridge} addm epair" . $out_jail['jailno']."a\n");
+			}  
 		fclose($cmd_handle);
 		if ( $delete_cmd == true ) { unlink ($commandfile); }
 		 
