@@ -861,6 +861,7 @@ function write_defs_rules() {
  function write_jailconf () {
  	global $config, $g;
  	$startonboot ="";
+	$vnetroute="";
  	if (!is_dir($config['thebrig']['rootfolder']."conf/jails")) { 
 		mkdir ($config['thebrig']['rootfolder']."conf/jails", 0755);
 	} 
@@ -975,11 +976,13 @@ function write_defs_rules() {
 			} 
 		}
 		// vnet script
-		if (isset($out_jail['jail_vnet'] )) {	
+		if (isset($out_jail['jail_vnet'] )) {
+			
 			$delete_cmd = false;  
-			fwrite ($cmd_handle, "sysctl net.inet.ip.forwarding=1 >/dev/null\n");
+			fwrite ($cmd_handle, "sysctl net.inet.ip.forwarding=1 >/dev/null\n");			
 			fwrite ($cmd_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");			
 			fwrite ($cmd_handle, "if [ -z \${bridge} ]; then\n");
+			
 			fwrite ($cmd_handle, "\tbridge=\"bridge20\"\n");
 			fwrite ($cmd_handle, "\tifconfig \${bridge} create > /dev/null 2> /dev/null\n");
 			fwrite ($cmd_handle, "\tifconfig \${bridge} addm " . $out_jail['if']."\n");
@@ -1001,9 +1004,11 @@ function write_defs_rules() {
 			$delete_post = false;
 			fwrite ($post_handle, "ifconfig epair".$out_jail['jailno']."b vnet " . $out_jail['jailname']."\n");
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
-			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default " . $out_jail['epair_a_ip'] . "\n");
-			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");
-			//fwrite ($post_handle, "ifconfig bridge" . ($out_jail['jailno']+10) ." addm " . $config['interfaces']['lan']['if'] ."\n");
+			/* next 2 string calculate default route for vmet enabled jails as side A for first started jail*/
+			fwrite ($post_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");
+			fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");			
+			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default \$iproutedef \n");
+			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");			
 		}					
 		if (isset($out_jail['fdescfs_enable'])) { 
 			$delete_post = false;
