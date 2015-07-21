@@ -857,11 +857,213 @@ function write_defs_rules() {
 	 unlink_if_exists("/etc/devfs.rules");
 	 }
 }
+function write_jailcommands ($out_jail) {
+	global $config, $g;
+	//prestart command proccessing
+	$commandfile=  $config['thebrig']['rootfolder']."conf/jails/prestart.". $out_jail['jailname'];
+		$cmd_handle = fopen( $commandfile, "w");		 
+		fwrite ($cmd_handle, "#!/bin/sh\n#\n");
+/* The order of execution of scripts is:
+1 User scripts
+2 zfs attach
+3 vnet scripts
+*/
+		$delete_cmd = true;
+		if (TRUE == is_array($out_jail['cmd'])) { 
+			$prestart_cmd = preg_grep("/^prestart\|/", $out_jail['cmd']);
+			if (!empty($prestart_cmd) ) {
+				$delete_cmd = false;
+				foreach ($prestart_cmd as $command) { 
+					$a_command = explode( "|", $command); 
+					fwrite ($cmd_handle, $a_command[2] . "\n"); 
+				}
+			}
+		}
+		 // zfs prepare 
+			 // check zfs health 
+		if (false === brig_zfs_check()) {  
+			write_briglog (" zfs not running ", "INFO"); 
+		}
+		else {
+			if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) ) {
+				$cachefile = $config['thebrig']['rootfolder']."conf/jails/zfscache.". $out_jail['jailname'];
+				$cach_handle = fopen( $cachefile, "w");
+				$a_dataset = explode(";",$out_jail['zfs_datasets']);
+				foreach ($a_dataset as $b_dataset) {
+					$c_dataset =  explode("|",$b_dataset);
+					$delete_cmd = false;
+					fwrite ($cmd_handle, "zfs set jailed=on " . $c_dataset[0] . "\n");
+					$mainmountpoint = exec ("zfs get -H mountpoint " . $c_dataset[0] . " | awk '{print \$3}'");
+					fwrite ($cach_handle, $mainmountpoint . " " . $c_dataset[0] . "\n");
+				}
+				fclose ($cach_handle);
+			} 
+		}
+		// vnet script
+		if (isset($out_jail['jail_vnet'] )) {
+			
+			$delete_cmd = false;  
+			fwrite ($cmd_handle, "sysctl net.inet.ip.forwarding=1 >/dev/null\n");			
+			fwrite ($cmd_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");			
+			fwrite ($cmd_handle, "if [ -z \${bridge} ]; then\n");
+			
+			fwrite ($cmd_handle, "\tbridge=\"bridge20\"\n");
+			fwrite ($cmd_handle, "\tifconfig \${bridge} create > /dev/null 2> /dev/null\n");
+			fwrite ($cmd_handle, "\tifconfig \${bridge} addm " . $out_jail['if']."\n");
+			fwrite ($cmd_handle, "\tifconfig \${bridge} inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
+			fwrite ($cmd_handle, "\tifconfig \${bridge} up\n");
+			fwrite ($cmd_handle, "fi\n");
+			fwrite ($cmd_handle, "ifconfig epair" . $out_jail['jailno']." create up\n");
+			fwrite ($cmd_handle, "ifconfig \${bridge} addm epair" . $out_jail['jailno']."a\n");
+			}  
+		fclose($cmd_handle);
+		if ( $delete_cmd == true ) { unlink ($commandfile); }
+		 
+			 // poststart script
+/* The order of execution of scripts is:
+1 vnet scripts
+2 zfs attach
+3 User scripts
+3a - executed under main
+3b - executed under jail
+*/	
+		$commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/poststart.". $out_jail['jailname'];
+		$post_handle = fopen( $commandfile, "w");
+		fwrite ($post_handle, "#!/bin/sh\n#\n");
+		$delete_post = true;
+		if (isset($out_jail['jail_vnet'] )) {
+			$delete_post = false;
+			fwrite ($post_handle, "ifconfig epair".$out_jail['jailno']."b vnet " . $out_jail['jailname']."\n");
+			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
+			/* next 2 string calculate default route for vmet enabled jails as side A for first started jail*/
+			fwrite ($post_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");
+			fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");			
+			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default \$iproutedef \n");
+			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");			
+		}					
+		if (isset($out_jail['fdescfs_enable'])) { 
+			$delete_post = false;
+			fwrite( $post_handle ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  
+		} 
+		//zfs   
+		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_zfs_check())) {
+			$delete_post = false;
+			fwrite ($post_handle, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
+			$a_dataset = explode(";",$out_jail['zfs_datasets']);
+			foreach ($a_dataset as $b_dataset) {
+				$c_dataset =  explode("|",$b_dataset);
+				fwrite ($post_handle, "/sbin/zfs jail \${JID} " . $c_dataset[0] . "\n");
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " zfs set mountpoint=".$c_dataset[1]." ". $c_dataset[0]."\n");
+			}
+			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " zfs mount -a\n");
+		}
+			
+		// add users poststart command	
 
+		$poststart_cmd_sys = preg_grep("/^afterstart_for_main\|/",$out_jail['cmd']);
+		if (!empty($poststart_cmd_sys)) {
+			$delete_post = false;
+			foreach ($poststart_cmd_sys as $command) { 
+				$a_command = explode( "|", $command); 
+				fwrite ($post_handle, $a_command[2] . "\n");
+			}
+		} 
+		$poststart_cmd_jail = preg_grep("/^afterstart_for_jail\|/", $out_jail['cmd']);
+		if (!empty($poststart_cmd_jail)) {
+			$delete_post = false;
+			foreach ($poststart_cmd_jail as $command) { 
+				$a_command = explode( "|", $command); 
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] ." ". $a_command[2] . "\n"); 
+			}
+		}
+		fclose($post_handle);
+		if ( $delete_post == true ) { unlink( $commandfile ); }
+		
+	 // prestop jail
+/* The order of execution of scripts is:
+1 User scripts
+1a - executed under jail
+1b - executed under main
+2 zfs detach
+3 vnet scripts
+*/		 
+		$commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/prestop.". $out_jail['jailname'];
+		$pre_handle = fopen( $commandfile, "w");
+		fwrite ($pre_handle, "#!/bin/sh\n#\n");
+		$delete_pre=true;
+		$prestop_cmd_jail = preg_grep("/^prestop_for_jail\|/", $out_jail['cmd']);
+		foreach ($prestop_cmd_jail as $command) { 
+			$delete_pre=false;
+			$a_command = explode( "|", $command); 
+			fwrite ($pre_handle, "jexec " . $out_jail['jailname'] ." ". $a_command[2] . "\n"); 
+		}
+		$prestop_cmd_sys = preg_grep("/^prestop_for_main\|/", $out_jail['cmd']);
+		foreach ($prestop_cmd_sys as $command) { 
+			$delete_pre=false;
+			$a_command = explode( "|", $command); 
+			fwrite ($pre_handle, $a_command[2] . "\n"); 						   
+		}
+			//zfs_datasets
+		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_zfs_check())) {
+			$delete_pre=false;
+			fwrite ($pre_handle, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
+			$a_dataset = explode(";",$out_jail['zfs_datasets']);
+			foreach ($a_dataset as $b_dataset) {
+				$c_dataset =  explode("|",$b_dataset);
+				fwrite ($pre_handle, "jexec " . $out_jail['jailname'] ." zfs unmount -f " . $c_dataset[1] . "\n");
+				fwrite ($pre_handle, "zfs unjail \${JID} " . $c_dataset[0] . "\n");
+				fwrite ($pre_handle, "zfs set jailed=off " . $c_dataset[0] . "\n");
+				//fwrite ($handle1, "zfs set mountpoint=/mnt/" . $c_dataset[0] ." ".$c_dataset[0] . "\n");
+			}
+					// restore saved mountpoints
+			$cachefile_1 = file ($cachefile);
+			foreach ($cachefile_1 as $line) { fwrite ($pre_handle, "zfs set mountpoint=" . $line ); }
+		}
+		if (isset($out_jail['fdescfs_enable'])) { 
+			$delete_pre=false;
+			fwrite( $pre_handle ,  "umount " . $out_jail['jailpath']."dev/fd\n");
+		}
+	   	fclose($pre_handle);
+		if ( $delete_pre == true ) { unlink($commandfile); }			
+		
+		// Post-stop commands
+		/* The order of execution of scripts is:
+1 vnet scripts
+2 zfs detach
+3 User scripts
+
+*/	
+		$commandfile=  $config['thebrig']['rootfolder'] ."conf/jails/poststop.". $out_jail['jailname'];
+		$after_handle = fopen( $commandfile, "w");
+		fwrite ($after_handle, "#!/bin/sh\n#\n");
+		$delete_after=true;
+		if (isset($out_jail['jail_vnet'] )) {
+			$delete_after=false;					 
+			fwrite( $after_handle ,  "ifconfig bridge20 deletem epair".$out_jail['jailno']."a\n");
+			fwrite( $after_handle ,  "ifconfig epair". $out_jail['jailno']."a destroy\n");
+			//fwrite( $after_handle ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem " . $out_jail['if'] ."\n");
+			//fwrite( $after_handle ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
+		}
+		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
+			$delete_after=false;
+			fwrite ($after_handle, "zfs mount -a");
+		}
+		$poststop_cmd = preg_grep("/^afterstop\|/", $out_jail['cmd']);
+		foreach ($poststop_cmd as $command) {
+			$delete_after=false; 
+			$a_command = explode( "|", $command); 
+			fwrite ($after_handle,  $a_command[2] . "\n"); 
+		}
+		fwrite ($after_handle, "rm -f /var/run/jail_{$out_jail['jailname']}.id\n");
+		fclose($after_handle);
+		
+		if ( $delete_after == true ) { unlink($commandfile); }
+		// End of commands proccessing
+}
  function write_jailconf () {
  	global $config, $g;
  	$startonboot ="";
-	$vnetroute="";
+	
  	if (!is_dir($config['thebrig']['rootfolder']."conf/jails")) { 
 		mkdir ($config['thebrig']['rootfolder']."conf/jails", 0755);
 	} 
@@ -940,179 +1142,7 @@ function write_defs_rules() {
 		}
 		fclose($fstab_handle);
 		
-		// commands processing
-		$commandfile=  $config['thebrig']['rootfolder']."conf/jails/prestart.". $out_jail['jailname'];
-		$cmd_handle = fopen( $commandfile, "w");		 
-		fwrite ($cmd_handle, "#!/bin/sh\n#\n");
-		$delete_cmd = true;
-		if (TRUE == is_array($out_jail['cmd'])) { 
-			$prestart_cmd = preg_grep("/^prestart\|/", $out_jail['cmd']);
-			if (!empty($prestart_cmd) ) {
-				$delete_cmd = false;
-				foreach ($prestart_cmd as $command) { 
-					$a_command = explode( "|", $command); 
-					fwrite ($cmd_handle, $a_command[2] . "\n"); 
-				}
-			}
-		}
-		 // zfs prepare 
-			 // check zfs health 
-		if (false === brig_zfs_check()) {  
-			write_briglog (" zfs not running ", "INFO"); 
-		}
-		else {
-			if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) ) {
-				$cachefile = $config['thebrig']['rootfolder']."conf/jails/zfscache.". $out_jail['jailname'];
-				$cach_handle = fopen( $cachefile, "w");
-				$a_dataset = explode(";",$out_jail['zfs_datasets']);
-				foreach ($a_dataset as $b_dataset) {
-					$c_dataset =  explode("|",$b_dataset);
-					$delete_cmd = false;
-					fwrite ($cmd_handle, "zfs set jailed=on " . $c_dataset[0] . "\n");
-					$mainmountpoint = exec ("zfs get -H mountpoint " . $c_dataset[0] . " | awk '{print \$3}'");
-					fwrite ($cach_handle, $mainmountpoint . " " . $c_dataset[0] . "\n");
-				}
-				fclose ($cach_handle);
-			} 
-		}
-		// vnet script
-		if (isset($out_jail['jail_vnet'] )) {
-			
-			$delete_cmd = false;  
-			fwrite ($cmd_handle, "sysctl net.inet.ip.forwarding=1 >/dev/null\n");			
-			fwrite ($cmd_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");			
-			fwrite ($cmd_handle, "if [ -z \${bridge} ]; then\n");
-			
-			fwrite ($cmd_handle, "\tbridge=\"bridge20\"\n");
-			fwrite ($cmd_handle, "\tifconfig \${bridge} create > /dev/null 2> /dev/null\n");
-			fwrite ($cmd_handle, "\tifconfig \${bridge} addm " . $out_jail['if']."\n");
-			fwrite ($cmd_handle, "\tifconfig \${bridge} inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
-			fwrite ($cmd_handle, "\tifconfig \${bridge} up\n");
-			fwrite ($cmd_handle, "fi\n");
-			fwrite ($cmd_handle, "ifconfig epair" . $out_jail['jailno']." create up\n");
-			fwrite ($cmd_handle, "ifconfig \${bridge} addm epair" . $out_jail['jailno']."a\n");
-			}  
-		fclose($cmd_handle);
-		if ( $delete_cmd == true ) { unlink ($commandfile); }
-		 
-			 // poststart script
-		$commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/poststart.". $out_jail['jailname'];
-		$post_handle = fopen( $commandfile, "w");
-		fwrite ($post_handle, "#!/bin/sh\n#\n");
-		$delete_post = true;
-		if (isset($out_jail['jail_vnet'] )) {
-			$delete_post = false;
-			fwrite ($post_handle, "ifconfig epair".$out_jail['jailno']."b vnet " . $out_jail['jailname']."\n");
-			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
-			/* next 2 string calculate default route for vmet enabled jails as side A for first started jail*/
-			fwrite ($post_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");
-			fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");			
-			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default \$iproutedef \n");
-			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");			
-		}					
-		if (isset($out_jail['fdescfs_enable'])) { 
-			$delete_post = false;
-			fwrite( $post_handle ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  
-		} 
-		//zfs   
-		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_zfs_check())) {
-			$delete_post = false;
-			fwrite ($post_handle, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
-			$a_dataset = explode(";",$out_jail['zfs_datasets']);
-			foreach ($a_dataset as $b_dataset) {
-				$c_dataset =  explode("|",$b_dataset);
-				fwrite ($post_handle, "/sbin/zfs jail \${JID} " . $c_dataset[0] . "\n");
-				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " zfs set mountpoint=".$c_dataset[1]." ". $c_dataset[0]."\n");
-			}
-			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " zfs mount -a\n");
-		}
-			
-		// add users poststart command		  
-		$poststart_cmd_sys = preg_grep("/^afterstart_for_main\|/",$out_jail['cmd']);
-		if (!empty($poststart_cmd_sys)) {
-			$delete_post = false;
-			foreach ($poststart_cmd_sys as $command) { 
-				$a_command = explode( "|", $command); 
-				fwrite ($post_handle, $a_command[2] . "\n");
-			}
-		} 
-		$poststart_cmd_jail = preg_grep("/^afterstart_for_jail\|/", $out_jail['cmd']);
-		if (!empty($poststart_cmd_jail)) {
-			$delete_post = false;
-			foreach ($poststart_cmd_jail as $command) { 
-				$a_command = explode( "|", $command); 
-				fwrite ($post_handle, "jexec " . $out_jail['jailname'] ." ". $a_command[2] . "\n"); 
-			}
-		}
-		fclose($post_handle);
-		if ( $delete_post == true ) { unlink( $commandfile ); }
-		
-	 // prestop jail		
-		$commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/prestop.". $out_jail['jailname'];
-		$pre_handle = fopen( $commandfile, "w");
-		fwrite ($pre_handle, "#!/bin/sh\n#\n");
-		$delete_pre=true;
-		$prestop_cmd_jail = preg_grep("/^prestop_for_jail\|/", $out_jail['cmd']);
-		foreach ($prestop_cmd_jail as $command) { 
-			$delete_pre=false;
-			$a_command = explode( "|", $command); 
-			fwrite ($pre_handle, "jexec " . $out_jail['jailname'] ." ". $a_command[2] . "\n"); 
-		}
-		$prestop_cmd_sys = preg_grep("/^prestop_for_main\|/", $out_jail['cmd']);
-		foreach ($prestop_cmd_sys as $command) { 
-			$delete_pre=false;
-			$a_command = explode( "|", $command); 
-			fwrite ($pre_handle, $a_command[2] . "\n"); 						   
-		}
-			//zfs_datasets
-		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets']) && (FALSE !== brig_zfs_check())) {
-			$delete_pre=false;
-			fwrite ($pre_handle, "JID=`jls -j " . $out_jail['jailname'] . " jid`\n");
-			$a_dataset = explode(";",$out_jail['zfs_datasets']);
-			foreach ($a_dataset as $b_dataset) {
-				$c_dataset =  explode("|",$b_dataset);
-				fwrite ($pre_handle, "jexec " . $out_jail['jailname'] ." zfs unmount -f " . $c_dataset[1] . "\n");
-				fwrite ($pre_handle, "zfs unjail \${JID} " . $c_dataset[0] . "\n");
-				fwrite ($pre_handle, "zfs set jailed=off " . $c_dataset[0] . "\n");
-				//fwrite ($handle1, "zfs set mountpoint=/mnt/" . $c_dataset[0] ." ".$c_dataset[0] . "\n");
-			}
-					// restore saved mountpoints
-			$cachefile_1 = file ($cachefile);
-			foreach ($cachefile_1 as $line) { fwrite ($pre_handle, "zfs set mountpoint=" . $line ); }
-		}
-		if (isset($out_jail['fdescfs_enable'])) { 
-			$delete_pre=false;
-			fwrite( $pre_handle ,  "umount " . $out_jail['jailpath']."dev/fd\n");
-		}
-	   	fclose($pre_handle);
-		if ( $delete_pre == true ) { unlink($commandfile); }			
-		
-		// Post-stop commands
-		$commandfile=  $config['thebrig']['rootfolder'] ."conf/jails/poststop.". $out_jail['jailname'];
-		$after_handle = fopen( $commandfile, "w");
-		fwrite ($after_handle, "#!/bin/sh\n#\n");
-		$delete_after=true;
-		if (isset($out_jail['jail_vnet'] )) {
-			$delete_after=false;					 
-			fwrite( $after_handle ,  "ifconfig bridge20 deletem epair".$out_jail['jailno']."a\n");
-			fwrite( $after_handle ,  "ifconfig epair". $out_jail['jailno']."a destroy\n");
-			//fwrite( $after_handle ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem " . $out_jail['if'] ."\n");
-			//fwrite( $after_handle ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
-		}
-		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
-			$delete_after=false;
-			fwrite ($after_handle, "zfs mount -a");
-		}
-		$poststop_cmd = preg_grep("/^afterstop\|/", $out_jail['cmd']);
-		foreach ($poststop_cmd as $command) {
-			$delete_after=false; 
-			$a_command = explode( "|", $command); 
-			fwrite ($after_handle,  $a_command[2] . "\n"); 
-		}
-		fwrite ($after_handle, "rm -f /var/run/jail_{$out_jail['jailname']}.id\n");
-		fclose($after_handle);
-		
-		if ( $delete_after == true ) { unlink($commandfile); }
+		write_jailcommands ($out_jail);		
 		
 		if (is_file( $config['thebrig']['rootfolder'] . "conf/jails/prestart.". $out_jail['jailname'])) { 
 			fwrite ($conf_handle, "\texec.prestart =\"/bin/sh ". $config['thebrig']['rootfolder']."conf/jails/prestart.". $out_jail['jailname'] . "\";\n"); 
