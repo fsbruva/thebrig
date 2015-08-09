@@ -540,13 +540,13 @@ function thebrig_split_world ( $destination , $jail_type ){
 		} // end of check for ugly perl hack
 		
 	} // end of else for all slim jails
-	
+	$myjailhostname = basename($destination).".".$config['system']['domain'];
 	exec ( "echo 'sendmail_enable=\"NONE\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'syslogd_flags=\"-ss\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'rpc_bind=\"NO\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
-	
+	exec ( "echo 'hostname=\"{$myjailhostname}\"' >> " . $destination . "etc/rc.conf" );
 } // end of function
 
 
