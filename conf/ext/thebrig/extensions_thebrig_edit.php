@@ -2,7 +2,7 @@
 /*
 	file: extensions_thebrig_edit.php
 	
-	  	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+	  	Copyright 2012-2015 Matthew Kempe, Alexey Kruglov and Tom Waller
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-	<span class='vexpl'><?="Gateway for the VNET"?><input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>  /></span>
-	*/
 require("auth.inc");
 require("guiconfig.inc");
 //require_once("ext/thebrig/lang.inc");
@@ -109,17 +107,11 @@ $myarch = exec("/usr/bin/uname -p");
 if ( $tar_check > 31 && $myarch == "amd64" ) 
 	$input_errors[] = _THEBRIG_NO_LIB32 ;
 
-
-
 // This sorts thebrig's configuration array by the jailno
 array_sort_key($config['thebrig']['content'], "jailno");
 // This identifies the jail section of the XML, but does so by reference.
 $a_jail = &$config['thebrig']['content'];
 
-//$a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }
-
-//$input_errors[] = implode ( " | " , array_keys ( $a_interface ));
-//$input_errors[] = implode( " | " , $a_interface);
 // This checks that the $uuid variable is set, and that the 
 // attempt to determine the index of the jail config that has the same 
 // uuid as the page was entered with is not empty
@@ -133,11 +125,11 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['allowedip'] = $a_jail[$cnid]['allowedip'];  // new entries
 	$pconfig['if'] = $a_jail[$cnid]['if'];
 	$pconfig['jail_vnet'] = isset($a_jail[$cnid]['jail_vnet']);
-	$pconfig['epair_a_ip'] = $a_jail[$cnid]['epair_a_ip'];  // new entries = ip for systemside epair interface
-	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask'];  // new entries mask for systemside epair interface
-	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip'];  // new entries = ip for jailside epair interface
-	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask'];  // new entries mask for jailside epair interface
-	$pconfig['epair_gw'] = $a_jail[$cnid]['epair_gw'];  // new entries mask for jailside gateway
+	$pconfig['epair_a_ip'] = $a_jail[$cnid]['epair_a_ip']; // new entries = ip for systemside epair interface
+	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask']; // new entries mask for systemside epair interface
+	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip']; // new entries = ip for jailside epair interface
+	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask']; // new entries mask for jailside epair interface
+	$pconfig['epair_gw'] = $a_jail[$cnid]['epair_gw']; // new entries mask for jailside gateway
 	$pconfig['jailpath'] = $a_jail[$cnid]['jailpath'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['statfs'] = $a_jail[$cnid]['statfs'];
@@ -205,14 +197,12 @@ else {
 	$name_ro = false;
 }
 
-
 if ($_POST) {
 	unset($input_errors);
 	if (isset($_POST['Cancel']) && $_POST['Cancel']) {
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
-	
 	$pconfig = $_POST;
 	// for clean work with new system env
 	unset ($pconfig['allowedipfiletype']);
@@ -242,7 +232,6 @@ if ($_POST) {
 		 //$pconfig['jail_mount'] = "yes";
 		 $pconfig['devfs_enable'] = "yes";
 		 }
-	
 	// check alowes.  Subroutine check mount section checkboxes, and give allow values allow.mount.blabla, if user not define its.
 	$cache_param_1 = array();
 	$cache_param = array();
@@ -264,9 +253,7 @@ if ($_POST) {
 			$pconfig['param'] =  array_merge_recursive ($pconfig['param'], $result);
 			$pconfig['param'] = array_unique (  $pconfig['param'] );
 			    // file_put_contents ("/tmp/thebrig.error.4.txt", serialize ($anyarray));  very nice for diagnostic.  Cache values
-			}
-	
-		
+			}	
 		}
 	// check zfs mount setting 1. enforce_statfs insert foggoten values
 	if ( isset ( $pconfig['zfs_enable'] )) { $config['thebrig']['gl_statfs'] =0; $pconfig['statfs'] =0; } else {}
