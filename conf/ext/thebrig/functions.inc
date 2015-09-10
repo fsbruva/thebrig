@@ -937,10 +937,17 @@ function write_jailcommands ($out_jail) {
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
 			/* next 2 string calculate default route for vmet enabled jails as side A for first started jail*/
 			fwrite ($post_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");
-			fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");			
-			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default \$iproutedef \n");
+			// fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");			
+			if (!empty($out_jail['epair_gw'])) {
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default " . $out_jail['epair_gw'] . "\n");
+			}
+			else {
+				fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default \$iproutedef \n");
+			}
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");			
-		}					
+		}
+							
 		if (isset($out_jail['fdescfs_enable'])) { 
 			$delete_post = false;
 			fwrite( $post_handle ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  

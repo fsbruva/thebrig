@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-	
+	<span class='vexpl'><?="Gateway for the VNET"?><input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>  /></span>
 	*/
 require("auth.inc");
 require("guiconfig.inc");
@@ -137,6 +137,7 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask'];  // new entries mask for systemside epair interface
 	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip'];  // new entries = ip for jailside epair interface
 	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask'];  // new entries mask for jailside epair interface
+	$pconfig['epair_gw'] = $a_jail[$cnid]['epair_gw'];  // new entries mask for jailside gateway
 	$pconfig['jailpath'] = $a_jail[$cnid]['jailpath'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['statfs'] = $a_jail[$cnid]['statfs'];
@@ -182,7 +183,8 @@ else {
 	$pconfig['epair_a_ip'] = "192.168.1.251"; 
 	$pconfig['epair_a_mask'] = "24"; 
 	$pconfig['epair_b_ip'] = "192.168.1.252"; 
-	$pconfig['epair_b_mask'] = "24";	
+	$pconfig['epair_b_mask'] = "24";
+	$pconfig['epair_gw'] = "";
 	$pconfig['if'] = "";
 	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = true;
@@ -464,6 +466,7 @@ if ($_POST) {
 		$jail['epair_a_mask'] = $pconfig['epair_a_mask'];  
 		$jail['epair_b_ip'] = $pconfig['epair_b_ip']; 
 		$jail['epair_b_mask'] = $pconfig['epair_b_mask'];
+		$jail['epair_gw'] = $pconfig['epair_gw'];
 		$jail['if'] = $pconfig['if'];
 		$jail['rule'] = $pconfig['rule'];
 		$jail['jail_mount'] = isset($pconfig['jail_mount']) ? true : false;
@@ -716,8 +719,15 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  />
 								 <br /><span class='vexpl'>Jail side of interface, eq: 192.168.1.252/24</span>
 							 </td></tr>
+							 <tr><td width='50%'>
+								  <input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>>
+								  <br /><span class='vexpl'>Jail Gateway, eq: 192.168.1.254 (Optional)</span>
+							    </td>
+							    <td width='50%'>
+								 
+							 </td></tr>
 						  </table>
-						 
+						<br />
 						<span class='vexpl'><?="All scripts TheBrig create automatically"?></span>
 					</td>
 				</tr>
