@@ -276,6 +276,8 @@
 		define(_THEBRIG_HELP_EPAIRA, "Sets the system side IPv4 address and network bitmask. This should be a local unused address on the target network.");
 		define(_THEBRIG_HELP_EPAIRB, "Sets the jail side IPv4 address and network bitmask. This should be a local unused address on the target network.");
 		define(_THEBRIG_HELP_EPAIRGW, "Specify a default gateway. This will allow the jail to route traffic via a specific gateway as opposed to using the host gateway. Useful in scenarios where traffic needs to route via a seperate network to the host.");
+		define(_THEBRIG_HELP_EPAIRDNS1, "Sets the jail primary DNS server manually. If specified, the entry is written to resolv.conf automatically. If left blank, the hosts resolv.conf will be copied to the jail.");
+		define(_THEBRIG_HELP_EPAIRDNS2, "Sets the jail secondary DNS server manually. If specified, the entry is written to resolv.conf automatically. If left blank, the hosts resolv.conf will be copied to the jail.");
 		define(_THEBRIG_HELP_EPAIRIF, "Attach the jail to a specific interface on the host. This will create a bridge on the host with the specified interface as a member.");
 		
 		}
