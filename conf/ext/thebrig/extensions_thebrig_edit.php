@@ -116,6 +116,7 @@ body.loading .modal {
 	color: #FFF;
 	font-size: 13px;
 	line-height: 1.4;
+	z-index: 10;
 }
 
 /* Prevents the tooltip from being hidden. */
@@ -773,18 +774,16 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 							<tr><td width='50%'>Side A (system)</td><td width='50%'>Side B (jail)</td>
 							<tr><td width='50%'>
 								  <input name='epair_a_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_a_ip']?>  /> /
-								  <input name='epair_a_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_a_mask']?>  />
+								  <input name='epair_a_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_a_mask']?>  /><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRA ?></p></div>
 								  <br /><span class='vexpl'>System side of interface, eq: 192.168.1.251/24</span>
 							    </td>
 							    <td width='50%'>
 								    <input name='epair_b_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_b_ip']?>  /> /
-								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  /><div class="help-tip"><p>This is the inline help tip! It can contain all kinds of HTML. Style it as you please.</p>
-</div>
+								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  /><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRB ?></p></div>
 								 <br /><span class='vexpl'>Jail side of interface, eq: 192.168.1.252/24</span>
 							 </td></tr>
 							 <tr><td width='50%'>
-								  <input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>><div class="help-tip"><p>This is the inline help tip! It can contain all kinds of HTML. Style it as you please.</p>
-</div>
+								  <input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRGW ?></p></div>
 								  <br /><span class='vexpl'>Jail Gateway, eq: 192.168.1.254 (Optional)</span>
 							    </td>
 							    <td width='50%'>
