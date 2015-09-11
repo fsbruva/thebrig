@@ -254,19 +254,37 @@ $(document).ready(function(){
 					}
 			}
 			if (typeof(data.id[idx]) !== 'undefined') {
-				var value1 = data.id[idx];				
-				if (value1 != 'OFF') {
-						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/off_small.png');
-						$('#ajaxjailcmdimg'+ idx).attr('title', 'Stop Jail'); 
-						$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_stop'); 
-					} else {
-						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/on_small.png'); 
-						$('#ajaxjailcmdimg'+ idx).attr('title', 'Start Jail'); 
-						$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_start'); 
-					}
+				var value1 = data.id[idx];
+				
+				switch (value1) {
+					case "STARTING":
+						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/starting_small.png');
+						$('#ajaxjailcmdimg'+ idx).attr('title', 'Starting Jail'); 
+						$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_starting');
+						$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail starting');
+						break;
+					case "STOPPING":
+						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/stopping_small.png');
+						$('#ajaxjailcmdimg'+ idx).attr('title', 'Stopping Jail'); 
+						$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_stopping');
+						$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail stopping');
+						break;
+					default:
+						if (value1 != 'OFF') {
+							$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/off_small.png');
+							$('#ajaxjailcmdimg'+ idx).attr('title', 'Stop Jail'); 
+							$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_stop');
+							$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail stop'); 
+						} else {
+							$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/on_small.png'); 
+							$('#ajaxjailcmdimg'+ idx).attr('title', 'Start Jail'); 
+							$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_start');
+							$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail start'); 
+						}
+						break;
+				}						
 			}
 		}
-
 
 	}});
 });
@@ -280,15 +298,26 @@ jQuery.fn.extend({
           return this;
         }
 });
+
 $(".jail_stop").live( 'click' , function(){
 	var $tr = $(this).closest('tr');
 	var name = $tr.children(':eq(0)').text();
+	$(this).attr("class", 'Jail_stopping');
+	$(this).attr("alt", 'Jail stopping'); 
+	$(this).attr("src", 'ext/thebrig/stopping_small.png');
+	$(this).attr('title', 'Stopping Jail');
+	$(this).attr('status', 'STOPPING');
 	brig_action(name , 'onestop');
 });	
 	
 $(".jail_start").live( 'click', function(){
 	var $tr = $(this).closest('tr');
 	var name = $tr.children(':eq(0)').text();
+	$(this).attr("class", 'Jail_starting');
+	$(this).attr("alt", 'Jail starting') 
+	$(this).attr("src", 'ext/thebrig/starting_small.png');
+	$(this).attr('title', 'Starting Jail');
+	$(this).attr('status', 'STARTING');
 	brig_action(name , 'onestart');
 });	
 
