@@ -205,7 +205,9 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask']; // new entries mask for systemside epair interface
 	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip']; // new entries = ip for jailside epair interface
 	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask']; // new entries mask for jailside epair interface
-	$pconfig['epair_gw'] = $a_jail[$cnid]['epair_gw']; // new entries mask for jailside gateway
+	$pconfig['epair_gw'] = $a_jail[$cnid]['epair_gw']; // new entries mask for jailside gateway.
+	$pconfig['epair_dns1'] = $a_jail[$cnid]['epair_dns1']; // new entries mask for jailside primary DNS server.
+	$pconfig['epair_dns2'] = $a_jail[$cnid]['epair_dns2']; // new entries mask for jailside secondary DNS server.
 	$pconfig['jailpath'] = $a_jail[$cnid]['jailpath'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['statfs'] = $a_jail[$cnid]['statfs'];
@@ -253,6 +255,8 @@ else {
 	$pconfig['epair_b_ip'] = "192.168.1.252"; 
 	$pconfig['epair_b_mask'] = "24";
 	$pconfig['epair_gw'] = "";
+	$pconfig['epair_dns1'] = "";
+	$pconfig['epair_dns2'] = "";
 	$pconfig['if'] = "";
 	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = true;
@@ -530,6 +534,8 @@ if ($_POST) {
 		$jail['epair_b_ip'] = $pconfig['epair_b_ip']; 
 		$jail['epair_b_mask'] = $pconfig['epair_b_mask'];
 		$jail['epair_gw'] = $pconfig['epair_gw'];
+		$jail['epair_dns1'] = $pconfig['epair_dns1'];
+		$jail['epair_dns2'] = $pconfig['epair_dns2'];
 		$jail['if'] = $pconfig['if'];
 		$jail['rule'] = $pconfig['rule'];
 		$jail['jail_mount'] = isset($pconfig['jail_mount']) ? true : false;
@@ -785,7 +791,11 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 							 <tr><td width='50%'>
 								  <br />
 								  <input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRGW ?></p></div>
-								  <br />Jail Gateway (Optional)
+								  <br />Jail Gateway (Optional)<br /><br />
+								  <input name='epair_dns1' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_dns1']?>><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRDNS1 ?></p></div>
+								  <br />Jail DNS Server 1 (Optional)<br />
+								  <input name='epair_dns2' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_dns2']?>><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRDNS2 ?></p></div>
+								  <br />Jail DNS Server 2 (Optional)
 							    </td>
 							    <td width='50%'>
 								 
