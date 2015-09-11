@@ -937,11 +937,13 @@ function write_jailcommands ($out_jail) {
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
 			/* next 2 string calculate default route for vmet enabled jails as side A for first started jail*/
 			fwrite ($post_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");
-			// fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");			
+			// Check to see if the jail has a default gateway set.			
 			if (!empty($out_jail['epair_gw'])) {
+				// The jail has a default gateway set so add the default root during to the post-start script.
 				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default " . $out_jail['epair_gw'] . "\n");
 			}
 			else {
+				// The jail does not have a custom default route so add the default route as the bridge IP address.
 				fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");
 				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default \$iproutedef \n");
 			}

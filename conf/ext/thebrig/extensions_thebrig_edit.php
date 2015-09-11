@@ -15,7 +15,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
+*/
 require("auth.inc");
 require("guiconfig.inc");
 //require_once("ext/thebrig/lang.inc");
@@ -71,6 +71,81 @@ body.loading {
 body.loading .modal {
     display: block;
 }
+
+/* The tooltip itself. */
+.help-tip {
+	display: inline-block;
+	position: relative;
+	margin-left: 8px;
+	text-align: center;
+	background-color: #666;
+	border-radius: 50%;
+	width: 14px;
+	height: 14px;
+	font-size: 12px;
+	line-height: 14px;
+	cursor: default;
+}
+
+/* The tooltip indicator. */
+.help-tip:before {
+	content:'?';
+	color:#fff;
+}
+
+/* The tooltip paragraph. */
+.help-tip:hover p {
+	display: block;
+	transform-origin: 100% 0%;
+	-webkit-animation: fadeIn 0.3s ease-in-out;
+	animation: fadeIn 0.3s ease-in-out;
+}
+
+/* The tooltip box. */
+.help-tip p {
+	position: absolute;
+	display: none;
+	text-align: left;
+	background-color: #1E2021;
+	padding: 20px;
+	width: 300px;
+	margin-top: 20px;
+	border-radius: 3px;
+	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+	right: -4px;
+	color: #FFF;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+/* Prevents the tooltip from being hidden. */
+.help-tip p:after {
+	width: 100%;
+	height: 40px;
+	content: '';
+	top: -40px;
+	left: 0;
+}
+
+/* CSS animation. */
+@-webkit-keyframes fadeIn {
+	0% { 
+		opacity: 0; 
+		transform: scale(0.6);
+	}
+
+	100% {
+		opacity: 100%;
+		transform: scale(1);
+	}
+}
+
+/* CSS animation. */
+@keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 100%; }
+}
+
 </style>
 '<script type="text/javascript" src="ext/thebrig/spin.min.js"></script>'
 EOD;
@@ -697,17 +772,19 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 						  <table class="formdata" width="100%" border="0">
 							<tr><td width='50%'>Side A (system)</td><td width='50%'>Side B (jail)</td>
 							<tr><td width='50%'>
-								  <input name='epair_a_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_a_ip']?>  />/
+								  <input name='epair_a_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_a_ip']?>  /> /
 								  <input name='epair_a_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_a_mask']?>  />
 								  <br /><span class='vexpl'>System side of interface, eq: 192.168.1.251/24</span>
 							    </td>
 							    <td width='50%'>
-								    <input name='epair_b_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_b_ip']?>  />/
-								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  />
+								    <input name='epair_b_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_b_ip']?>  /> /
+								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  /><div class="help-tip"><p>This is the inline help tip! It can contain all kinds of HTML. Style it as you please.</p>
+</div>
 								 <br /><span class='vexpl'>Jail side of interface, eq: 192.168.1.252/24</span>
 							 </td></tr>
 							 <tr><td width='50%'>
-								  <input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>>
+								  <input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>><div class="help-tip"><p>This is the inline help tip! It can contain all kinds of HTML. Style it as you please.</p>
+</div>
 								  <br /><span class='vexpl'>Jail Gateway, eq: 192.168.1.254 (Optional)</span>
 							    </td>
 							    <td width='50%'>
