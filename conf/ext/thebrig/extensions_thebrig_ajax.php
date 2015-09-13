@@ -70,7 +70,13 @@ function get_jailinfo() {
 				$tabledata['file_id'][$n_jail["jailno"]] = $file_id;
 			} 
 			else {
-				$tabledata['status'][$n_jail["jailno"]] = 'OFF'; 
+				if ($tabledata['status'][$n_jail["jailno"]] == 'STARTING') {
+					$tabledata['status'][$n_jail["jailno"]] = 'STARTING';
+				} else if ($tabledata['status'][$n_jail["jailno"]] == 'STOPPING') {
+					$tabledata['status'][$n_jail["jailno"]] = 'STOPPING';
+				} else {
+					$tabledata['status'][$n_jail["jailno"]] = 'OFF';
+				}
 				$tabledata['id'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['ip'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['hostname'][$n_jail["jailno"]] = 'OFF';
