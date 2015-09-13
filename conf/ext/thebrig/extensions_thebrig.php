@@ -395,7 +395,7 @@ function disable_buttons() {
 									    <td width="22%" valign="middle" class="listrc" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>">  <img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
 									    <td width="12%" valign="middle" class="listrc" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"> <img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
 									    <td width="22%" valign="middle" class="listrc" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
-										<td width="5%" valign="middle" class="listrd" align="center" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
+										<td width="5%" valign="middle" class="listrd" align="center" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span style="cursor: pointer;"><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
 										</td>
 									 </tr>
 			<?php endforeach; ?>
