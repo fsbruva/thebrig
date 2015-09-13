@@ -258,25 +258,25 @@ $(document).ready(function(){
 				
 				switch (value1) {
 					case "STARTING":
-						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/starting_small.png');
+						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/res/img_jail_starting_s.png');
 						$('#ajaxjailcmdimg'+ idx).attr('title', 'Starting Jail'); 
 						$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_starting');
 						$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail starting');
 						break;
 					case "STOPPING":
-						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/stopping_small.png');
+						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/res/img_jail_stopping_s.png');
 						$('#ajaxjailcmdimg'+ idx).attr('title', 'Stopping Jail'); 
 						$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_stopping');
 						$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail stopping');
 						break;
 					default:
 						if (value1 != 'OFF') {
-							$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/off_small.png');
+							$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/res/img_jail_stop_s.png');
 							$('#ajaxjailcmdimg'+ idx).attr('title', 'Stop Jail'); 
 							$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_stop');
 							$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail stop'); 
 						} else {
-							$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/on_small.png'); 
+							$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/res/img_jail_start_s.png');
 							$('#ajaxjailcmdimg'+ idx).attr('title', 'Start Jail'); 
 							$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_start');
 							$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail start'); 
@@ -304,7 +304,7 @@ $(".jail_stop").live( 'click' , function(){
 	var name = $tr.children(':eq(0)').text();
 	$(this).attr("class", 'Jail_stopping');
 	$(this).attr("alt", 'Jail stopping'); 
-	$(this).attr("src", 'ext/thebrig/stopping_small.png');
+	$(this).attr("src", 'ext/thebrig/res/img_jail_stopping_s.png');
 	$(this).attr('title', 'Stopping Jail');
 	$(this).attr('status', 'STOPPING');
 	brig_action(name , 'onestop');
@@ -315,7 +315,7 @@ $(".jail_start").live( 'click', function(){
 	var name = $tr.children(':eq(0)').text();
 	$(this).attr("class", 'Jail_starting');
 	$(this).attr("alt", 'Jail starting') 
-	$(this).attr("src", 'ext/thebrig/starting_small.png');
+	$(this).attr("src", 'ext/thebrig/res/img_jail_starting_s.png');
 	$(this).attr('title', 'Starting Jail');
 	$(this).attr('status', 'STARTING');
 	brig_action(name , 'onestart');
@@ -384,7 +384,7 @@ function disable_buttons() {
 										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE2;?></td>
 										<td width="12%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE3;?></td>
 										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
-										<td width="5%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE7;?></td>
+										<td width="5%" class="listhdrc" align="center"><?=_THEBRIG_ONLINETABLE_TITLE7;?></td>
 									</tr>
 						<?php foreach( $config['thebrig']['content'] as $n_jail): ?>					
 									<tr name='myjail<?=$n_jail['jailno']; ?>' id='myjail<?=$n_jail['jailno']; ?>'>
@@ -395,7 +395,7 @@ function disable_buttons() {
 									    <td width="22%" valign="top" class="listrc" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>">  <img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
 									    <td width="12%" valign="top" class="listrc" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"> <img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
 									    <td width="22%" valign="top" class="listrc" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
-										<td width="5%" valign="top" class="listrd" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
+										<td width="5%" valign="top" class="listrd" align="center" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
 										</td>
 									 </tr>
 			<?php endforeach; ?>
