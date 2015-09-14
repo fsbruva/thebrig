@@ -3,7 +3,7 @@
    File:  extensions_thebrig_ajax.php
 
 
-  	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+  	Copyright 2012-2015 Matthew Kempe, Alexey Kruglov & Tom Waller
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ function get_jailinfo() {
 	if (is_array($config['thebrig']['content']) ) { 
 		array_sort_key($config['thebrig']['content'], "jailno");
 		$jails =  $config['thebrig']['content'];
-		$tabledata['rowcount']=count($jails);
+		$tabledata['rowcount']=count($jails)+1;
 		foreach ($jails as $n_jail){
 			$tabledata['name'][$n_jail["jailno"]] = $n_jail['jailname'];
 			if (!is_dir( $n_jail['jailpath'] ."var/run")) 	{
@@ -51,43 +51,32 @@ function get_jailinfo() {
 				}	
 			$file_id = "/var/run/jail_".$n_jail['jailname'].".id";
 			if (true === is_file($file_id)) {
-			$jail_id = exec ("jls -j ".$n_jail['jailname']. " jid");
-			$sleep_cmd = "ps -o jid,stat -ax -J | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"S\"||\$2~\"I\")&&\$2!~\"S[\+]\"{++c}END{print c}'";
-			$runn_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"R\"||\$2~\"S[\+]\"){++c}END{print c}'";
-			$sleep_cnt = exec ( $sleep_cmd ); 
-			$runn_cnt = exec ( $runn_cmd);
-			$total = intval($sleep_cnt) + intval($runn_cnt);
-			$tabledata['status'][$n_jail["jailno"]] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
-			$tabledata['id'][$n_jail["jailno"]] = $jail_id;
-			//$tabledata['pwrstate'][$n_jail["jailno"]] = 'Stopped';
-			if (1 == exec ("jls -j ".$n_jail['jailname']. " vnet") ) { 
-				unset ($result);
-				$cmd = "jexec ".$n_jail['jailname']." ifconfig epair" . $n_jail["jailno"] ."b | grep inet | awk '{ print \$2}'";
-				exec ($cmd, $result); 
-				$tabledata['ip'][$n_jail["jailno"]] = implode(",", $result); } else {
-				$tabledata['ip'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." ip4.addr"); }
+				$jail_id = exec ("jls -j ".$n_jail['jailname']. " jid");
+				$sleep_cmd = "ps -o jid,stat -ax -J | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"S\"||\$2~\"I\")&&\$2!~\"S[\+]\"{++c}END{print c}'";
+				$runn_cmd = "ps -o jid,stat -ax | awk 'BEGIN{c=0}\$1~\"{$jail_id}\"&&(\$2~\"R\"||\$2~\"S[\+]\"){++c}END{print c}'";
+				$sleep_cnt = exec ( $sleep_cmd ); 
+				$runn_cnt = exec ( $runn_cmd);
+				$total = intval($sleep_cnt) + intval($runn_cnt);
+				$tabledata['status'][$n_jail["jailno"]] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
+				$tabledata['id'][$n_jail["jailno"]] = $jail_id;
+				if (1 == exec ("jls -j ".$n_jail['jailname']. " vnet") ) { 
+					unset ($result);
+					$cmd = "jexec ".$n_jail['jailname']." ifconfig epair" . $n_jail["jailno"] ."b | grep inet | awk '{ print \$2}'";
+					exec ($cmd, $result); 
+					$tabledata['ip'][$n_jail["jailno"]] = implode(",", $result);
+				} else {
+					$tabledata['ip'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." ip4.addr"); 
+				}
 				$tabledata['hostname'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." host.hostname");
 				$tabledata['path'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." path");
 				$tabledata['file_id'][$n_jail["jailno"]] = $file_id;
-				$tabledata['pwrstate'][$n_jail["jailno"]] = 'Running';
-			} 
-			else {
-				if ($tabledata['status'][$n_jail["jailno"]] == 'STARTING') {
-					$tabledata['status'][$n_jail["jailno"]] = 'STARTING';
-					$tabledata['pwrstate'][$n_jail["jailno"]] = 'Starting';
-				} else if ($tabledata['status'][$n_jail["jailno"]] == 'STOPPING') {
-					$tabledata['status'][$n_jail["jailno"]] = 'STOPPING';
-					$tabledata['pwrstate'][$n_jail["jailno"]] = 'Stopping';
-				} else {
-					$tabledata['status'][$n_jail["jailno"]] = 'OFF';
-					$tabledata['pwrstate'][$n_jail["jailno"]] = 'Stopped';
-				}
+			} else {
+				$tabledata['status'][$n_jail["jailno"]] = 'OFF'; 
 				$tabledata['id'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['ip'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['hostname'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['path'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['file_id'][$n_jail["jailno"]] = false;
-				//$tabledata['pwrstate'][$n_jail["jailno"]] = 'Stopped';
 			}
 		}
 	}

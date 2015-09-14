@@ -2,7 +2,7 @@
 /*
    File:  extensions_thebrig.php
   
-    	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+    	Copyright 2012-2015 Matthew Kempe, Alexey Kruglov & Tom Waller
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -210,7 +210,6 @@ $(document).ready(function(){
 					} else {
 						$('#ajaxjailstatus'+ idx).text("");
 						$('#ajaxjailstatusimg'+ idx).attr('src', 'status_disabled.png'); 
-						//$('#ajaxjailstatusimg'+ idx).attr('title', 'Stopped'); 
 					}
 			}
 			if (typeof(data.id[idx]) !== 'undefined') {
@@ -236,8 +235,7 @@ $(document).ready(function(){
 				
 				if (value1 != 'OFF') {
 						$('#ajaxjailhostname'+ idx).text(data.hostname[idx]);
-					} else {
-						//$('#ajaxjailhostnameimg'+ idx).attr('src', 'status_disabled.png'); 
+					} else { 
 						$('#ajaxjailhostname'+ idx).text("Stopped");
 						$('#ajaxjailhostnameimg'+ idx).attr('title', 'Stopped'); 
 					}
@@ -248,7 +246,6 @@ $(document).ready(function(){
 				if (value1 != 'OFF') {
 						$('#ajaxjailpath'+ idx).text(data.path[idx]);
 					} else {
-						//$('#ajaxjailpathimg'+ idx).attr('src', 'status_disabled.png'); 
 						$('#ajaxjailpathimg'+ idx).attr('title', 'Stopped'); 
 						$('#ajaxjailpath'+ idx).text("Stopped");
 					}
@@ -312,7 +309,6 @@ $(".jail_stop").live( 'click' , function(){
 	$(this).attr("alt", 'Jail stopping'); 
 	$(this).attr("src", 'ext/thebrig/img_jail_stopping_s.png');
 	$(this).attr('title', 'Stopping Jail');
-	$(this).attr('status', 'STOPPING');
 	$(this).attr('pwrstate', 'Stopping');
 	$tr.children(':eq(8)').text('Stopping');
 	brig_action(name , 'onestop');
@@ -325,7 +321,6 @@ $(".jail_start").live( 'click', function(){
 	$(this).attr("alt", 'Jail starting') 
 	$(this).attr("src", 'ext/thebrig/img_jail_starting_s.png');
 	$(this).attr('title', 'Starting Jail');
-	$(this).attr('status', 'STARTING');
 	$(this).attr('pwrstate', 'Starting');
 	$tr.children(':eq(8)').text('Starting');
 	brig_action(name , 'onestart');
