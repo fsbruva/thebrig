@@ -34,25 +34,25 @@
 	
 		define(_THEBRIG_ONLINETABLE_TITLE, "On-line view");
 		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
-		define(_THEBRIG_ONLINETABLE_TITLE2, "Jail ip");
-		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail hostname");
-		define(_THEBRIG_ONLINETABLE_TITLE4, "Path to jail");
+		define(_THEBRIG_ONLINETABLE_TITLE2, "Jail IP");
+		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail Hostname");
+		define(_THEBRIG_ONLINETABLE_TITLE4, "Path to Jail");
 		define(_THEBRIG_ONLINETABLE_TITLE5, "Status");
 		define(_THEBRIG_ONLINETABLE_TITLE6, "ID");
 		define(_THEBRIG_ONLINETABLE_TITLE7, "Action");
 		define(_THEBRIG_ONLINETABLE_TITLE8, "State");
-		define(_THEBRIG_TABLE1_TITLE,"TheBrig config");
-		define(_THEBRIG_JAILS, "Jails" );
-		define(_THEBRIG_TABLE1_TITLE3,"Start on boot");
-		define(_THEBRIG_TABLE1_TITLE1,"Jail name");
+		define(_THEBRIG_TABLE1_TITLE,"TheBrig Config");
+		define(_THEBRIG_JAILS, "Jails");
+		define(_THEBRIG_TABLE1_TITLE3,"Start on Boot");
+		define(_THEBRIG_TABLE1_TITLE1,"Jail Name");
 		define(_THEBRIG_TABLE1_TITLE2,"Network");		
 		define(_THEBRIG_TABLE1_TITLE4,"ZFS");
 		define(_THEBRIG_TABLE1_TITLE5,"Hostname");
-		define(_THEBRIG_TABLE1_TITLE6,"Path to jail");
+		define(_THEBRIG_TABLE1_TITLE6,"Path to Jail");
 		define(_THEBRIG_TABLE1_TITLE7,"Description");
 		define(_THEBRIG_GLOBALS_TITLE,"Globals");
 		define(_THEBRIG_GLOBALS_ENABLE,"Allow start all jails");
-		define(_THEBRIG_GLOBALS_STATFS,"Choose Global enforce_statfs. Default value =2. Jail's value  cannot be less then Global value . <br />Value 2 not allow  jail root user mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount jail-friendly filesystems");
+		define(_THEBRIG_GLOBALS_STATFS,"Choose Global enforce_statfs. Default value =2. Jail's value cannot be less then Global value.<br />Value 2 not allow jail root user mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount jail-friendly filesystems");
 
 		/** Edit page */
 		define('_THEBRIG_EDIT', "Edit" );
