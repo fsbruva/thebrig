@@ -387,27 +387,27 @@ function disable_buttons() {
 					<?php else: ?>
 								<table id = 'onlinetable' width="100%" border="0" cellpadding="5" cellspacing="0">
 						
-									<tr><td style="width:7%" class="listhdrlr" ><?=_THEBRIG_TABLE1_TITLE1;?></td>
-										<td style="width:10%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE1;?></td>
-										<td style="width:19%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE5;?></td>
-										<td style="width:5%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE6;?></td>
-										<td style="width:22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE2;?></td>
-										<td style="width:12%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE3;?></td>
-										<td style="width:21%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
-										<td style="width:1%" class="listhdrc" align="center"><?=_THEBRIG_ONLINETABLE_TITLE7;?></td>
-										<td style="width:3%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE8;?></td>
+									<tr><td style="width: 7%; text-align: left;" class="listhdrlr" ><?=_THEBRIG_TABLE1_TITLE1;?></td>
+										<td style="width:10%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE1;?></td>
+										<td style="width:19%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE5;?></td>
+										<td style="width:5%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE6;?></td>
+										<td style="width:22%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE2;?></td>
+										<td style="width:12%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE3;?></td>
+										<td style="width:21%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
+										<td style="width:1%; text-align: left;" class="listhdrc" align="center"><?=_THEBRIG_ONLINETABLE_TITLE7;?></td>
+										<td style="width:3%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE8;?></td>
 									</tr>
 						<?php foreach( $config['thebrig']['content'] as $n_jail): ?>					
 									<tr name='myjail<?=$n_jail['jailno']; ?>' id='myjail<?=$n_jail['jailno']; ?>'>
-										<td style="width:7%" valign="middle" class="listlr" name="ajaxjailname<?=$n_jail['jailno']; ?>"  id="ajaxjailname<?=$n_jail['jailno']; ?>" >  </td>
-									    <td style="width:10%" valign="top" class="listr" name="ajaxjailbuilt<?=$n_jail['jailno']; ?>" ><span><img id="ajaxjailbuiltimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$n_jail['jailno']; ?>"></span><span id="ajaxjailbuiltsrc<?=$n_jail['jailno']; ?>"></span> </td>
-									    <td style="width:19%" valign="top" class="listrc" name="ajaxjailstatus<?=$n_jail['jailno']; ?>"  > <span><img id="ajaxjailstatusimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$n_jail['jailno']; ?>"></span></td>
-									    <td style="width:5%" valign= "middle" class="listrc" name="ajaxjailid<?=$n_jail['jailno']; ?>" id="ajaxjailid<?=$n_jail['jailno']; ?>"></td>
-									    <td style="width:22%" valign="middle" class="listrc" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>">  <img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
-									    <td style="width:12%" valign="middle" class="listrc" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"> <img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
-									    <td style="width:21%" valign="middle" class="listrc" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
-										<td style="width:1%" valign="middle" class="listrd" align="center" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span style="cursor: pointer;"><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /></span></td>
-										<td style="width:3%" valign= "middle" class="listrd" name="ajaxjailpwrstate<?=$n_jail['jailno']; ?>" id="ajaxjailpwrstate<?=$n_jail['jailno']; ?>"></td>
+										<td style="width:7%; text-align: left; vertical-align: text-middle;" class="listlr" name="ajaxjailname<?=$n_jail['jailno']; ?>" id="ajaxjailname<?=$n_jail['jailno']; ?>" ></td>
+									    <td style="width:10%; text-align: left; vertical-align: text-middle;" class="listr" name="ajaxjailbuilt<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailbuiltimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="template?" /></span><span id="ajaxjailbuiltports<?=$n_jail['jailno']; ?>"></span><span id="ajaxjailbuiltsrc<?=$n_jail['jailno']; ?>"></span></td>
+									    <td style="width:19%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailstatus<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailstatusimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></span><span id="ajaxjailstatus<?=$n_jail['jailno']; ?>"></span></td>
+									    <td style="width:5%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailid<?=$n_jail['jailno']; ?>" id="ajaxjailid<?=$n_jail['jailno']; ?>"></td>
+									    <td style="width:22%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>"><img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td style="width:12%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"><img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td style="width:21%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
+										<td style="width:1%; text-align: center; vertical-align: text-middle;" class="listrd" align="center" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span style="cursor: pointer;"><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /></span></td>
+										<td style="width:3%; text-align: left; vertical-align: text-middle;" class="listrd" name="ajaxjailpwrstate<?=$n_jail['jailno']; ?>" id="ajaxjailpwrstate<?=$n_jail['jailno']; ?>"></td>
 										</td>
 									 </tr>
 			<?php endforeach; ?>
