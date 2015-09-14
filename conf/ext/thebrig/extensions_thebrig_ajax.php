@@ -59,6 +59,7 @@ function get_jailinfo() {
 			$total = intval($sleep_cnt) + intval($runn_cnt);
 			$tabledata['status'][$n_jail["jailno"]] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
 			$tabledata['id'][$n_jail["jailno"]] = $jail_id;
+			//$tabledata['pwrstate'][$n_jail["jailno"]] = 'Stopped';
 			if (1 == exec ("jls -j ".$n_jail['jailname']. " vnet") ) { 
 				unset ($result);
 				$cmd = "jexec ".$n_jail['jailname']." ifconfig epair" . $n_jail["jailno"] ."b | grep inet | awk '{ print \$2}'";
@@ -68,20 +69,25 @@ function get_jailinfo() {
 				$tabledata['hostname'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." host.hostname");
 				$tabledata['path'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." path");
 				$tabledata['file_id'][$n_jail["jailno"]] = $file_id;
+				$tabledata['pwrstate'][$n_jail["jailno"]] = 'Running';
 			} 
 			else {
 				if ($tabledata['status'][$n_jail["jailno"]] == 'STARTING') {
 					$tabledata['status'][$n_jail["jailno"]] = 'STARTING';
+					$tabledata['pwrstate'][$n_jail["jailno"]] = 'Starting';
 				} else if ($tabledata['status'][$n_jail["jailno"]] == 'STOPPING') {
 					$tabledata['status'][$n_jail["jailno"]] = 'STOPPING';
+					$tabledata['pwrstate'][$n_jail["jailno"]] = 'Stopping';
 				} else {
 					$tabledata['status'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['pwrstate'][$n_jail["jailno"]] = 'Stopped';
 				}
 				$tabledata['id'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['ip'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['hostname'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['path'][$n_jail["jailno"]] = 'OFF';
 				$tabledata['file_id'][$n_jail["jailno"]] = false;
+				//$tabledata['pwrstate'][$n_jail["jailno"]] = 'Stopped';
 			}
 		}
 	}

@@ -40,6 +40,7 @@
 		define(_THEBRIG_ONLINETABLE_TITLE5, "Status");
 		define(_THEBRIG_ONLINETABLE_TITLE6, "ID");
 		define(_THEBRIG_ONLINETABLE_TITLE7, "Action");
+		define(_THEBRIG_ONLINETABLE_TITLE8, "State");
 		define(_THEBRIG_TABLE1_TITLE,"TheBrig config");
 		define(_THEBRIG_JAILS, "Jails" );
 		define(_THEBRIG_TABLE1_TITLE3,"Start on boot");
