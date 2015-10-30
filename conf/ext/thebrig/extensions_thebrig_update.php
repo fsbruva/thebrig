@@ -526,7 +526,9 @@ function conf_handler() {
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($tag_date);?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($tag_version );?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars( $file_summary);?>&nbsp;</td>
-									<td class="listbg"><?=htmlspecialchars($a_jail[$k]['base_ver']);?>&nbsp;</td>
+									<?php $freebsdversionc = $a_jail[$k]["jailpath"].'bin/freebsd-version -u'; ?>
+									<td class="listbg"><?=htmlspecialchars( exec($freebsdversionc) );?>&nbsp;</td>
+									<!--<td class="listbg"><?=htmlspecialchars($a_jail[$k]['base_ver']);?>&nbsp;</td> -->
 								</tr>
 				<?php endfor; 
 				if ( is_dir( $config['thebrig']['template'] . "/var/run" ) ) {
