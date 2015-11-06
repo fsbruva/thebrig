@@ -135,7 +135,7 @@ then
 	ACTION=`cat ${FILE_ACT}` 
 		
 	# Copy downloaded version to the install destination
-	cp -r $START_FOLDER/install_stage/* $BRIG_ROOT/
+	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
 
 	# Change_ver didn't update - this is the initial installation
 	if [ "$ACTION" -eq 0 ]
