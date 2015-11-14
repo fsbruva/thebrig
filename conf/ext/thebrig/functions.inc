@@ -1033,16 +1033,14 @@ function write_jailcommands ($out_jail) {
 3 User scripts
 
 */	
-		$commandfile=  $config['thebrig']['rootfolder'] ."conf/jails/poststop.". $out_jail['jailname'];
-		$after_handle = fopen( $commandfile, "w");
-		fwrite ($after_handle, "#!/bin/sh\n#\n");
-		$delete_after=true;
 		if (isset($out_jail['jail_vnet'] )) {
 			$delete_after=false;					 
 			fwrite( $after_handle ,  "ifconfig bridge20 deletem epair".$out_jail['jailno']."a\n");
 			fwrite( $after_handle ,  "ifconfig epair". $out_jail['jailno']."a destroy\n");
-			//fwrite( $after_handle ,  "ifconfig bridge".($out_jail['jailno']+10)." deletem " . $out_jail['if'] ."\n");
-			//fwrite( $after_handle ,  "ifconfig bridge". ($out_jail['jailno']+10) ." destroy\n");
+			fwrite( $after_handle ,  "MEMBERS=`ifconfig bridge20 | grep member | wc -l`\n");
+			fwrite( $after_handle ,  "if [ \$MEMBERS -lt 2 ]; then \n");
+			fwrite( $after_handle ,  "\tifconfig bridge20 destroy\n");
+			fwrite( $after_handle ,  "fi\n");
 		}
 		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
 			$delete_after=false;
