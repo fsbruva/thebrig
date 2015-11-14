@@ -1033,6 +1033,10 @@ function write_jailcommands ($out_jail) {
 3 User scripts
 
 */	
+		$commandfile=  $config['thebrig']['rootfolder'] ."conf/jails/poststop.". $out_jail['jailname'];
+		$after_handle = fopen( $commandfile, "w");
+		fwrite ($after_handle, "#!/bin/sh\n#\n");
+		$delete_after=true;
 		if (isset($out_jail['jail_vnet'] )) {
 			$delete_after=false;					 
 			fwrite( $after_handle ,  "ifconfig bridge20 deletem epair".$out_jail['jailno']."a\n");
