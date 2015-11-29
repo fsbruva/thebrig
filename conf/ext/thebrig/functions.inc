@@ -856,6 +856,13 @@ function write_defs_rules() {
 	 } else {
 	 unlink_if_exists("/etc/devfs.rules");
 	 }
+if (isset($config['vbox']['enable'])) {
+$handle = fopen("/etc/devfs.rules", "a");
+fwrite($handle, "##Vbox rulesets##");
+fwrite($handle, "\n[vbox_tap=20]\n");
+fwrite($handle, "add path 'tap*' mode 0660 group vboxusers\n");
+fclose($handle);
+}
 }
 function write_jailcommands ($out_jail) {
 	global $config, $g;
