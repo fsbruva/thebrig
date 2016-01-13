@@ -36,11 +36,28 @@ else
 fi
 # touch /tmp/thebrig.tmp
 
+MAJ_REL=$(uname -r | cut -d- -f1 | cut -d. -f1)
+MIN_REL=$(uname -r | cut -d- -f1 | cut -d. -f2)
+
+# Prevent users from breaking their system
+
+	echo "ERROR: This version of TheBrig is incompatible with your system!"
+	exerr "ERROR: Please upgrade Nas4Free to version 9.3 or higher!"
+fi
 if [ $2 -eq 2 ]; then 
+	if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then	
     # Fetch the testing branch as a zip file
-    echo "Retrieving the testing branch as a zip file"
-    fetch https://github.com/fsbruva/thebrig/archive/working.zip || exerr "ERROR: Could not write to install directory!"
-    mv working.zip master.zip
+    		echo "Retrieving the testing branch as a zip file"
+	 	fetch https://github.com/fsbruva/thebrig/archive/working.zip || exerr "ERROR: Could not write to install directory!"
+    		mv working.zip master.zip
+    		ALCATRAZ=0
+    	else
+    		echo "You have alcatraz - compatible system. Use alcatraz"
+    		echo "Retrieving the alcatraz branch as a zip file"
+    		fetch https://github.com/fsbruva/thebrig/archive/alcatraz.zip || exerr "ERROR: Could not write to install directory!"
+    		mv alcatraz.zip master.zip
+    		ALCATRAZ=1
+    	fi
 elif [ $2 -eq 3 ]; then
 	echo "Retrieving the alexey's branch as a zip file"
 	fetch https://github.com/fsbruva/thebrig/archive/alexey.zip || exerr "ERROR: Could not write to install directory!"
@@ -68,6 +85,7 @@ if [ -f "$filever" ]
 then
 	action=`cat ${filever}` 
 	# echo "Thebrig "${action}
+	if [ ${ALCATRAZ} = 0 ]. then
 		if [ `uname -p` = "amd64" ]; then
 			echo "Renaming 64 bit ftp binary"
 			mv conf/bin/ftp_amd64 conf/bin/ftp
@@ -77,6 +95,7 @@ then
 			mv conf/bin/ftp_i386 conf/bin/ftp
 			rm conf/bin/ftp_amd64
 		fi
+	fi
 	cp -r * $BRIG_ROOT/
 	mkdir -p /usr/local/www/ext/thebrig
 	cp $BRIG_ROOT/conf/ext/thebrig/* /usr/local/www/ext/thebrig
