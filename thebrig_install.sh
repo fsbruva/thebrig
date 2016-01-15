@@ -100,16 +100,6 @@ if [ ! -z ${INSTALLED} ]; then
 	echo "Look like update thebrig"
 	BRIG_ROOT=${INSTALLED}
 	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
-	# Nas4Free doesn't ship php-cli, so we have to fool it.
-	THEBRIG_START_FILE=thebrig_start.php
-	export REDIRECT_STATUS=200
-	export GATEWAY_INTERFACE="CGI/1.1"
-	export REQUEST_METHOD="GET"
-	export SCRIPT_FILENAME=$STAGE_BIN_PATH/$THEBRIG_START_FILE
-	export SCRIPT_PATH=$THEBRIG_START_FILE
-	export PATH_INFO=$SCRIPT_FILENAME
-	/usr/local/bin/php-cgi -q
-	ACTION_MSG="Updated"
 	echo "Congratulations! You have fresh TheBrig version."
 else
 	echo "Look like fresh install"
