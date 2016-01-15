@@ -99,11 +99,11 @@ INSTALLED=`configxml_get //thebrig/rootfolder`
 if [ ! -z ${INSTALLED} ]; then
 	echo "Look like update thebrig"
 	BRIG_ROOT=${INSTALLED}
-	rsync -r --del $START_FOLDER/install_stage/* $BRIG_ROOT/
+	cp -f $START_FOLDER/install_stage/* $BRIG_ROOT/
 	echo "Congratulations! You have fresh TheBrig version."
 else
 	echo "Look like fresh install"
-	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
+	cp -f $START_FOLDER/install_stage/* $BRIG_ROOT/
 	# Create the symlinks/schema. We can't use thebrig_start since
 	# there is nothing for the brig in the config XML
 	mkdir -p /usr/local/www/ext
