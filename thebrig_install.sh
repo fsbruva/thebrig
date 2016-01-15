@@ -86,9 +86,9 @@ fetch https://github.com/fsbruva/thebrig/archive/alcatraz.zip || exerr "ERROR: C
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
-tar -xf master.zip --exclude='.git*' --strip-components 1
+tar -xf alcatraz.zip --exclude='.git*' --strip-components 1
 echo "Done!"
-rm master.zip
+rm alcatraz.zip
 
 echo "Detecting current configuration..."
 . /etc/rc.subr
