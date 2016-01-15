@@ -99,7 +99,7 @@ INSTALLED=`configxml_get //thebrig/rootfolder`
 if [ ! -z ${INSTALLED} ]; then
 	echo "Look like update thebrig"
 	BRIG_ROOT=${INSTALLED}
-	cp -f $START_FOLDER/install_stage/* $BRIG_ROOT/
+	cp -f -R $START_FOLDER/install_stage/* $BRIG_ROOT/
 	echo "Congratulations! You have fresh TheBrig version."
 else
 	echo "Look like fresh install"
