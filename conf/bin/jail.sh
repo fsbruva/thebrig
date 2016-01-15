@@ -74,15 +74,20 @@ thebrig_start()
 
         for _j in ${_jail_list}; do
                 echo -n "${_j} "
-
+		_tmp=`mktemp -t jail` || exit 3
                 if [ -e /var/run/jail_${_j}.id ]; then
                         echo "${_j} already exists"
                         continue
                 fi
-                #      Uncomment for debug next string and comment next+1.
-                #       jail -c -d -p 20 -f /etc/thebrig.conf -J /var/run/jail_${_j}.id ${_j}  >> /$
-                $jail_cmd $jail_args -p 20 -J /var/run/jail_${_j}.id -c ${_j}
-
+                $jail_cmd $jail_args -p 20 -J /var/run/jail_${_j}.id -c ${_j} >> $_tmp 2>&1
+				sleep 1
+				if _jid=$(jls -j $_j jid); then
+					tail -1 $_tmp
+				else
+					rm -f /var/run/jail_${_j}.id
+					echo " cannot start jail \"${_hostname:-${_j}}\": "
+				fi
+				rm -f $_tmp
         done
         echo ""
 }
@@ -116,7 +121,3 @@ thebrig_stop()
 }
 
 run_rc_command "${cmd}"
-
-
-
-

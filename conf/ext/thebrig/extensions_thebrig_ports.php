@@ -30,13 +30,7 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 // Display the page title, based on the constants defined in lang.inc
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_PORTS);
 
-// we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
-$brig_update_ready = thebrig_update_prep();
 
-if ( $brig_update_ready == 0 ){
-	// The operations carried out in thebrig_update_prep will only return 0 if there is at least one complete jail,
-	// and the necessary binaries for update operations were able to be copied. If there are no jails present, then the function
-	// will return 2
 
 	// Slight redefinition to make life a little easier
 	$brig_root = $config['thebrig']['rootfolder'] ;
@@ -46,7 +40,7 @@ if ( $brig_update_ready == 0 ){
 	array_sort_key($config['thebrig']['content'], "jailno");
 	$a_jail = &$config['thebrig']['content'];
 	$pconfig['portscron'] = isset( $config['thebrig']['portscron'] ) ;
-}
+
 
 // User has clicked a button
 if ($_POST) {
@@ -278,7 +272,7 @@ function conf_handler() {
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then 
 			// converts that from an epoch second to a usable date.
 			if ( file_exists ("/tmp/portsnap_latest.ssl") && file_exists("/tmp/portsnap_pub.ssl") ) {
-				$most_date= exec( "date -j -r `" . $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
+				$most_date= exec( "date -j -r `openssl rsautl -pubin -inkey "
 					. "/tmp/portsnap_pub.ssl -verify < "
 					. "/tmp/portsnap_latest.ssl | cut -f 2 -d '|'`");
 				exec ("rm /tmp/portsnap_latest.ssl"); 	// Get rid of the latest tag

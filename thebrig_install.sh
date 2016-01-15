@@ -55,8 +55,8 @@ if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then
 fi
 
 # Store the script's current location in a file
-echo $START_FOLDER > /tmp/thebriginstaller
 
+#Store user's inputs
 # This first checks to see that the user has supplied an argument
 if [ ! -z $1 ]; then
     # The first argument will be the path that the user wants to be the root folder.
@@ -78,23 +78,10 @@ fi
 # Make and move into the install staging folder
 mkdir -p $START_FOLDER/install_stage || exerr "ERROR: Could not create staging directory!"
 cd $START_FOLDER/install_stage || exerr "ERROR: Could not access staging directory!"
+STAGE_BIN_PATH=$START_FOLDER/install_stage/conf/bin
 
-if [ $2 -eq 3 ]; then 
-    # Fetch the testing branch as a zip file
-    echo "Retrieving the unstable branch as a zip file"
-    echo "If you aren't a developer for TheBrig, is a bad idea!"
-    echo "Please re-install according to the documentation..."
-    fetch https://github.com/fsbruva/thebrig/archive/alcatraz.zip || exerr "ERROR: Could not write to install directory!"
-    mv alcatraz.zip master.zip
-elif [ $# -gt 1 -o $2 -eq 2 ]; then
-	echo "ERROR: You are attempting an obsolete installation method!!"
-	echo "ERROR: If you were following an online tutorial, alert the author!"
-	exerr "ERROR: The method you attempted is not supported!"
-else
-    # Fetch the master branch as a zip file
-    echo "Retrieving the most recent stable version of TheBrig"
-    fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
-fi
+echo "Retrieving the alcatraz branch as a zip file"
+fetch https://github.com/alexey1234/mythebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
@@ -104,92 +91,49 @@ echo "Done!"
 rm master.zip
 
 echo "Detecting current configuration..."
-# Run the change_ver script to deal with different versions of TheBrig
-STAGE_BIN_PATH=$START_FOLDER/install_stage/conf/bin
-CHANGE_VER_FILE=change_ver.php
+. /etc/rc.subr
+. /etc/configxml.subr
+. /etc/util.subr
 
-# Nas4Free doesn't ship php-cli, so we have to fool it.
-export REDIRECT_STATUS=200
-export GATEWAY_INTERFACE="CGI/1.1"
-export REQUEST_METHOD="GET"
-export SCRIPT_FILENAME=$STAGE_BIN_PATH/$CHANGE_VER_FILE
-export SCRIPT_PATH=$CHANGE_VER_FILE
-export PATH_INFO=$SCRIPT_FILENAME
-/usr/local/bin/php-cgi -q
-
-# The file /tmp/thebrigversion should get created by the change_ver script
-# Its existence implies that change_ver.php finished successfully. 
-# No matter what type of install it is, change_ver will backup and remove
-# the old stuff. From this script's perpective, all that needs to happen
-# is to copy the contents of the staging directory to the destination 
-# folder.
-
-# There are two use cases for this file:
-# 1. Brand new install, so there is no config array yet (don't run start)
-# 2. Upgraded install, so change_ver made a backup of the old stuff (run start)
-
-FILE_ACT="/tmp/thebrig_action"
-
-if [ -f "$FILE_ACT" ]
-then
-	ACTION=`cat ${FILE_ACT}` 
-		
-	# Copy downloaded version to the install destination
+INSTALLED=`configxml_get //thebrig/rootfolder`
+if [ ! -z ${INSTALLED} ]; then
+	echo "Look like update thebrig"
+	BRIG_ROOT=${INSTALLED}
 	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
-
-	# Change_ver didn't update - this is the initial installation
-	if [ "$ACTION" -eq 0 ]
-	then
-		echo "Installing..."
-		# Create the symlinks/schema. We can't use thebrig_start since
-		# there is nothing for the brig in the config XML
-		mkdir -p /usr/local/www/ext
-		ln -s $BRIG_ROOT/conf/ext/thebrig /usr/local/www/ext/thebrig
-		cd /usr/local/www
-		# For each of the php files in the extensions folder
-		for file in $BRIG_ROOT/conf/ext/thebrig/*.php
+	# Nas4Free doesn't ship php-cli, so we have to fool it.
+	THEBRIG_START_FILE=thebrig_start.php
+	export REDIRECT_STATUS=200
+	export GATEWAY_INTERFACE="CGI/1.1"
+	export REQUEST_METHOD="GET"
+	export SCRIPT_FILENAME=$STAGE_BIN_PATH/$THEBRIG_START_FILE
+	export SCRIPT_PATH=$THEBRIG_START_FILE
+	export PATH_INFO=$SCRIPT_FILENAME
+	/usr/local/bin/php-cgi -q
+	ACTION_MSG="Updated"
+	echo "Congratulations! You have fresh TheBrig version."
+else
+	echo "Look like fresh install"
+	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
+	# Create the symlinks/schema. We can't use thebrig_start since
+	# there is nothing for the brig in the config XML
+	mkdir -p /usr/local/www/ext
+	ln -s $BRIG_ROOT/conf/ext/thebrig /usr/local/www/ext/thebrig
+	cd /usr/local/www
+	# For each of the php files in the extensions folder
+	for file in $BRIG_ROOT/conf/ext/thebrig/*.php
 		do
 			# Create link
 			ln -s "$file" "${file##*/}"
 		done
-		# Store the install destination into the /tmp/thebrig.tmp
-		echo $BRIG_ROOT > /tmp/thebrig.tmp
-		ACTION_MSG="Freshly installed"
-		echo "Congratulations! TheBrig was installed. Navigate to rudimentary config tab and push Save."
-	else 
-		echo "Upgrading/Re-installing..."
-		# Change_ver detected an existing config, so we need to run thebrig_start
-		# in order to create all the necessary simlinks. Thebrig_start
-		# requires that the XML config has all the needed data.
-		# Nas4Free doesn't ship php-cli, so we have to fool it.
-		THEBRIG_START_FILE=thebrig_start.php
-
-		export REDIRECT_STATUS=200
-		export GATEWAY_INTERFACE="CGI/1.1"
-		export REQUEST_METHOD="GET"
-		export SCRIPT_FILENAME=$STAGE_BIN_PATH/$THEBRIG_START_FILE
-		export SCRIPT_PATH=$THEBRIG_START_FILE
-		export PATH_INFO=$SCRIPT_FILENAME
-		/usr/local/bin/php-cgi -q
-		# "1" means we had an older version. "2" means we re-installed
-		if [ "$ACTION" -eq 1 ]
-		then
-			ACTION_MSG="Upgraded"
-			echo "Congratulations! TheBrig was upgraded."
-		else
-			ACTION_MSG="Re-installed"
-			echo "Congratulations! TheBrig was re-installed."
-		fi
-		# Start cleaning up
-		rm /tmp/thebrig_action
-	fi
-	# Get rid of staged updates & cleanup
-	rm -r $START_FOLDER/install_stage
-	rm /tmp/thebriginstaller
-else
-# There was no /tmp/thebrigversion, so something bad happened in change_ver
-	echo "Something bad happened with change_ver.php. Please re-download and run the install."
+	# Store the install destination into the /tmp/thebrig.tmp
+	echo $BRIG_ROOT > /tmp/thebrig.tmp
+	echo "Congratulations! TheBrig was installed. Navigate to rudimentary config tab and push Save."
+	ACTION_MSG="fresh installed"
 fi
+# Get rid of staged updates & cleanup
+cd $START_FOLDER
+rm -rf install_stage
+
 # Log it!
 CURRENTDATE=`date -j +"%Y-%m-%d %H:%M:%S"`
 echo "[$CURRENTDATE]: TheBrig installer!: installer: ${ACTION_MSG} successfully" >> $BRIG_ROOT/thebrig.log
