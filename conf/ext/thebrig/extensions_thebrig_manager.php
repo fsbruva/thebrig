@@ -171,7 +171,7 @@ if ( $input_errors ) {
 				<div id="submit_x">
 					<input id="thebrig_update" name="thebrig_update" type="submit" class="formbtn" value="<?=_THEBRIG_UPDATE_BUTTON;?>" onClick="return confirm('<?=_THEBRIG_INFO_MGR;?>');" /><br />
 				</div>
-				<input name="txtCommand" type="hidden" value="<?="sh /tmp/thebrig_install.sh {$config['thebrig']['rootfolder']} 3 &";?>" />
+				<input name="txtCommand" type="hidden" value="<?="sh /tmp/thebrig_install.sh {$config['thebrig']['rootfolder']} &";?>" />
 			</td>
 			</tr> <?php } ?>
 		<?php html_separator(); ?>
