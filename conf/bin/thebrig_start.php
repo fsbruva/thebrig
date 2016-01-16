@@ -46,7 +46,8 @@ header_remove("content-type");
 require_once ("config.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/functions.inc");
 require_once ("{$config['thebrig']['rootfolder']}conf/ext/thebrig/lang.inc");
-if ( ! copy ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
+unlink_if_exists("/etc/rc.d/thebrig");
+if ( ! ln -s ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
 	{ exec ("logger Failed copy rc script");} 
 chmod("/etc/rc.d/thebrig", 0755);
 
