@@ -123,7 +123,8 @@ fi
 # Get rid of staged updates & cleanup
 cd $START_FOLDER
 rm -rf install_stage
-
+chmod -f -R 755 $BRIG_ROOT/conf/bin
+chmod -f -R 755 $BRIG_ROOT/conf/sbin
 # Log it!
 CURRENTDATE=`date -j +"%Y-%m-%d %H:%M:%S"`
 echo "[$CURRENTDATE]: TheBrig installer!: installer: ${ACTION_MSG} successfully" >> $BRIG_ROOT/thebrig.log
