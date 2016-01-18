@@ -103,7 +103,7 @@ if [ ! -z ${INSTALLED} ]; then
 	echo "Congratulations! You have fresh TheBrig version."
 else
 	echo "Look like fresh install"
-	cp -f $START_FOLDER/install_stage/* $BRIG_ROOT/
+	cp -f -R $START_FOLDER/install_stage/* $BRIG_ROOT/
 	# Create the symlinks/schema. We can't use thebrig_start since
 	# there is nothing for the brig in the config XML
 	mkdir -p /usr/local/www/ext
