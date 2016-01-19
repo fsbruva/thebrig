@@ -240,18 +240,18 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 					// Fetch only
 					$command_fetch= $command_prefix . " --not-running-from-cron fetch";
 					
-					cmd_exec($command_fetch, $output);
+					cmd_exec($command_fetch, $output, $errors);
 					
 					break;
 				case _THEBRIG_INSTALL_BUTTON:
 					// Update
 					$command_update= $command_prefix . " --not-running-from-cron install";
-					cmd_exec($command_update, $output);
+					cmd_exec($command_update, $output, $errors);
 					break;
 				case "Fetch & Install":
 					// Install --> fetch & extract
 					$command_fetch= $command_prefix . " --not-running-from-cron fetch install";
-					cmd_exec($command_fetch, $output);
+					cmd_exec($command_fetch, $output, $errors);
 					break;
 				case "Cron":
 					// Cron
