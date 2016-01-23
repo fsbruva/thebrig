@@ -219,7 +219,9 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 					$input_errors[] = _THEBRIG_NOROLLBACK_TEMPLATE;
 				}
 			}
-			
+			if ($pconfig['update_op'] == "Upgrade"){
+				file_put_contents("/tmp/release.upgrade",$pconfig['release'] );
+			}
 			$response = 0;
 			if ( count ( $input_errors ) == 0) {
 				$response = thebrig_update($basedir_list, $workdir_list , $conffile_list, $pconfig['update_op']); 
@@ -594,13 +596,43 @@ function conf_handler() {
 						</td>
 				<?php
 				if ($response) {
-					foreach ($response as $line) {
-						$infobox = $infobox . $line . "<br />";
-					}
+					foreach ($response as $line) {  $infobox = $infobox . $line . "<br />";	}
 				html_text($confconv1, "<font color=\"red\">Results:</font>", $infobox );
-			
-				//print_info_box( $infobox);
 				}
+				// RELEASE UPGRADE
+				$path = "ftp://ftp.freebsd.org/pub/FreeBSD/releases/".$my_arch."/".$my_arch."/";
+				$release_num = preg_split("|-RELEASE|",$my_rel_cut);
+				$release_num[0] = 10*$release_num[0];
+				$release_num[0] = 93;
+				$releases = release_array($path);
+				foreach ($releases as $release) {
+					$bsd_release_num= preg_split("|-RELEASE|",$release);
+					$bsd_release[]=array($release => 10*$bsd_release_num[0] ) ;
+				}
+				foreach ($bsd_release as $release) {
+						foreach ( $release as $name => $number ) {
+								if ($number >  $release_num[0]) $combo[]=$name;
+					}}
+				if (count ($combo) < 1) { } else { 
+					//html_combobox("releaseupgrade", "Upgrade release", $pconfig['releaseupgrade'], $combo, "description"); 
+					?>
+					<tr id='releaseupgrade_tr'>
+						<td width='22%' valign='top' class='vncell'><label for=''>Upgrade release</label></td>
+						<td width='78%' class='vtable'>
+							<select name='release' class='formfld' id='release' >
+							<?php foreach ($combo as $value):  ?>
+								<option value='<?=$value;?>' ><?=$value;?></option>
+							<?php endforeach;?>
+							</select>
+							<input id="update" name="update_op" type="submit" form="iform" class="formbtn" value="Upgrade"
+									onClick="return conf_handler();" />
+						<br /><span class='vexpl'>description</span>
+						</td>						
+					</tr>
+				<?php	}
+					
+					
+				//update details
 				html_separator();
 				html_titleline(_THEBRIG_UPDATE_DETAILS);
 				// Build an array with the keys as the jail uuid, and with the value as the jail's name
