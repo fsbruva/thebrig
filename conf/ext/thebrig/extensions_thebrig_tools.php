@@ -2,39 +2,68 @@
 /*
  * extensions_thebrig_tools.php
  Autor Alexey Kruglov
+
+	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
 */
 require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
-require_once("XML/Serializer.php");
-require_once("XML/Unserializer.php");
+//require_once("XML/Serializer.php");
+//require_once("XML/Unserializer.php");
 if ( !is_dir ( $config['thebrig']['rootfolder']."/work") ) { $input_errors[] = _THEBRIG_NOT_CONFIRMED; }
 $swich_converted = "0";
 
 if (isset($_POST['export']) && $_POST['export']) {
-	$options = array(
-			XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
-			XML_SERIALIZER_OPTION_INDENT           => "\t",
-			XML_SERIALIZER_OPTION_LINEBREAKS       => "\n",
-			XML_SERIALIZER_OPTION_XML_ENCODING     => "UTF-8",
-			XML_SERIALIZER_OPTION_ROOT_NAME        => get_product_name(),
-			XML_SERIALIZER_OPTION_ROOT_ATTRIBS     => array("version" => get_product_version(), "revision" => get_product_revision()),
-			XML_SERIALIZER_OPTION_DEFAULT_TAG      => "content",
-			XML_SERIALIZER_OPTION_MODE             => XML_SERIALIZER_MODE_DEFAULT,
-			XML_SERIALIZER_OPTION_IGNORE_FALSE     => true,
-			XML_SERIALIZER_OPTION_CONDENSE_BOOLS   => true,
-	);
 
-	$serializer = new XML_Serializer($options);
-	$status = $serializer->serialize($config['thebrig']['content']);
+$doc = new DOMDocument('1.0', 'UTF-8');
+	$doc->formatOutput = true;
+	$elm = $doc->createElement(get_product_name());
+	$elm->setAttribute('version', get_product_version());
+	$elm->setAttribute('revision', get_product_revision());
+	$node = $doc->appendChild($elm);
 
-	if (@PEAR::isError($status)) {
-		$errormsg = $status->getMessage();
+	// export as XML
+	array_sort_key($config['thebrig']['content'], "jailno");
+	foreach ($config['thebrig']['content'] as $k => $v) {
+		$elm = $doc->createElement('jail');
+		foreach ($v as $k2 => $v2) {
+			if (is_array($v2)) {
+					foreach ($v2 as $k3 => $v3) {
+						$elm2 = $doc->createElement($k2, htmlentities($v3));
+						$elm->appendChild($elm2);
+						//print_r($v3);
+					}
+			}	else {
+			
+			$elm2 = $doc->createElement($k2, $v2);
+			$elm->appendChild($elm2);
+			}
+			
+			
+		}
+		$node->appendChild($elm);
+	}
+	$xml = $doc->saveXML();
+	if ($xml === FALSE) {
+		$errormsg = gettext("Invalid file format.");
 	} else {
 		$ts = date("YmdHis");
 		$fn = "thebrig-{$config['system']['hostname']}.{$config['system']['domain']}-{$ts}.jails";
-		$data = $serializer->getSerializedData();
+		$data = $xml;
 		$fs = strlen($data);
 
 		header("Content-Type: application/octet-stream");
@@ -44,38 +73,50 @@ if (isset($_POST['export']) && $_POST['export']) {
 		echo $data;
 
 		exit;
+
 	}
-} else if (isset($_POST['import']) && $_POST['import']) {
-	if (is_uploaded_file($_FILES['jailsfile']['tmp_name'])) {
-		$options = array(
-				XML_UNSERIALIZER_OPTION_COMPLEXTYPE => 'array',
-				XML_UNSERIALIZER_OPTION_ATTRIBUTES_PARSE => true,
-				XML_UNSERIALIZER_OPTION_FORCE_ENUM  => $listtags,
-		);
+} elseif (isset($_POST['import']) && $_POST['import']) {
+		if (is_uploaded_file($_FILES['jailsfile']['tmp_name'])) {
+			
+			// import from XML
+		$xml = file_get_contents($_FILES['jailsfile']['tmp_name']);
+		$doc = new DOMDocument();
+		$data = array();
+		$data['content'] = array();
+		if ($doc->loadXML($xml) != FALSE) {
+			$doc->normalizeDocument();
+			$jails = $doc->getElementsByTagName('jail');
+			
+			foreach ($jails as $jail) {
+				$a = array();
+				foreach ($jail->childNodes as $node) {
+					if ($node->nodeType != XML_ELEMENT_NODE)
+						continue;
+					$name = !empty($node->nodeName) ? (string)$node->nodeName : '';
+					$value = !empty($node->nodeValue) ? (string)$node->nodeValue : '';
+					if (!empty($name))
+						$a[$name] = $value;
+				}
+				$data['content'][] = $a;
+			}
+		}
 
-		$unserializer = new XML_Unserializer($options);
-		$status = $unserializer->unserialize($_FILES['jailsfile']['tmp_name'], true);
-
-		if (@PEAR::isError($status)) {
-			$errormsg = $status->getMessage();
+		if (empty($data['content'])) {
+			$input_errors[] = gettext("Invalid file format.");
 		} else {
 			// Take care array already exists.
-			if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content']))
-				$config['thebrig']['content'] = array();
-
-			$data = $unserializer->getUnserializedData();
+			if (!isset($config['thebrig']['content']) || !is_array($config['thebrig']['content'])) $config['thebrig']['content'] = array();
 
 			// Import jails.
-			foreach ($data['content'] as $jail) {
+			foreach ($data as $jail) {
 				// Check if jail already exists.
 				$index = array_search_ex($jail['uuid'], $config['thebrig']['content'], "uuid");
 				if (false !== $index) {
 					// Create new uuid and mark jail as duplicate (modify description).
-					$content['uuid'] = uuid();
-					$content['desc'] = gettext("*** Imported duplicate ***") . " {$jail['desc']}";
+					$jail['uuid'] = uuid();
+					$jail['desc'] = "*** Imported duplicate ***" . $jail['desc'];
 				}
-				$config['thebrig']['content'][] = $jail;
-
+				$config['thebrig']['content'] = $jail;
 				updatenotify_set("thebrig", UPDATENOTIFY_MODE_NEW, $jail['uuid']);
 			}
 
@@ -85,209 +126,68 @@ if (isset($_POST['export']) && $_POST['export']) {
 			exit;
 		}
 	} else {
-		$errormsg = sprintf("%s %s", gettext("Failed to upload file."),
-				$g_file_upload_error[$_FILES['jailsfile']['error']]);
+		$input_errors[] = sprintf("%s %s", _THEBRIG_FILED_UPLOAD, $g_file_upload_error[$_FILES['jailsfile']['error']]);
 	}
+} else {}
+
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_TOOLS);
+include("fbegin.inc");
+// This will evaluate if there were any input errors from prior to the user clicking "save"
+if ($input_errors) { 
+	print_input_errors($input_errors);
 }
 
-
-if ($_POST['submit'] === "Convert") {
-	
-		if ( empty ( $_POST['oldconfig']) || !is_file($_POST['oldconfig']) ) { $input_errors[] = gettext("No valid file"); goto out1;}
-	$pconfig=$_POST;
-	$oldconfig = file($_POST['oldconfig']);
-	$matches  = preg_grep ('/^jail_\S+".+"/', $oldconfig); //  remove no valid lines
-	$matches = array_values($matches); // sanitize key numbers
-		$j=0; // do sanitize from online comments
-		do $matches1[$j]= rtrim(preg_replace ('/"\W+\#.*$/', '"', $matches[$j]));
-		while ($j++<(count($matches)-1));  // end sanitize from line comments
-		$matches1 =array_values($matches1);
-		$prsconfig['jailnames'] = array(); // Define output array
-		$jailnames = preg_grep ( '/^.*_hostname=.*/i', $matches1 );
-		$jailnames =array_values($jailnames);
-		foreach ($jailnames  as $item) { $parts = explode('=', $item); 	$jailnames1[]=str_replace('"', '', $parts[1]);}
-		foreach ($jailnames1  as $item) { $parts = explode('.', $item); 	$prsconfig['jailnames'][]=$parts[0];}
-		
-		// Now I have array with jail names
-		
-		// I begin extract globals variable and compose as name => value I want to extract only 4 values, because I not need jail_enable and jail_list
-		$glpattern = array( "jail_parallel_start", "jail_set_hostname_allow", "jail_socket_unixiproute_only", "jail_sysvipc_allow");
-		$tmp = array();
-		for ($i=0; $i<4;){
-		$patt = $glpattern[$i];
-		for ($j=0; $j<(count($matches1));){  $item = ($matches1[$j]); 	
-				$parts = explode('=', $item);
-					// I use strlen for value "YES".  strlen "YES" =5, strlen "NO" = 4
-					if ($parts[0] == $patt) { if( strlen($parts[1]) == 5)  { 
-							$tmp[$i] = str_replace('"', '', $parts[1]); $tmp1[$i] = $parts[0]; } 
-							} 
-						else{} 					
-			++$j;	}
-
-		++$i;} 
-
-		// alljails  parsing
-		// $etalon is array with standart FreeBSD names for rc.conf
-	$etalon = array("3"=>"_hostname", "4"=>"_interface", "5"=>"_ip", "7"=>"_rootdir", "9"=>"_mount_enable", "10"=>"_devfs_enable", "11"=>"_procfs_enable", "12"=>"_fdescfs_enable", "14"=>"_exec_start", "15"=>"_exec_afterstart0", "16"=>"_exec_afterstart1", 
-		"17"=>"_exec_stop", "18"=>"_flags" );
-		// parsing....
-	for ($i=0; $i<(count($prsconfig['jailnames']));){
-		for ($j=0; $j<20;){
-				$patt1 = "jail_".$prsconfig['jailnames'][$i].$etalon[$j];
-					for ($k=0; $k<(count($matches1));){  
-						$item = ($matches1[$k]); 	
-						$parts = explode('=', $item);
-						if ($parts[0] == $patt1) { $prsconfig['values'][$i][$j] = str_replace('"', '', $parts[1]); $prsconfig['names'][$i][$j] = $parts[0]; }  else{}
-						++$k;		}
-				++$j; 	}
-		++$i;	}
-	// sanitize from domain name
-	for ($i=0; $i<(count($prsconfig['jailnames']));) {$prsconfig['values'][$i][3] = $prsconfig['jailnames'][$i]; ++$i; } 
-	
-		// Prsconfig['thebrig'] is array with thebrig variables, but it have some keys numbers as $prsconfig['names']
-		$prsconfig['thebrig'] = array ("0" =>"uuid", "1" => "enable", "2"=>"jailno", "3"=>"jailname", "4"=>"if", "5"=>"ipaddr",	"6"=>"subnet", "7"=>"jailpath", "8"=>"dst",	"9"=>"jail_mount",
-		"10"=> "devfs_enable",	"11"=> "proc_enable", 	"12"=> "fdescfs_enable", "13"=>"fstab",	"14"=>"exec_start", "15"=>"afterstart0",	"16"=>"afterstart1", "17"=>"exec_stop",	"18"=>"extraoptions",
-		"19"=>"desc", "20"=>"base_ver",	"21"=>"lib_ver", "22"=>"src_ver",	"23"=>"doc_ver", "24"=>"image",	"25"=>"image_type",	"26"=>"attach_params",	"27"=>"attach_blocking",
-		"28"=>"force_blocking",		"29"=>"zfs_datasets",	"30"=>"fib", "31"=>"type", );
-
-		// add array startonboot
-	for ($j=0; $j<(count($matches1));){  
-				$item = ($matches1[$j]); 	
-				$parts = explode('=', $item);
-				if ($parts[0] == "jail_list")  { $jaillist = str_replace('"', '', $parts[1]); } 					
-			++$j;	
-		}
-	$prsconfig['startonboot']= explode(' ', $jaillist);
-
-		//Add values jailno, uuid, startonboot  to jails  values 
-	for ($i=0; $i<(count($prsconfig['jailnames'] ) ) ; ) {
-		$prsconfig['values'][$i]['2'] = ($i+1);
-		$prsconfig['values'][$i]['31']="full";
-		$prsconfig['values'][$i]['0'] = uuid();
-			for ($j=0; $j<(count($prsconfig['startonboot']));){ 
-				if ($prsconfig['startonboot'][$j] == $prsconfig['values'][$i][3]) { 
-					$prsconfig['values'][$i][1] = "Yes";} 
-				else {}
-				++$j;	}
-		++$i;	
-	}
-
-//
-// I have output array $prsconfig with
-// $prsconfig['thebrig']  - thebrig variables --------------------------------| this arrays have some keys!!
-// $prsconfig['names']  -  standart FreeBSD names, used in rc.conf |local|----|
-// $prsconfig['values']  - values from rc.config |local| but ready to apply for Thebrig.
-//
-// I prepare Array for xml writer
-	for ($i=0; $i<(count($prsconfig['jailnames'] ) ) ; ) {
-			for ($j=0; $j<(count($prsconfig['thebrig'] ) ) ; ) {
-					if( ! empty ( $prsconfig['values'][$i][$j]) ) { $testmulti[$i]["{$prsconfig['thebrig'][$j]}"] = $prsconfig['values'][$i][$j];} 
-					else {unset($testmulti[$i]["{$prsconfig['thebrig'][$j]}"] ) ; }
-					++$j;	}
-			++$i;	} 
-			// and try
-
-		$options = array(
-		XML_SERIALIZER_OPTION_XML_DECL_ENABLED => true,
-		XML_SERIALIZER_OPTION_INDENT           => "\t",
-		XML_SERIALIZER_OPTION_LINEBREAKS       => "\n",
-		XML_SERIALIZER_OPTION_XML_ENCODING     => "UTF-8",
-		XML_SERIALIZER_OPTION_ROOT_NAME        => get_product_name(),
-		XML_SERIALIZER_OPTION_ROOT_ATTRIBS     => array("version" => get_product_version(), "revision" => get_product_revision()),
-		XML_SERIALIZER_OPTION_DEFAULT_TAG      => "content",
-		XML_SERIALIZER_OPTION_MODE             => XML_SERIALIZER_MODE_DEFAULT,
-		XML_SERIALIZER_OPTION_IGNORE_FALSE     => true,
-		XML_SERIALIZER_OPTION_CONDENSE_BOOLS   => true,
-	);
-
-	$serializer = new XML_Serializer($options);
-	$status = $serializer->serialize($testmulti);
-
-	if (@PEAR::isError($status)) {
-		$errormsg = $status->getMessage();
-		} else {
-		$ts = date("YmdHis");
-		$fn = "thebrig-{$config['system']['hostname']}.{$config['system']['domain']}-{$ts}.jails";
-		$data = $serializer->getSerializedData();
-		$fs = strlen($data);
-
-		header("Content-Type: application/octet-stream");
-		header("Content-Disposition: attachment; filename={$fn}");
-		header("Content-Length: {$fs}");
-		header("Pragma: hack");
-		echo $data;
-
-		exit;
-		} 
-} 
-if ($_POST['submit'] === "Compress") {
-		if ( empty ( $_POST['fname']) || !is_dir($_POST['fname']) ) { $input_errors[] = gettext("No valid folder"); goto out1;}
-		$pconfig=$_POST;
-		$foldername = $_POST['fname'];
-		if (strlen($foldername) > 6 && $path[strlen($foldername)-1] == "/") { $foldername = substr($foldername, 0, strlen($foldername)-1); } 
-		$path_parts = pathinfo($foldername);
-		$timestamp = date("Y-m-d_H:i:s");
-		chdir($path_parts['dirname']);
-		mwexec("tar -c -z -f " . $config['thebrig']['rootfolder'] . "work/snached_" . $timestamp . ".txz -C" . $path_parts['dirname'] . " " . $path_parts['basename'] . "/*");
-		// This tool make archive any folder and place archive into thebrig/work.  Usefull for easy migrate old jails.
-}
-out1: 
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Tools");
-include("fbegin.inc");?>
+?>
+<?php if ($errormsg) print_error_box($errormsg);?>
 
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav"><li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+				<?php If (!empty($config['thebrig']['content'])) { 
+			$thebrigupdates=_THEBRIG_UPDATES;
+			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
+			} else {} ?>
+			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=_THEBRIG_LOG;?></span></a></li>
+
 		</ul>
 	    </td>
 	</tr>
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav2">
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
-			<li class="tabact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
+			<li class="tabact"><a href="extensions_thebrig_tools.php"  title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_TOOLS;?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_translator.php"><span>Translator</span></a></li>
+
 		</ul>
 	</td></tr>
-	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform">
+	<tr><form action="extensions_thebrig_tools.php" method="post" name="iform" id="iform" enctype="multipart/form-data">
+	
 		<td class="tabcont">
-			 <?php if (!empty($input_errors)) print_input_errors($input_errors); ?>
 			 <table width="100%" border="0" cellpadding="6" cellspacing="0">
 			 
-			 	<?php html_titleline(gettext("Configuration Backup/Restore"));?>
+			 	<?php html_titleline(_THEBRIG_LOG_TITLELINE);?>
 			 	<tr>
-						<td width="22%" valign="top" class="vncell">Backup Existing Config&nbsp;</td>
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_BACKUP_CONFIG;?></td>
 						<td width="78%" class="vtable">
-							<?=gettext("Make a backup of the existing configuration.");?><br />
+							<?=_THEBRIG_BACKUP_CONFIG_EXPL;?><br />
 							<div id="submit">
-								<input name="export" type="submit" class="formbtn" value="<?=gettext("Export");?>" /><br />
+								<input name="export" type="submit" class="formbtn" value="<?=_THEBRIG_EXPORT_BUTTON;?>" /><br />
 							</div>
 						</td>
 					</tr>
 					<tr>
-						<td width="22%" valign="top" class="vncell">Restore&nbsp;</td>
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_RESTORE_CONFIG;?></td>
 						<td width="78%" class="vtable">
-							<?=gettext("Restore jails config from XML.");?><br />
 							<div id="submit">
-								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="40" accept="*.jails" />&nbsp;
-								<input name="import" type="submit" class="formbtn" id="import" value="<?=gettext("Import");?>" /><br />
+								<input name="jailsfile" type="file" class="formfld" id="jailsfile" size="45" accept="*.jails" />&nbsp;
+								<input name="import" type="submit" class="formbtn" id="import" value="<?=_THEBRIG_IMPORT_CONFIG;?>" /><br />
 							</div>
 						</td>
 					</tr>
-			 	
-			 	<?php html_separator();
-				html_titleline(gettext("rc.conf.local Migrator"));?>
-				<?php html_filechooser("oldconfig", gettext("Path to source"), $pconfig['oldconfig'], sprintf(gettext("If you want convert old rc.conf.local to TheBrig application, please add path to it."), $pconfig['name']), "/mnt/", false);
-				html_text($confconv, gettext("Convert and download xml"), '<input name="submit" type="submit" value="Convert">') ?>
-				
-									
 				<?php html_separator();
-				html_titleline(gettext("Jail Archiver"));?>
-				<?php  html_filechooser("fname", gettext("Path to folder"), $pconfig['fname'], sprintf(gettext("If you want archive old jail or any another folder choose it. It will be compressed and stored in " . $config['thebrig']['rootfolder'] . "work/."), $pconfig['fname']), "/mnt/", false);
-				html_text($confconv, gettext("Compress and save"), '<input name="submit" type="submit" value="Compress">') ?>
-
-	     
+				html_text("translatorprompt", "New tab - translator", "If you want to have TheBrig on your language, you can try to translate TheBrig.<p>Translator have 3 buttons - Save template, Delete template and Create lang file.<p>You can save your work, as template, default /usr/local/www/ext/thebrig/lang.tmpl for tomorrow - translator will load it automatically.  When all messages will translate, you can create lang file. <b>Warning/</b> This action delete your template.<p>File will create as /usr/local/www/ext/thebrig/<font color='red'>your_language</font>_lang.inc. Send it to developers, we include it to TheBrig. ");?>
 			 </table>
 		</td>
 	<?php include("formend.inc");?>

@@ -1,6 +1,21 @@
 <?php
 /*
      extensions_thebrig_fstab.php   Autor Alexey Kruglov 2013
+    
+    Copyright 2013-2015 Matthew Kempe & Alexey Kruglov
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.    
+    
 */
 require("auth.inc");
 require("guiconfig.inc");
@@ -17,54 +32,7 @@ print_r ($_GET);
 	$a_jail = &$config['thebrig']['content'];
 	if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))) {
 	$p_config = $a_jail[$cnid];
-	$tmpfile = "/tmp/tempjail";
-    $handle = fopen($tmpfile,"wb");
-	fwrite ($handle, "uuid:".$a_jail[$cnid]['uuid']."\n"); //0
-	if(isset($a_jail[$cnid]['enable'])) {fwrite ($handle, "enable:yes\n");} else { fwrite ($handle, "enable:no\n" );}
-	fwrite ($handle, "jailno:".$a_jail[$cnid]['jailno']."\n");
-	fwrite ($handle, "jailname:".$a_jail[$cnid]['jailname']."\n");
-	fwrite ($handle, "type:".$a_jail[$cnid]['type']."\n");
-	fwrite ($handle, "if:".$a_jail[$cnid]['if']."\n");
-	fwrite ($handle, "ipaddr:".$a_jail[$cnid]['ipaddr']."\n");
-	fwrite ($handle, "subnet:".$a_jail[$cnid]['subnet']."\n");
-	fwrite ($handle, "jailpath:".$a_jail[$cnid]['jailpath']."\n");
-	if(isset($a_jail[$cnid]['jail_mount'])) {fwrite ($handle, "jail_mount:yes\n");} else { fwrite ($handle, "jail_mount:no\n" );}
-	if (isset($a_jail[$cnid]['devfs_enable'])) {fwrite ($handle, "devfs_enable:yes\n");} else { fwrite ($handle, "devfs_enable:no\n" );} //10
-	if(isset($a_jail[$cnid]['proc_enable'])) {fwrite ($handle, "proc_enable:yes\n");} else { fwrite ($handle, "proc_enable:no\n" );}
-	if(isset($a_jail[$cnid]['fdescfs_enable'])) {fwrite ($handle, "fdescfs_enable:yes\n");} else { fwrite ($handle, "fdescfs_enable:no\n" );}
-	if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam']))  {	$p_config['auxparam'] = implode(",", $a_jail[$cnid]['auxparam']); } 
-	fwrite ($handle, "auxparam:".$p_config['auxparam']."\n");/*13*/
-	fwrite ($handle, "exec_prestart:".$a_jail[$cnid]['exec_prestart']."\n");
-	fwrite ($handle, "exec_start:".$a_jail[$cnid]['exec_start']."\n");
-	fwrite ($handle, "afterstart0:".$a_jail[$cnid]['afterstart0']."\n");
-	fwrite ($handle, "afterstart1:".$a_jail[$cnid]['afterstart1']."\n");
-	fwrite ($handle, "exec_stop:".$a_jail[$cnid]['exec_stop']."\n");
-	fwrite ($handle, "extraoptions:".$a_jail[$cnid]['extraoptions']."\n");
-	fwrite ($handle, "jail_parameters:".$a_jail[$cnid]['jail_parameters']."\n");
-	fwrite ($handle, "desc:".$a_jail[$cnid]['desc']."\n");
-	fwrite ($handle, "base_ver:".$a_jail[$cnid]['base_ver']."\n");
-	fwrite ($handle, "lib_ver:".$a_jail[$cnid]['lib_ver']."\n");
-	fwrite ($handle, "src_ver:".$a_jail[$cnid]['src_ver']."\n");
-	fwrite ($handle, "doc_ver:".$a_jail[$cnid]['doc_ver']."\n");
-	fwrite ($handle, "image:".$a_jail[$cnid]['image']."\n");
-	fwrite ($handle, "image_type:".$a_jail[$cnid]['image_type']."\n");
-	fwrite ($handle, "attach_params:".$a_jail[$cnid]['attach_params']."\n");
-	fwrite ($handle, "attach_blocking:".$a_jail[$cnid]['attach_blocking']."\n");
-	fwrite ($handle, "force_blocking:".$a_jail[$cnid]['force_blocking']."\n");
-	fwrite ($handle, "zfs_datasets:".$a_jail[$cnid]['zfs_datasets']."\n");
-	if(isset($a_jail[$cnid]['fib'])) {fwrite ($handle, "fib:yes\n");} else { fwrite ($handle, "fib:no\n" );}
-	if(isset($a_jail[$cnid]['ports'])) {fwrite ($handle, "ports:yes\n");} else { fwrite ($handle, "ports:no\n" );}
-	// By default, when editing an existing jail, path and name will be read only.
-	$path_ro = true;
-	$name_ro = true;
-	if ( !is_dir( $p_config['jailpath']) ) {
-		$input_errors[] = "The specified jail location does not exist - probably because you imported the jail's config. Please choose another.";
-		$path_ro = false;
-	}
-	if ( (FALSE !== ( $ncid = array_search_ex($p_config['jailname'], $a_jail, "jailname"))) && $ncid !== $cnid ){
-		$input_errors[] = "The specified jailname is a duplicate - probably because you imported the jail's config. Please choose another.";	
-		$name_ro = false;
-			}
+	file_put_contents("/tmp/tempjail.cache", serialize($p_config));
 	}
 	else { $input_errors[]=" Jail not defined!  Please define jail over Add|Edit tab and push <b>Add</b> button for store configuration into config.xml "; goto menu; }
 		if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam'])) {
@@ -131,79 +99,14 @@ if(isset($_POST['Submit'])) {
 			$result2[$i] = trim($result1[$i]); //sanitize array
 			}
 	$result = array_diff($result2, array(''));
-	$frombackup=file("/tmp/tempjail");
+	
 	$a_jail = &$config['thebrig']['content'];
 	if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))) {
-		$jail = array();
-		$a_frombackup = explode(":", $frombackup[0]);
-				$jail['uuid'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[1]);
-				if (strlen($a_frombackup[1]) > 3) { $jail['enable'] = true; } else { unset($jail['enable']); }
-		$a_frombackup = explode(":", $frombackup[2]);
-				$jail['jailno'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[3]);
-				$jail['jailname'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[4]);
-				$jail['type'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[5]);
-				$jail['if'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[6]);
-				$jail['ipaddr'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[7]);
-				$jail['subnet'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[8]);
-				$jail['jailpath'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[9]);
-				if (strlen($a_frombackup[1]) > 3) {	$jail['jail_mount'] = true; } else { unset($jail['jail_mount']); }
-		$a_frombackup = explode(":", $frombackup[10]);
-				if (strlen ($a_frombackup[1]) > 3) {	$jail['devfs_enable'] = true; } else { unset($jail['devfs_enable']); }
-		$a_frombackup = explode(":", $frombackup[11]);
-				if (strlen ($a_frombackup[1]) > 3) {	$jail['proc_enable'] = true; } else { unset($jail['proc_enable']); }
-		$a_frombackup = explode(":", $frombackup[12]);
-				if (strlen ($a_frombackup[1]) > 3) { $jail['fdescfs_enable'] = true; } else { unset($jail['fdescfs_enable']); }
+		$jail = unserialize (file_get_contents("/tmp/tempjail.cache" )) ;
+
 		unset($jail['auxparam']);
 				$jail['auxparam'] = $result;
-		$a_frombackup = explode(":", $frombackup[14]);
-				$jail['exec_prestart'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[15]);		
-				$jail['exec_start'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[16]);
-				$jail['afterstart0'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[17]);
-				$jail['afterstart1'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[18]);
-				$jail['exec_stop'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[19]);
-				$jail['extraoptions'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[20]);
-				$jail['jail_parameters'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[21]);
-				$jail['desc'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[22]);
-			$jail['base_ver'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[23]);
-			$jail['lib_ver'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[24]);
-			$jail['src_ver'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[25]);
-			$jail['doc_ver'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[26]);
-			$jail['image'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[27]);
-			$jail['image_type'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[28]);
-			$jail['attach_params'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[29]);
-			$jail['attach_blocking'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[30]);
-			$jail['force_blocking'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[31]);
-			$jail['zfs_datasets'] = trim ($a_frombackup[1], "\n");
-		$a_frombackup = explode(":", $frombackup[32]);
-			if (strlen ($a_frombackup[1]) > 3) { $jail['fib']  = true; } else { unset($jail['fib'] ); }
-		$a_frombackup = explode(":", $frombackup[33]);
-			if (strlen ($a_frombackup[1]) > 3) { $jail['ports']  = true; } else { unset($jail['ports'] ); }
-				
+						
 		if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid")))) {
 				// Copies newly modified properties over the old
 			$a_jail[$cnid] = $jail;

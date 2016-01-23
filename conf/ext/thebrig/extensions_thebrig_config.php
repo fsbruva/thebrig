@@ -1,4 +1,21 @@
 <?php
+/*
+	file: extensions_thebrig_config.php
+  
+  	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
@@ -8,12 +25,6 @@ require_once("ext/thebrig/functions.inc");
 if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) {
 	$config['thebrig'] = array();
 }
-
-// attempt to extract the rootfolder from the global config
-$pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
-$pconfig['template'] = $config['thebrig']['template'] ;
-$pconfig['basejail'] = $config['thebrig']['basejail']['folder'] ;
-
 
 
 // This determines if there are any thin jails (type = slim), which means we shouldn't
@@ -25,7 +36,7 @@ if ( !isset($_POST['remove'] ) && is_array(  $config['thebrig']['content'] ) ) {
 	foreach ( $config['thebrig']['content'] as $jail ){
 		if ( $jail['type'] === 'slim' )
 			$base_ro = true;
-		if ( preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
+		if ( 1 === preg_match ( "#" . $config['thebrig']['rootfolder'] . "#" , $jail['jailpath']) )
 			$brig_jails=true;
 	}
 }
@@ -48,9 +59,7 @@ if ( ( !isset( $config['thebrig']['rootfolder'] ) ) && file_exists( '/tmp/thebri
 
 	// If the thing pulled from the .tmp file is an actual directory, do some stuff
 	if ( is_dir( $config['thebrig']['rootfolder'] ) ) {
-		write_config();		// write the config so it survives reboot
-		thebrig_populate( $config['thebrig']['rootfolder'] , $config['thebrig']['rootfolder'] );
-		unlink_if_exists("/tmp/thebrig.tmp");  // deletes the .tmp file (if it was there)
+		write_config();		// write the config so at least the folder survives reboot
 	}
 	else {
 		// There was a .tmp file, but it didn't have a valid folder within it, which is tough to do, because
@@ -71,10 +80,13 @@ $template_search = glob ( $config['thebrig']['rootfolder'] . "template/bin/*" );
 
 // User has clicked a button
 if ($_POST) {
+	
 	unset($input_errors);
 	$pconfig = $_POST;
-	 
-	if ( $pconfig['remove'] ) {
+	unset($pconfig['compress']);
+	if (isset( $_POST['compress'])) { $pconfig['compress'] = "yes"; } else { unset ($pconfig['compress'] ); }
+	if ( isset( $pconfig['remove'] ) && $pconfig['remove'] ) {
+
 		if (is_dir($config['thebrig']['rootfolder']."basejail")) { $cmd = "chflags -R noschg ".$config['thebrig']['rootfolder']."basejail"; mwexec($cmd);} else {}
 		// we want to remove thebrig
 		thebrig_unregister();
@@ -82,11 +94,13 @@ if ($_POST) {
 		header("Location: /");
 		exit;
 	}
+	
 	// Complete all root folder error checking.
 	// Convert root folder after filechoicer
 	if ( $pconfig['rootfolder'][strlen($pconfig['rootfolder'])-1] != "/")  {
 		$pconfig['rootfolder'] = $pconfig['rootfolder'] . "/";
 	}
+	
 	// This first check to make sure that the supplied folder actually exists. If it does not
 	// then the user should be alerted. No changes will be made.
 	if ( !is_dir( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ) {
@@ -99,7 +113,7 @@ if ($_POST) {
 	}
 	// We also need to see if there is enough space on the target disk.
 	elseif ( disk_free_space ( $pconfig['rootfolder'] ) < 200000000 && !isset($pconfig['remove']) ) {
-		$input_errors[] = "There is not enough space on the target disk!";
+		$input_errors[] = _THEBRIG_NOTENOUGHSPACE;
 	}
 	
 	// The folder supplied by the user is a valid folder, so we can continue our input validations
@@ -113,20 +127,24 @@ if ($_POST) {
 		}
 	else {
 		// If they haven't set a path for the basejail, then we need to assume one
-		if ( ! isset($pconfig['basejail']) || empty($pconfig['basejail']) ) 
+		if ( ! isset($pconfig['basejail']) || empty($pconfig['basejail']) ) { 
 			$pconfig['basejail']=$pconfig['rootfolder'] . "basejail" ;
+		}
 		
 		// Convert basejail to have trailing /
-		if ( $pconfig['basejail'][strlen($pconfig['basejail'])-1] != "/")  
+		if ( $pconfig['basejail'][strlen($pconfig['basejail'])-1] != "/")  {
 			$pconfig['basejail'] = $pconfig['basejail'] . "/";
+		}
 		
 		// If they haven't set a template path, then we need to assume one
-		if ( ! isset($pconfig['template']) || empty($pconfig['template']) ) 
+		if ( ! isset($pconfig['template']) || empty($pconfig['template']) ) { 
 			$pconfig['template']=$pconfig['rootfolder'] . "template" ;
+		}
 				
 		// Convert template location to have trailing /
-		if ( $pconfig['template'][strlen($pconfig['template'])-1] != "/")  
+		if ( $pconfig['template'][strlen($pconfig['template'])-1] != "/")  {
 			$pconfig['template'] = $pconfig['template'] . "/";
+		}
 		
 	}
 	
@@ -137,7 +155,7 @@ if ($_POST) {
 			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 			// a jail at the old location. Call thebrig_populate, which will move all the web stuff and create the 
 			// directory tree
-			// Also add startup command when thebrig completly installed
+			// Also add startup command when thebrig completely installed
 			thebrig_populate( $pconfig['rootfolder'] , $config['thebrig']['rootfolder'] );
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			$config['thebrig']['template'] = $pconfig['template'];
@@ -145,15 +163,22 @@ if ($_POST) {
 			$langfile = file("ext/thebrig/lang.inc");
 			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
 			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
+			if ($pconfig['compress'] == "yes" ) $config['thebrig']['compress'] = $pconfig['compress']; else unset( $config['thebrig']['compress']);
 			write_config(); // Write the config to disk
-			if (!is_dir ("{$config['thebrig']['rootfolder']}conf/ports")) mkdir ("{$config['thebrig']['rootfolder']}conf/ports",0777);
+			unlink_if_exists("/tmp/thebrig.tmp");
 		// Whatever we did, we did it successfully
 		$retval = 0;
 		$savemsg = get_std_save_message($retval);
 	} // end of no input errors
 } // end of POST
+// attempt to extract the rootfolder from the global config
+$pconfig['rootfolder'] = $config['thebrig']['rootfolder'];
+$pconfig['template'] = $config['thebrig']['template'] ;
+$pconfig['basejail'] = $config['thebrig']['basejail']['folder'] ;
+if ($config['thebrig']['compress']  == "yes" ) $pconfig['compress'] = "yes"; else unset(  $pconfig['compress']);
+
 // Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_BASIC_CONFIG, isset($config['thebrig']['version']) ? "version:".$config['thebrig']['version'] : "First start");
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE,  _THEBRIG_BASIC_CONFIG, _THEBRIG_VERSION_NBR );
 // Uses the global fbegin include
 include("fbegin.inc");
 
@@ -173,7 +198,8 @@ function disable_buttons() {
 	document.iform.submit();}
 function message(obj) {
 	if (obj.checked) {
-		alert('If you want to uninstall the TheBrig, please make sure that all jails have been removed');
+		var phpVar = <?php echo json_encode(_THEBRIG_DELETE_WARN);?>;
+		alert(phpVar);
 	}
 		return true;
 }
@@ -188,30 +214,36 @@ function message(obj) {
 			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
 			} else {} ?>
 			<li class="tabact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=_THEBRIG_LOG;?></span></a></li>
+					</span> </a>
+				</li>
 		</ul>
 	</td></tr>
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav2">
 			<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_TARBALL_MGMT;?></span></a></li>
+			
 			<li class="tabact"><a href="extensions_thebrig_config.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_BASIC_CONFIG;?></span></a></li>
 			<li class="tabinact"><a href="extensions_thebrig_tools.php"><span><?=_THEBRIG_TOOLS;?></span></a></li>
 		</ul>
 	</td></tr>
 
 	<tr><td class="tabcont">
-		<form action="extensions_thebrig_config.php" method="post" name="iform" id="iform">
+		<form action="extensions_thebrig_config.php" method="post" name="iform" id="iform"> 
+	<!--	<form action="test.php" method="post" name="iform" id="iform">-->
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php html_titleline(gettext(_THEBRIG_SETTINGS_BASIC));?>
 		<?php html_inputbox("rootfolder", gettext(_THEBRIG_ROOT), $pconfig['rootfolder'], gettext(_THEBRIG_ROOT_DESC), true, 50);?>
-	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
-		<?php html_separator();?>		
-		<?php html_titleline(gettext("Advanced Jail Locations"));?>
-		<?php html_inputbox("basejail", gettext(_THEBRIG_BASE), $pconfig['basejail'], gettext(_THEBRIG_BASE_DESC), false, 50 , $base_ro );?>
-	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
-		<?php html_inputbox("template", gettext("Template Location"), $pconfig['template'], gettext("Sets the alternate location for the buildworld jail template. Default is in a folder named template within TheBrig's installation folder."), false, 50);?>
-	 	<?php //html_filechooser("rootfolder", gettext("Media Directory"), $pconfig['rootfolder'], gettext("Directory that contains our jails (e.g /mnt/Mount_Point/Folder). We will create folder /mnt/Mount_Point/Folder/thebrig/"), $g['media_path'], true);?>
-		<?php html_separator();?>
+		<tr id='compress_tr'>
+	<td width='22%' valign='top' class='vncell'><label for='compress'><?=_THEBRIG_ARCHIVE_ASK;?></label></td>
+	<td width='78%' class='vtable'>
+		<input name='compress' type='checkbox' class='formfld' id='compress' value='' <?php if  ($pconfig['compress'] == "yes") echo "checked"; else false; ?> />&nbsp;<?=_THEBRIG_ARCHIVE_EXPL;?> </td>
+</tr>
+	<?php html_separator();?>		
+		<?php html_titleline(_THEBRIG_LOC_TITLE);?>
+		<?php html_inputbox("basejail", _THEBRIG_BASE, $pconfig['basejail'], _THEBRIG_BASE_DESC, false, 50 , $base_ro );?>
+	 	<?php html_inputbox("template", _THEBRIG_LOC_TEMP, $pconfig['template'], _THEBRIG_LOC_TEMP_EXPL, false, 50);?>
+	 	<?php html_separator();?>
 		<?php html_titleline(gettext(_THEBRIG_CLEANUP));?>
 		
 		<!-- This is the row beneath the title -->
@@ -227,6 +259,7 @@ function message(obj) {
 			 	<input name="Submit" type="submit" class="formbtn" value="<?=_THEBRIG_SAVE;?>" onClick="disable_buttons();">
 			</td>
 		</tr>
+		
 	</table>
 	<?php include("formend.inc");?>
 </form>

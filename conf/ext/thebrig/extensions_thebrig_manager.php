@@ -3,65 +3,119 @@ require("auth.inc");
 require("guiconfig.inc");
 require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
+/*
+  File name: 	extensions_thebrig_manager.php
+  Author: 		Matt Kempe, Alexey Kruglov
+  Modified:		Dec 2014
+  
+	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+  
+  Purpose: 	This page is used to update all the files of TheBrig's
+  				extension. 
+  
+  Variables used:	
+  
+  input_errors		Nas4Free array with error messages
+  pgtitle			Array to label page using lang.inc
+  pconfig			Nas4Free array containing $_POST data
+  config_changed	Boolean variable to track if the Nas4Free config.xml 
+  					needs to have changes written to it
+  brig_ver			String (then floating point) version value stored in 
+  					the installed copy of TheBrig's lang.inc
+  gitlangfile		File descriptor for accessing the github version of 
+  					TheBrig's lang.inc (online version)
+  git_ver			String (then floating point) version value within the
+  					github version of TheBrig's lang.inc. (Also displays
+  					an error message when the fetch fails.
+  fetch_args		String of OS version dependent arguments to pass to
+  					fetch so that it will work.
+  fetch_ret_val		Integer to receive the program return status from 
+  					the call to fetch.
+  
+ */
 	
+// Display the page title, based on the constants defined in lang.inc
+$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_MANAGER_TITLE);
+	
+	// This checks to see if we've finished installing TheBrig. If there
+	// is no stored folder or created work folder, the install isn't done.
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
-} // end of elseif
-
-
-// Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, "Manager");
-
-if (is_array ($config['thebrig']['content'])) { array_sort_key($config['thebrig']['content'], "jailno"); }
-$a_jail = &$config['thebrig']['content'];
-
-// User has clicked a button
-if ($_POST) {
-	unset($input_errors);
-	$pconfig = $_POST;
-	$config_changed = false;		// Keep track if we need to re-write the config
-
-	if ( isset($pconfig['update']) && $pconfig['update'] ){ 
-		
-		$langfile = file("/tmp/lang.inc");
-		$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
-		$gitversion = 0 + substr($version[1],0,3);
-		
-		// This extracts the actual version from the lang.inc file
-		$version = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
-		$myversion = 0 + substr($version[1],0,3); // Forces version to be a float
-		// This checks to make sure the XML config concurs with the version of lang.inc, even if we already
-		// have the most recent version
-		if ( ($config['thebrig']['version'] != $myversion ) && ($gitversion == $myversion)){
-			// We need to update the XML config to reflect reality
-			$config['thebrig']['version'] = $myversion;
-			$config_changed = true;
-		} 
-		elseif ( $gitversion > $myversion ) {
-			// We want to make sure we can't let the user revert
-			
-		}
-		
-		
-	} // end of "clicked update"
+} // end of if
+else { // TheBrig has been confirmed
+	// Get the string version of the installed software
+	$brig_ver = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
+	// Convert the string to a float so that it can be used in comparisons
+	$brig_ver = 0 + substr($brig_ver[1],0,4);
 	
+	if ( !$_POST ) {
+		// $_POST not being set means we haven't clicked a button - so 
+		// we need to go and get the lastest version
 		
-	// There are no input errors detected.
-	if ( !$input_errors ){
-		// User has selected to carry out the update
-		if ( isset($pconfig['update'])) {
+		// First we get rid of the previously fetched file
+		unlink_if_exists ("/tmp/lang.inc");
+		// Foolish workaround because of the version of "fetch" included
+		// in 9.1 compared to other FreeBSD versions
+		$fetch_args = "";			// "default" arguments for 9.1
+		mwexec2("uname -r | cut -d- -f1" , $rel ) ; 		// Obtain the current kernel release
+		// If the string compare yields anything other than "0", we 
+		// are not 9.1
+		if ( floatval($rel[0]) >= 9.1)  {
+			// FreeBSD above 9.1 has issues fetching from GitHub, so 
+			// we need to tell fetch to not verify certificates
+			$fetch_args = "--no-verify-peer";	
+		}
+		// Before we attempt to download anything, we need to see if we 
+		// even have DNS/internet
+		$connected = @fsockopen("www.github.com", 80); 
+		if ( $connected ) {
+			fclose($connected);
+			// Go get the lang.inc file
+			mwexec2 ( "fetch {$fetch_args} -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/alcatraz/conf/ext/thebrig/lang.inc" , $garbage , $fetch_ret_val ) ;
+			// Needless error checking
+			if ( is_file("/tmp/lang.inc") ) {
+				$gitlangfile = file("/tmp/lang.inc");
+				// Extract the version string from the file ("0.8", "0.9")
+				$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[18]);
+				// Force the version to be a number for comparisons
+				$git_ver = 0 + substr($git_ver[1],0,4);
+				// Go get the install file and make it executable - only if we can successfully get the files we need.
+				mwexec2 ( "fetch {$fetch_args} -o /tmp/thebrig_install.sh https://raw.github.com/fsbruva/thebrig/alcatraz/thebrig_install.sh" , $garbage , $fetch_ret_val ) ;
+				if ( is_file("/tmp/thebrig_install.sh" ) ) {
+					// Fetch of install.sh succeeded
+					mwexec ("chmod a+x /tmp/thebrig_install.sh");
+				}	// end of install.sh fetch success
+				else {
+					// We couldn't get the file from GitHub. We might not have 
+					// connectivity to Github, the file wasn't found, there was 
+					// a DNS issue, or something else went wrong.
+					$savemsg = _THEBRIG_CHECK_NETWORKING_GIT;
+					$input_errors[]=_THEBRIG_CHECK_NETWORKING_GIT;
+				}  // end of failed install.sh fetch	
+			} // end of successful lang.inc fetch
+		} // end of successful internet connectivity test
+		else { 
+			// We couldn't get the lang file from GitHub. We might not have 
+			// connectivity to Github, the file wasn't found, there was 
+			// a DNS issue, or something else went wrong.
+			$input_errors[] = _THEBRIG_CHECK_NETWORKING_GIT;
+			$git_ver = _THEBRIG_ERROR;
+		}	// end of lang.inc fetch failed
+	} // end of "Not Post"
 
-			//if ($gitversion == $myversion) {  $savemsg = " Your TheBrig run on current ".$myversion." version"; goto menu; }
-		}
-			// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
-		if ( $config_changed ) {
-			write_config();
-		}
-		// Whatever we did, we did it successfully
-		$retval = 0;
-		$savemsg = get_std_save_message($retval);
-	} // end of no input errors
-} // end of POST
+} // end of "Brig Confirmed"
 
 // Uses the global fbegin include
 include("fbegin.inc");
@@ -70,85 +124,59 @@ include("fbegin.inc");
 if ( $input_errors ) { 
 	print_input_errors( $input_errors );
 }
-// This will alert the user to unsaved changes, and prompt the changes to be saved.
-elseif ($savemsg) print_info_box($savemsg);
 
 ?> <!-- This is the end of the first bit of html code -->
 
-<!-- This function allows the pages to render the buttons impotent whilst carrying out various functions -->
-<script language="JavaScript">
-function checkBeforeSubmit() {
-	if ( document.iform.beenSubmitted )
-		return false;
-	else {
-		document.iform.beenSubmitted = true;
-		return document.iform.beenSubmitted;
-	}
-}
-
-function conf_handler() {
-	if ( document.iform.beenSubmitted )
-		alert('Please wait for the previous operation to complete!!');
-	else{
-		return confirm('The selected operation will be completed. Please do not click any other buttons.');
-	}
-}
-
-</script>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
-	<tr><td class="tabnavtbl">
-		<ul id="tabnav">
-			<li class="tabinact">
-				<a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a>
-			</li>
-			<li class="tabact">
-				<a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATES;?></span></a>
-			</li>
-			<li class="tabinact">
-				<a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a>
-			</li>
-			<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
-		</ul>
-	</td></tr>
-	<tr><td class="tabnavtbl">
-		<ul id="tabnav2">
-			<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATER;?></span></a></li>
-			<li class="tabinact"><a href="extensions_thebrig_ports.php"><span><?=_THEBRIG_PORTS;?></span></a></li>
-			<li class="tabact">
-				<a href="extensions_thebrig_manager.php" title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_MANAGER;?></span></a>
-			</li>
-		</ul>
-	</td></tr>
+	<tr>
+		<td class="tabnavtbl">
+			<ul id="tabnav">
+				<li class="tabinact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?>
+					</span> </a>
+				</li>
+				<li class="tabact"><a href="extensions_thebrig_ports.php"><span><?=_THEBRIG_UPDATES;?>
+					</span> </a>
+				</li>
+				<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?>
+					</span> </a>
+				</li>
+				<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<td class="tabnavtbl">
+			<ul id="tabnav2">
+				<li class="tabinact"><a href="extensions_thebrig_update.php"><span><?=_THEBRIG_UPDATER;?>
+					</span> </a></li>
+				<li class="tabinact"><a href="extensions_thebrig_ports.php"
+					title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_PORTS;?> </span>
+				</a></li>
+				<li class="tabact"><a href="extensions_thebrig_manager.php"><span><?=_THEBRIG_MANAGER;?></span></a></li>
+			</ul>
+		</td>
+	</tr>
 
 	<tr><td class="tabcont">
-		<form action="extensions_thebrig_manager.php" method="post" name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
+		<form action="exec.php" method="post" name="iform" id="iform" >
 		<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php 
-			// Download the most recent lang.inc, to see the version
-			mwexec ( "fetch -o /tmp/lang.inc https://raw.github.com/fsbruva/thebrig/working/conf/ext/thebrig/lang.inc" ) ;
-			$version = preg_split ( "/v/", _THEBRIG_VERSION_NBR);
-			$myversion = 0 + substr($version[1],0,3);
-			$langfile = file("/tmp/lang.inc");
-			$version = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
-			$gitversion = 0 + substr($version[1],0,3);
-			
-			
 			html_titleline(gettext("Update Availability")); 
-			html_text($confconv, gettext("Current Status"),"The latest version on GitHub is: " . $gitversion . "<br /><br />Your version is: " . $myversion );
-				// We have tag meaning we have downloaded & extracted a copy of the tree before - now we just want to update it.?>
+			html_text($confconv, gettext("Current Status"),"The latest version on GitHub is: " . $git_ver . "<br /><br />Your version is: " . $brig_ver ); ?> 
 			<tr>
+			<?php if (! $input_errors ) { ?>
 			<td width="22%" valign="top" class="vncell">Update your installation&nbsp;</td>
 			<td width="78%" class="vtable">
 			<?=gettext("Click below to download and install the latest version.");?><br />
 				<div id="submit_x">
-					<input id="update" name="update" type="submit" class="formbtn" value="<?=gettext("Update");?>" onClick="return conf_handler();" /><br />
+					<input id="thebrig_update" name="thebrig_update" type="submit" class="formbtn" value="<?=_THEBRIG_UPDATE_BUTTON;?>" onClick="return confirm('<?=_THEBRIG_INFO_MGR;?>');" /><br />
 				</div>
+				<input name="txtCommand" type="hidden" value="<?="sh /tmp/thebrig_install.sh {$config['thebrig']['rootfolder']} 3";?>" />
 			</td>
-			</tr>
+			</tr> <?php } ?>
 		<?php html_separator(); ?>
-
 	</table><?php include("formend.inc");?>
 </form>
 </td></tr>
 </table>
-<?php 	include("fend.inc"); ?>
+<?php include("fend.inc"); ?>

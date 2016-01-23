@@ -1,7 +1,25 @@
 <?php
+/*
+	file: extensions_thebrig_ports.php
+	
+	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+  
+ */
 require("auth.inc");
 require("guiconfig.inc");
-require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
 
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
@@ -14,6 +32,7 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_PORTS);
 
 // we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
 $brig_update_ready = thebrig_update_prep();
+
 if ( $brig_update_ready == 0 ){
 	// The operations carried out in thebrig_update_prep will only return 0 if there is at least one complete jail,
 	// and the necessary binaries for update operations were able to be copied. If there are no jails present, then the function
@@ -49,7 +68,7 @@ if ($_POST) {
 				for ($i; $i < count( $config['cron']['job'] ); $i++) {
 					// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 					// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
-					if ( preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
+					if ( 1 === preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
 						unset($config['cron']['job'][$i]);
 				} // end of for loop
 			} // end of array if statment
@@ -83,7 +102,7 @@ if ($_POST) {
 				for ($i; $i < count( $config['cron']['job'] ); $i++) {
 					// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 					// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
-					if ( preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
+					if ( 1 === preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
 						break;
 				} // end of for loop
 			} // end of array if statment
@@ -124,7 +143,11 @@ if ($_POST) {
 					// Create directory, remove anything within the directory, and mount the ports
 					exec ( "mkdir " . $my_jail['jailpath'] . "usr/ports");
 					exec ( "rm -r " . $my_jail['jailpath'] . "usr/ports/*");
-					exec ( "mount -t nullfs -r " . $brig_root . "conf/ports " . $my_jail['jailpath'] . "usr/ports");
+				// Update running jail
+					$jail_id = "/var/run/jail_".$my_jail['jailname'].".id";
+					if (true === is_file($jail_id)) {
+						exec ( "mount -t nullfs -r " . $brig_root . "conf/ports " . $my_jail['jailpath'] . "usr/ports");
+					}
 					// Make backup of existing make file for later
 					if ( file_exists($my_jail['jailpath'] . "etc/make.conf"))
 						exec("mv " . $my_jail['jailpath'] . "etc/make.conf " . $my_jail['jailpath'] . "etc/make.conf.bak");
@@ -140,17 +163,17 @@ if ($_POST) {
 		// We want to fetch AND extract the tree for the first time
 		$response = thebrig_portsnap($brig_root . "conf/ports", $brig_port_db , $brig_root . "conf/portsnap.conf", $pconfig['port_op']);
 		if ( $response == 1)
-			$input_errors[] = "Something bad happened while attempting to prep for the update operation";
+			$input_errors[] = _THEBRIG_NOPREPARE_UPDATE;
 		elseif ( $response == 2 )
-		$input_errors[] = "Something bad happened while attempting to return Nas4Free to its previous state";
+		$input_errors[] = _THEBRIG_NORETURN_UPDATE;
 	}
 
 	// There are no input errors detected.
 	if ( !$input_errors ){
 		// We have specified a new location for thebrig's installation, and it's valid, and we don't already have
 		if ( $config_changed ) {
-			write_config();
-			write_rcconflocal();
+			write_config ();
+			write_jailconf ();
 		}
 		// Whatever we did, we did it successfully
 		$retval = 0;
@@ -204,7 +227,7 @@ function conf_handler() {
 				<li class="tabinact"><a href="extensions_thebrig_tarballs.php"><span><?=_THEBRIG_MAINTENANCE;?>
 					</span> </a>
 				</li>
-				<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=gettext("Log");?></span></a></li>
+				<li class="tabinact"><a href="extensions_thebrig_log.php"><span><?=_THEBRIG_LOG;?></span></a></li>
 			</ul>
 		</td>
 	</tr>
@@ -216,9 +239,7 @@ function conf_handler() {
 				<li class="tabact"><a href="extensions_thebrig_ports.php"
 					title="<?=gettext("Reload page");?>"><span><?=_THEBRIG_PORTS;?> </span>
 				</a></li>
-				<li class="tabinact"><a href="extensions_thebrig_manager.php"><span><?=_THEBRIG_MANAGER;?>
-					</span> </a>
-				</li>
+				<li class="tabinact"><a href="extensions_thebrig_manager.php"><span><?=_THEBRIG_MANAGER;?></span></a></li>
 			</ul>
 		</td>
 	</tr>
@@ -230,51 +251,60 @@ function conf_handler() {
 				<table width="100%" border="0" cellpadding="6" cellspacing="0">
 					<?php if ( $brig_update_ready == 2 ) {
 			// The necessary binaries for all the update tasks could not be found in any jail.
-			html_titleline(gettext("ERROR!"));
-			html_text($confconv, gettext("Unable to Continue"),"In order to begin configuration and update tasks for a common ports tree, you need to have at least one configured and filled jail!");
+			html_titleline(_THEBRIG_ERROR);
+			html_text($confconv, _THEBRIG_UNABLECONTINUE,_THEBRIG_UNABLECONTINUE_EXPL1);
 		}
 		elseif ( $brig_update_ready == 1 ){
 			// The necessary binaries for all the update tasks could not be copied into thebrig's working directory.
-			html_titleline(gettext("ERROR! ... Like, a HUGE error!"));
-			html_text($confconv, gettext("Unable to Continue"),"For some reason, Nas4Free cannot be prepared for portsnap tasks. This is highly suspect, as the copying was attempted by root.");
+			html_titleline(_THEBRIG_HUGEERROR);
+			html_text($confconv, _THEBRIG_UNABLECONTINUE,_THEBRIG_UNABLECONTINUE_EXPL2);
 		}
 		else {
 			// All the binaries were found, and able to be moved into thebrig's working directory.
-			if ( file_exists ( $brig_port_db . "tag"))
+			if ( file_exists ( $brig_port_db . "tag")) {
 				// Extract the most recent tag's date, and convert from Unix epoch to a readable date
 				$tagdate= exec( "date -j -r `cut -f 2 -d '|' < " . $brig_port_db . "tag`");
-			else
-				$tagdate = "Never";
-			
-			
-			// Obtain latest update, if we can
-			exec ( "fetch -o /tmp/latest.ssl http://portsnap.freebsd.org/latest.ssl");
-			exec ( "fetch -o /tmp/pub.ssl http://portsnap.freebsd.org/pub.ssl");
+			}
+			else {
+				$tagdate = _THEBRIG_TAG_NEVER;
+			}
+			// Connectivity test
+			$connected = @fsockopen("portsnap.freebsd.org", 80); 
+			if ( $connected ) {
+				fclose($connected);
+				exec ( "fetch -o /tmp/portsnap_latest.ssl http://portsnap.freebsd.org/latest.ssl");
+				exec ( "fetch -o /tmp/portsnap_pub.ssl http://portsnap.freebsd.org/pub.ssl");
+			}	
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then 
 			// converts that from an epoch second to a usable date.
-			$most_date= exec( "date -j -r `" . $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
-					. "/tmp/pub.ssl -verify < "
-					. "/tmp/latest.ssl | cut -f 2 -d '|'`");
-			exec ("rm /tmp/latest.ssl"); 	// Get rid of the latest tag
-			exec ("rm /tmp/pub.ssl"); 	// Get rid of the latest tag
-			
+			if ( file_exists ("/tmp/portsnap_latest.ssl") && file_exists("/tmp/portsnap_pub.ssl") ) {
+				$most_date= exec( "date -j -r `" . $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
+					. "/tmp/portsnap_pub.ssl -verify < "
+					. "/tmp/portsnap_latest.ssl | cut -f 2 -d '|'`");
+				exec ("rm /tmp/portsnap_latest.ssl"); 	// Get rid of the latest tag
+				exec ("rm /tmp/portsnap_pub.ssl"); 	// Get rid of the latest tag
+			}
+			else {
+				$most_date = "Unknown - Do we have Internet?";
+			}
 			// We need to check if we have ever extracted a snapshot successfully
-			if ( file_exists ( $brig_root. "conf/ports/.portsnap.INDEX"))
+			if ( file_exists ( $brig_root. "conf/ports/.portsnap.INDEX")) {
 				$extractdate= date ("D M d H:i:s T Y" ,filemtime( $brig_root. "conf/ports/.portsnap.INDEX" )); // extract and convert the timestamp
-			else 
-				$extractdate = "Never";
+			}
+			else {
+				$extractdate = _THEBRIG_TAG_NEVER;
+			}
 			
-			html_titleline(gettext("Portstree")); 
-				html_text($confconv, gettext("Current Status"),gettext("The latest snapshot available for download is dated: ") . $most_date . "<br /><br />" .gettext("You have downloaded a snapshot that was released: ") . $tagdate . "<br /><br />" . gettext("The last time you applied a downloaded snapshot was: ") . $extractdate );
+			html_titleline(_THEBRIG_PORTSTREE_TITLE); 
+			html_text($confconv, _THEBRIG_PORTCURRENTSTATUS,_THEBRIG_PORTDOWNLOADABLE . $most_date . "<br /><br />" . _THEBRIG_PORTDOWNLOADED . $tagdate . "<br /><br />" . _THEBRIG_PORTAPPLIED . $extractdate );
 			// We have never gotten a tag before - we need to fetch and extract a copy first
-			if ( $tagdate === "Never"){ ?>
+			if ( $tagdate === _THEBRIG_TAG_NEVER){ ?>
 					<tr>
-						<td width="22%" valign="top" class="vncell">Fetch and Extract the
-							tree&nbsp;</td>
-						<td width="78%" class="vtable"><?=gettext("The first step to using a central ports tree is to fetch and extract the snapshot of the ports tree. <br /><b>This step should only need to be done the very first time, as it will overwrite anything in the ports tree directory!</b>");?><br />
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_FETCH_FIRST1;?>&nbsp;</td>
+						<td width="78%" class="vtable"><?=_THEBRIG_FETCH_FIRST2;?><br />
 							<div id="submit_x">
 								<input id="finstall" name="port_op" type="submit"
-									class="formbtn" value="<?=gettext("Fetch & Install");?>"
+									class="formbtn" value="<?=_THEBRIG_FETCHEXTRACT_BUTTON;?>"
 									onClick="return conf_handler();" /><br />
 							</div></td>
 					</tr>
@@ -282,45 +312,39 @@ function conf_handler() {
 			else {
 				// We have tag meaning we have downloaded & extracted a copy of the tree before - now we just want to update it.?>
 					<tr>
-						<td width="22%" valign="top" class="vncell">Fetch and Update the
-							tree&nbsp;</td>
-						<td width="78%" class="vtable"><?=gettext("Click below to perform an 'on-demand' fetch and update of the exising ports tree."); ?><br />
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_FETCH_UPDATE1;?>&nbsp;</td>
+						<td width="78%" class="vtable"><?=_THEBRIG_FETCH_UPDATE2; ?><br />
 							<div id="submit_x">
 								<input id="fupdate" name="port_op" type="submit" class="formbtn"
-									value="<?=gettext("Fetch & Update");?>"
+									value="<?=_THEBRIG_FETCHUPDATE_BUTTON;?>"
 									onClick="return conf_handler();" /><br />
 							</div>
 						</td>
 					</tr>
 
 					<tr>
-						<td width="22%" valign="top" class="vncell">Update the tree&nbsp;</td>
-						<td width="78%" class="vtable"><?=gettext("Click below to update of the exising ports tree using the most recently downloaded snapshot.");?><br />
+						<td width="22%" valign="top" class="vncell"><?=_THEBRIG_UPDATETREE1;?>&nbsp;</td>
+						<td width="78%" class="vtable"><?=_THEBRIG_UPDATETREE2;?><br />
 							<div id="submit_x">
 								<input id="update" name="port_op" type="submit" class="formbtn"
-									value="<?=gettext("Update");?>"
+									value="<?=_THEBRIG_UPDATE_BUTTON;?>"
 									onClick="return conf_handler();" /><br />
 							</div>
 						</td>
 					</tr>
 					<?php 
 			html_separator();
-			html_titleline(gettext("Jails"));?>
+			html_titleline(_THEBRIG_JAILS);?>
 					<tr>
-						<td width="15%" valign="top" class="vncell"><?=gettext("Ports Tree Enabling");?>
-						</td>
-						<td width="85%" class="vtable">Please choose which of the
-							following jails should have access to the shared ports tree:<br />
-							<br />
+						<td width="15%" valign="top" class="vncell"><?=_THEBRIG_ENABLE_PORTSTREE1;?></td>
+						<td width="85%" class="vtable"><?=_THEBRIG_ENABLE_PORTSTREE2;?><br /><br />
 							<table width="100%" border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td width="4%" class="listhdrlr">&nbsp;</td>
-									<td width="10%" class="listhdrr"><?=gettext("Name");?></td>
-									<td width="15%" class="listhdrr"><?=gettext("IP");?></td>
-									<td width="12%" class="listhdrr"><?=gettext("Hostname");?></td>
-									<td width="19%" class="listhdrr"><?=htmlspecialchars(gettext("Path"));?>
-									</td>
-									<td width="19%" class="listhdrr"><?=gettext("Description");?></td>
+									<td width="10%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE1;?></td>
+									<td width="12%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE5;?></td>
+									<td width="19%" class="listhdrr"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
+									<td width="19%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE7;?></td>
 									<td width="5%" class="list"></td>
 								</tr>
 								<?php $k = 0; for( $k; $k < count ( $a_jail ) ; $k ++ ) { ?>
@@ -330,23 +354,20 @@ function conf_handler() {
 										value=<?php echo "{$a_jail[$k]['uuid']}";?>
 										<?php  echo ( isset( $a_jail[$k]['ports'] ) ? "checked=\"checked\"" :  "" ) ; ?>>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['jailname']);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['ipaddr'] . " / " . $a_jail[$k]['subnet']) ;?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($a_jail[$k]['jailname'] . "." . $config['system']['domain']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($a_jail[$k]['jailpath']);?>&nbsp;</td>
 									<td class="listbg"><?=htmlspecialchars($a_jail[$k]['desc']);?>&nbsp;</td>
 
 								</tr>
 								<?php } ?>
-							</table> <br> <br> <b><?=gettext("Please note: ");?> </b> <?=gettext("Selecting a jail to have access to the portstree will result in a non-standard make.conf");?>
+							</table> <br> <br> <?=_THEBRIG_PORTSNOTE;?>
 					
 					
 					<tr>
-						<td width="15%" valign="top" class="vncell"><?=gettext("Cronjob");?>
-						</td>
-						<td width="85%" class="vtable"><input name="portscron"
-							type="checkbox" id="portscron" value="yes"
+						<td width="15%" valign="top" class="vncell"><?=_THEBRIG_PORTCRON;?></td>
+						<td width="85%" class="vtable"><input name="portscron" type="checkbox" id="portscron" value="yes"
 							<?php if (!empty($pconfig['portscron'])) echo "checked=\"checked\""; ?> />
-							<?=_THEBRIG_PORT_CRON?><br />
+							<?=_THEBRIG_PORT_CRON;?><br />
 						</td>
 					</tr>
 
