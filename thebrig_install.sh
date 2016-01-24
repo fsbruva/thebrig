@@ -49,9 +49,15 @@ MAJ_REL=$(uname -r | cut -d- -f1 | cut -d. -f1)
 MIN_REL=$(uname -r | cut -d- -f1 | cut -d. -f2)
 
 # Prevent users from breaking their system
-if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then
-	echo "ERROR: This version of TheBrig is incompatible with your system!"
-	exerr "ERROR: Please upgrade Nas4Free to version 9.3 or higher!"
+if [ $MAJ_REL -lt 10  ]; then
+		if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then
+			echo "ERROR: This version of TheBrig is incompatible with your system!"
+			exerr "ERROR: Please upgrade Nas4Free to version 9.3 or higher!"
+		else
+			BRANCHNAME="alexey"
+		fi
+	else
+	BRANCHNAME="alcatraz"
 fi
 
 # Store the script's current location in a file
@@ -81,14 +87,14 @@ cd $START_FOLDER/install_stage || exerr "ERROR: Could not access staging directo
 STAGE_BIN_PATH=$START_FOLDER/install_stage/conf/bin
 
 echo "Retrieving the alcatraz branch as a zip file"
-fetch https://github.com/alexey1234/mythebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
+fetch https://github.com/fsbruva/thebrig/archive/${BRANCHNAME}.zip || exerr "ERROR: Could not write to install directory!"
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
-tar -xf master.zip --exclude='.git*' --strip-components 1
+tar -xf ${BRANCHNAME}.zip --exclude='.git*' --strip-components 1
 echo "Done!"
-rm master.zip
+rm ${BRANCHNAME}.zip
 
 echo "Detecting current configuration..."
 . /etc/rc.subr
