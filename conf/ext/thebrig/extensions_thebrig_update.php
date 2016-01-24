@@ -29,25 +29,13 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_UPDATER);
 
 // we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
-$brig_update_ready = thebrig_update_prep();
 
-if ($brig_update_ready == 0 ){
-	// The operations carried out in thebrig_update_prep will only return 0 if there is at least one complete jail,
-	// and the necessary binaries for update operations were able to be copied. If there are no jails present, then the function
-	// will return 2
-	
-	// Slight redefinition to make life a little easier
+unset ($response);
+
 	$brig_root = $config['thebrig']['rootfolder'] ;
 	$brig_update_db = $brig_root . "conf/db/freebsd-update/";
 
-	// See my above comments for why the if() that used to live here is no longer needed
-	if (!is_array($config['thebrig']['content'])) {
-		// THis is impossible, as the link to this page is dead if there are no jails. However, if the user types this
-		// URL into the address bar manually, then I suppose they might be able to cause some trouble. I modified the 
-		// if ($_POST) to skip if there are no jails defined.
-		$input_errors[] = _THEBRIG_JAILSNODEFINED; 
-	}
-	else {
+	if (is_array($config['thebrig']['content'])) {
 		array_sort_key($config['thebrig']['content'], "jailno");
 		$a_jail = &$config['thebrig']['content'];
 		$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
@@ -56,9 +44,16 @@ if ($brig_update_ready == 0 ){
 		$basedir_hash = exec ( "echo " . $a_jail[0]['jailpath'] . " | sha256 -q" );
 		if ( is_link ( $a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) ) {
 		//$input_errors[]=$a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback";
-		}
+		
 	}
-}
+	} else {
+		// THis is impossible, as the link to this page is dead if there are no jails. However, if the user types this
+		// URL into the address bar manually, then I suppose they might be able to cause some trouble. I modified the 
+		// if ($_POST) to skip if there are no jails defined.
+		$input_errors[] = _THEBRIG_JAILSNODEFINED; 
+		}
+	
+
 
 // User has clicked a button
 if ($_POST && is_array( $config['thebrig']['content']))  {
@@ -192,7 +187,7 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 				// if there is a rollback link, and we want to do that, then we should allow the action to take place.
 				if (( is_link ( $brig_update_db . $basedir_hash . "-install" ) && $pconfig['update_op'] == _THEBRIG_INSTALL_BUTTON ) 
 					|| (is_link ( $my_jail['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) && $pconfig['update_op'] == "Rollback") ){
-					// We are attempting to rollback a jail that can't be
+					// We are attempting to rollback a jail th'at can't be
 					$basejail = $config['thebrig']['basejail'];
 					$basedir_list[]=$basejail['folder'];
 					$workdir_list[]=$brig_update_db;
@@ -224,10 +219,13 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 					$input_errors[] = _THEBRIG_NOROLLBACK_TEMPLATE;
 				}
 			}
-			
+			if ($pconfig['update_op'] == "Upgrade"){
+				file_put_contents("/tmp/release.upgrade",$pconfig['release'] );
+			}
 			$response = 0;
 			if ( count ( $input_errors ) == 0) {
 				$response = thebrig_update($basedir_list, $workdir_list , $conffile_list, $pconfig['update_op']); 
+				
 			}
 			else {
 				$input_errors[] = _THEBRIG_ABOVEERROR; 
@@ -235,9 +233,11 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 			
 			if ( $response == 1) {
 				$input_errors[] = _THEBRIG_NOPREPARE_UPDATE;
+				unset ($response);
 			}
 			elseif ( $response == 2 ) {
 				$input_errors[] = _THEBRIG_NORETURN_UPDATE;
+				unset ($response);
 			}
 		} // enf of else
 	} // end of update_op
@@ -311,11 +311,7 @@ if ($_POST && is_array( $config['thebrig']['content']))  {
 include("fbegin.inc");
 
 // This will evaluate if there were any input errors from prior to the user clicking "save"
-if ( $input_errors ) {
-	print_input_errors( $input_errors );
-}
-// This will alert the user to unsaved changes, and prompt the changes to be saved.
-elseif ($savemsg) print_info_box($savemsg);
+
 
 ?>
 <!-- This is the end of the first bit of html code -->
@@ -403,7 +399,12 @@ function conf_handler() {
 		<td class="tabcont">
 			<form action="extensions_thebrig_update.php" method="post"
 				name="iform" id="iform" onsubmit="return checkBeforeSubmit();">
-				<?php $msg =  _THEBRIG_NOT_CONFIRMED; if (is_file("/tmp/thebrig.tmp")) print_warning_box( $msg); ?>
+				<?php $msg =  _THEBRIG_NOT_CONFIRMED; if (is_file("/tmp/thebrig.tmp")) print_warning_box( $msg); 
+				if ( $input_errors ) print_input_errors( $input_errors );
+				if (!$response) { if ($savemsg) print_info_box($savemsg);}
+
+				?>
+				 
 				<table width="100%" border="0" cellpadding="6" cellspacing="0">
 		<?php if ( $brig_update_ready == 2 ) {
 			// The necessary binaries for all the update tasks could not be found in any jail.
@@ -433,7 +434,7 @@ function conf_handler() {
 			if (file_exists ( "/tmp/update_pub.ssl" ) && file_exists("/tmp/update_latest.ssl") ) {
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then
 			// converts that from an epoch second to a usable date.
-				exec (  $brig_root . "conf/bin/openssl rsautl -pubin -inkey "
+				exec ( "openssl rsautl -pubin -inkey "
 				. "/tmp/update_pub.ssl -verify < "
 				. "/tmp/update_latest.ssl  > /tmp/update.tag" );
 				$EOL_date= exec( "date -j -r `cat /tmp/update.tag  | cut -f 6 -d '|'`");
@@ -592,7 +593,50 @@ function conf_handler() {
 									onClick="return conf_handler();" /><br />
 							</div>
 						</td>
-				<?php html_separator();
+				<?php
+
+				if ($response) {
+					
+					foreach ($response as $line) {  $infobox1 = $infobox1 . $line ;	}
+					$infobox = "<textarea style=\"width: 98%; \" rows=\"15\"  name=\"code1\">".$infobox1."</textarea>";
+					
+				html_text($confconv1, "<font color=\"red\">Results:</font>", $infobox );
+				}
+				// RELEASE UPGRADE
+				$path = "ftp://ftp.freebsd.org/pub/FreeBSD/releases/".$my_arch."/".$my_arch."/";
+				$release_num = preg_split("|-RELEASE|",$my_rel_cut);
+				$release_num[0] = 10*$release_num[0];
+				$release_num[0] = 93;
+				$releases = release_array($path);
+				foreach ($releases as $release) {
+					$bsd_release_num= preg_split("|-RELEASE|",$release);
+					$bsd_release[]=array($release => 10*$bsd_release_num[0] ) ;
+				}
+				foreach ($bsd_release as $release) {
+						foreach ( $release as $name => $number ) {
+								if ($number >  $release_num[0]) $combo[]=$name;
+					}}
+				if (count ($combo) < 1) { } else { 
+					//html_combobox("releaseupgrade", "Upgrade release", $pconfig['releaseupgrade'], $combo, "description"); 
+					?>
+					<tr id='releaseupgrade_tr'>
+						<td width='22%' valign='top' class='vncell'><label for=''>Upgrade release</label></td>
+						<td width='78%' class='vtable'>
+							<select name='release' class='formfld' id='release' >
+							<?php foreach ($combo as $value):  ?>
+								<option value='<?=$value;?>' ><?=$value;?></option>
+							<?php endforeach;?>
+							</select>
+							<input id="update" name="update_op" type="submit" form="iform" class="formbtn" value="Upgrade"
+									onClick="return conf_handler();" />
+						<br /><span class='vexpl'>description</span>
+						</td>						
+					</tr>
+				<?php	}
+					
+					
+				//update details
+				html_separator();
 				html_titleline(_THEBRIG_UPDATE_DETAILS);
 				// Build an array with the keys as the jail uuid, and with the value as the jail's name
 				$jail_names = array();
@@ -613,9 +657,9 @@ function conf_handler() {
 								</tr>
 
 								<tr>
-									<td class="<?=$enable?"listlr":"listlrd";?>"><?=nl2br($added_contents[$i]);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=nl2br($updated_contents[$i]);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=nl2br($removed_contents[$i]);?>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$added_contents[$i];?></textarea>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$updated_contents[$i];?></textarea>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$removed_contents[$i];?></textarea>&nbsp;</td>
 								</tr>
 
 							</table>
@@ -635,9 +679,10 @@ function conf_handler() {
 								</tr>
 
 								<tr>
-									<td class="<?=$enable?"listlr":"listlrd";?>"><?=nl2br($added_contents[$i]);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=nl2br($updated_contents[$i]);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=nl2br($removed_contents[$i]);?>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$added_contents[$i];?></textarea>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$updated_contents[$i];?></textarea>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$removed_contents[$i];?></textarea>&nbsp;</td>
+									
 								</tr>
 
 							</table>
