@@ -29,24 +29,39 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_UPDATER);
 
 // we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
+$brig_update_ready = thebrig_update_prep();
+
+if ($brig_update_ready == 0 ){
+	// The operations carried out in thebrig_update_prep will only return 0 if there is at least one complete jail,
+	// and the necessary binaries for update operations were able to be copied. If there are no jails present, then the function
+	// will return 2
+	
+	// Slight redefinition to make life a little easier
 
 unset ($response);
 
 	$brig_root = $config['thebrig']['rootfolder'] ;
 	$brig_update_db = $brig_root . "conf/db/freebsd-update/";
 
-	if (is_array($config['thebrig']['content'])) {
+	// See my above comments for why the if() that used to live here is no longer needed
+	if (!is_array($config['thebrig']['content'])) {
+		// THis is impossible, as the link to this page is dead if there are no jails. However, if the user types this
+		// URL into the address bar manually, then I suppose they might be able to cause some trouble. I modified the 
+		// if ($_POST) to skip if there are no jails defined.
+		$input_errors[] = _THEBRIG_JAILSNODEFINED; 
+	}
+	else {
 		array_sort_key($config['thebrig']['content'], "jailno");
 		$a_jail = &$config['thebrig']['content'];
 		$pconfig['updatecron'] = isset( $config['thebrig']['updatecron'] ) ;
 
 
 		$basedir_hash = exec ( "echo " . $a_jail[0]['jailpath'] . " | sha256 -q" );
-		if ( is_link ( $a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) ) {
+		//if ( is_link ( $a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback" ) ) {
 		//$input_errors[]=$a_jail[0]['jailpath'] . "var/db/freebsd-update/" . $basedir_hash . "-rollback";
-		
+		//}
 	}
-	} else {
+}	else {
 		// THis is impossible, as the link to this page is dead if there are no jails. However, if the user types this
 		// URL into the address bar manually, then I suppose they might be able to cause some trouble. I modified the 
 		// if ($_POST) to skip if there are no jails defined.
@@ -434,7 +449,7 @@ function conf_handler() {
 			if (file_exists ( "/tmp/update_pub.ssl" ) && file_exists("/tmp/update_latest.ssl") ) {
 			// Uses openssl to verify the "latest.ssl" snapshot using the portsnap public key, and then
 			// converts that from an epoch second to a usable date.
-				exec ( "openssl rsautl -pubin -inkey "
+				exec ( $config['thebrig']['rootfolder']."conf/bin/openssl rsautl -pubin -inkey "
 				. "/tmp/update_pub.ssl -verify < "
 				. "/tmp/update_latest.ssl  > /tmp/update.tag" );
 				$EOL_date= exec( "date -j -r `cat /tmp/update.tag  | cut -f 6 -d '|'`");
@@ -527,9 +542,9 @@ function conf_handler() {
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($tag_date);?>&nbsp;</td>
 									<td class="<?=$enable?"listrc":"listrcd";?>"><?=htmlspecialchars($tag_version );?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars( $file_summary);?>&nbsp;</td>
-									<?php $freebsdversionc = $a_jail[$k]["jailpath"].'bin/freebsd-version -u'; ?>
-									<td class="listbg"><?=htmlspecialchars( exec($freebsdversionc) );?>&nbsp;</td>
-									<!--<td class="listbg"><?=htmlspecialchars($a_jail[$k]['base_ver']);?>&nbsp;</td> -->
+									<!--<?php //$freebsdversionc = $a_jail[$k]["jailpath"].'bin/freebsd-version -u'; ?>
+									<td class="listbg"><?=htmlspecialchars( exec($freebsdversionc) );?>&nbsp;</td>-->
+									<td class="listbg"><?=htmlspecialchars($a_jail[$k]['base_ver']);?>&nbsp;</td> 
 								</tr>
 				<?php endfor; 
 				if ( is_dir( $config['thebrig']['template'] . "/var/run" ) ) {
@@ -617,7 +632,7 @@ function conf_handler() {
 								if ($number >  $release_num[0]) $combo[]=$name;
 					}}
 				if (count ($combo) < 1) { } else { 
-					//html_combobox("releaseupgrade", "Upgrade release", $pconfig['releaseupgrade'], $combo, "description"); 
+					
 					?>
 					<tr id='releaseupgrade_tr'>
 						<td width='22%' valign='top' class='vncell'><label for=''>Upgrade release</label></td>
@@ -629,7 +644,7 @@ function conf_handler() {
 							</select>
 							<input id="update" name="update_op" type="submit" form="iform" class="formbtn" value="Upgrade"
 									onClick="return conf_handler();" />
-						<br /><span class='vexpl'>description</span>
+						<br /><span class='vexpl'>If you see this button, you can upgrade your jail to next release <br /> Please check the availability of the NAS4Free to the proposed release <br /> Also please read FreeBSD handbook about upgrade FreeBSD <br /><b>Idea:</b> FreeBSD jail can run with major kernel: world from 9.3 and kernel from 10.2 releases  </span>
 						</td>						
 					</tr>
 				<?php	}

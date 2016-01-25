@@ -241,18 +241,18 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 			switch ( $action ){
 				case _THEBRIG_FETCH_BUTTON:
 					// Fetch only
-					$command_fetch= $command_prefix . " fetch";
-					exec($command_fetch);
+					$command_fetch= $command_prefix . " --not-running-from-cron fetch";					
+					cmd_exec($command_fetch, $output, $errors);					
 					break;
 				case _THEBRIG_INSTALL_BUTTON:
 					// Update
-					$command_update= $command_prefix . " install";
-					exec($command_update);
+					$command_update= $command_prefix . " --not-running-from-cron install";
+					cmd_exec($command_update, $output, $errors);					
 					break;
 				case "Fetch & Install":
 					// Install --> fetch & extract
-					$command_fetch= $command_prefix . " fetch install";
-					mwexec($command_fetch );
+					$command_fetch= $command_prefix . " --not-running-from-cron fetch install";
+					cmd_exec($command_fetch, $output, $errors);
 					break;
 				case "Cron":
 					// Cron
@@ -267,12 +267,13 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 			} // end of switch
 
 		} // end of for loop
+		
 		// Cleanup Nas4Free and return it to its previous state
 		if ( thebrig_update_config ( false ) == true ){
 			return 2; // if the cleanup returns anything other than 0, there was a problem.
 		}
 	}
-	return 0;
+	return $output;
 }
 // fetch available releases
 function release_array($path) {
@@ -363,7 +364,7 @@ function thebrig_update_config ( $setup ) {
 	$brig_root = $config['thebrig']['rootfolder'];
 	$bin_list = $config['thebrig']['update']['cmd'];
 	$op_failure = false ;
-	if ( $setup ) {
+	if ( $setup == TRUE ) {
 		// We want to prepare for portsnap and update operations by putting the files within the respective locations on the 
 		// Nas4Free host. This is necessary because of the way portsnap and freebsd-update has certain paths fully qualified
 		for ( $i = 0; $i <= 8; $i++ ){
