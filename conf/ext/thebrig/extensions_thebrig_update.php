@@ -627,7 +627,7 @@ function conf_handler() {
 							</select>
 							<input id="update" name="update_op" type="submit" form="iform" class="formbtn" value="Upgrade"
 									onClick="return conf_handler();" />
-						<br /><span class='vexpl'>description</span>
+						<br /><span class='vexpl'>If you see this button, you can upgrade your jail to next release <br /> Please check the availability of the NAS4Free to the proposed release <br /> Also please read FreeBSD handbook about upgrade FreeBSD <br /><b>Idea:</b> FreeBSD jail can run with major kernel: world from 9.3 and kernel from 10.2 releases  </span>
 						</td>						
 					</tr>
 				<?php	}
