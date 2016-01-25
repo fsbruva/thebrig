@@ -49,36 +49,14 @@ if [ $MAJ_REL -lt 10  ]; then
 	else
 	BRANCHNAME="alcatraz"
 fi
-if [ $2 -eq 2 ]; then 
-	if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then	
-    # Fetch the testing branch as a zip file
-    		echo "Retrieving the testing branch as a zip file"
-	 	fetch https://github.com/fsbruva/thebrig/archive/working.zip || exerr "ERROR: Could not write to install directory!"
-    		mv working.zip master.zip
-    		ALCATRAZ=0
-    	else
-    		echo "You have alcatraz - compatible system. Use alcatraz"
-    		echo "Retrieving the alcatraz branch as a zip file"
-    		fetch https://github.com/fsbruva/thebrig/archive/alcatraz.zip || exerr "ERROR: Could not write to install directory!"
-    		mv alcatraz.zip master.zip
-    		ALCATRAZ=1
-    	fi
-elif [ $2 -eq 3 ]; then
-	echo "Retrieving the alexey's branch as a zip file"
-	fetch https://github.com/fsbruva/thebrig/archive/alexey.zip || exerr "ERROR: Could not write to install directory!"
-	mv alexey.zip master.zip
-else
-    # Fetch the master branch as a zip file
-    echo "Retrieving the most recent version of TheBrig"
-    fetch https://github.com/fsbruva/thebrig/archive/master.zip || exerr "ERROR: Could not write to install directory!"
-fi
-
+fetch https://github.com/fsbruva/thebrig/archive/${BRANCHNAME}.zip || exerr "ERROR: Could not write to install directory!"
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
-tar -xvf master.zip --exclude='.git*' --strip-components 1
-rm master.zip
+tar -xf ${BRANCHNAME}.zip --exclude='.git*' --strip-components 1
+echo "Done!"
+rm ${BRANCHNAME}.zip
 
 # Run the change_ver script to deal with different versions of TheBrig
 /usr/local/bin/php-cgi -f conf/bin/change_ver.php
