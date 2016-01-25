@@ -596,14 +596,15 @@ function conf_handler() {
 						</td>
 				<?php
 				if ($response) {
-					foreach ($response as $line) {  $infobox = $infobox . $line . "<br />";	}
-				html_text($confconv1, "<font color=\"red\">Results:</font>", $infobox );
+					foreach ($response as $line) {  $infobox1 = $infobox1 . $line ;	}
+					$infobox = "<textarea style=\"width: 98%; \" rows=\"15\"  name=\"code1\">".$infobox1."</textarea>";
+					html_text($confconv1, "<font color=\"red\">Results:</font>", $infobox );
 				}
 				// RELEASE UPGRADE
 				$path = "ftp://ftp.freebsd.org/pub/FreeBSD/releases/".$my_arch."/".$my_arch."/";
 				$release_num = preg_split("|-RELEASE|",$my_rel_cut);
 				$release_num[0] = 10*$release_num[0];
-				$release_num[0] = 93;
+				//$release_num[0] = 93;
 				$releases = release_array($path);
 				foreach ($releases as $release) {
 					$bsd_release_num= preg_split("|-RELEASE|",$release);
@@ -654,9 +655,9 @@ function conf_handler() {
 								</tr>
 
 								<tr>
-									<td class="<?=$enable?"listlr":"listlrd";?>"><?=nl2br($added_contents[$i]);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=nl2br($updated_contents[$i]);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=nl2br($removed_contents[$i]);?>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$added_contents[$i];?></textarea>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$updated_contents[$i];?></textarea>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$removed_contents[$i];?></textarea>&nbsp;</td>
 								</tr>
 
 							</table>
@@ -676,9 +677,9 @@ function conf_handler() {
 								</tr>
 
 								<tr>
-									<td class="<?=$enable?"listlr":"listlrd";?>"><?=nl2br($added_contents[$i]);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=nl2br($updated_contents[$i]);?>&nbsp;</td>
-									<td class="<?=$enable?"listr":"listrd";?>"><?=nl2br($removed_contents[$i]);?>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$added_contents[$i];?></textarea>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$updated_contents[$i];?></textarea>&nbsp;</td>
+									<td><textarea style="width: 98%; margin: 2px;" class="core" rows="20" cols="33" name="code"><?=$removed_contents[$i];?></textarea>&nbsp;</td>
 								</tr>
 
 							</table>

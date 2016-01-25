@@ -15,4 +15,4 @@ TL,DR version steps:
 3. Execute it, and pass the desired destination as the argument to the script like this
 nas4free # /bin/sh /tmp/thebrig_install.sh /mnt/pool1/brig_folder
 
-Copyright 2013-2015
+Copyright 2013-2016

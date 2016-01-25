@@ -49,9 +49,15 @@ MAJ_REL=$(uname -r | cut -d- -f1 | cut -d. -f1)
 MIN_REL=$(uname -r | cut -d- -f1 | cut -d. -f2)
 
 # Prevent users from breaking their system
-if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then
-	echo "ERROR: This version of TheBrig is incompatible with your system!"
-	exerr "ERROR: Please upgrade Nas4Free to version 9.3 or higher!"
+if [ $MAJ_REL -lt 10  ]; then
+		if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then
+			echo "ERROR: This version of TheBrig is incompatible with your system!"
+			exerr "ERROR: Please upgrade Nas4Free to version 9.3 or higher!"
+		else
+			BRANCHNAME="alexey"
+		fi
+	else
+	BRANCHNAME="alcatraz"
 fi
 
 # Store the script's current location in a file
@@ -81,14 +87,14 @@ cd $START_FOLDER/install_stage || exerr "ERROR: Could not access staging directo
 STAGE_BIN_PATH=$START_FOLDER/install_stage/conf/bin
 
 echo "Retrieving the alcatraz branch as a zip file"
-fetch https://github.com/fsbruva/thebrig/archive/alcatraz.zip || exerr "ERROR: Could not write to install directory!"
+fetch https://github.com/fsbruva/thebrig/archive/${BRANCHNAME}.zip || exerr "ERROR: Could not write to install directory!"
 
 # Extract the files we want, stripping the leading directory, and exclude
 # the git nonsense
 echo "Unpacking the tarball..."
-tar -xf alcatraz.zip --exclude='.git*' --strip-components 1
+tar -xf ${BRANCHNAME}.zip --exclude='.git*' --strip-components 1
 echo "Done!"
-rm alcatraz.zip
+rm ${BRANCHNAME}.zip
 
 echo "Detecting current configuration..."
 . /etc/rc.subr
@@ -99,11 +105,21 @@ INSTALLED=`configxml_get //thebrig/rootfolder`
 if [ ! -z ${INSTALLED} ]; then
 	echo "Look like update thebrig"
 	BRIG_ROOT=${INSTALLED}
-	cp -f -R $START_FOLDER/install_stage/* $BRIG_ROOT/
+	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
+	# Nas4Free doesn't ship php-cli, so we have to fool it.
+	THEBRIG_START_FILE=thebrig_start.php
+	export REDIRECT_STATUS=200
+	export GATEWAY_INTERFACE="CGI/1.1"
+	export REQUEST_METHOD="GET"
+	export SCRIPT_FILENAME=$STAGE_BIN_PATH/$THEBRIG_START_FILE
+	export SCRIPT_PATH=$THEBRIG_START_FILE
+	export PATH_INFO=$SCRIPT_FILENAME
+	/usr/local/bin/php-cgi -q
+	ACTION_MSG="Updated"
 	echo "Congratulations! You have fresh TheBrig version."
 else
 	echo "Look like fresh install"
-	cp -f -R $START_FOLDER/install_stage/* $BRIG_ROOT/
+	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
 	# Create the symlinks/schema. We can't use thebrig_start since
 	# there is nothing for the brig in the config XML
 	mkdir -p /usr/local/www/ext
@@ -123,8 +139,7 @@ fi
 # Get rid of staged updates & cleanup
 cd $START_FOLDER
 rm -rf install_stage
-chmod -f -R 755 $BRIG_ROOT/conf/bin
-chmod -f -R 755 $BRIG_ROOT/conf/sbin
+
 # Log it!
 CURRENTDATE=`date -j +"%Y-%m-%d %H:%M:%S"`
 echo "[$CURRENTDATE]: TheBrig installer!: installer: ${ACTION_MSG} successfully" >> $BRIG_ROOT/thebrig.log
