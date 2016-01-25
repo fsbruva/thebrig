@@ -40,9 +40,14 @@ MAJ_REL=$(uname -r | cut -d- -f1 | cut -d. -f1)
 MIN_REL=$(uname -r | cut -d- -f1 | cut -d. -f2)
 
 # Prevent users from breaking their system
-
-	echo "ERROR: This version of TheBrig is incompatible with your system!"
-	exerr "ERROR: Please upgrade Nas4Free to version 9.3 or higher!"
+if [ $MAJ_REL -lt 10  ]; then
+		if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then
+			BRANCHNAME="working"
+		else
+			BRANCHNAME="alexey"
+		fi
+	else
+	BRANCHNAME="alcatraz"
 fi
 if [ $2 -eq 2 ]; then 
 	if [ $MAJ_REL -lt 9 -o $MAJ_REL -eq 9 -a $MIN_REL -lt 3 ]; then	
