@@ -64,6 +64,15 @@ jail_args="-f ${rootfolder}/conf/thebrig.conf"
 
 start_cmd="thebrig_start"
 stop_cmd="thebrig_stop"
+list_cmd=`echo /usr/sbin/jls`
+listall_cmd="thebrig_show_all_jails"
+startonboot_cmd=`echo grep thebrig_list /etc/rc.conf`
+extra_commands="list listall startonboot"
+thebrig_show_all_jails()
+{
+/usr/local/bin/xml sel -t -m "//thebrig/content" -v jailname -o " " /conf/config.xml
+echo ""
+}
 
 thebrig_start()
 {
