@@ -64,6 +64,15 @@ jail_args="-f ${rootfolder}/conf/thebrig.conf"
 
 start_cmd="thebrig_start"
 stop_cmd="thebrig_stop"
+list_cmd=`echo /usr/sbin/jls`
+listall_cmd="thebrig_show_all_jails"
+startonboot_cmd=`echo grep thebrig_list /etc/rc.conf`
+extra_commands="list listall startonboot"
+thebrig_show_all_jails()
+{
+/usr/local/bin/xml sel -t -m "//thebrig/content" -v jailname -o " " /conf/config.xml
+echo ""
+}
 
 thebrig_start()
 {
@@ -74,15 +83,20 @@ thebrig_start()
 
         for _j in ${_jail_list}; do
                 echo -n "${_j} "
-
+		_tmp=`mktemp -t jail` || exit 3
                 if [ -e /var/run/jail_${_j}.id ]; then
                         echo "${_j} already exists"
                         continue
                 fi
-                #      Uncomment for debug next string and comment next+1.
-                #       jail -c -d -p 20 -f /etc/thebrig.conf -J /var/run/jail_${_j}.id ${_j}  >> /$
-                $jail_cmd $jail_args -p 20 -J /var/run/jail_${_j}.id -c ${_j}
-
+                $jail_cmd $jail_args -p 20 -J /var/run/jail_${_j}.id -c ${_j} >> $_tmp 2>&1
+				sleep 1
+				if _jid=$(jls -j $_j jid); then
+					tail -1 $_tmp
+				else
+					rm -f /var/run/jail_${_j}.id
+					echo " cannot start jail \"${_hostname:-${_j}}\": "
+				fi
+				rm -f $_tmp
         done
         echo ""
 }
@@ -116,7 +130,3 @@ thebrig_stop()
 }
 
 run_rc_command "${cmd}"
-
-
-
-
