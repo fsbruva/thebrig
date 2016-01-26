@@ -16,7 +16,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-include_once( "ext/thebrig/lang.inc");
+include_once( "config.inc");
+include_once( $config['thebrig']['rootfolder']."conf/ext/thebrig/lang.inc");
 function thebrig_unregister() {
  	global $config;
  	
