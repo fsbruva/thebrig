@@ -263,7 +263,7 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 				case "Upgrade":
 					// Upgrade --> release upgrade					
 					$command_upgrade = $command_prefix . " --not-running-from-cron upgrade -r " . file_get_contents("/tmp/release.upgrade") . " install" ;
-					cmd_exec($command_upgrade, $output);
+					cmd_exec($command_upgrade, $output, $errors);
 					break;
 			} // end of switch
 
