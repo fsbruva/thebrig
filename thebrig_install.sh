@@ -101,25 +101,20 @@ echo "Detecting current configuration..."
 . /etc/configxml.subr
 . /etc/util.subr
 
+echo "Detecting current configuration..."
+. /etc/rc.subr
+. /etc/configxml.subr
+. /etc/util.subr
+
 INSTALLED=`configxml_get //thebrig/rootfolder`
 if [ ! -z ${INSTALLED} ]; then
 	echo "Look like update thebrig"
 	BRIG_ROOT=${INSTALLED}
-	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
-	# Nas4Free doesn't ship php-cli, so we have to fool it.
-	THEBRIG_START_FILE=thebrig_start.php
-	export REDIRECT_STATUS=200
-	export GATEWAY_INTERFACE="CGI/1.1"
-	export REQUEST_METHOD="GET"
-	export SCRIPT_FILENAME=$STAGE_BIN_PATH/$THEBRIG_START_FILE
-	export SCRIPT_PATH=$THEBRIG_START_FILE
-	export PATH_INFO=$SCRIPT_FILENAME
-	/usr/local/bin/php-cgi -q
-	ACTION_MSG="Updated"
+	cp -f -R $START_FOLDER/install_stage/* $BRIG_ROOT/
 	echo "Congratulations! You have fresh TheBrig version."
 else
 	echo "Look like fresh install"
-	rsync -r $START_FOLDER/install_stage/* $BRIG_ROOT/
+	cp -f -R $START_FOLDER/install_stage/* $BRIG_ROOT/
 	# Create the symlinks/schema. We can't use thebrig_start since
 	# there is nothing for the brig in the config XML
 	mkdir -p /usr/local/www/ext
@@ -139,7 +134,8 @@ fi
 # Get rid of staged updates & cleanup
 cd $START_FOLDER
 rm -rf install_stage
-
+chmod -f -R 755 $BRIG_ROOT/conf/bin
+chmod -f -R 755 $BRIG_ROOT/conf/sbin
 # Log it!
 CURRENTDATE=`date -j +"%Y-%m-%d %H:%M:%S"`
 echo "[$CURRENTDATE]: TheBrig installer!: installer: ${ACTION_MSG} successfully" >> $BRIG_ROOT/thebrig.log
