@@ -875,7 +875,7 @@ function write_defs_rules() {
 	 }
 	 fclose($handle);
 	 } else {
-	 unlink_if_exists($config['thebrig']['rootfolder']."/conf/devfs.rules";);
+	 unlink_if_exists($config['thebrig']['rootfolder']."/conf/devfs.rules");
 	 }
 }
 function write_jailcommands ($out_jail) {
