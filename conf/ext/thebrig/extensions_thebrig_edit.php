@@ -187,8 +187,8 @@ else {
 	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = true;
 	$pconfig['statfs'] = "2";
-	$pconfig['devfs_enable'] = false;
-	$pconfig['proc_enable'] = false;
+	$pconfig['devfs_enable'] = true;
+	$pconfig['proc_enable'] = true;
 	$pconfig['fdescfs_enable'] = false;
 	unset ($pconfig['rule'] );
 	unset($pconfig['auxparam']);
@@ -583,19 +583,6 @@ $('#source').change(function(){
 		$('#homegrown_tr').hide();
 		}
 	});
-$('#devfs_type').change(function() {
-	switch ($('#devfs_enable').val()) {
-	case "parent":
-		$('#mounts_separator_empty').show();
-		break;
-	case "standart":
-		$('#mounts_separator_empty').show();
-		break;
-	case "custom":
-		$('#mounts_separator_empty').show();
-		break;
-		}
-	});
 $('#jail_vnet').change(function() {
 		switch ($('#jail_vnet').is(':checked')) {
 		case false :
@@ -623,10 +610,43 @@ $('#zfs_enable').change(function() {
 		break;
 		}
 	});
+$('#moreless').click(function (){
+		switch ($('#moreless').val()) {
+			case "More":
+				$('#moreless').val("Less");
+				$('#jail_mount_tr').show();
+				$('#param_tr').show();
+				$('#statfs_tr').show();
+				$('#devfs_enable_tr').show();
+				$('#rule_tr').show();
+				$('#proc_enable_tr').show();
+				$('#fdescfs_enable_tr').show();
+				$('#auxparam_tr').show();
+				$('#cmd_tr').show();
+				$('#mounts_separator').show();
+			break;
+			case "Less":
+			default:
+				$('#moreless').val("More");
+				$('#jail_mount_tr').hide();
+				$('#param_tr').hide();
+				$('#statfs_tr').hide();
+				$('#devfs_enable_tr').hide();
+				$('#rule_tr').hide();
+				$('#proc_enable_tr').hide();
+				$('#fdescfs_enable_tr').hide();
+				$('#auxparam_tr').hide();
+				$('#cmd_tr').hide();
+				$('#mounts_separator').hide();
+			break;
+		}
+});
+$('#moreless').click();
 $('#zfs_enable').change();
 $('#jail_type').change();
 $('#source').change();
 $('#jail_vnet').change();
+$('#moreless').click();
 });
 function jail_mount_enable() {
 	switch (document.iform.jail_mount.checked) {
@@ -665,7 +685,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_titleline(_THEBRIG_JAIL_PARAMETERS);?>
         	<?php html_inputbox("jailno", _THEBRIG_JAIL_NUMBER, $pconfig['jailno'], _THEBRIG_JAIL_NUMBER_EXPL,true, 10, true);?>
 			<?php html_inputbox("jailname", _THEBRIG_TABLE1_TITLE1, $pconfig['jailname'], _THEBRIG_TABLE1_TITLE1_EXPL, true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
-			<?php html_combobox("jail_type", _THEBRIG_JAIL_TYPE, $pconfig['jail_type'], array('slim' =>'Slim','full'=> 'Full'), _THEBRIG_JAIL_TYPE_EXPL, true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
+			<?php html_combobox("jail_type", _THEBRIG_JAIL_TYPE, $pconfig['jail_type'], array('full'=> 'Full','slim' =>'Slim'), _THEBRIG_JAIL_TYPE_EXPL, true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
 			
 			<?php html_checkbox("enable", _THEBRIG_TABLE1_TITLE3,			!empty($pconfig['enable']) ? true : false, _THEBRIG_TABLE1_TITLE3_EXPL, "");?>
 			<?php html_inputbox("jailpath", _THEBRIG_ONLINETABLE_TITLE4, $pconfig['jailpath'], _THEBRIG_ONLINETABLE_TITLE4_EXPL, false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>
@@ -763,9 +783,11 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			} //endif ?>	
 				</table>
 				<div id="submit">
+					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" value="More" id="moreless" />
+					<p><p>
 					<input name="Submit" type="submit" class="formbtn" value="<?=(isset($uuid) && (FALSE !== $cnid)) ? _THEBRIG_SAVE_BUTTON : _THEBRIG_ADD_BUTTON?>" onclick="return submitted();"/>
 					<input name="Cancel" type="submit" class="formbtn" value="<?=_THEBRIG_CANCEL_BUTTON;?>" />
-					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="<?=_THEBRIG_FSTAB_BUTTON;?>">
+					<input type="button" style = "font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;font-size: 11px;font-weight:bold;" onclick="redirect()" value="<?=_THEBRIG_FSTAB_BUTTON;?>"/>
 					<input name="uuid" type="hidden" value="<?=$pconfig['uuid'];?>" />
 					<input name="http_redirect" type="hidden" value="extensions_thebrig.php" />
 					
