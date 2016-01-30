@@ -125,7 +125,7 @@ thebrig_stop()
                 fi
 			ruleset=`/usr/local/bin/xml sel -t \
 							-m "//thebrig/content" \
-								-i "jailname[.='${_j}']" -v "4+jailno" -n -b \
+								-i "jailname[.='${_j}']" -v "100+jailno" -n -b \
 						/conf/config.xml`
 			 eval /sbin/devfs rule -s ${ruleset} delset
         done
