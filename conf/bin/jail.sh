@@ -78,8 +78,9 @@ thebrig_start()
 {
         echo -n "Starting jails: "
         /sbin/sysctl security.jail.enforce_statfs=`configxml_get "//thebrig/gl_statfs"`
-
-        devfs_init_rulesets
+		devfs_init_rulesets
+		rulefile=${rootfolder}conf/devfs.rules
+		devfs_rulesets_from_file ${rulefile}
 
         for _j in ${_jail_list}; do
                 echo -n "${_j} "
@@ -122,7 +123,11 @@ thebrig_stop()
                 if [ $retval -eq 0 ]; then
                     rm /var/run/jail_${_j}.id
                 fi
-
+			ruleset=`/usr/local/bin/xml sel -t \
+							-m "//thebrig/content" \
+								-i "jailname[.='${_j}']" -v "100+jailno" -n -b \
+						/conf/config.xml`
+			 eval /sbin/devfs rule -s ${ruleset} delset
         done
 
         echo

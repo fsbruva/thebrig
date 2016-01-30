@@ -859,7 +859,7 @@ function brig_datasets_list() {
 function write_defs_rules() {
 	global $config, $g;
 	
-	$file = "/etc/devfs.rules";
+	$file = $config['thebrig']['rootfolder']."/conf/devfs.rules";
 	$handle = fopen($file, "w");
 	fwrite($handle, "##Thebrig rulesets##");
 	$jails = $config['thebrig']['content'];
@@ -875,7 +875,7 @@ function write_defs_rules() {
 	 }
 	 fclose($handle);
 	 } else {
-	 unlink_if_exists("/etc/devfs.rules");
+	 unlink_if_exists($config['thebrig']['rootfolder']."/conf/devfs.rules";);
 	 }
 }
 function write_jailcommands ($out_jail) {
