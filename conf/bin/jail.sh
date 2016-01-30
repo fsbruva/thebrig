@@ -64,13 +64,23 @@ jail_args="-f ${rootfolder}/conf/thebrig.conf"
 
 start_cmd="thebrig_start"
 stop_cmd="thebrig_stop"
+list_cmd=`echo /usr/sbin/jls`
+listall_cmd="thebrig_show_all_jails"
+startonboot_cmd=`echo grep thebrig_list /etc/rc.conf`
+extra_commands="list listall startonboot"
+thebrig_show_all_jails()
+{
+/usr/local/bin/xml sel -t -m "//thebrig/content" -v jailname -o " " /conf/config.xml
+echo ""
+}
 
 thebrig_start()
 {
         echo -n "Starting jails: "
         /sbin/sysctl security.jail.enforce_statfs=`configxml_get "//thebrig/gl_statfs"`
-
-        devfs_init_rulesets
+		devfs_init_rulesets
+		rulefile=${rootfolder}conf/devfs.rules
+		devfs_rulesets_from_file ${rulefile}
 
         for _j in ${_jail_list}; do
                 echo -n "${_j} "
@@ -113,7 +123,11 @@ thebrig_stop()
                 if [ $retval -eq 0 ]; then
                     rm /var/run/jail_${_j}.id
                 fi
-
+			ruleset=`/usr/local/bin/xml sel -t \
+							-m "//thebrig/content" \
+								-i "jailname[.='${_j}']" -v "4+jailno" -n -b \
+						/conf/config.xml`
+			 eval /sbin/devfs rule -s ${ruleset} delset
         done
 
         echo
