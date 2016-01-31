@@ -30,23 +30,26 @@ function get_jailinfo() {
 		array_sort_key($config['thebrig']['content'], "jailno");
 		$jails =  $config['thebrig']['content'];
 		$tabledata['rowcount']=count($jails);
-		foreach ($jails as $n_jail){
-			$tabledata['name'][$n_jail["jailno"]] = $n_jail['jailname'];
+		$k=0;
+		for ($k = 0; $k < $tabledata['rowcount']; $k++ ) {
+			$n_jail = $jails[$k];
+			$i=1+$k;
+			$tabledata['name'][$i] = $n_jail['jailname'];
 			if (!is_dir( $n_jail['jailpath'] ."var/run")) 	{
-					$tabledata['built'][$n_jail["jailno"]] = 'OFF';
-					$tabledata['builtports'][$n_jail["jailno"]] = 'OFF';
-					$tabledata['builtsrc'][$n_jail["jailno"]] = 'OFF';
+					$tabledata['built'][$i] = 'OFF';
+					$tabledata['builtports'][$i] = 'OFF';
+					$tabledata['builtsrc'][$i] = 'OFF';
 				}else{
-					$tabledata['built'][$n_jail["jailno"]] = 'ON';
+					$tabledata['built'][$i] = 'ON';
 					if (is_dir( $n_jail['jailpath'] . "usr/ports/Mk")) {
-						$tabledata['builtports'][$n_jail["jailno"]] = "ON";
+						$tabledata['builtports'][$i] = "ON";
 						} else {
-						$tabledata['builtports'][$n_jail["jailno"]] = "OFF";
+						$tabledata['builtports'][$i] = "OFF";
 						}
 					if (is_dir( $n_jail['jailpath'] . "usr/src/sys")) {
-						$tabledata['builtsrc'][$n_jail["jailno"]] = "ON";
+						$tabledata['builtsrc'][$i] = "ON";
 						} else {
-						$tabledata['builtsrc'][$n_jail["jailno"]] = "OFF";
+						$tabledata['builtsrc'][$i] = "OFF";
 						}
 				}	
 			$file_id = "/var/run/jail_".$n_jail['jailname'].".id";
@@ -57,25 +60,25 @@ function get_jailinfo() {
 			$sleep_cnt = exec ( $sleep_cmd ); 
 			$runn_cnt = exec ( $runn_cmd);
 			$total = intval($sleep_cnt) + intval($runn_cnt);
-			$tabledata['status'][$n_jail["jailno"]] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
-			$tabledata['id'][$n_jail["jailno"]] = $jail_id;
+			$tabledata['status'][$i] = "{$total} processes: {$runn_cnt} running, {$sleep_cnt} sleeping";
+			$tabledata['id'][$i] = $jail_id;
 			if (1 == exec ("jls -j ".$n_jail['jailname']. " vnet") ) { 
 				unset ($result);
 				$cmd = "jexec ".$n_jail['jailname']." ifconfig epair" . $n_jail["jailno"] ."b | grep inet | awk '{ print \$2}'";
 				exec ($cmd, $result); 
-				$tabledata['ip'][$n_jail["jailno"]] = implode(",", $result); } else {
-				$tabledata['ip'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." ip4.addr"); }
-				$tabledata['hostname'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." host.hostname");
-				$tabledata['path'][$n_jail["jailno"]] = exec ("jls -j ".$n_jail['jailname']." path");
-				$tabledata['file_id'][$n_jail["jailno"]] = $file_id;
+				$tabledata['ip'][$i] = implode(",", $result); } else {
+				$tabledata['ip'][$i] = exec ("jls -j ".$n_jail['jailname']." ip4.addr"); }
+				$tabledata['hostname'][$i] = exec ("jls -j ".$n_jail['jailname']." host.hostname");
+				$tabledata['path'][$i] = exec ("jls -j ".$n_jail['jailname']." path");
+				$tabledata['file_id'][$i] = $file_id;
 			} 
 			else {
-				$tabledata['status'][$n_jail["jailno"]] = 'OFF'; 
-				$tabledata['id'][$n_jail["jailno"]] = 'OFF';
-				$tabledata['ip'][$n_jail["jailno"]] = 'OFF';
-				$tabledata['hostname'][$n_jail["jailno"]] = 'OFF';
-				$tabledata['path'][$n_jail["jailno"]] = 'OFF';
-				$tabledata['file_id'][$n_jail["jailno"]] = false;
+				$tabledata['status'][$i] = 'OFF'; 
+				$tabledata['id'][$i] = 'OFF';
+				$tabledata['ip'][$i] = 'OFF';
+				$tabledata['hostname'][$i] = 'OFF';
+				$tabledata['path'][$i] = 'OFF';
+				$tabledata['file_id'][$i] = false;
 			}
 		}
 	}
