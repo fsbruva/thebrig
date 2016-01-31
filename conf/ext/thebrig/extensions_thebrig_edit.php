@@ -624,6 +624,7 @@ $('#moreless').click(function (){
 				$('#auxparam_tr').show();
 				$('#cmd_tr').show();
 				$('#mounts_separator').show();
+				$('#zfs_enable_tr').show();
 			break;
 			case "Less":
 			default:
@@ -638,6 +639,7 @@ $('#moreless').click(function (){
 				$('#auxparam_tr').hide();
 				$('#cmd_tr').hide();
 				$('#mounts_separator').hide();
+				$('#zfs_enable_tr').hide();
 			break;
 		}
 });
