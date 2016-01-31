@@ -2,7 +2,7 @@
 /*
 	file: functions.inc
 	
-	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+	Copyright 2012-2015 Matthew Kempe, Alexey Kruglov & Tom Waller
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -839,10 +839,42 @@ function write_jailcommands ($out_jail) {
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
 			/* next 2 string calculate default route for vmet enabled jails as side A for first started jail*/
 			fwrite ($post_handle, "bridge=`ifconfig | grep -m 1 bridge | cut -f 1 -d :`\n");
-			fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");			
-			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default \$iproutedef \n");
+			// Check to see if the jail has a default gateway set.			
+			if (!empty($out_jail['epair_gw'])) {
+				// The jail has a default gateway set so add the default root during to the post-start script.
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default " . $out_jail['epair_gw'] . "\n");
+			}
+			else {
+				// The jail does not have a custom default route so add the default route as the bridge IP address.
+				fwrite ($post_handle, "iproutedef=`ifconfig \$bridge | grep -m 1 inet | awk '{ print \$2 }'`\n");
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " route add default \$iproutedef \n");
+			}
 			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");			
-		}					
+		
+		// Check to see if the jail has custom DNS set.			
+			if (!empty($out_jail['epair_dns1'])) {
+				// The jail has a default gateway set so add the default root during to the post-start script.
+				// Also of note, since I am adding piped commands here, they need to be spawned from a sh instance otherwise
+				// they will execute on the host as opposed to the jail - it may end up modifying the host resolv.conf if
+				// not wrapped correctly.
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " cp -n /etc/resolv.conf /etc/resolv.orig\n");
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " sh -c 'cat /etc/resolv.conf | sed -i \"\" '/nameserver/d' /etc/resolv.conf'\n");
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " sh -c 'echo nameserver " . $out_jail['epair_dns1'] . " >> /etc/resolv.conf'\n");
+				// If we also have a secondary custom DNS server, add it.
+				if (!empty($out_jail['epair_dns2'])) {
+					// Add the secondary DNS server as well.
+					fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " sh -c 'echo nameserver " . $out_jail['epair_dns2'] . " >> /etc/resolv.conf'\n");
+				}
+			}
+			
+			else {
+				// The jail does not have a custom DNS set so copy the resolv.orig from the backup created.
+				fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " cp -f /etc/resolv.orig /etc/resolv.conf\n");
+			
+			}
+			fwrite ($post_handle, "jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");			
+		}
+									
 		if (isset($out_jail['fdescfs_enable'])) { 
 			$delete_post = false;
 			fwrite( $post_handle ,  "mount -t fdescfs null " . $out_jail['jailpath'] . "dev/fd\n");  

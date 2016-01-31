@@ -2,7 +2,7 @@
 /*
 	file: extensions_thebrig_edit.php
 	
-	  	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+	  	Copyright 2012-2015 Matthew Kempe, Alexey Kruglov & Tom Waller
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
-	
-	*/
+*/
 require("auth.inc");
 require("guiconfig.inc");
 //require_once("ext/thebrig/lang.inc");
@@ -73,6 +71,82 @@ body.loading {
 body.loading .modal {
     display: block;
 }
+
+/* The tooltip itself. */
+.help-tip {
+	display: inline-block;
+	position: relative;
+	margin-left: 8px;
+	text-align: center;
+	background-color: #666;
+	border-radius: 50%;
+	width: 14px;
+	height: 14px;
+	font-size: 12px;
+	line-height: 14px;
+	cursor: default;
+}
+
+/* The tooltip indicator. */
+.help-tip:before {
+	content:'?';
+	color:#fff;
+}
+
+/* The tooltip paragraph. */
+.help-tip:hover p {
+	display: block;
+	transform-origin: 100% 0%;
+	-webkit-animation: fadeIn 0.3s ease-in-out;
+	animation: fadeIn 0.3s ease-in-out;
+}
+
+/* The tooltip box. */
+.help-tip p {
+	position: absolute;
+	display: none;
+	text-align: left;
+	background-color: #1E2021;
+	padding: 20px;
+	width: 300px;
+	margin-top: 20px;
+	border-radius: 3px;
+	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+	right: -4px;
+	color: #FFF;
+	font-size: 13px;
+	line-height: 1.4;
+	z-index: 10;
+}
+
+/* Prevents the tooltip from being hidden. */
+.help-tip p:after {
+	width: 100%;
+	height: 40px;
+	content: '';
+	top: -40px;
+	left: 0;
+}
+
+/* CSS animation. */
+@-webkit-keyframes fadeIn {
+	0% { 
+		opacity: 0; 
+		transform: scale(0.6);
+	}
+
+	100% {
+		opacity: 100%;
+		transform: scale(1);
+	}
+}
+
+/* CSS animation. */
+@keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 100%; }
+}
+
 </style>
 '<script type="text/javascript" src="ext/thebrig/spin.min.js"></script>'
 EOD;
@@ -109,17 +183,11 @@ $myarch = exec("/usr/bin/uname -p");
 if ( $tar_check > 31 && $myarch == "amd64" ) 
 	$input_errors[] = _THEBRIG_NO_LIB32 ;
 
-
-
 // This sorts thebrig's configuration array by the jailno
 array_sort_key($config['thebrig']['content'], "jailno");
 // This identifies the jail section of the XML, but does so by reference.
 $a_jail = &$config['thebrig']['content'];
 
-//$a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }
-
-//$input_errors[] = implode ( " | " , array_keys ( $a_interface ));
-//$input_errors[] = implode( " | " , $a_interface);
 // This checks that the $uuid variable is set, and that the 
 // attempt to determine the index of the jail config that has the same 
 // uuid as the page was entered with is not empty
@@ -133,10 +201,13 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['allowedip'] = $a_jail[$cnid]['allowedip'];  // new entries
 	$pconfig['if'] = $a_jail[$cnid]['if'];
 	$pconfig['jail_vnet'] = isset($a_jail[$cnid]['jail_vnet']);
-	$pconfig['epair_a_ip'] = $a_jail[$cnid]['epair_a_ip'];  // new entries = ip for systemside epair interface
-	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask'];  // new entries mask for systemside epair interface
-	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip'];  // new entries = ip for jailside epair interface
-	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask'];  // new entries mask for jailside epair interface
+	$pconfig['epair_a_ip'] = $a_jail[$cnid]['epair_a_ip']; // new entries = ip for systemside epair interface
+	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask']; // new entries mask for systemside epair interface
+	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip']; // new entries = ip for jailside epair interface
+	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask']; // new entries mask for jailside epair interface
+	$pconfig['epair_gw'] = $a_jail[$cnid]['epair_gw']; // new entries mask for jailside gateway.
+	$pconfig['epair_dns1'] = $a_jail[$cnid]['epair_dns1']; // new entries mask for jailside primary DNS server.
+	$pconfig['epair_dns2'] = $a_jail[$cnid]['epair_dns2']; // new entries mask for jailside secondary DNS server.
 	$pconfig['jailpath'] = $a_jail[$cnid]['jailpath'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['statfs'] = $a_jail[$cnid]['statfs'];
@@ -182,7 +253,10 @@ else {
 	$pconfig['epair_a_ip'] = "192.168.1.251"; 
 	$pconfig['epair_a_mask'] = "24"; 
 	$pconfig['epair_b_ip'] = "192.168.1.252"; 
-	$pconfig['epair_b_mask'] = "24";	
+	$pconfig['epair_b_mask'] = "24";
+	$pconfig['epair_gw'] = "";
+	$pconfig['epair_dns1'] = "";
+	$pconfig['epair_dns2'] = "";
 	$pconfig['if'] = "";
 	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = true;
@@ -203,14 +277,12 @@ else {
 	$name_ro = false;
 }
 
-
 if ($_POST) {
 	unset($input_errors);
 	if (isset($_POST['Cancel']) && $_POST['Cancel']) {
 		header("Location: extensions_thebrig.php");
 		exit;
 	}
-	
 	$pconfig = $_POST;
 	// for clean work with new system env
 	unset ($pconfig['allowedipfiletype']);
@@ -240,7 +312,6 @@ if ($_POST) {
 		 //$pconfig['jail_mount'] = "yes";
 		 $pconfig['devfs_enable'] = "yes";
 		 }
-	
 	// check alowes.  Subroutine check mount section checkboxes, and give allow values allow.mount.blabla, if user not define its.
 	$cache_param_1 = array();
 	$cache_param = array();
@@ -262,9 +333,7 @@ if ($_POST) {
 			$pconfig['param'] =  array_merge_recursive ($pconfig['param'], $result);
 			$pconfig['param'] = array_unique (  $pconfig['param'] );
 			    // file_put_contents ("/tmp/thebrig.error.4.txt", serialize ($anyarray));  very nice for diagnostic.  Cache values
-			}
-	
-		
+			}	
 		}
 	// check zfs mount setting 1. enforce_statfs insert foggoten values
 	if ( isset ( $pconfig['zfs_enable'] )) { $config['thebrig']['gl_statfs'] =0; $pconfig['statfs'] =0; } else {}
@@ -464,6 +533,9 @@ if ($_POST) {
 		$jail['epair_a_mask'] = $pconfig['epair_a_mask'];  
 		$jail['epair_b_ip'] = $pconfig['epair_b_ip']; 
 		$jail['epair_b_mask'] = $pconfig['epair_b_mask'];
+		$jail['epair_gw'] = $pconfig['epair_gw'];
+		$jail['epair_dns1'] = $pconfig['epair_dns1'];
+		$jail['epair_dns2'] = $pconfig['epair_dns2'];
 		$jail['if'] = $pconfig['if'];
 		$jail['rule'] = $pconfig['rule'];
 		$jail['jail_mount'] = isset($pconfig['jail_mount']) ? true : false;
@@ -727,20 +799,30 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 					<td width='78%' class='vtable'>
 					
 						  <table class="formdata" width="100%" border="0">
-							<tr><td width='50%'>Side A (system)</td><td width='50%'>Side B (jail)</td>
+							
 							<tr><td width='50%'>
-								  <input name='epair_a_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_a_ip']?>  />/
-								  <input name='epair_a_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_a_mask']?>  />
-								  <br /><span class='vexpl'>System side of interface, eq: 192.168.1.251/24</span>
+								  <input name='epair_a_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_a_ip']?>  /> /
+								  <input name='epair_a_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_a_mask']?>  /><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRA ?></p></div>
+								  <br />Side A (host) Network
 							    </td>
 							    <td width='50%'>
-								    <input name='epair_b_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_b_ip']?>  />/
-								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  />
-								 <br /><span class='vexpl'>Jail side of interface, eq: 192.168.1.252/24</span>
+								    <input name='epair_b_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_b_ip']?>  /> /
+								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  /><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRB ?></p></div>
+								  <br />Side B (jail) Network
+							 </td></tr>
+							 <tr><td width='50%'>
+								  <br />
+								  <input name='epair_gw' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_gw']?>><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRGW ?></p></div>
+								  <br />Jail Gateway (Optional)<br /><br />
+								  <input name='epair_dns1' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_dns1']?>><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRDNS1 ?></p></div>
+								  <br />Jail DNS Server 1 (Optional)<br />
+								  <input name='epair_dns2' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_dns2']?>><div class="help-tip"><p><?= _THEBRIG_HELP_EPAIRDNS2 ?></p></div>
+								  <br />Jail DNS Server 2 (Optional)
+							    </td>
+							    <td width='50%'>
+								 
 							 </td></tr>
 						  </table>
-						 
-						<span class='vexpl'><?="All scripts TheBrig create automatically"?></span>
 					</td>
 				</tr>
 						

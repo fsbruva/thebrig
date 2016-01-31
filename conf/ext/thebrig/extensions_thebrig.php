@@ -2,7 +2,7 @@
 /*
    File:  extensions_thebrig.php
   
-    	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+    	Copyright 2012-2015 Matthew Kempe, Alexey Kruglov & Tom Waller
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -210,7 +210,6 @@ $(document).ready(function(){
 					} else {
 						$('#ajaxjailstatus'+ idx).text("");
 						$('#ajaxjailstatusimg'+ idx).attr('src', 'status_disabled.png'); 
-						//$('#ajaxjailstatusimg'+ idx).attr('title', 'Stopped'); 
 					}
 			}
 			if (typeof(data.id[idx]) !== 'undefined') {
@@ -236,8 +235,7 @@ $(document).ready(function(){
 				
 				if (value1 != 'OFF') {
 						$('#ajaxjailhostname'+ idx).text(data.hostname[idx]);
-					} else {
-						//$('#ajaxjailhostnameimg'+ idx).attr('src', 'status_disabled.png'); 
+					} else { 
 						$('#ajaxjailhostname'+ idx).text("Stopped");
 						$('#ajaxjailhostnameimg'+ idx).attr('title', 'Stopped'); 
 					}
@@ -248,25 +246,48 @@ $(document).ready(function(){
 				if (value1 != 'OFF') {
 						$('#ajaxjailpath'+ idx).text(data.path[idx]);
 					} else {
-						//$('#ajaxjailpathimg'+ idx).attr('src', 'status_disabled.png'); 
 						$('#ajaxjailpathimg'+ idx).attr('title', 'Stopped'); 
 						$('#ajaxjailpath'+ idx).text("Stopped");
 					}
 			}
-			if (typeof(data.id[idx]) !== 'undefined') {
-				var value1 = data.id[idx];				
-				if (value1 != 'OFF') {
-						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/off_small.png');
-						$('#ajaxjailcmdimg'+ idx).attr('title', 'Stop Jail'); 
-						$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_stop'); 
-					} else {
-						$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/on_small.png'); 
-						$('#ajaxjailcmdimg'+ idx).attr('title', 'Start Jail'); 
-						$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_start'); 
-					}
-			}
-		}
+			
 
+			
+			if (typeof(data.id[idx]) !== 'undefined') {
+				var value1 = data.id[idx];
+				
+				if (value1 == "STARTING") {
+					$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/img_jail_starting_s.png');
+					$('#ajaxjailcmdimg'+ idx).attr('title', 'Starting Jail'); 
+					$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_starting');
+					$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail starting');
+					$('#ajaxjailpwrstate'+ idx).text("Starting");
+					$('#ajaxjailpwrstate'+ idx).attr('text', 'Starting'); 
+				} else if (value1 == "STOPPING") {
+					$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/img_jail_stopping_s.png');
+					$('#ajaxjailcmdimg'+ idx).attr('title', 'Stopping Jail'); 
+					$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_stopping');
+					$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail stopping');
+					$('#ajaxjailpwrstate'+ idx).text("Stopping");
+					$('#ajaxjailpwrstate'+ idx).attr('text', 'Stopping'); 
+				} else if (value1 != "OFF") {
+					$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/img_jail_stop_s.png');
+					$('#ajaxjailcmdimg'+ idx).attr('title', 'Stop Jail'); 
+					$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_stop');
+					$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail stop'); 
+					$('#ajaxjailpwrstate'+ idx).text("Running");
+					$('#ajaxjailpwrstate'+ idx).attr('text', 'Running'); 
+				} else {
+					$('#ajaxjailcmdimg'+ idx).attr('src', 'ext/thebrig/img_jail_start_s.png');
+					$('#ajaxjailcmdimg'+ idx).attr('title', 'Start Jail'); 
+					$('#ajaxjailcmdimg'+ idx).attr('class', 'jail_start');
+					$('#ajaxjailcmdimg'+ idx).attr('alt', 'jail start');
+					$('#ajaxjailpwrstate'+ idx).text("Stopped");
+					$('#ajaxjailpwrstate'+ idx).attr('text', 'Stopped'); 
+				}
+			}	
+		
+		}
 
 	}});
 });
@@ -280,15 +301,28 @@ jQuery.fn.extend({
           return this;
         }
 });
+
 $(".jail_stop").live( 'click' , function(){
 	var $tr = $(this).closest('tr');
 	var name = $tr.children(':eq(0)').text();
+	$(this).attr("class", 'Jail_stopping');
+	$(this).attr("alt", 'Jail stopping'); 
+	$(this).attr("src", 'ext/thebrig/img_jail_stopping_s.png');
+	$(this).attr('title', 'Stopping Jail');
+	$(this).attr('pwrstate', 'Stopping');
+	$tr.children(':eq(8)').text('Stopping');
 	brig_action(name , 'onestop');
 });	
 	
 $(".jail_start").live( 'click', function(){
 	var $tr = $(this).closest('tr');
 	var name = $tr.children(':eq(0)').text();
+	$(this).attr("class", 'Jail_starting');
+	$(this).attr("alt", 'Jail starting') 
+	$(this).attr("src", 'ext/thebrig/img_jail_starting_s.png');
+	$(this).attr('title', 'Starting Jail');
+	$(this).attr('pwrstate', 'Starting');
+	$tr.children(':eq(8)').text('Starting');
 	brig_action(name , 'onestart');
 });	
 
@@ -348,25 +382,27 @@ function disable_buttons() {
 					<?php else: ?>
 								<table id = 'onlinetable' width="100%" border="0" cellpadding="5" cellspacing="0">
 						
-									<tr><td width="7%"  class="listhdrlr" ><?=_THEBRIG_TABLE1_TITLE1;?></td>
-										<td width="15%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE1;?></td>
-										<td width="24%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE5;?></td>
-										<td width="5%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE6;?></td>
-										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE2;?></td>
-										<td width="12%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE3;?></td>
-										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
-										<td width="5%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE7;?></td>
+									<tr><td style="width: 7%; text-align: left;" class="listhdrlr" ><?=_THEBRIG_TABLE1_TITLE1;?></td>
+										<td style="width:10%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE1;?></td>
+										<td style="width:19%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE5;?></td>
+										<td style="width:5%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE6;?></td>
+										<td style="width:22%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE2;?></td>
+										<td style="width:12%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE3;?></td>
+										<td style="width:21%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
+										<td style="width:1%; text-align: left;" class="listhdrc" align="center"><?=_THEBRIG_ONLINETABLE_TITLE7;?></td>
+										<td style="width:3%; text-align: left;" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE8;?></td>
 									</tr>
 						<?php foreach( $config['thebrig']['content'] as $n_jail): ?>					
 									<tr name='myjail<?=$n_jail['jailno']; ?>' id='myjail<?=$n_jail['jailno']; ?>'>
-										<td width="7%" valign="top" class="listlr" name="ajaxjailname<?=$n_jail['jailno']; ?>"  id="ajaxjailname<?=$n_jail['jailno']; ?>" >  </td>
-									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$n_jail['jailno']; ?>" ><span><img id="ajaxjailbuiltimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$n_jail['jailno']; ?>"></span><span id="ajaxjailbuiltsrc<?=$n_jail['jailno']; ?>"></span> </td>
-									    <td width="24%" valign="top" class="listrc" name="ajaxjailstatus<?=$n_jail['jailno']; ?>"  > <span><img id="ajaxjailstatusimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$n_jail['jailno']; ?>"></span></td>
-									    <td width="5%" valign= "top" class="listrc" name="ajaxjailid<?=$n_jail['jailno']; ?>" id="ajaxjailid<?=$n_jail['jailno']; ?>"></td>
-									    <td width="22%" valign="top" class="listrc" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>">  <img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
-									    <td width="12%" valign="top" class="listrc" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"> <img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
-									    <td width="22%" valign="top" class="listrc" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
-										<td width="5%" valign="top" class="listrd" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
+										<td style="width:7%; text-align: left; vertical-align: text-middle;" class="listlr" name="ajaxjailname<?=$n_jail['jailno']; ?>" id="ajaxjailname<?=$n_jail['jailno']; ?>" ></td>
+									    <td style="width:10%; text-align: left; vertical-align: text-middle;" class="listr" name="ajaxjailbuilt<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailbuiltimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="template?" /></span><span id="ajaxjailbuiltports<?=$n_jail['jailno']; ?>"></span><span id="ajaxjailbuiltsrc<?=$n_jail['jailno']; ?>"></span></td>
+									    <td style="width:19%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailstatus<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailstatusimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></span><span id="ajaxjailstatus<?=$n_jail['jailno']; ?>"></span></td>
+									    <td style="width:5%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailid<?=$n_jail['jailno']; ?>" id="ajaxjailid<?=$n_jail['jailno']; ?>"></td>
+									    <td style="width:22%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>"><img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td style="width:12%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"><img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td style="width:21%; text-align: left; vertical-align: text-middle;" class="listrc" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
+										<td style="width:1%; text-align: center; vertical-align: text-middle;" class="listrd" align="center" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span style="cursor: pointer;"><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /></span></td>
+										<td style="width:3%; text-align: left; vertical-align: text-middle;" class="listrd" name="ajaxjailpwrstate<?=$n_jail['jailno']; ?>" id="ajaxjailpwrstate<?=$n_jail['jailno']; ?>"></td>
 										</td>
 									 </tr>
 			<?php endforeach; ?>

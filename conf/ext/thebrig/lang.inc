@@ -2,7 +2,7 @@
 /*
 	file: lang.inc
 	
-	Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
+	Copyright 2012-2015 Matthew Kempe, Alexey Kruglov & Tom Waller
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -34,24 +34,25 @@
 	
 		define(_THEBRIG_ONLINETABLE_TITLE, "On-line view");
 		define(_THEBRIG_ONLINETABLE_TITLE1, "Built");
-		define(_THEBRIG_ONLINETABLE_TITLE2, "Jail ip");
-		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail hostname");
-		define(_THEBRIG_ONLINETABLE_TITLE4, "Path to jail");
+		define(_THEBRIG_ONLINETABLE_TITLE2, "Jail IP");
+		define(_THEBRIG_ONLINETABLE_TITLE3, "Jail Hostname");
+		define(_THEBRIG_ONLINETABLE_TITLE4, "Path to Jail");
 		define(_THEBRIG_ONLINETABLE_TITLE5, "Status");
 		define(_THEBRIG_ONLINETABLE_TITLE6, "ID");
 		define(_THEBRIG_ONLINETABLE_TITLE7, "Action");
-		define(_THEBRIG_TABLE1_TITLE,"TheBrig config");
-		define(_THEBRIG_JAILS, "Jails" );
-		define(_THEBRIG_TABLE1_TITLE3,"Start on boot");
-		define(_THEBRIG_TABLE1_TITLE1,"Jail name");
+		define(_THEBRIG_ONLINETABLE_TITLE8, "State");
+		define(_THEBRIG_TABLE1_TITLE,"TheBrig Config");
+		define(_THEBRIG_JAILS, "Jails");
+		define(_THEBRIG_TABLE1_TITLE3,"Start on Boot");
+		define(_THEBRIG_TABLE1_TITLE1,"Jail Name");
 		define(_THEBRIG_TABLE1_TITLE2,"Network");		
 		define(_THEBRIG_TABLE1_TITLE4,"ZFS");
 		define(_THEBRIG_TABLE1_TITLE5,"Hostname");
-		define(_THEBRIG_TABLE1_TITLE6,"Path to jail");
+		define(_THEBRIG_TABLE1_TITLE6,"Path to Jail");
 		define(_THEBRIG_TABLE1_TITLE7,"Description");
 		define(_THEBRIG_GLOBALS_TITLE,"Globals");
 		define(_THEBRIG_GLOBALS_ENABLE,"Allow start all jails");
-		define(_THEBRIG_GLOBALS_STATFS,"Choose Global enforce_statfs. Default value =2. Jail's value  cannot be less then Global value . <br />Value 2 not allow  jail root user mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount jail-friendly filesystems");
+		define(_THEBRIG_GLOBALS_STATFS,"Choose Global enforce_statfs. Default value =2. Jail's value cannot be less then Global value.<br />Value 2 not allow jail root user mount inside a jail. \"High\" = 1  and \"All\" = 0 values allow mount jail-friendly filesystems");
 
 		/** Edit page */
 		define('_THEBRIG_EDIT', "Edit" );
@@ -269,5 +270,16 @@
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
 		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");		
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
+		
+		/* Help text. */
+		
+		define(_THEBRIG_HELP_JAILNUMBER, "The jail number determines the order of the jail.");
+		define(_THEBRIG_HELP_EPAIRA, "Sets the system side IPv4 address and network bitmask. This should be a local unused address on the target network.");
+		define(_THEBRIG_HELP_EPAIRB, "Sets the jail side IPv4 address and network bitmask. This should be a local unused address on the target network.");
+		define(_THEBRIG_HELP_EPAIRGW, "Specify a default gateway. This will allow the jail to route traffic via a specific gateway as opposed to using the host gateway. Useful in scenarios where traffic needs to route via a seperate network to the host.");
+		define(_THEBRIG_HELP_EPAIRDNS1, "Sets the jail primary DNS server manually. If specified, the entry is written to resolv.conf automatically. If left blank, the hosts resolv.conf will be copied to the jail.");
+		define(_THEBRIG_HELP_EPAIRDNS2, "Sets the jail secondary DNS server manually. If specified, the entry is written to resolv.conf automatically. If left blank, the hosts resolv.conf will be copied to the jail.");
+		define(_THEBRIG_HELP_EPAIRIF, "Attach the jail to a specific interface on the host. This will create a bridge on the host with the specified interface as a member.");
+		
 		}
 ?>
