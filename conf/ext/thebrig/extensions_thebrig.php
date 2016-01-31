@@ -170,7 +170,7 @@ include("fbegin.inc");?>
 <script language="JavaScript">
 $(document).ready(function(){
 	var gui = new GUI;
-	gui.recall(500, 3000, 'extensions_thebrig_ajax.php', null, function(data) {
+	gui.recall(500, 2000, 'extensions_thebrig_ajax.php', null, function(data) {
 		if ( typeof(data) !== 'undefined' ) {
 		for ( idx=1; idx<= data.rowcount;  idx++ ) {
 			$('#ajaxjailname'+idx).text(data.name[idx] );
@@ -357,19 +357,21 @@ function disable_buttons() {
 										<td width="22%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE4;?></td>
 										<td width="5%" class="listhdrc"><?=_THEBRIG_ONLINETABLE_TITLE7;?></td>
 									</tr>
-						<?php foreach( $config['thebrig']['content'] as $n_jail): ?>					
+						<?php 
+						//foreach( $config['thebrig']['content'] as $n_jail): 
+						for ($k=1; $k <= count($config['thebrig']['content']); $k++) : ?>					
 									<tr name='myjail<?=$n_jail['jailno']; ?>' id='myjail<?=$n_jail['jailno']; ?>'>
-										<td width="7%" valign="top" class="listlr" name="ajaxjailname<?=$n_jail['jailno']; ?>"  id="ajaxjailname<?=$n_jail['jailno']; ?>" >  </td>
-									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$n_jail['jailno']; ?>" ><span><img id="ajaxjailbuiltimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$n_jail['jailno']; ?>"></span><span id="ajaxjailbuiltsrc<?=$n_jail['jailno']; ?>"></span> </td>
-									    <td width="24%" valign="top" class="listrc" name="ajaxjailstatus<?=$n_jail['jailno']; ?>"  > <span><img id="ajaxjailstatusimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$n_jail['jailno']; ?>"></span></td>
-									    <td width="5%" valign= "top" class="listrc" name="ajaxjailid<?=$n_jail['jailno']; ?>" id="ajaxjailid<?=$n_jail['jailno']; ?>"></td>
-									    <td width="22%" valign="top" class="listrc" name="ajaxjailip<?=$n_jail['jailno']; ?>" id="ajaxjailip<?=$n_jail['jailno']; ?>">  <img id="ajaxjailipimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
-									    <td width="12%" valign="top" class="listrc" name="ajaxjailhostname<?=$n_jail['jailno']; ?>" id="ajaxjailhostname<?=$n_jail['jailno']; ?>"> <img id="ajaxjailhostnameimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
-									    <td width="22%" valign="top" class="listrc" name="ajaxjailpath<?=$n_jail['jailno']; ?>" id="ajaxjailpath<?=$n_jail['jailno']; ?>"><img id="ajaxjailpathimg<?=$n_jail['jailno']; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
-										<td width="5%" valign="top" class="listrd" name="ajaxjailcmd<?=$n_jail['jailno']; ?>" id="ajaxjailcmd<?=$n_jail['jailno']; ?>"><span><img id="ajaxjailcmdimg<?=$n_jail['jailno']; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
+										<td width="7%" valign="top" class="listlr" name="ajaxjailname<?=$k; ?>"  id="ajaxjailname<?=$k; ?>" >  </td>
+									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$k; ?>" ><span><img id="ajaxjailbuiltimg<?=$k; ?>" src="status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$k; ?>"></span><span id="ajaxjailbuiltsrc<?=$k; ?>"></span> </td>
+									    <td width="24%" valign="top" class="listrc" name="ajaxjailstatus<?=$k; ?>"  > <span><img id="ajaxjailstatusimg<?=$k; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$k; ?>"></span></td>
+									    <td width="5%" valign= "top" class="listrc" name="ajaxjailid<?=$k; ?>" id="ajaxjailid<?=$k; ?>"></td>
+									    <td width="22%" valign="top" class="listrc" name="ajaxjailip<?=$k; ?>" id="ajaxjailip<?=$k; ?>">  <img id="ajaxjailipimg<?=$k; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td width="12%" valign="top" class="listrc" name="ajaxjailhostname<?=$k; ?>" id="ajaxjailhostname<?=$k; ?>"> <img id="ajaxjailhostnameimg<?=$k; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td width="22%" valign="top" class="listrc" name="ajaxjailpath<?=$k; ?>" id="ajaxjailpath<?=$k; ?>"><img id="ajaxjailpathimg<?=$k; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
+										<td width="5%" valign="top" class="listrd" name="ajaxjailcmd<?=$k; ?>" id="ajaxjailcmd<?=$k; ?>"><span><img id="ajaxjailcmdimg<?=$k; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
 										</td>
 									 </tr>
-			<?php endforeach; ?>
+			<?php endfor; ?>
 								</table>
 					<?php endif;?>
 				</td></tr>
