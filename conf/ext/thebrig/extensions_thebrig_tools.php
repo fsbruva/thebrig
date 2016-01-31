@@ -130,7 +130,7 @@ $doc = new DOMDocument('1.0', 'UTF-8');
 	}
 } else {}
 
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_TOOLS);
+$pgtitle = array(_THEBRIG_TITLE, _THEBRIG_MAINTENANCE, _THEBRIG_TOOLS);
 include("fbegin.inc");
 // This will evaluate if there were any input errors from prior to the user clicking "save"
 if ($input_errors) { 

@@ -47,7 +47,7 @@ require_once("ext/thebrig/functions.inc");
  */
 	
 // Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_MANAGER_TITLE);
+$pgtitle = array(_THEBRIG_TITLE, _THEBRIG_UPDATES, _THEBRIG_TITLE ." ". _THEBRIG_MANAGER_TITLE);
 	
 	// This checks to see if we've finished installing TheBrig. If there
 	// is no stored folder or created work folder, the install isn't done.

@@ -26,7 +26,7 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 
 
 // Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_UPDATER);
+$pgtitle = array(_THEBRIG_TITLE, _THEBRIG_UPDATES , _THEBRIG_UPDATER);
 
 // we run the "prep" function to see if all the binaries we need are present in a jail (any jail). If they aren't we can't proceed
 

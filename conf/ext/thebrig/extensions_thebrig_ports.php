@@ -28,7 +28,7 @@ if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['r
 
 
 // Display the page title, based on the constants defined in lang.inc
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_PORTS);
+$pgtitle = array( _THEBRIG_TITLE, _THEBRIG_UPDATES ,_THEBRIG_PORTS);
 
 
 

@@ -56,7 +56,7 @@ if (isset($_POST['savetmp']) && $_POST['savetmp'] == 'Save template') {
  else { }	
 	
 
-$pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE, _THEBRIG_TOOLS, "translator");
+$pgtitle = array(_THEBRIG_TITLE, _THEBRIG_MAINTENANCE, "translator");
 include ("fbegin.inc"); ?>
 <script type="text/javascript">
 <!--

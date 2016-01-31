@@ -669,10 +669,10 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
-			<?php If (!empty($config['thebrig']['content'])) { 
+			<?php /* If (!empty($config['thebrig']['content'])) { 
 			$thebrigupdates=_THEBRIG_UPDATES;
 			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
-			} else {} ?>
+			} else {} */?>
 			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 		</ul>
 	</td></tr>
