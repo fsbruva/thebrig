@@ -18,14 +18,15 @@
 */
 require("auth.inc");
 require("guiconfig.inc");
-require_once("ext/thebrig/lang.inc");
-require_once("ext/thebrig/functions.inc");
-	
 // If thebrig array does not exist or is not a valid array within the global config, then create a blank one.
 if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) {
 	$config['thebrig'] = array();
+	$includepath=rtrim( file_get_contents('/tmp/thebrig.tmp') );
+} else {
+	$includepath = $config['thebrig']['rootfolder'];
 }
-
+require_once($includepath . "conf/ext/thebrig/lang.inc");
+require_once($includepath . "conf/ext/thebrig/functions.inc");
 
 // This determines if there are any thin jails (type = slim), which means we shouldn't
 // relocate the basejail. We also need to check and make sure no jails currently live 
