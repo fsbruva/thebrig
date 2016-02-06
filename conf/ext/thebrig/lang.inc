@@ -18,9 +18,9 @@
 */
 	define(_THEBRIG_VERSION_NBR, 'v0.94');	
 		
-	if ($config['system']['language'] == 'ru') { 
-		include_once("ext/thebrig/lang.ru.inc");
-	} else {
+//	if ($config['system']['language'] == 'ru') { 
+//		include_once("ext/thebrig/lang.ru.inc");
+//	} else {
 	/** All pages  */
 		define(_THEBRIG_EXTN, "Extensions");
 		define(_THEBRIG_TITLE, "TheBrig");
@@ -269,5 +269,5 @@
 		define(_THEBRIG_JAIL_ROUTE, "Route only TCP/IP within a jail");
 		define(_THEBRIG_JAIL_IPC, "Allow SystemV IPC use from within a jail");		
 		define(_THEBRIG_LIB, "Specify any additional tarballs to be added to the base jail. For an AMD64 system, this should at least include a tarball with lib32.");
-		}
+//		}
 ?>
