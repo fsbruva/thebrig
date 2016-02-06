@@ -22,7 +22,7 @@ require("guiconfig.inc");
 // If thebrig array does not exist or is not a valid array within the global config, then create a blank one.
 if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) {
 	$config['thebrig'] = array();
-	$includepath=rtrim( file_get_contents('/tmp/thebrig.tmp') );
+	$includepath=rtrim( file_get_contents('/tmp/thebrig.tmp') ) ."/";
 } else {
 	$includepath = $config['thebrig']['rootfolder'];
 }
