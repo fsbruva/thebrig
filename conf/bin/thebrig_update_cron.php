@@ -26,12 +26,12 @@ $brig_update_db = $brig_root . "conf/db/freebsd-update/";
 array_sort_key($config['thebrig']['content'], "jailno");
 $a_jail = &$config['thebrig']['content'];
 sleep ( rand( 0 , 3600 ) );
-$brig_update_ready = thebrig_update_prep();
+//$brig_update_ready = thebrig_update_prep();
 $basedir_list = array();
 $workdir_list = array();
 $conffile_list = array();
 $base_selected = false;
-if ( $brig_update_ready == 0 ) {
+//if ( $brig_update_ready == 0 ) {
 	
 	// We will be building arrays of base directories, working directories and config files
 	// to be used for the fetch operations.
@@ -67,6 +67,6 @@ if ( $brig_update_ready == 0 ) {
 	} // end of template selected
 
 	$response = thebrig_update($basedir_list, $workdir_list , $conffile_list, "Fetch");
-} // end of brig_update_ready
-
+//} // end of brig_update_ready
+write_briglog("Selected jails updated","info");
 ?>
