@@ -137,9 +137,14 @@ thebrig_stop()
         echo
 
 }
-thebrig_troubleshoot() {
+thebrig_troubleshut() {
 	for _j in ${_jail_list}; do
-		cat /tmp/${_j}.log
+	if [ -f /tmp/${_j}.log ]; then
+			cat /tmp/${_j}.log
+		else
+			JID=`jls -j ${_j} jid`
+			echo "Can not find problem. May be jail created with id=${JID} ??"
+	fi
 	done
 }
 
