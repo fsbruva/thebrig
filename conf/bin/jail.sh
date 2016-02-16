@@ -137,7 +137,7 @@ thebrig_stop()
         echo
 
 }
-thebrig_troubleshut() {
+thebrig_troubleshoot() {
 	for _j in ${_jail_list}; do
 	if [ -f /tmp/${_j}.log ]; then
 			cat /tmp/${_j}.log
