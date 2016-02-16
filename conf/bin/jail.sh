@@ -64,10 +64,11 @@ jail_args="-f ${rootfolder}/conf/thebrig.conf"
 
 start_cmd="thebrig_start"
 stop_cmd="thebrig_stop"
+troubleshoot_cmd="thebrig_troubleshoot"
 list_cmd=`echo /usr/sbin/jls`
 listall_cmd="thebrig_show_all_jails"
 startonboot_cmd=`echo grep thebrig_list /etc/rc.conf`
-extra_commands="list listall startonboot"
+extra_commands="list listall startonboot troubleshoot"
 thebrig_show_all_jails()
 {
 /usr/local/bin/xml sel -t -m "//thebrig/content" -v jailname -o " " /conf/config.xml
@@ -89,7 +90,7 @@ thebrig_start()
                         echo "${_j} already exists"
                         continue
                 fi
-                $jail_cmd $jail_args -p 20 -J /var/run/jail_${_j}.id -c ${_j} >> $_tmp 2>&1
+                $jail_cmd $jail_args -p 20 -J /var/run/jail_${_j}.id -c ${_j} >> $_tmp 2>/tmp/${_j}.log
 				sleep 1
 				if _jid=$(jls -j $_j jid); then
 					tail -1 $_tmp
@@ -98,6 +99,9 @@ thebrig_start()
 					echo " cannot start jail \"${_hostname:-${_j}}\": "
 				fi
 				rm -f $_tmp
+				if [ ! -s /tmp/${_j}.log ]; then
+					rm -f /tmp/${_j}.log
+				fi
         done
         echo ""
 }
@@ -132,6 +136,11 @@ thebrig_stop()
 
         echo
 
+}
+thebrig_troubleshoot() {
+	for _j in ${_jail_list}; do
+		cat /tmp/${_j}.log
+	done
 }
 
 run_rc_command "${cmd}"
