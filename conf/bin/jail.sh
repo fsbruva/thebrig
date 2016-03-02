@@ -85,22 +85,22 @@ thebrig_start()
 
         for _j in ${_jail_list}; do
                 echo -n "${_j} "
-		_tmp=`mktemp -t jail` || exit 3
+		_tmp=`/usr/bin/mktemp -t jail` || exit 3
                 if [ -e /var/run/jail_${_j}.id ]; then
                         echo "${_j} already exists"
                         continue
                 fi
                 $jail_cmd $jail_args -p 20 -J /var/run/jail_${_j}.id -c ${_j} >> $_tmp 2>/tmp/${_j}.log
 				sleep 1
-				if _jid=$(jls -j $_j jid); then
-					tail -1 $_tmp
+				if _jid=$(/usr/sbin/jls -j $_j jid); then
+					/usr/bin/tail -1 $_tmp
 				else
-					rm -f /var/run/jail_${_j}.id
+					/bin/rm -f /var/run/jail_${_j}.id
 					echo " cannot start jail \"${_hostname:-${_j}}\": "
 				fi
-				rm -f $_tmp
+				/bin/rm -f $_tmp
 				if [ ! -s /tmp/${_j}.log ]; then
-					rm -f /tmp/${_j}.log
+					/bin/rm -f /tmp/${_j}.log
 				fi
         done
         echo ""
@@ -119,13 +119,13 @@ thebrig_stop()
                 fi
         #       eval _zfs=\"\${jail_${_j}_zfs:-}\"
 
-                _jid=`jls -j ${_j} jid 2>/dev/null`
+                _jid=`/usr/sbin/jls -j ${_j} jid 2>/dev/null`
 
         #       jail -r -f /etc/thebrig.conf  ${_j}  >> /var/log/jail.log 2>&1
                 $jail_cmd $jail_args -r ${_j}
                 retval=$?
                 if [ $retval -eq 0 ]; then
-                    rm /var/run/jail_${_j}.id
+                    /bin/rm /var/run/jail_${_j}.id
                 fi
 			ruleset=`/usr/local/bin/xml sel -t \
 							-m "//thebrig/content" \
