@@ -406,13 +406,13 @@ function disable_buttons() {
 									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
-										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="e.gif" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>&nbsp;
-										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return jail_delete();"><img src="x.gif" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>&nbsp;
+										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="edit.png" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>&nbsp;
+										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return jail_delete();"><img src="delete.png" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>&nbsp;
 										<a href="extensions_thebrig_fstab.php?act=editor&amp;uuid=<?=$jail['uuid'];?>"><img src="ext/thebrig/fstab.png" title="<?=gettext("Edit fstab for this jail");?>" border="0" alt="<?=gettext("Edit jail's fstab");?>" /></a>
 									</td>
 									<?php else:?>
 									<td valign="middle" nowrap="nowrap" class="list">
-										<img src="del.gif" border="0" alt="" />
+										<img src="delete.png" border="0" alt="" />
 									</td>
 									<?php endif;?>									
 								</tr>
@@ -420,7 +420,7 @@ function disable_buttons() {
 								<tr>
 									<td class="list" colspan="8"></td>
 									<td class="list">
-										<a href="extensions_thebrig_edit.php"><img src="plus.gif" title="<?=gettext("Add jail");?>" border="0" alt="<?=gettext("Add jail");?>" /></a>
+										<a href="extensions_thebrig_edit.php"><img src="add.png" title="<?=gettext("Add jail");?>" border="0" alt="<?=gettext("Add jail");?>" /></a>
 									</td>
 								</tr>
 							</table>
