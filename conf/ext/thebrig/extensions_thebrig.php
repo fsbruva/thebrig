@@ -178,10 +178,10 @@ $(document).ready(function(){
 			if (typeof(data.built[idx]) !== 'undefined') {
 				var value1 = data.built[idx];
 				if (value1 !== 'ON') { 
-					$('#ajaxjailbuiltimg'+ idx).attr('src', 'status_disabled.png'); 
+					$('#ajaxjailbuiltimg'+ idx).attr('src', 'images/status_disabled.png'); 
 					$('#ajaxjailbuiltimg'+ idx).attr('title', 'Template?'); 
 				} else {
-					$('#ajaxjailbuiltimg'+ idx).attr('src', 'status_enabled.png');
+					$('#ajaxjailbuiltimg'+ idx).attr('src', 'images/status_enabled.png');
 					$('#ajaxjailbuiltimg'+ idx).attr('title', 'Build');
 				}			
 			}
@@ -206,11 +206,11 @@ $(document).ready(function(){
 				var value1 = data.status[idx];				
 				if (value1 != 'OFF') {
 						$('#ajaxjailstatus'+ idx).text(data.status[idx]);
-						$('#ajaxjailstatusimg'+ idx).attr('src', 'status_enabled.png');
+						$('#ajaxjailstatusimg'+ idx).attr('src', 'images/status_enabled.png');
 						$('#ajaxjailstatusimg'+ idx).attr('title', 'Created'); 
 					} else {
 						$('#ajaxjailstatus'+ idx).text("");
-						$('#ajaxjailstatusimg'+ idx).attr('src', 'status_disabled.png'); 
+						$('#ajaxjailstatusimg'+ idx).attr('src', 'images/status_disabled.png'); 
 						//$('#ajaxjailstatusimg'+ idx).attr('title', 'Stopped'); 
 					}
 			}
@@ -238,7 +238,7 @@ $(document).ready(function(){
 				if (value1 != 'OFF') {
 						$('#ajaxjailhostname'+ idx).text(data.hostname[idx]);
 					} else {
-						//$('#ajaxjailhostnameimg'+ idx).attr('src', 'status_disabled.png'); 
+						//$('#ajaxjailhostnameimg'+ idx).attr('src', 'images/status_disabled.png'); 
 						$('#ajaxjailhostname'+ idx).text("Stopped");
 						$('#ajaxjailhostnameimg'+ idx).attr('title', 'Stopped'); 
 					}
@@ -406,13 +406,13 @@ function disable_buttons() {
 									<td class="listbg"><?=htmlspecialchars($jail['desc']);?>&nbsp;</td>
 									<?php if (UPDATENOTIFY_MODE_DIRTY != $notificationmode):?>
 									<td valign="middle" nowrap="nowrap" class="list">
-										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="edit.png" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>&nbsp;
-										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return jail_delete();"><img src="delete.png" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>&nbsp;
+										<a href="extensions_thebrig_edit.php?uuid=<?=$jail['uuid'];?>"><img src="images/edit.png" title="<?=gettext("Edit jail");?>" border="0" alt="<?=gettext("Edit jail");?>" /></a>&nbsp;
+										<a href="extensions_thebrig.php?act=del&amp;uuid=<?=$jail['uuid'];?>&amp;name=<?=$jail['jailname'];?>" onclick="return jail_delete();"><img src="images/delete.png" title="<?=gettext("Delete jail");?>" border="0" alt="<?=gettext("Delete jail");?>" /></a>&nbsp;
 										<a href="extensions_thebrig_fstab.php?act=editor&amp;uuid=<?=$jail['uuid'];?>"><img src="ext/thebrig/fstab.png" title="<?=gettext("Edit fstab for this jail");?>" border="0" alt="<?=gettext("Edit jail's fstab");?>" /></a>
 									</td>
 									<?php else:?>
 									<td valign="middle" nowrap="nowrap" class="list">
-										<img src="delete.png" border="0" alt="" />
+										<img src="images/delete.png" border="0" alt="" />
 									</td>
 									<?php endif;?>									
 								</tr>
@@ -420,7 +420,7 @@ function disable_buttons() {
 								<tr>
 									<td class="list" colspan="8"></td>
 									<td class="list">
-										<a href="extensions_thebrig_edit.php"><img src="add.png" title="<?=gettext("Add jail");?>" border="0" alt="<?=gettext("Add jail");?>" /></a>
+										<a href="extensions_thebrig_edit.php"><img src="images/add.png" title="<?=gettext("Add jail");?>" border="0" alt="<?=gettext("Add jail");?>" /></a>
 									</td>
 								</tr>
 							</table>
