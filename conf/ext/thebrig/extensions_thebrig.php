@@ -249,7 +249,7 @@ $(document).ready(function(){
 				if (value1 != 'OFF') {
 						$('#ajaxjailpath'+ idx).text(data.path[idx]);
 					} else {
-						//$('#ajaxjailpathimg'+ idx).attr('src', 'status_disabled.png'); 
+						//$('#ajaxjailpathimg'+ idx).attr('src', 'images/status_disabled.png'); 
 						$('#ajaxjailpathimg'+ idx).attr('title', 'Stopped'); 
 						$('#ajaxjailpath'+ idx).text("Stopped");
 					}
@@ -271,23 +271,14 @@ $(document).ready(function(){
 
 	}});
 });
-jQuery.fn.extend({
-  live: function( types, data, fn ) {
-          if( window.console && console.warn ) {
-           console.warn( "jQuery.live is deprecated. Use jQuery.on instead." );
-          }
 
-          jQuery( this.context ).on( types, this.selector, data, fn );
-          return this;
-        }
-});
-$(".jail_stop").live( 'click' , function(){
+$( document ).on( 'click', ".jail_stop",  function(){
 	var $tr = $(this).closest('tr');
 	var name = $tr.children(':eq(0)').text();
 	brig_action(name , 'onestop');
 });	
 	
-$(".jail_start").live( 'click', function(){
+$( document ).on( 'click', ".jail_start",  function(){
 	var $tr = $(this).closest('tr');
 	var name = $tr.children(':eq(0)').text();
 	brig_action(name , 'onestart');
@@ -363,12 +354,12 @@ function disable_buttons() {
 						for ($k=1; $k <= count($config['thebrig']['content']); $k++) : ?>					
 									<tr name='myjail<?=$n_jail['jailno']; ?>' id='myjail<?=$n_jail['jailno']; ?>'>
 										<td width="7%" valign="top" class="listlr" name="ajaxjailname<?=$k; ?>"  id="ajaxjailname<?=$k; ?>" >  </td>
-									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$k; ?>" ><span><img id="ajaxjailbuiltimg<?=$k; ?>" src="status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$k; ?>"></span><span id="ajaxjailbuiltsrc<?=$k; ?>"></span> </td>
-									    <td width="24%" valign="top" class="listrc" name="ajaxjailstatus<?=$k; ?>"  > <span><img id="ajaxjailstatusimg<?=$k; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$k; ?>"></span></td>
+									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$k; ?>" ><span><img id="ajaxjailbuiltimg<?=$k; ?>" src="images/status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$k; ?>"></span><span id="ajaxjailbuiltsrc<?=$k; ?>"></span> </td>
+									    <td width="24%" valign="top" class="listrc" name="ajaxjailstatus<?=$k; ?>"  > <span><img id="ajaxjailstatusimg<?=$k; ?>" src="images/status_disabled.png" border="0" alt="Stopped" /> </span><span id="ajaxjailstatus<?=$k; ?>"></span></td>
 									    <td width="5%" valign= "top" class="listrc" name="ajaxjailid<?=$k; ?>" id="ajaxjailid<?=$k; ?>"></td>
-									    <td width="22%" valign="top" class="listrc" name="ajaxjailip<?=$k; ?>" id="ajaxjailip<?=$k; ?>">  <img id="ajaxjailipimg<?=$k; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
-									    <td width="12%" valign="top" class="listrc" name="ajaxjailhostname<?=$k; ?>" id="ajaxjailhostname<?=$k; ?>"> <img id="ajaxjailhostnameimg<?=$k; ?>" src="status_disabled.png" border="0" alt="Stopped" /></td>
-									    <td width="22%" valign="top" class="listrc" name="ajaxjailpath<?=$k; ?>" id="ajaxjailpath<?=$k; ?>"><img id="ajaxjailpathimg<?=$k; ?>" src="status_disabled.png" border="0" alt="Stopped" /> </td>
+									    <td width="22%" valign="top" class="listrc" name="ajaxjailip<?=$k; ?>" id="ajaxjailip<?=$k; ?>">  <img id="ajaxjailipimg<?=$k; ?>" src="images/status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td width="12%" valign="top" class="listrc" name="ajaxjailhostname<?=$k; ?>" id="ajaxjailhostname<?=$k; ?>"> <img id="ajaxjailhostnameimg<?=$k; ?>" src="images/status_disabled.png" border="0" alt="Stopped" /></td>
+									    <td width="22%" valign="top" class="listrc" name="ajaxjailpath<?=$k; ?>" id="ajaxjailpath<?=$k; ?>"><img id="ajaxjailpathimg<?=$k; ?>" src="images/status_disabled.png" border="0" alt="Stopped" /> </td>
 										<td width="5%" valign="top" class="listrd" name="ajaxjailcmd<?=$k; ?>" id="ajaxjailcmd<?=$k; ?>"><span><img id="ajaxjailcmdimg<?=$k; ?>" class="jail_start" src="ext/thebrig/on_small.png" border="0" alt="Jail start" /> </span></td>	
 										</td>
 									 </tr>
