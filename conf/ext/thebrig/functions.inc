@@ -600,10 +600,10 @@ global $config ;
 			$pct_done = floor( $currentSize * 100 / $targetSize ) ;
 			$pct_rem = 100 - $pct_done;
 			
-			$partFiles .= "<img src=\"bar_left.gif\" class=\"progbarl\" alt>";
-			$partFiles .= "<img src=\"bar_blue.gif\" name=\"file{$k}u\" id=\"file{$k}u\" width=\"{$pct_done}px\" class=\"progbarcf\" alt>";
-			$partFiles .= "<img src=\"bar_gray.gif\" name=\"file{$k}f\" id=\"file{$k}f\" width=\"{$pct_rem}px\" class=\"progbarc\" alt>";
-			$partFiles .= "<img src=\"bar_right.gif\" class=\"progbarr\" alt>";
+			$partFiles .= "<img src=\"images/bar_left.gif\" class=\"progbarl\" alt>";
+			$partFiles .= "<img src=\"images/bar_blue.gif\" name=\"file{$k}u\" id=\"file{$k}u\" width=\"{$pct_done}px\" class=\"progbarcf\" alt>";
+			$partFiles .= "<img src=\"images/bar_gray.gif\" name=\"file{$k}f\" id=\"file{$k}f\" width=\"{$pct_rem}px\" class=\"progbarc\" alt>";
+			$partFiles .= "<img src=\"images/bar_right.gif\" class=\"progbarr\" alt>";
 			$partFiles .= "<input style=\"padding: 0; border: 0;\" size=\"30\" name=\"file{$k}\" id=\"file{$k}\" value=\"{$pct_done}% of {$nicetargetSize}MiB\">";
 			//$partFiles .= $pct_done ;
 			
