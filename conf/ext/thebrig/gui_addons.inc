@@ -530,7 +530,7 @@ class HTMLzfs_set extends HTMLBaseControl {
 		echo "    <tr><td width='40%'><select name='{$ctrlname}filetype' class='formfld' id='{$ctrlname}filetype' >\n ";
 		if (isset($value)){
 		foreach ($options as $optionsv) {
-		echo "      <option value='{$optionsv[2]}' {$optparam}>{$optionsv[2]}</option>\n";
+		echo "      <option value='{$optionsv[1]}' {$optparam}>{$optionsv[1]}</option>\n";
 			}}
 		
 		

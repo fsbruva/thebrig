@@ -116,10 +116,7 @@ array_sort_key($config['thebrig']['content'], "jailno");
 // This identifies the jail section of the XML, but does so by reference.
 $a_jail = &$config['thebrig']['content'];
 
-//$a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { $a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }
 
-//$input_errors[] = implode ( " | " , array_keys ( $a_interface ));
-//$input_errors[] = implode( " | " , $a_interface);
 // This checks that the $uuid variable is set, and that the 
 // attempt to determine the index of the jail config that has the same 
 // uuid as the page was entered with is not empty
@@ -361,24 +358,7 @@ if ($_POST) {
 				$base_count++;
 				$pconfig['base_ver'] = $file_split[2] . "-" . $file_split[3]; 
 			}
-		/*	elseif ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'lib32.txz') == 0 ){
-				$lib_count++;
-				$pconfig['lib_ver'] = $file_split[2] . "-" . $file_split[3] ;
-			}
-			elseif ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'doc.txz') == 0 ){
-				$doc_count++;
-				$pconfig['doc_ver'] = $file_split[2] . "-" . $file_split[3] ;
-			}
-			elseif ( strcmp($file_split[0], 'FreeBSD') == 0 && strcmp($file_split[4], 'src.txz') == 0 ){
-				$src_count++;
-				$pconfig['src_ver'] = $file_split[2] . "-" . $file_split[3] ;
-			}
-			else {
-				$pconfig['base_ver']= "Unknown";
-				$pconfig['lib_ver'] = "Unknown";
-				$pconfig['src_ver'] = "Unknown";
-				$pconfig['doc_ver'] = "Unknown";
-			} */
+		
 		} // End of foreach
 		// Need to deal with keeping track of the lib version as the same as the base version
 		if ( $myarch != "amd64" ){
@@ -402,16 +382,6 @@ if ($_POST) {
 		      }
 		  }
 	
-	// This is a second test to see if the directory was created properly.
-	//if ( !is_dir( $pconfig['jailpath'] )){
-	//	$input_errors[] = "Could not create directory for jail to live in!";
-	//}
-		
-	// Validate if jail number is unique in order to reorder the jails (if necessary)
-	// Alexey - why do we care about the jail number or the uuid?
-	// Why not use the name?
-	
-	// a_jail is the list of all jails, sorted by their jail number
 	
 	if ( empty( $input_errors )) {
 		// Index is the location within a_jail that has the same jailnumber as the one just entered
@@ -669,10 +639,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 	<tr><td class="tabnavtbl">
 		<ul id="tabnav">
 			<li class="tabact"><a href="extensions_thebrig.php"><span><?=_THEBRIG_JAILS;?></span></a></li>
-			<?php /* If (!empty($config['thebrig']['content'])) { 
-			$thebrigupdates=_THEBRIG_UPDATES;
-			echo "<li class=\"tabinact\"><a href=\"extensions_thebrig_update.php\"><span>{$thebrigupdates}</span></a></li>";
-			} else {} */?>
+			
 			<li class="tabinact"><a href="extensions_thebrig_config.php"><span><?=_THEBRIG_MAINTENANCE;?></span></a></li>
 		</ul>
 	</td></tr>
@@ -701,18 +668,16 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
  			
  			html_combobox("statfs", _THEBRIG_J_STATFS, $pconfig['statfs'], $combovalues , _THEBRIG_J_STATFS_EXPL, false,false);?>
 		
- 			<?php//html_combobox("devfs_enable", gettext("Enable mount devfs \n <input type=\"button\" onclick=\"helpboxdevfs()\" value=\"Help\" />"), $pconfig['devfs_enable'], array('parent' =>'Main devfs','standart'=> 'Standart', 'custom'=> 'With ruleset'), "Choose devfs type", false,false,"devfs_change()");?>
-			
+ 						
 			<?php html_checkbox("devfs_enable", _THEBRIG_J_DEVFS, $pconfig['devfs_enable'], _THEBRIG_J_DEVFS_EXPL, "", "", "");?>
 	<?php html_brigdevfs_box("rule", _THEBRIG_J_DEVFSRULES, !empty($pconfig['rule']) ? $pconfig['rule'] : array(), _THEBRIG_J_DEVFSRULES_EXPL, false);?>
 							
 			
-			<?php //html_inputbox("devfsrules", gettext("Devfs ruleset name"), !empty($pconfig['devfsrules']) ? $pconfig['devfsrules'] : "devfsrules_jail", gettext("You can change standart ruleset"), false, 30);?>
-			<?php html_checkbox("proc_enable", _THEBRIG_J_PROCFS, $pconfig['proc_enable'], "", _THEBRIG_J_PROCFS_EXPL, " ", " ");?>
+						<?php html_checkbox("proc_enable", _THEBRIG_J_PROCFS, $pconfig['proc_enable'], "", _THEBRIG_J_PROCFS_EXPL, " ", " ");?>
 			<?php html_checkbox("fdescfs_enable", _THEBRIG_J_FDESCFS, $pconfig['fdescfs_enable'], "", _THEBRIG_J_FDESCFS_NOTE, " ");?>
 			<?php if (FALSE !== ($datasets_list = brig_datasets_list())) {
-			html_checkbox("zfs_enable", _THEBRIG_J_ZFS, isset($pconfig['zfs_enable']) ? true : false, "", "", " ");
-			html_zfs_box("zfs_dataset", _THEBRIG_J_ZFS_MOUNTED, $pconfig['zfs_dataset'], $datasets_list, false, false); 
+				html_checkbox("zfs_enable", _THEBRIG_J_ZFS, isset($pconfig['zfs_enable']) ? true : false, "", "", " ");
+				html_zfs_box("zfs_dataset", _THEBRIG_J_ZFS_MOUNTED, $pconfig['zfs_dataset'], $datasets_list, false, false); 
 			} else { echo " <input name='zfs_enable' type='hidden' value='' />";}
 			?>
 			<?php html_textarea("auxparam", _THEBRIG_J_FSTAB, $pconfig['auxparam'] , _THEBRIG_J_FSTAB_EXPL, false, 65, 5, false, false);?>
@@ -749,8 +714,6 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			$a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", _THEBRIG_VNET_LAN, $pconfig['if'], $a_interface, _THEBRIG_VNET_LAN_EXPL, true);?>
 			<?php } ?>
-			<?php //html_ipv4addrbox("ipaddr", "subnet", _THEBRIG_NETWORK gettext("Jail IPv4 address"), $pconfig['ipaddr'], $pconfig['subnet'], "", false);?>
-			<?php // html_ipv6addrbox("ipaddr6", "subnet6", gettext("Jail IPv6 address"), $pconfig['ipaddr6'], $pconfig['subnet6'], "", false);?>
 			<?php  html_brig_network_box("allowedip",  _THEBRIG_J_NETWORK, $pconfig['allowedip'], "May be multiple IPs and LANs", false, false) ; ?>
 				
 			<?php html_separator();?>

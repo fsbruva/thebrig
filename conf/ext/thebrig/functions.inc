@@ -709,6 +709,42 @@ function brig_datasets_list() {
 	// Using the -H option removes the headers, and uses a single \t between
 	// column entries
 	cmd_exec("zpool list -Ho name",$pool_names, $errors);
+	cmd_exec("zfs list -t filesystem -H -o jailed,name,mountpoint",$dataset_names, $errors);
+	$pool_count = count($pool_names);
+	$dataset_count = count($dataset_names);
+	$unique_count = $dataset_count - $pool_count ;
+	if (0 < $unique_count ){
+		for ($i=0; $i < $dataset_count;$i++) { 
+			$cell[$i] = explode ( "\t" , $dataset_names[$i]);
+			for ($k=0; $k<$pool_count;$k++){
+				// Remove the pools from the list of datasets
+				if ( strcmp( $cell[$i][1] , rtrim($pool_names[$k]) ) === 0 ) {
+					unset ( $cell[$i]);
+				}
+			}
+		}
+		foreach ($cell as $cells ) { $cell1[] = array_filter($cells); }
+		for ($i=0; $i< count($cell1);) { 
+			$pattern1=$cell1[$i][1];
+			$pattern1 = preg_quote($pattern1, '/' );
+			$pattern = "/".$pattern1."/"; 
+			$match = preg_match($pattern, $config['thebrig']['rootfolder']);
+			if (1 === $match) { unset ($cell1[$i]); } 
+			$i++;
+			}
+		$cell1 =  array_filter($cell1);
+		foreach ($cell1 as $cells ) { $datasets_list[] = array_filter($cells); }
+	
+	return $datasets_list;
+	} else { return false; }
+}
+
+function brig_datasets_list_old() {
+	global $config;
+	$pool_names = array(); $dataset_names = array(); $errors = array(); 
+	// Using the -H option removes the headers, and uses a single \t between
+	// column entries
+	cmd_exec("zpool list -Ho name",$pool_names, $errors);
 	cmd_exec("zfs list -Ho jailed,name,mountpoint",$dataset_names, $errors);
 	$pool_count = count($pool_names);
 	$dataset_count = count($dataset_names);
@@ -831,7 +867,7 @@ function write_jailcommands ($out_jail) {
 */	
 		$commandfile=  $config['thebrig']['rootfolder'] . "conf/jails/poststart.". $out_jail['jailname'];
 		$post_handle = fopen( $commandfile, "w");
-		fwrite ($post_handle, "#!/bin/sh\n#\n");
+		fwrite ($post_handle, "#!/bin/sh\n#\nset -x\n");
 		$delete_post = true;
 		if (isset($out_jail['jail_vnet'] )) {
 			$delete_post = false;
