@@ -21,8 +21,9 @@
 require("auth.inc");
 require("guiconfig.inc");
 //require_once("ext/thebrig/lang.inc");
-require("ext/thebrig/functions.inc");
-require("ext/thebrig/gui_addons.inc");
+require_once("ext/thebrig/functions.inc");
+require_once("ext/thebrig/gui_addons.inc");
+require_once("zfs.inc");
 
 $in_jail_allow = array (
 "allow.sysvipc",
@@ -126,6 +127,9 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['jailno'] = $a_jail[$cnid]['jailno'];
 	$pconfig['jailname'] = $a_jail[$cnid]['jailname'];
 	$pconfig['jail_type'] = $a_jail[$cnid]['jail_type'];
+	$pconfig['filesystemschem'] = $a_jail[$cnid]['filesystemschem'];
+	$pconfig['zfspool'] = $a_jail[$cnid]['zfspool'];
+	$pconfig['compression'] = $a_jail[$cnid]['compression'];
 	$pconfig['param'] = $a_jail[$cnid]['param'];
 	$pconfig['allowedip'] = $a_jail[$cnid]['allowedip'];  // new entries
 	$pconfig['if'] = $a_jail[$cnid]['if'];
@@ -173,6 +177,7 @@ else {
 	$pconfig['jailno'] = $next_jailnumber;
 	$pconfig['jailname'] = "jail".$next_jailnumber;
 	$pconfig['jail_type']="Slim";
+	$pconfig['filesystemschem']="simple";
 	$pconfig['param'] = array("allow.mount", "allow.mount.devfs");
 	unset ($pconfig['allowedip']);
 	unset ($pconfig['jail_vnet']);
@@ -344,7 +349,12 @@ if ($_POST) {
 	// Check to make sure they are not attempting to install to a folder that thebrig uses.
 	if ( array_search ($pconfig['jailpath'], $thebrig_dirs ) !== FALSE)
 		$input_errors[] = "The specified jail location is reserved. Please choose another.";
-		
+	if (false === zfs_is_valid_dataset_name($pconfig['jailname'])) {
+			$input_errors[] = sprintf(gtext("The attribute '%s' contains invalid characters."), gtext('Jail name'));
+		}
+	//Dataset full name construkt as pool/dataset
+	$datasetfullname = $pconfig['zfspool'] . "/" . $pconfig['jailname']	;
+	
 			// Check to make sure there are not any duplicate files selected
 	if ( count( $files_selected) > 0 ){
 		$base_count = 0;
@@ -427,6 +437,9 @@ if ($_POST) {
 		$jail['jailname'] = $pconfig['jailname'];
 		$jail['jail_type'] = $pconfig['jail_type'];
 		$jail['param'] = $pconfig['param'];
+		$jail['filesystemschem'] = $pconfig['filesystemschem'];
+		$jail['zfspool'] = $pconfig['zfspool'];
+		$jail['compression'] = $pconfig['compression'];
 		$jail['jailpath'] = $pconfig['jailpath'];		
 		$jail['allowedip'] = $pconfig['allowedip'];		
 		$jail['jail_vnet'] = isset($pconfig['jail_vnet']) ? true : false;
@@ -460,7 +473,19 @@ if ($_POST) {
 		$jail['zfs_enable'] = !empty($pconfig['zfs_enable']) ? true : false;
 		$jail['fib'] = $pconfig['fib'];
 		$jail['ports'] = isset( $pconfig['ports'] ) ? true : false ;
-		
+		// Create zfs dataset, if it defined
+		if (FALSE === ($cnid = array_search_ex($uuid, $a_jail, "uuid")) && $jail['filesystemschem'] == "zfs") {
+		// Create new jail with zfs schem => Prepare dataset for jail 
+		// create dataset
+		$result = 0;
+		$option = " -o mountpoint=".rtrim($jail['jailpath'], "/")." -o compression=".$jail['compression'];
+		$cmd = 'zfs create'. $option . ' '. $datasetfullname;
+		write_log($cmd);
+		$result |= mwexec($cmd, true);
+	if ($result != 0) {
+		write_log(sprintf('Error: Failed to create dataset %1$s', $datasetfullname));
+		exit;
+		} }
 		// Populate the jail. The simplest case is a full jail using tarballs.
 		if ( $pconfig['source'] === "tarballs" && ( count ( $files_selected ) > 0 ) && $jail['jail_type'] === "full")
 			thebrig_split_world($pconfig['jailpath'] , false , $files_selected );
@@ -507,6 +532,24 @@ function thebrig_get_next_jailnumber() {
 	}
 	return $jailno;
 }
+
+$l_compressionmode = [
+	'on' => gtext('On'),
+	'off' => gtext('Off'),
+	'lz4' => 'lz4',
+	'lzjb' => 'lzjb',
+	'gzip' => 'gzip',
+	'gzip-1' => 'gzip-1',
+	'gzip-2' => 'gzip-2',
+	'gzip-3' => 'gzip-3',
+	'gzip-4' => 'gzip-4',
+	'gzip-5' => 'gzip-5',
+	'gzip-6' => 'gzip-6',
+	'gzip-7' => 'gzip-7',
+	'gzip-8' => 'gzip-8',
+	'gzip-9' => 'gzip-9',
+	'zle' => 'zle'
+];
 ?>
 <?php include("fbegin.inc");?>
 <script type="text/javascript">//<![CDATA[
@@ -613,12 +656,27 @@ $('#moreless').click(function (){
 			break;
 		}
 });
+$('#filesystemschem').change(function(){
+	switch ($('#filesystemschem').val()) {
+	case "simple":
+			$('#filesystemschem1_tr').hide();	
+			$('#zfspool_tr').hide();
+			$('#compression_tr').hide();
+		break;
+	case "zfs":
+		$('#filesystemschem1_tr').hide();	
+		$('#zfspool_tr').show();
+		$('#compression_tr').show();
+		}
+});
 $('#moreless').click();
 $('#zfs_enable').change();
 $('#jail_type').change();
 $('#source').change();
 $('#jail_vnet').change();
+$('#filesystemschem').change();
 $('#moreless').click();
+
 });
 function jail_mount_enable() {
 	switch (document.iform.jail_mount.checked) {
@@ -644,8 +702,8 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 		</ul>
 	</td></tr>
 		<td class="tabcont">
-      <form action="extensions_thebrig_edit.php" method="post" name="iform" id="iform"> 
-     <!--  <form action="test.php" method="post" name="iform" id="iform"> -->
+    <form action="extensions_thebrig_edit.php" method="post" name="iform" id="iform">  
+    <!--     <form action="test.php" method="post" name="iform" id="iform">-->
       <input name="jailpath" type="hidden" value="<?=$pconfig['jailpath'];?>" />
 					<input name="base_ver" type="hidden" value="<?=$pconfig['base_ver'];?>" />
 					<input name="fib" type="hidden" value="<?=$pconfig['fib'];?>" />
@@ -654,8 +712,18 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php html_titleline(_THEBRIG_JAIL_PARAMETERS);?>
         	<?php html_inputbox("jailno", _THEBRIG_JAIL_NUMBER, $pconfig['jailno'], _THEBRIG_JAIL_NUMBER_EXPL,true, 10, true);?>
 			<?php html_inputbox("jailname", _THEBRIG_TABLE1_TITLE1, $pconfig['jailname'], _THEBRIG_TABLE1_TITLE1_EXPL, true, 15,isset($uuid) && (FALSE !== $cnid) && $name_ro );?>
-			<?php html_combobox("jail_type", _THEBRIG_JAIL_TYPE, $pconfig['jail_type'], array('full'=> 'Full','slim' =>'Slim'), _THEBRIG_JAIL_TYPE_EXPL, true,isset($uuid) && (FALSE !== $cnid),"type_change()");?>
+			<?php html_combobox("jail_type", _THEBRIG_JAIL_TYPE, $pconfig['jail_type'], array('full'=> 'Full','slim' =>'Slim'), _THEBRIG_JAIL_TYPE_EXPL, true,isset($uuid) && (FALSE !== $cnid),"type_change()");
+			html_combobox("filesystemschem", _THEBRIG_TABLE1_TITLE_ZFS, $pconfig['filesystemschem'], array("simple" => "Simple folder","zfs"=>"zfs dataset for this"), _THEBRIG_TABLE1_TITLEZFS_EXPL, true,isset($uuid) && (FALSE !== $cnid) && $name_ro,"");
+			if (FALSE !== ($datasets_list1 = brig_datasets_list())) {
+				foreach ( $datasets_list1 as $b_dataset) {$c_dataset[] = $b_dataset[1];}
 			
+			}
+			$a_pools = zfs_get_pool_list();?>
+			<?php foreach ( $a_pools as $a_pool_n => $a_pool_val) {$poolname[$a_pool_val['name']] = $a_pool_val['name'];} ?>
+	
+			<?php html_combobox("zfspool", _THEBRIG_J_POOL, $pconfig['zfspool'], $poolname, _THEBRIG_J_POOL_EXPL, false,isset($uuid) && (FALSE !== $cnid) && $name_ro,"");	?>
+			<?php html_combobox2('compression', gtext('Compression'), $pconfig['compression'], $l_compressionmode, gtext("Controls the compression algorithm used for this dataset. The 'lzjb' compression algorithm is optimized for performance while providing decent data compression. Setting compression to 'On' uses the 'lzjb' compression algorithm. You can specify the 'gzip' level by using the value 'gzip-N', where N is an integer from 1 (fastest) to 9 (best compression ratio). Currently, 'gzip' is equivalent to 'gzip-6'."), false,isset($uuid) && (FALSE !== $cnid) && $name_ro); ?>
+
 			<?php html_checkbox("enable", _THEBRIG_TABLE1_TITLE3,			!empty($pconfig['enable']) ? true : false, _THEBRIG_TABLE1_TITLE3_EXPL, "");?>
 			<?php html_inputbox("jailpath", _THEBRIG_ONLINETABLE_TITLE4, $pconfig['jailpath'], _THEBRIG_ONLINETABLE_TITLE4_EXPL, false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>
 			<?php html_optionsbox("param", _THEBRIG_J_ALLOW , $pconfig['param'], $in_jail_allow, false, false); ?>

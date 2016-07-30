@@ -58,13 +58,18 @@
 		define('_THEBRIG_ADD', "Add" );
 		define('_THEBRIG_JAIL', "Jail" );
 		define ('_THEBRIG_JAIL_PARAMETERS', "Jail parameters");
-		define (_THEBRIG_JAIL_NUMBER, "Jail number");
-		define (_THEBRIG_JAIL_NUMBER_EXPL, "The jail number determines the order of the jail.");
-		define (_THEBRIG_TABLE1_TITLE1_EXPL, "The jail's  name.");
-		define (_THEBRIG_JAIL_TYPE, "Jail Type \n <input type=\"button\" onclick=\"helpbox()\" value=\"Help\" />");
-		define (_THEBRIG_JAIL_TYPE_EXPL, "Choose jail type ");
-		define(_THEBRIG_TABLE1_TITLE3_EXPL,"Check it if you want start current jail automatically with main system ");
-		define(_THEBRIG_ONLINETABLE_TITLE4_EXPL, "Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}jail_name/");
+		define ('_THEBRIG_JAIL_NUMBER', "Jail number");
+		define ('_THEBRIG_JAIL_NUMBER_EXPL', "The jail number determines the order of the jail.");
+		define ('_THEBRIG_TABLE1_TITLE1_EXPL', "The jail's  name.");
+		define ('_THEBRIG_JAIL_TYPE', "Jail Type \n <input type=\"button\" onclick=\"helpbox()\" value=\"Help\" />");
+		define ('_THEBRIG_JAIL_TYPE_EXPL', "Choose jail type ");
+		define('_THEBRIG_TABLE1_TITLE3_EXPL',"Check it if you want start current jail automatically with main system ");
+		define('_THEBRIG_ONLINETABLE_TITLE4_EXPL', "Sets an alternate location for the jail. Default is {$config['thebrig']['rootfolder']}jail_name/");
+		define('_THEBRIG_TABLE1_TITLE_ZFS',"Jail folder type");
+		define('_THEBRIG_TABLE1_TITLEZFS_EXPL',"Choice how to store the jail's world. If you want use new dataset, TherBrig will create it automatically and dataset name will as jailname");
+		define('_THEBRIG_J_POOL', "Pool" );
+		define('_THEBRIG_J_POOL_COPM', "Compression" );
+		define('_THEBRIG_J_POOL_EXPL', "Choise pool, where TheBrig will create dataset for jail. You can manage dataset after creation over ZFS page GUI" );
 		define('_THEBRIG_J_ALLOW', "In jail allow:" );
 		define('_THEBRIG_J_OPTION', "In jail" ); //  insert into jscript page
 		define('_THEBRIG_J_MOUNTFSTAB', "mount/umount jail's fs");
