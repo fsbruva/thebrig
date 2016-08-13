@@ -350,7 +350,7 @@ if ($_POST) {
 	if ( array_search ($pconfig['jailpath'], $thebrig_dirs ) !== FALSE)
 		$input_errors[] = "The specified jail location is reserved. Please choose another.";
 	if (false === zfs_is_valid_dataset_name($pconfig['jailname'])) {
-			$input_errors[] = sprintf(gtext("The attribute '%s' contains invalid characters."), gtext('Jail name'));
+			$input_errors[] = sprintf(gettext("The attribute '%s' contains invalid characters."), gettext('Jail name'));
 		}
 	//Dataset full name construkt as pool/dataset
 	$datasetfullname = $pconfig['zfspool'] . "/" . $pconfig['jailname']	;
@@ -534,8 +534,8 @@ function thebrig_get_next_jailnumber() {
 }
 
 $l_compressionmode = [
-	'on' => gtext('On'),
-	'off' => gtext('Off'),
+	'on' => 'On',
+	'off' => 'Off',
 	'lz4' => 'lz4',
 	'lzjb' => 'lzjb',
 	'gzip' => 'gzip',
@@ -722,7 +722,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php foreach ( $a_pools as $a_pool_n => $a_pool_val) {$poolname[$a_pool_val['name']] = $a_pool_val['name'];} ?>
 	
 			<?php html_combobox("zfspool", _THEBRIG_J_POOL, $pconfig['zfspool'], $poolname, _THEBRIG_J_POOL_EXPL, false,isset($uuid) && (FALSE !== $cnid) && $name_ro,"");	?>
-			<?php html_combobox2('compression', gtext('Compression'), $pconfig['compression'], $l_compressionmode, gtext("Controls the compression algorithm used for this dataset. The 'lzjb' compression algorithm is optimized for performance while providing decent data compression. Setting compression to 'On' uses the 'lzjb' compression algorithm. You can specify the 'gzip' level by using the value 'gzip-N', where N is an integer from 1 (fastest) to 9 (best compression ratio). Currently, 'gzip' is equivalent to 'gzip-6'."), false,isset($uuid) && (FALSE !== $cnid) && $name_ro); ?>
+			<?php html_combobox2('compression', _THEBRIG_DATASET_COMPRESS, $pconfig['compression'], $l_compressionmode, _THEBRIG_DATASET_COMPRESS_EXPL,	false,isset($uuid) && (FALSE !== $cnid) && $name_ro); ?>
 
 			<?php html_checkbox("enable", _THEBRIG_TABLE1_TITLE3,			!empty($pconfig['enable']) ? true : false, _THEBRIG_TABLE1_TITLE3_EXPL, "");?>
 			<?php html_inputbox("jailpath", _THEBRIG_ONLINETABLE_TITLE4, $pconfig['jailpath'], _THEBRIG_ONLINETABLE_TITLE4_EXPL, false, 40,isset($uuid) && (FALSE !== $cnid) && $path_ro);?>

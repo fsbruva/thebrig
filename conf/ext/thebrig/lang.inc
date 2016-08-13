@@ -57,6 +57,8 @@
 		define('_THEBRIG_EDIT', "Edit" );
 		define('_THEBRIG_ADD', "Add" );
 		define('_THEBRIG_JAIL', "Jail" );
+		define('_THEBRIG_DATASET_COMPRESS', "Compression" );
+		define('_THEBRIG_DATASET_COMPRESS_EXPL', "Controls the compression algorithm used for this dataset. The 'lzjb' compression algorithm is optimized for performance while providing decent data compression. Setting compression to 'On' uses the 'lzjb' compression algorithm. You can specify the 'gzip' level by using the value 'gzip-N', where N is an integer from 1 (fastest) to 9 (best compression ratio). Currently, 'gzip' is equivalent to 'gzip-6'.");
 		define ('_THEBRIG_JAIL_PARAMETERS', "Jail parameters");
 		define ('_THEBRIG_JAIL_NUMBER', "Jail number");
 		define ('_THEBRIG_JAIL_NUMBER_EXPL', "The jail number determines the order of the jail.");
