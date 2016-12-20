@@ -42,7 +42,7 @@ redirect=">/dev/null 2>&1"
 /usr/bin/fetch -q -o ${dest}/${rel}_${arch}_MANIFEST $ftp_url/MANIFEST >/dev/null 2>$1
 
 # Carry out the grep operation to extract the desired sha256 hash from the manifest
-desired_hash=`grep ${pack} ${dest}/${rel}_${arch}_MANIFEST | awk '{print $2}'`
+desired_hash=`grep ${pack}.txz ${dest}/${rel}_${arch}_MANIFEST | awk '{print $2}'`
 
 # Determine the file size from the ftp server
 desired_size=`/usr/bin/fetch -s ${ftp_url}/${pack}.txz`

@@ -136,7 +136,9 @@ function thebrig_populate ($new_location, $old_location)
 		 	}	// end for		
 	} // end if (is array)
 	// update the value of the shutdown command.
-	$config['rc']['shutdown']['cmd'][$i] = "/bin/sh {$new_location}conf/bin/thebrig_stop.sh";
+	//$config['rc']['shutdown']['cmd'][$i] = "/bin/sh {$new_location}conf/bin/thebrig_stop.sh";
+	unlink_if_exists("{$new_location}conf/bin/thebrig_stop.sh");
+	unlink_if_exists("{$old_location}conf/bin/thebrig_stop.sh");
 	unlink_if_exists("/etc/rc.d/thebrig");
 	if ( ! symlink ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
 	{ exec ("logger Failed copy rc script");} 
@@ -1125,3 +1127,4 @@ function print_thebrig_confirm_box() {
 	echo "<input name=\"cancel\" type=\"submit\" class=\"formbtn\" id=\"cancel\" value=\"Cancel\" />";
 	echo "</div>";
 }
+?>

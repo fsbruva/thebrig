@@ -426,7 +426,7 @@ function disable_buttons() {
 	</td></tr></table>
 				<div id="submit">
 					<input name="Submit" type="submit" class="formbtn" value="<?=_THEBRIG_SAVE_BUTTON;?>" />
-					 <input name="compress" type="hidden" value="<?if ($pconfig['compress'] == "yes") echo "yes"; ?>" />
+					 <input name="compress" type="hidden" value="<?php if ($pconfig['compress'] == "yes") echo "yes"; ?>" />
 				</div>
 				
 	</table>

@@ -16,8 +16,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-require("auth.inc");
-require("guiconfig.inc");
+require_once("auth.inc");
+require_once("guiconfig.inc");
 
 // If thebrig array does not exist or is not a valid array within the global config, then create a blank one.
 if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) {

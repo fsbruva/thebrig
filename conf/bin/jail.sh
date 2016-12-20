@@ -132,9 +132,10 @@ thebrig_stop()
 								-i "jailname[.='${_j}']" -v "100+jailno" -n -b \
 						/conf/config.xml`
 			 eval /sbin/devfs rule -s ${ruleset} delset
+			 echo "Stopped jail "${_j}
         done
 
-        echo
+        echo 
 
 }
 thebrig_troubleshoot() {
