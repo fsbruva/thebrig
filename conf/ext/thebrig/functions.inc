@@ -20,18 +20,21 @@ include_once( "config.inc");
 include_once( $config['thebrig']['rootfolder']."conf/ext/thebrig/lang.inc");
 function thebrig_unregister() {
  	global $config;
- 	
- 	$i = 0;
- 	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
- 		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
- 		
- 		///TODO - please refer into preg_match manual preg_match() returns 1 if the pattern matches given subject, 0 if it does not, or FALSE if an error occurred.
- 		// Construction delete ALL cmd
- 			if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i])) {
- 				unset($config['rc']['postinit']['cmd'][$i]); }	// Disable the old startup
- 		}	// end for
- 	} // end if (is array)
-
+ 	if ( floatval(file_get_contents("/etc/prd.revision")) < 3200 ) {
+		$i = 0;
+		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
+			for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
+ 		 				// Construction delete  cmd
+				if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i])) unset($config['rc']['postinit']['cmd'][$i]); 
+				}	// end for
+			}	// end if (is array) 
+		} else {
+			$a_param = &$config['rc']['param'];
+			if (FALSE !== ($parid = array_search_ex("Thebrig startup script", $a_param, "name"))) {
+				unset ( $a_param[$parid]);		//  delete old input for new scheme		
+			}
+		}
+	
  	// remove TheBrig related config and webgui settings - store folder location temporarily
  	$brigroot = $config['thebrig']['rootfolder'];
  	// clears the config variables
@@ -104,41 +107,62 @@ function thebrig_populate ($new_location, $old_location)
 		mwexec ( "mkdir -p {$new_location}work/") ;
 	}
 	
-	// This section finds and unsets the startup command for the extension (code borrowed from slimserver install)
-	$i = 0;
-	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
-		for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
-			if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
-				unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
-		 	}	// end for		
-	} // end if (is array)
-
-	// This will search the startup commands to find the appropriate index to place thebrig's startup script command
-	$i = 0;
-	// Don't want to attempt array operations if there are no postinit commands.
-	if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
-		for ($i; $i < count( $config['rc']['postinit']['cmd'] ); $i++) {
-			// This loops through all the post init command script entries, and if it finds thebrig_start.sh (placed by hand), 
-			// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
-			if ( 1 === preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
-				break;
-		} // end of for loop
-	} // end of array if statment
-	// update the value of the postinit command.
-	$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$new_location}conf/bin/thebrig_start.php";
-	// update all the symbolic links and such by executing the shutdown script from the new location
-	//mwexec("/bin/sh /mnt/data/thebrig/conf/bin/thebrig_stop.sh");
-	$i = 0;
-	if ( is_array($config['rc']['shutdown'] ) && is_array( $config['rc']['shutdown']['cmd'] ) ) {
-		for ($i; $i < count($config['rc']['shutdown']['cmd']); $i++) {
-			if (1 === preg_match('/thebrig_stop\.sh/', $config['rc']['shutdown']['cmd'][$i]))
-				unset($config['rc']['shutdown']['cmd'][$i]);	// Disable the old startup
-		 	}	// end for		
-	} // end if (is array)
-	// update the value of the shutdown command.
-	//$config['rc']['shutdown']['cmd'][$i] = "/bin/sh {$new_location}conf/bin/thebrig_stop.sh";
+		// This section finds and unsets the startup command for the extension (code borrowed from slimserver install)
+		$i = 0;
+		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
+			for ($i; $i < count($config['rc']['postinit']['cmd']); $i++) {
+				if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+					unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
+				}	// end for		
+		} // end if (is array)
+		if ( floatval(file_get_contents("/etc/prd.revision")) < 3200 ) {
+		// This will search the startup commands to find the appropriate index to place thebrig's startup script command
+		$i = 0;
+		// Don't want to attempt array operations if there are no postinit commands.
+		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
+			for ($i; $i < count( $config['rc']['postinit']['cmd'] ); $i++) {
+				// This loops through all the post init command script entries, and if it finds thebrig_start.sh (placed by hand), 
+				// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
+				if ( 1 === preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i]))
+					break;
+			} // end of for loop
+		} // end of array if statment
+		// update the value of the postinit command.
+		$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$new_location}conf/bin/thebrig_start.php";
+	} else {
+		$sphere_record['param']['uuid'] = uuid();
+		$sphere_record['param']['enable'] = true;
+		$sphere_record['param']['protected'] = false;
+		$sphere_record['param']['name'] = 'Thebrig startup script';
+		$sphere_record['param']['value'] = "/usr/local/bin/php-cgi {$new_location}conf/bin/thebrig_start.php";
+		$sphere_record['param']['comment'] = '';
+		$sphere_record['param']['typeid'] = '2';
+		if ( ! is_array($config['rc']['param'] ) ) {
+			$config['rc']['param'] = array();
+		} else {
+			$a_param = &$config['rc']['param'];
+			if (FALSE !== ($parid = array_search_ex("Thebrig startup script", $a_param, "name"))) {
+				unset ( $a_param[$parid]);		//  delete old input for new scheme		
+			}
+		}
+		$config['rc']['param'] = array_merge_recursive ($config['rc']['param'], $sphere_record );
+		if (  1 >= count ($config['rc']['postinit'])) unset ($config['rc']['postinit']);
+		
+		}
+		// update all the symbolic links and such by executing the shutdown script from the new location
+		//mwexec("/bin/sh /mnt/data/thebrig/conf/bin/thebrig_stop.sh");
+		$i = 0;
+		if ( is_array($config['rc']['shutdown'] ) && is_array( $config['rc']['shutdown']['cmd'] ) ) {
+			for ($i; $i < count($config['rc']['shutdown']['cmd']); $i++) {
+				if (1 === preg_match('/thebrig_stop\.sh/', $config['rc']['shutdown']['cmd'][$i]))
+					unset($config['rc']['shutdown']['cmd'][$i]);	// Disable the old startup
+				}	// end for		
+		} // end if (is array)
+		if ( empty($config['rc']['shutdown'])  ) unset ($config['rc']['shutdown']);	
+		// update the value of the shutdown command.
 	unlink_if_exists("{$new_location}conf/bin/thebrig_stop.sh");
-	unlink_if_exists("{$old_location}conf/bin/thebrig_stop.sh");
+	unlink_if_exists("{$old_location}conf/bin/thebrig_stop.sh");	
+	
 	unlink_if_exists("/etc/rc.d/thebrig");
 	if ( ! symlink ( $config['thebrig']['rootfolder']."conf/bin/jail.sh", "/etc/rc.d/thebrig"))  
 	{ exec ("logger Failed copy rc script");} 
@@ -451,6 +475,7 @@ function thebrig_split_world ( $destination , $jail_type ){
 	exec ( "echo 'network_interfaces=\"\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'cron_flags=\"\$cron_flags -J 15\"' >> " . $destination . "etc/rc.conf" );
 	exec ( "echo 'hostname=\"{$myjailhostname}\"' >> " . $destination . "etc/rc.conf" );
+	exec ( "echo 'syslogd_oomprotect=\"NONE\"' >> " . $destination . "etc/rc.conf" );
 } // end of function
 
 

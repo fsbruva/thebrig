@@ -183,6 +183,9 @@ if ($config['thebrig']['compress']  == "yes" ) $pconfig['compress'] = "yes"; els
 $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_MAINTENANCE, _THEBRIG_BASIC_CONFIG, _THEBRIG_VERSION_NBR );
 // Uses the global fbegin include
 include("fbegin.inc");
+if ( floatval(file_get_contents("/etc/prd.revision")) > 3200 && is_array ($config['rc']['postinit'])) {
+	$need_convert="Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format";
+} else { unset ($need_convert) ;}
 
 // This will evaluate if there were any input errors from prior to the user clicking "save"
 if ( $input_errors ) { 
@@ -254,6 +257,17 @@ function message(obj) {
 				<input type="checkbox" name="remove" value="1" onclick="return message(this);" ><?=_THEBRIG_CLEANUP_DESC;?>
 			</td>
 		</tr>
+		<?php
+		if ($need_convert) { 
+		
+		?>
+		<?php html_separator(); ?>
+		<tr><td width="22%" valign="top" class="vncellreq">
+		 <span class='red'><strong><b>Attention</b>:</strong></span><br /></td>
+		<td width="78%" class="vtable"><color=\'red\'>Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format</color></td>
+			
+		<?php } ?>	
+		
 			
 		<!-- This is the Save button -->
 		<tr><td width="22%" valign="top">&nbsp;</td>
@@ -267,4 +281,4 @@ function message(obj) {
 </form>
 </td></tr>
 </table>
-<?php 	include("fend.inc"); ?>
+<?php include("fend.inc"); ?>
