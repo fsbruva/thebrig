@@ -40,7 +40,7 @@ name=thebrig
 rcvar=${name}_enable
 
 load_rc_config $name
-: ${jail_enable="NO"}
+: ${thebrig_enable="NO"}
 
 cmd="$1"
 if [ $# -gt 0 ]; then
