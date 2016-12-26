@@ -184,7 +184,7 @@ $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_MAINTENANCE, _THEBRIG_BASIC_CONFIG, _T
 // Uses the global fbegin include
 include("fbegin.inc");
 $freebsdversion=floatval(exec("uname -r | cut -d- -f1 | cut -d. -f1"));
-if ( $freebsdversion >10 ) {
+if ( true== ( $freebsdversion >10) && is_array( $config['rc']['postinit'] )) {
 	$need_convert="Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format";
 } else { unset ($need_convert) ;}
 
