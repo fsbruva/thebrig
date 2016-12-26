@@ -114,7 +114,7 @@ if ( count ( $config['thebrig']['content'] ) > 0 ) {
 }
 // If thebrig service is enabled, then starting its rc script(s) need to 
 // be updated and run 
-if (isset ( $config['thebrig']['thebrig_enable']) ) {
+if (isset ( $config['thebrig']['enable']) ) {
 		rc_update_service('thebrig');
 		rc_start_service('thebrig');
 }
