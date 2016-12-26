@@ -15,7 +15,7 @@
 # and "enforce_statfs" to 0.
 
 # PROVIDE: thebrig
-# REQUIRE: LOGIN cleanvar
+# REQUIRE: execcmd_postinit
 # BEFORE: securelevel
 # KEYWORD: shutdown
 # XQUERY: -i "count(//thebrig/thebrig_enable) > 0" -o "0" -b
@@ -40,7 +40,7 @@ name=thebrig
 rcvar=${name}_enable
 
 load_rc_config $name
-: ${jail_enable="NO"}
+: ${thebrig_enable="NO"}
 
 cmd="$1"
 if [ $# -gt 0 ]; then
@@ -84,10 +84,10 @@ thebrig_start()
 		devfs_rulesets_from_file ${rulefile}
 
         for _j in ${_jail_list}; do
-                echo -n "${_j} "
+               logger "${_j} "
 		_tmp=`/usr/bin/mktemp -t jail` || exit 3
                 if [ -e /var/run/jail_${_j}.id ]; then
-                        echo "${_j} already exists"
+                        logger "${_j} already exists"
                         continue
                 fi
                 $jail_cmd $jail_args -p 20 -J /var/run/jail_${_j}.id -c ${_j} >> $_tmp 2>/tmp/${_j}.log
@@ -96,7 +96,7 @@ thebrig_start()
 					/usr/bin/tail -1 $_tmp
 				else
 					/bin/rm -f /var/run/jail_${_j}.id
-					echo " cannot start jail \"${_hostname:-${_j}}\": "
+					logger " cannot start jail \"${_hostname:-${_j}}\": "
 				fi
 				/bin/rm -f $_tmp
 				if [ ! -s /tmp/${_j}.log ]; then

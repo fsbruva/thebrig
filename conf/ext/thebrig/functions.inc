@@ -115,7 +115,8 @@ function thebrig_populate ($new_location, $old_location)
 					unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
 				}	// end for		
 		} // end if (is array)
-		if ( floatval(file_get_contents("/etc/prd.revision")) < 3200 ) {
+		$freebsdversion=floatval(exec("uname -r | cut -d- -f1 | cut -d. -f1"));
+		if ( $freebsdversion < 11 ) {
 		// This will search the startup commands to find the appropriate index to place thebrig's startup script command
 		$i = 0;
 		// Don't want to attempt array operations if there are no postinit commands.

@@ -116,6 +116,6 @@ if ( count ( $config['thebrig']['content'] ) > 0 ) {
 // be updated and run 
 if (isset ( $config['thebrig']['thebrig_enable']) ) {
 		rc_update_service('thebrig');
-		rc_start_service('thebrig');
+		//rc_start_service('thebrig');
 }
 ?>

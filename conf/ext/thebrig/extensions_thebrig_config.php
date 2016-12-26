@@ -183,7 +183,8 @@ if ($config['thebrig']['compress']  == "yes" ) $pconfig['compress'] = "yes"; els
 $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_MAINTENANCE, _THEBRIG_BASIC_CONFIG, _THEBRIG_VERSION_NBR );
 // Uses the global fbegin include
 include("fbegin.inc");
-if ( floatval(file_get_contents("/etc/prd.revision")) > 3200 && is_array ($config['rc']['postinit'])) {
+$freebsdversion=floatval(exec("uname -r | cut -d- -f1 | cut -d. -f1"));
+if ( $freebsdversion >10 ) {
 	$need_convert="Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format";
 } else { unset ($need_convert) ;}
 
