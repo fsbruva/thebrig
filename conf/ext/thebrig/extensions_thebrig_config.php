@@ -162,9 +162,9 @@ if ($_POST) {
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			$config['thebrig']['template'] = $pconfig['template'];
 			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
-			$langfile = file("ext/thebrig/lang.inc");
-			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[1]);
-			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
+			$langfile = file( $config['thebrig']['rootfolder'] ."conf/ext/thebrig/lang.inc");
+			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[18]);
+			$config['thebrig']['version'] = 0 + substr($version_1[1],0,4);
 			if ($pconfig['compress'] == "yes" ) $config['thebrig']['compress'] = $pconfig['compress']; else unset( $config['thebrig']['compress']);
 			write_config(); // Write the config to disk
 			unlink_if_exists("/tmp/thebrig.tmp");
@@ -184,7 +184,7 @@ $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_MAINTENANCE, _THEBRIG_BASIC_CONFIG, _T
 // Uses the global fbegin include
 include("fbegin.inc");
 $freebsdversion=floatval(exec("uname -r | cut -d- -f1 | cut -d. -f1"));
-if ( true== ( $freebsdversion >10) && is_array( $config['rc']['postinit'] )) {
+if ( true== ( $freebsdversion >10) && isset( $config['rc']['postinit'] )) {
 	$need_convert="Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format";
 } else { unset ($need_convert) ;}
 
