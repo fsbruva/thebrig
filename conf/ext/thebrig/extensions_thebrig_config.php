@@ -162,9 +162,9 @@ if ($_POST) {
 			$config['thebrig']['rootfolder'] = $pconfig['rootfolder']; // Store the newly specified folder in the XML config
 			$config['thebrig']['template'] = $pconfig['template'];
 			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
-			$langfile = file( $config['thebrig']['rootfolder'] ."conf/ext/thebrig/lang.inc");
+			$langfile = file("ext/thebrig/lang.inc");
 			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[18]);
-			$config['thebrig']['version'] = 0 + substr($version_1[1],0,4);
+			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
 			if ($pconfig['compress'] == "yes" ) $config['thebrig']['compress'] = $pconfig['compress']; else unset( $config['thebrig']['compress']);
 			write_config(); // Write the config to disk
 			unlink_if_exists("/tmp/thebrig.tmp");
@@ -184,9 +184,20 @@ $pgtitle = array(_THEBRIG_TITLE, _THEBRIG_MAINTENANCE, _THEBRIG_BASIC_CONFIG, _T
 // Uses the global fbegin include
 include("fbegin.inc");
 $freebsdversion=floatval(exec("uname -r | cut -d- -f1 | cut -d. -f1"));
-if ( true== ( $freebsdversion >10) && isset( $config['rc']['postinit'] )) {
-	$need_convert="Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format";
-} else { unset ($need_convert) ;}
+unset ($need_convert);
+if ( $freebsdversion >10 ) {
+	$i = 0;
+		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
+			for ($i; $i < count($config['rc']['postinit']['cmd']); ) {
+				if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+					{
+						$need_convert="Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format";
+						break;
+					}
+					$i++;
+				}
+		} // end if (is array)
+}
 
 // This will evaluate if there were any input errors from prior to the user clicking "save"
 if ( $input_errors ) { 
@@ -265,7 +276,7 @@ function message(obj) {
 		<?php html_separator(); ?>
 		<tr><td width="22%" valign="top" class="vncellreq">
 		 <span class='red'><strong><b>Attention</b>:</strong></span><br /></td>
-		<td width="78%" class="vtable"><color=\'red\'>Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format</color></td>
+		<td width="78%" class="vtable"><color=\'red\'><?= $need_convert;?></color></td>
 			
 		<?php } ?>	
 		
