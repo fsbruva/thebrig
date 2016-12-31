@@ -151,7 +151,16 @@ function thebrig_populate ($new_location, $old_location)
 			}
 		}
 		$config['rc']['param'] = array_merge_recursive ($config['rc']['param'], $sphere_record );
-		if (  1 >= count ($config['rc']['postinit'])) unset ($config['rc']['postinit']);
+		
+			$i = 0;
+			if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
+				for ($i; $i < count($config['rc']['postinit']['cmd']); ) {
+					if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
+						unset($config['rc']['postinit']['cmd'][$i]);	// Disable the old startup
+						$i++;
+					}	// end for
+				if (  !isset ($config['rc']['postinit']['cmd'])) unset ($config['rc']['postinit']);
+				} // end if (is array)
 		
 		}
 		// update all the symbolic links and such by executing the shutdown script from the new location
