@@ -130,10 +130,12 @@ function thebrig_populate ($new_location, $old_location)
 				// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
 				if ( 1 === preg_match('/thebrig_start\.sh/', $config['rc']['postinit']['cmd'][$i])) {
 					unset ($config['rc']['postinit']['cmd'][$i]);
+					$i--; //Added by Grey!!!
 					break;
 				}					
 				$i++;
 			} // end of for loop
+			$i++;//Added by Grey!!!
 		} // end of array if statment
 		// update the value of the postinit command.
 		$config['rc']['postinit']['cmd'][$i] = "/usr/local/bin/php-cgi {$new_location}conf/bin/thebrig_start.php";
