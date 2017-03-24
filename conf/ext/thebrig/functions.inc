@@ -16,8 +16,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-include_once( "config.inc");
-include_once( $config['thebrig']['rootfolder']."conf/ext/thebrig/lang.inc");
+include_once "guiconfig.inc";
+$includepath1 = dirname(__FILE__) . "/lang.inc";
+require_once $includepath1;
+
 
 function thebrig_unregister() {
  	global $config;
@@ -106,10 +108,14 @@ function thebrig_populate ($new_location, $old_location)
 	}	// moves data from and removes the old directory 
 	
 	// Create the work directory if it doesn't already exist
-	if ( ! is_dir ( "{$new_location}work/" ) ) {
+	if ( ! is_dir ( $new_location."work/" ) ) {
 		mwexec ( "mkdir -p {$new_location}work/") ;
 	}
-	
+	if (FALSE === is_array($config['rc'])) {
+		$config['rc'] = array();
+		$config['rc']['param'] = array();
+	}
+	if (isset($config['rc']['postinit'])) {
 		// This section finds and unsets the startup command for the extension (code borrowed from slimserver install)
 		$i = 0;
 		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
@@ -119,6 +125,7 @@ function thebrig_populate ($new_location, $old_location)
 					$i++;
 				}	// end for		
 		} // end if (is array)
+	}
 		$freebsdversion=floatval(exec("uname -r | cut -d- -f1 | cut -d. -f1"));
 		if ( $freebsdversion < 11 ) {
 		// This will search the startup commands to find the appropriate index to place thebrig's startup script command

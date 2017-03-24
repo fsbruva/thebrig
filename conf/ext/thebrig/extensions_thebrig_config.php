@@ -20,14 +20,22 @@ require_once("auth.inc");
 require_once("guiconfig.inc");
 
 // If thebrig array does not exist or is not a valid array within the global config, then create a blank one.
-if ( !isset($config['thebrig']) || !is_array($config['thebrig'])) {
-	$config['thebrig'] = array();
-	$includepath=rtrim( file_get_contents('/tmp/thebrig.tmp') ) ."/";
-} else {
-	$includepath = $config['thebrig']['rootfolder'];
-}
-require_once($includepath . "conf/ext/thebrig/lang.inc");
-require_once($includepath . "conf/ext/thebrig/functions.inc");
+if ( isset($config['thebrig']) ) {
+	if (is_array($config['thebrig'])) { 
+		$includepath = $config['thebrig']['rootfolder'] ;
+	} else {
+		$input_errors[] = "You have broken config";
+	}
+}	else {
+		$config['thebrig'] = array();
+		if (file_exists("/tmp/thebrig.tmp")) {
+			$includepath=rtrim( file_get_contents('/tmp/thebrig.tmp') ) ."/" ;
+		} else {
+			$input_errors[] = _THEBRIG_NOT_INSTALLED;
+		}
+	} 
+$includefunctions = $includepath . "conf/ext/thebrig/functions.inc";
+require_once $includefunctions;
 
 // This determines if there are any thin jails (type = slim), which means we shouldn't
 // relocate the basejail. We also need to check and make sure no jails currently live 
@@ -186,6 +194,7 @@ include("fbegin.inc");
 $freebsdversion=floatval(exec("uname -r | cut -d- -f1 | cut -d. -f1"));
 unset ($need_convert);
 if ( $freebsdversion >10 ) {
+	if (isset($config['rc']['postinit']) ) {
 	$i = 0;
 		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
 			for ($i; $i < count($config['rc']['postinit']['cmd']); ) {
@@ -197,6 +206,7 @@ if ( $freebsdversion >10 ) {
 					$i++;
 				}
 		} // end if (is array)
+	}
 }
 
 // This will evaluate if there were any input errors from prior to the user clicking "save"
