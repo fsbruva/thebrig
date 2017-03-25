@@ -61,7 +61,7 @@ if ($_POST) {
 		$retval |= updatenotify_process("thebrig", "thebrig_process_updatenotification");
 		// Lock the config
 		if ( isset($config['thebrig']['thebrig_enable']) ) { 
-			file_put_contents($brig_test, "brig is enabled and retval is:{$retval} \n");
+			//file_put_contents($brig_test, "brig is enabled and retval is:{$retval} \n");
 			$retval |= rc_update_rcconf("thebrig", "enable");
 			} 
 		else { 
