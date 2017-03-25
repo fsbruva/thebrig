@@ -16,7 +16,7 @@ Copyright 2012-2015 Matthew Kempe & Alexey Kruglov
 */
 require("auth.inc");
 require("guiconfig.inc");
-require_once("ext/thebrig/lang.inc");
+//require_once("ext/thebrig/lang.inc");
 require_once("ext/thebrig/functions.inc");
 $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
 
@@ -24,14 +24,7 @@ $pgtitle = array(_THEBRIG_EXTN , _THEBRIG_TITLE);
 // The entirety of this next section (all the way to the /head) is copied out of the fbegin.inc file
 // normally used to construct the larger portion of the nas4free framing, including all the title bars and whatnot
 //=========================================================================================================================================================
-function gentitle($title) {
-	$navlevelsep = "|"; // Navigation level separator string.
-	return join($navlevelsep, $title);
-}
 
-function genhtmltitle($title) {
-	return system_get_hostname() . " - " . gentitle($title);
-}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?=system_get_language_code();?>" lang="<?=system_get_language_code();?>">
