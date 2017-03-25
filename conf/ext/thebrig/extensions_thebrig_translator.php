@@ -26,8 +26,13 @@ $thebrigdefine1 = $phpdefine['user'];
 foreach ($thebrigdefine1 as $key => $entries) {	
 // Unset not our values 
 		if (0 == preg_match('/UPDATENOTIFY_/',$key)) {
-			if (0 == preg_match('/_VERSION_NBR/',$key)) $thebrigdefine[$key] = $entries;
-		}}
+			if ( 0 == preg_match('/RECORD_/',$key )) {
+				if	( 0 == preg_match('/PAGE_MODE/',$key )) {
+					if (0 == preg_match('/_VERSION_NBR/',$key)) { $thebrigdefine[$key] = $entries; $keys[]=$key;} ;
+		$result[] = preg_match('/UPDATENOTIFY_/',$key, $matches);
+		//$matches
+		}}} 
+}
 if (is_file( $config['thebrig']['rootfolder']."conf/ext/thebrig/lang.tmpl")) {
 		$pconfig = unserialize (file_get_contents($config['thebrig']['rootfolder']."conf/ext/thebrig/lang.tmpl"));
 		
