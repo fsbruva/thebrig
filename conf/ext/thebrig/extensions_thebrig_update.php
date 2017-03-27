@@ -102,15 +102,16 @@ if ( $_POST && is_array( $config['thebrig']['content']))
 			// This will search the existing cronjobs to find the appropriate index to place the portsnap command
 						$i = 0;
 			// Don't want to attempt array operations if there are no cronjobs.
-						if ( is_array($config['cron'] ) && is_array( $config['cron']['job'] ) ) 
-							{
+						if ( is_array($config['cron'] ) ) {
+							if ( is_array( $config['cron']['job'] ) ) {
 								for ($i; $i < count( $config['cron']['job'] ); $i++) 
 									{
 											// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 											// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
 									if ( 1 === preg_match('/thebrig_update_cron\.php/', $config['cron']['job'][$i]['command'])) break;
 									} // end of for loop
-							} // end of array if statment
+							} else { $config['cron']['job'] =array(); }
+							} else { $config['cron'] =array(); $config['cron']['job'] =array(); }
 			// update the value of the cron.
 						$config['cron']['job'][$i] = $brig_cron_job;
 					} // end of "turning on" cron
