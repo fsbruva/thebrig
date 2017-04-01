@@ -34,9 +34,8 @@ function thebrig_unregister() {
 				}	// end for
 			}	// end if (is array) 
 		} else {
-			$a_param = &$config['rc']['param'];
-			if (FALSE !== ($parid = array_search_ex("Thebrig startup script", $a_param, "name"))) {
-				unset ( $a_param[$parid]);		//  delete old input for new scheme		
+			if (FALSE !== ($parid = array_search_ex("Thebrig startup script", $config['rc']['param'], "name"))) {
+				unset ( $config['rc']['param'][$parid]);
 			}
 		}
 	
