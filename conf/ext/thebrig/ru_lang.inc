@@ -1,7 +1,7 @@
 <?php
 /* 
 define(buildlang, "Create lang file");
-Translated by Dimon8x
+Translated by Dimon8x  https://github.com/fsbruva/thebrig/tree/alcatraz
 */
 define(_THEBRIG_EXTN, "Расширения");
 define(_THEBRIG_TITLE, "TheBrig");
