@@ -547,6 +547,8 @@ function html_optionsbox($ctrlname, $title, $value, $j_opt, $required = false, $
 	$ctrl->Render();
 }
 function html_brigdevfs_box($ctrlname, $title, $value, $desc,  $required = false, $readonly = false) {
+ 	foreach ($value as &$curString)
+          { $curString = htmlspecialchars($curString, ENT_QUOTES); }
 	$ctrl = new HTMLBrigdevfs($ctrlname, $title, $value, $desc);
 	$ctrl->SetRequired($required);
 	$ctrl->SetReadOnly($readonly);	
