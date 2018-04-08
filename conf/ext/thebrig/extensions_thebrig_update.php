@@ -654,6 +654,7 @@ function conf_handler() {
 						$bsd_release_num= preg_split("|-RELEASE|",$release);
 						$bsd_release[]=array($release => 10*$bsd_release_num[0] ) ;
 					}
+				
 				foreach ($bsd_release as $release) 
 					{
 						foreach ( $release as $name => $number ) 
@@ -661,6 +662,7 @@ function conf_handler() {
 								if ($number >  $release_num[0]) $combo[]=$name;
 							}
 					}
+				if (isset ($combo) ) {
 				if (count ($combo) < 1)	{ } else 
 					{ 
 					//html_combobox("releaseupgrade", "Upgrade release", $pconfig['releaseupgrade'], $combo, "description"); 
@@ -678,7 +680,7 @@ function conf_handler() {
 						<br /><span class='vexpl'>If you see this button, you can upgrade your jail to next release <br /> Please check the availability of the NAS4Free to the proposed release <br /> Also please read FreeBSD handbook about upgrade FreeBSD <br /><b>Idea:</b> FreeBSD jail can run with major kernel: world from 9.3 and kernel from 10.2 releases  </span>
 						</td>						
 					</tr>
-<?php				}
+				<?php				}	}
 				//update details
 				html_separator();
 				html_titleline(_THEBRIG_UPDATE_DETAILS);

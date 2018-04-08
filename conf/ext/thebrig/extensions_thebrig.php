@@ -21,15 +21,18 @@ require("auth.inc");
 require("guiconfig.inc");
 
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
+	
+	$includepath=rtrim( file_get_contents('/tmp/thebrig.tmp') ) ."/conf/ext/thebrig/functions.inc";
+	require_once($includepath );
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
-	$includepath=rtrim( file_get_contents('/tmp/thebrig.tmp') ) ."/";
 	header("Location: extensions_thebrig_config.php");
 	
 } 
 else {
 	$includepath = $config['thebrig']['rootfolder'];
+	require_once($includepath ."conf/ext/thebrig/functions.inc");
 }
-require_once($includepath ."conf/ext/thebrig/functions.inc");
+
 $pgtitle = array(_THEBRIG_EXTN,_THEBRIG_TITLE);
 /*
 if (is_ajax()) {

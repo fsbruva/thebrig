@@ -30,7 +30,7 @@ $in_jail_allow = array (
 "allow.raw_sockets",
 "allow.chflags",
 "allow.mount",
-/*allow.mount,tmpfs,*/
+"allow.mount,tmpfs",
 "allow.mount.devfs",
 "allow.mount.nullfs",
 "allow.mount.procfs",
@@ -356,7 +356,8 @@ if ($_POST) {
 	$datasetfullname = $pconfig['zfspool'] . "/" . $pconfig['jailname']	;
 	
 			// Check to make sure there are not any duplicate files selected
-	if ( count( $files_selected) > 0 ){
+	
+	if ( true === count_ext( $files_selected, ">", 0 )){
 		$base_count = 0;
 		$lib_count = 0;
 		$doc_count = 0;
@@ -386,7 +387,7 @@ if ($_POST) {
 		$input_errors[] = "You have selected more than one of a given tarball type!!  Please select only one of each type";
 		
 	// If the specified path doesn't exist, we need to create it.
-	if ( !is_dir( $pconfig['jailpath'] ) && ( count($input_errors) == 0 ) ) {
+	if ( !is_dir( $pconfig['jailpath'] ) && ( isset($input_errors) === FALSE ) ) {
 		if (!mkdir( $pconfig['jailpath'], 0774, true)) {
 		     $input_errors[] ="Could not create directory for jail to live in!";
 		      }
@@ -487,15 +488,18 @@ if ($_POST) {
 		exit;
 		} }
 		// Populate the jail. The simplest case is a full jail using tarballs.
-		if ( $pconfig['source'] === "tarballs" && ( count ( $files_selected ) > 0 ) && $jail['jail_type'] === "full")
+		
+		if ( $pconfig['source'] === "tarballs" && ( count_ext ( $files_selected, ">", 0 )) && $jail['jail_type'] === "full")
 			thebrig_split_world($pconfig['jailpath'] , false , $files_selected );
+		
 		elseif ( $pconfig['source'] === "template" && $jail['jail_type'] === "full" )
 			thebrig_split_world($pconfig['jailpath'] , false);
 		// Next simplest is to split the world if we're making a slim jail out of tarballs.
 		elseif ( $jail['jail_type'] === "slim" ) {
 			// We know we're making a slim jail now
 			$config['thebrig']['basejail']['base_ver'] = $pconfig['base_ver'];
-			if ( $pconfig['source'] === "tarballs" && count ( $files_selected ) > 0 ) 
+			
+			if ( $pconfig['source'] === "tarballs" && count_ext ( $files_selected, ">", 0 ) )
 				thebrig_split_world($pconfig['jailpath'] , true , $files_selected );
 			elseif (  $pconfig['source'] === "template" )
 				thebrig_split_world($pconfig['jailpath'] , true);
@@ -516,6 +520,28 @@ if ($_POST) {
 		exit;
 	}
 }
+// function count sanitized, example ===> count ( $files_selected ) > 0 )
+function count_ext($array, $sign, $act) {
+	//global $config;
+	unset($result);
+	if ( isset ($array) && is_array($array)) {
+		switch ($sign) {
+				case "<":
+						$result = (count ( $array ) < $act);
+						break;
+				case "==":
+						$result= (count ( $array ) == $act);
+						break;
+				case ">":
+						$result = (count ( $array ) > $act);
+						break;
+		}	
+		
+	} 	
+return $result;
+}
+
+
 
 // Get next jail number.
 function thebrig_get_next_jailnumber() {
@@ -746,7 +772,7 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php if (FALSE !== ($datasets_list = brig_datasets_list())) {
 				html_checkbox("zfs_enable", _THEBRIG_J_ZFS, isset($pconfig['zfs_enable']) ? true : false, "", "", " ");
 				html_zfs_box("zfs_dataset", _THEBRIG_J_ZFS_MOUNTED, $pconfig['zfs_dataset'], $datasets_list, false, false); 
-			} else { echo " <input name='zfs_enable' type='hidden' value='' />";}
+			} else { /*echo " <input name='zfs_enable' type='hidden' value='' />";*/}
 			?>
 			<?php html_textarea("auxparam", _THEBRIG_J_FSTAB, $pconfig['auxparam'] , _THEBRIG_J_FSTAB_EXPL, false, 65, 5, false, false);?>
 
