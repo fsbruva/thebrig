@@ -171,7 +171,7 @@ if ($_POST) {
 			$config['thebrig']['template'] = $pconfig['template'];
 			$config['thebrig']['basejail']['folder'] = $pconfig['basejail'];
 			$langfile = file("ext/thebrig/lang.inc");
-			$version_1 = preg_split ( "/VERSION_NBR, 'v/", $langfile[18]);
+			$version_1 = preg_split ( "/'v/", $langfile[18]);
 			$config['thebrig']['version'] = 0 + substr($version_1[1],0,3);
 			if ($pconfig['compress'] == "yes" ) $config['thebrig']['compress'] = $pconfig['compress']; else unset( $config['thebrig']['compress']);
 			write_config(); // Write the config to disk
