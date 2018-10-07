@@ -30,7 +30,7 @@ $in_jail_allow = array (
 "allow.raw_sockets",
 "allow.chflags",
 "allow.mount",
-"allow.mount,tmpfs",
+"allow.mount.tmpfs",
 "allow.mount.devfs",
 "allow.mount.nullfs",
 "allow.mount.procfs",
