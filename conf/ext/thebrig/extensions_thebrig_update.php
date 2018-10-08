@@ -230,7 +230,7 @@ if ( $_POST && is_array( $config['thebrig']['content']))
 								file_put_contents("/tmp/release.upgrade",$pconfig['release'] );
 							}
 						$response = 0;
-						if ( count ( $input_errors ) == 0) 
+						if (FALSE === is_array ($input_errors)) 
 							{
 								$response = thebrig_update($basedir_list, $workdir_list , $conffile_list, $pconfig['update_op']); 
 								foreach ($response as $line) 
