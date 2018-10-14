@@ -88,7 +88,7 @@ else { // TheBrig has been confirmed
 			if ( is_file("/tmp/lang.inc") ) {
 				$gitlangfile = file("/tmp/lang.inc");
 				// Extract the version string from the file ("0.8", "0.9")
-				$git_ver = preg_split ( "/VERSION_NBR, 'v/", $gitlangfile[18]);
+				$git_ver = preg_split ( "/v/", $gitlangfile[18]);
 				// Force the version to be a number for comparisons
 				$git_ver = 0 + substr($git_ver[1],0,4);
 				// Go get the install file and make it executable - only if we can successfully get the files we need.
