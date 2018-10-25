@@ -354,7 +354,7 @@ function disable_buttons() {
 									</tr>
 						<?php 
 						//foreach( $config['thebrig']['content'] as $n_jail): 
-						for ($k=1; $k <= count($config['thebrig']['content']); $k++) : ?>					
+						for ($k=1; $k <= count_safe ($config['thebrig']['content']); $k++) : ?>					
 									<tr name='myjail<?=$n_jail['jailno']; ?>' id='myjail<?=$n_jail['jailno']; ?>'>
 										<td width="7%" valign="top" class="listlr" name="ajaxjailname<?=$k; ?>"  id="ajaxjailname<?=$k; ?>" >  </td>
 									    <td width="15%" valign="top" class="listr" name="ajaxjailbuilt<?=$k; ?>" ><span><img id="ajaxjailbuiltimg<?=$k; ?>" src="images/status_disabled.png" border="0" alt="template?" /> </span><span id="ajaxjailbuiltports<?=$k; ?>"></span><span id="ajaxjailbuiltsrc<?=$k; ?>"></span> </td>

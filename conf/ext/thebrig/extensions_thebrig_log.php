@@ -49,7 +49,7 @@ $loginfo2 = array(
 		))
 );
 if (is_array($config['thebrig']['content'])) {
-$countjails = count($config['thebrig']['content']);
+$countjails = count_safe($config['thebrig']['content']);
 foreach ($config['thebrig']['content'] as $jails) { $jailnames[]= $jails['jailname']; }
 for ($i=0;  $i<$countjails; $i++) {
 $loginfo1[$i] = array(
@@ -130,7 +130,7 @@ function log_display($loginfo) {
 			continue;
 
 		// Skip empty lines
-		if (count($loginfo['columns']) == 1 && empty($matches[1]))
+		if (count_safe($loginfo['columns']) == 1 && empty($matches[1]))
 			continue;
 
 		echo "<tr valign=\"top\">\n";

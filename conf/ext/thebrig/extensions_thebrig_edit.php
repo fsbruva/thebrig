@@ -232,13 +232,13 @@ if ($_POST) {
 		 $delimit = "/".$c_ips[0]."/";
 		  if (!is_ipaddr($c_ips[0])) $input_errors[] = sprintf( gettext("The attribute '%s' is not a valid IP address."), $c_ips[0]);
 		  $matches = preg_grep ($delimit, $pconfig['allowedip'] );
-		  if (count ($matches) > 1)  $input_errors[] = sprintf( gettext("Duplicate IP address input detected - '%s' "), $c_ips[0]);
+		  if (count_safe ($matches) > 1)  $input_errors[] = sprintf( gettext("Duplicate IP address input detected - '%s' "), $c_ips[0]);
 		   $matches = preg_grep ($delimit, $a_jail );
-		   if (count ($matches) > 1)  $input_errors[] = sprintf( gettext("The specified ip address '%s'  is already in use. Please choose another."), $c_ips[0]);
+		   if (count_safe ($matches) > 1)  $input_errors[] = sprintf( gettext("The specified ip address '%s'  is already in use. Please choose another."), $c_ips[0]);
 	}
 	}
 	// check device filesystem rules.  If we have one defined -> set enables  for devfs_enable
-	if (isset ( $pconfig['rule'] ) && count ($pconfig['rule'] > 0) && !empty($pconfig['rule']) ) {
+	if (isset ( $pconfig['rule'] ) && count_safe ($pconfig['rule'] > 0) && !empty($pconfig['rule']) ) {
 		 //$pconfig['jail_mount'] = "yes";
 		 $pconfig['devfs_enable'] = "yes";
 		 }
@@ -306,7 +306,7 @@ if ($_POST) {
 	if (is_array ($pconfig['cmd'])) {
 	foreach ($pconfig['cmd'] as $a_cmd ) {  $b_cmd = explode("|", $a_cmd); $c_cmd[] =  $b_cmd[0] . $b_cmd[1]; } 
 	
-	if (count($c_cmd) != count (array_unique($c_cmd)))  $input_errors[] = sprintf( gettext("Duplicate command detected, please inspect command mice values."));
+	if (count_safe($c_cmd) != count_safe (array_unique($c_cmd)))  $input_errors[] = sprintf( gettext("Duplicate command detected, please inspect command mice values."));
 	}
 	$files_selected = $_POST['formFiles'];
 	// Input validation.
@@ -426,7 +426,7 @@ if ($_POST) {
 			} // end of editing existing jail
 			else {
 				// This indicates we are creating a new jail
-				for ( $i = $index; $i < count( $a_jail ); $i++ ){
+				for ( $i = $index; $i < count_safe( $a_jail ); $i++ ){
 					$a_jail[$i]['jailno'] += 1;
 				} // end of for loop
 			} // end of else (we're adding a new jail

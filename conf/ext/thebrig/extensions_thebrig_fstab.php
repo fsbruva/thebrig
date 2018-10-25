@@ -37,7 +37,7 @@ print_r ($_GET);
 	else { $input_errors[]=" Jail not defined!  Please define jail over Add|Edit tab and push <b>Add</b> button for store configuration into config.xml "; goto menu; }
 		if (isset($a_jail[$cnid]['auxparam']) && is_array($a_jail[$cnid]['auxparam'])) {
 			$fstab = $a_jail[$cnid]['auxparam'];
-			$linenumbers = count($fstab);
+			$linenumbers = count_safe($fstab);
 			if (empty($fstab[0])) $linenumbers=0;
 			foreach ($fstab as $fstabline) {
 			$fstabentry = explode(" ",$fstabline);
@@ -70,7 +70,7 @@ print_r ($_GET);
 		$line = $_GET['line'];
 		//$numberline=$_GET['numberline'];
 		$result1 = file($fstabfile);
-		$numberline = count($result1);
+		$numberline = count_safe($result1);
 		for ($i = 0; $i < $numberline; $i++) {
 			$result1[$i] = trim($result1[$i]); //sanitize array
 			}
@@ -94,7 +94,7 @@ if(isset($_POST['Submit'])) {
 	$uuid = $pconfig['uuid'];
 	$fstabfile= "/tmp/fstab.edit";
 	$result1 = file($fstabfile);
-	$numberline = count($result1);
+	$numberline = count_safe($result1);
 	for ($i = 0; $i < $numberline; $i++) {
 			$result2[$i] = trim($result1[$i]); //sanitize array
 			}
@@ -249,7 +249,7 @@ function ds(f) {
 							</tr>
 		<?php // this line need for analystic from host
 					$fstabfile= file("/tmp/fstab.edit");
-					$countfstabfile=count($fstabfile);
+					$countfstabfile=count_safe($fstabfile);
 					if (($countfstabfile==1) && ( filesize("/tmp/fstab.edit") < 12)) $countfstabfile = 0;
 					for ($i = 0; $i <= $countfstabfile; $i++):
 					$fstabelement[$i] = explode(" ",$fstabfile[$i]); ?>

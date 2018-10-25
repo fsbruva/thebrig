@@ -59,7 +59,7 @@ if ($_POST) {
 			$i = 0;
 			// Don't want to attempt array operations if there are no cronjobs.
 			if ( is_array($config['cron'] ) && is_array( $config['cron']['job'] ) ) {
-				for ($i; $i < count( $config['cron']['job'] ); $i++) {
+				for ($i; $i < count_safe( $config['cron']['job'] ); $i++) {
 					// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 					// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
 					if ( 1 === preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
@@ -94,7 +94,7 @@ if ($_POST) {
 			// Don't want to attempt array operations if there are no cronjobs.
 			if ( is_array($config['cron'] ) ) {
 				if(is_array( $config['cron']['job'] ) ) {
-					for ($i; $i < count( $config['cron']['job'] ); $i++) {
+					for ($i; $i < count_safe( $config['cron']['job'] ); $i++) {
 					// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 					// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
 					if ( 1 === preg_match('/thebrig_ports_cron\.php/', $config['cron']['job'][$i]['command']))
@@ -343,7 +343,7 @@ function conf_handler() {
 									<td width="19%" class="listhdrr"><?=_THEBRIG_TABLE1_TITLE7;?></td>
 									<td width="5%" class="list"></td>
 								</tr>
-								<?php $k = 0; for( $k; $k < count ( $a_jail ) ; $k ++ ) { ?>
+								<?php $k = 0; for( $k; $k < count_safe ( $a_jail ) ; $k ++ ) { ?>
 								<tr>
 									<td class="<?=$enable?"listlr":"listlrd";?>"><input
 										type="checkbox" name="formJails[]"

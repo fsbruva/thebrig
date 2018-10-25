@@ -29,7 +29,7 @@ function get_jailinfo() {
 	if (is_array($config['thebrig']['content']) ) { 
 		array_sort_key($config['thebrig']['content'], "jailno");
 		$jails =  $config['thebrig']['content'];
-		$tabledata['rowcount']=count($jails);
+		$tabledata['rowcount']=count_safe($jails);
 		$k=0;
 		for ($k = 0; $k < $tabledata['rowcount']; $k++ ) {
 			$n_jail = $jails[$k];

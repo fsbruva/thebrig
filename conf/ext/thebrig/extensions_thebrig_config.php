@@ -128,7 +128,7 @@ if ($_POST) {
 	
 	// The folder supplied by the user is a valid folder, so we can continue our input validations
 	elseif( ( strcmp ( realpath($old_location) , realpath($new_location) ) != 0 ) && 				
-				(( count( $base_search ) > 0 ) || ( count( $template_search ) > 0) || $brig_jails )  ) {
+				(( count_safe( $base_search ) > 0 ) || ( count_safe( $template_search ) > 0) || $brig_jails )  ) {
 		// If the user has selected a new installation folder, then we also must check that there are no existing
 		// jails living there. This is a multiple step process. We need to see if there is anything in the basejail or in the
 		// template jail, or if there are any jails defined that have their jailpath within thebrig's root. Since
@@ -197,7 +197,7 @@ if ( $freebsdversion >10 ) {
 	if (isset($config['rc']['postinit']) ) {
 	$i = 0;
 		if ( is_array($config['rc']['postinit'] ) && is_array( $config['rc']['postinit']['cmd'] ) ) {
-			for ($i; $i < count($config['rc']['postinit']['cmd']); ) {
+			for ($i; $i < count_safe($config['rc']['postinit']['cmd']); ) {
 				if (1 === preg_match('/thebrig_start\.php/', $config['rc']['postinit']['cmd'][$i]))
 					{
 						$need_convert="Old startup and shutdown scheme was detect.  We convert only ThBrig scripts for new format";

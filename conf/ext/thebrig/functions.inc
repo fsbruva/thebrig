@@ -1184,4 +1184,13 @@ function print_thebrig_confirm_box() {
 	echo "<input name=\"cancel\" type=\"submit\" class=\"formbtn\" id=\"cancel\" value=\"Cancel\" />";
 	echo "</div>";
 }
+
+function count_safe( $array ) {
+	if (is_array( $array ) ) {
+		return count ( $array);
+	} else {
+		return 0;
+	}
+}
+
 ?>

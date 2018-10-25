@@ -49,7 +49,7 @@ if ($_POST) {
 	// If the "Delete" button was pressed, then we need to check for that, and then grab
 	// the list of files selected, and see how big that array is (count). If the size is less than
 	// one (implying that it is 0), then nothing has been selected, and we need to let the user know.
-	if ( isset ($_POST['delete'] ) && count ( $_POST['formFiles'] ) < 1 ){
+	if ( isset ($_POST['delete'] ) && count_safe ( $_POST['formFiles'] ) < 1 ){
 		$input_errors[] = _THEBRIG_DELETE_ERROR ;
 	}
 
@@ -57,7 +57,7 @@ if ($_POST) {
 	// If the "Fetch" button was pressed, then we need to check for that, and then grab
 	// the list of files selected, and see how big that array is (count). If the size is less than
 	// one (implying that it is 0), then nothing has been selected, and we need to let the user know.
-	if (isset($_POST['fetch']) && count ( $_POST['formPackages'] ) < 1 ){
+	if (isset($_POST['fetch']) && count_safe ( $_POST['formPackages'] ) < 1 ){
 		$input_errors[] = _THEBRIG_FETCH_ERROR ;
 	}
 
@@ -114,7 +114,7 @@ if ($_POST) {
 			
 			
 		// much better coding - we continue this loop while we've failed and we still have servers yet to try.
-		} while ( !$result && ($ftp_n < count ($ftp_servers)) );
+		} while ( !$result && ($ftp_n < count_safe ($ftp_servers)) );
 			
 		//$input_errs[] = "outside while and result is ";
 		if ( !$result ){

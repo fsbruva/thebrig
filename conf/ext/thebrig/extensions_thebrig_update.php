@@ -68,7 +68,7 @@ if ( $_POST && is_array( $config['thebrig']['content']))
 			// Don't want to attempt array operations if there are no cronjobs.
 						if ( is_array($config['cron'] ) && is_array( $config['cron']['job'] ) ) 
 							{
-								for ($i; $i < count( $config['cron']['job'] ); $i++) 
+								for ($i; $i < count_safe( $config['cron']['job'] ); $i++) 
 									{
 										// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 										// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
@@ -104,7 +104,7 @@ if ( $_POST && is_array( $config['thebrig']['content']))
 			// Don't want to attempt array operations if there are no cronjobs.
 						if ( is_array($config['cron'] ) ) {
 							if ( is_array( $config['cron']['job'] ) ) {
-								for ($i; $i < count( $config['cron']['job'] ); $i++) 
+								for ($i; $i < count_safe( $config['cron']['job'] ); $i++) 
 									{
 											// This loops through all the cron job entries, and if it finds thebrig_ports_cron.php (placed by hand),
 											// it will update the entry to reflect the new location by breaking out of the for loop at the correct index.
@@ -508,7 +508,7 @@ function conf_handler() {
 									<td width="12%" class="listhdrr"><?=_THEBRIG_UPDATETABLE4;?></td>
 								</tr>
 <?php 		$k = 0; 
-			for( $k; $k < count ( $a_jail ) ; $k ++ )
+			for( $k; $k < count_safe ( $a_jail ) ; $k ++ )
 				{
 					if ( file_exists ( $a_jail[$k]['jailpath'] . "/var/db/freebsd-update/tag"))
 						{
@@ -541,9 +541,9 @@ function conf_handler() {
 										} // End of slim jail shenanigans
 									// Count how many files by exploding the list and counting the arrays. If the list has only a "\n", then we should
 									// say that list has no files.
-									$added_count = ( strlen ($added_contents[$k]) <= 1 ) ? 0 : count( explode( "\n" , $added_contents[$k]));
-									$updated_count = ( strlen ($updated_contents[$k]) <= 1 ) ? 0 : count( explode( "\n" , $updated_contents[$k]) );
-									$removed_count = ( strlen ($removed_contents[$k]) <= 1 ) ? 0 :count( explode( "\n" , $removed_contents[$k]) );
+									$added_count = ( strlen ($added_contents[$k]) <= 1 ) ? 0 : count_safe( explode( "\n" , $added_contents[$k]));
+									$updated_count = ( strlen ($updated_contents[$k]) <= 1 ) ? 0 : count_safe( explode( "\n" , $updated_contents[$k]) );
+									$removed_count = ( strlen ($removed_contents[$k]) <= 1 ) ? 0 :count_safe( explode( "\n" , $removed_contents[$k]) );
 									$file_summary = $added_count . " files added, " . $updated_count. " files updated and  " . $removed_count . " files removed."  ;
 								} // End of there exists file lists
 							else {
@@ -586,9 +586,9 @@ function conf_handler() {
 									$removed_contents[$k] = rtrim(file_get_contents($config['thebrig']['template'] . "var/db/freebsd-update/files.removed"));
 									// Count how many files by exploding the list and counting the arrays. If the list has only a "\n", then we should
 									// say that list has no files.
-									$added_count = ( strlen ($added_contents[$k]) <= 1 ) ? 0 : count( explode( "\n" , $added_contents[$k]));
-									$updated_count = ( strlen ($updated_contents[$k]) <= 1 ) ? 0 : count( explode( "\n" , $updated_contents[$k]) );
-									$removed_count = ( strlen ($removed_contents[$k]) <= 1 ) ? 0 :count( explode( "\n" , $removed_contents[$k]) );
+									$added_count = ( strlen ($added_contents[$k]) <= 1 ) ? 0 : count_safe( explode( "\n" , $added_contents[$k]));
+									$updated_count = ( strlen ($updated_contents[$k]) <= 1 ) ? 0 : count_safe( explode( "\n" , $updated_contents[$k]) );
+									$removed_count = ( strlen ($removed_contents[$k]) <= 1 ) ? 0 :count_safe( explode( "\n" , $removed_contents[$k]) );
 									$file_summary = $added_count . " files added, " . $updated_count. " files updated and  " . $removed_count . " files removed."  ;
 								} // End of there exists file lists
 							else {
@@ -663,7 +663,7 @@ function conf_handler() {
 							}
 					}
 				if (isset ($combo) ) {
-				if (count ($combo) < 1)	{ } else 
+				if (count_safe ($combo) < 1)	{ } else 
 					{ 
 					//html_combobox("releaseupgrade", "Upgrade release", $pconfig['releaseupgrade'], $combo, "description"); 
 ?>
@@ -693,7 +693,7 @@ function conf_handler() {
 				$jail_names['00000000-0000-0000-0000-000000000000']="TEMPLATE";
 				html_combobox("jail_name", _THEBRIG_TABLE1_TITLE1, $pconfig['type'], $jail_names, _THEBRIG_UPDATE_DETAILS_EXPL, "","","");
 				$i = 0; 
-				for( $i; $i < count ( $a_jail ) ; $i ++ )
+				for( $i; $i < count_safe ( $a_jail ) ; $i ++ )
 					{ 
 						$added_list = $added_contents; 
 ?>
