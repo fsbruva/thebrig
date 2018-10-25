@@ -314,7 +314,7 @@ function thebrig_update ( $dest_dir , $work_dir , $conf_file , $action ) {
 				case "Upgrade":
 					// Upgrade --> release upgrade					
 					$command_upgrade = $command_prefix . " --not-running-from-cron upgrade -r " . file_get_contents("/tmp/release.upgrade") . " install" ;
-					cmd_exec($command_upgrade, $output);
+					cmd_exec($command_upgrade, $output, $errors);
 					break;
 			} // end of switch
 
@@ -927,9 +927,8 @@ function write_jailcommands ($out_jail) {
 			fwrite ($post_handle, "/sbin/ifconfig epair".$out_jail['jailno']."b vnet " . $out_jail['jailname']."\n");
 			fwrite ($post_handle, "/usr/sbin/jexec " . $out_jail['jailname'] . " /sbin/ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
 			/* next 2 string calculate default route for vmet enabled jails as side A for first started jail*/
-			fwrite ($post_handle, "bridge=`/sbin/ifconfig | /usr/bin/grep -m 1 bridge | /usr/bin/cut -f 1 -d :`\n");
-			fwrite ($post_handle, "iproutedef=`/sbin/ifconfig \$bridge | /usr/bin/grep -m 1 inet | /usr/bin/awk '{ print \$2 }'`\n");			
-			fwrite ($post_handle, "/usr/sbin/jexec " . $out_jail['jailname'] . " /sbin/route add default \$iproutedef \n");
+			$iproutedef = get_ipaddr( $out_jail['if'] );
+			fwrite ($post_handle, "/usr/sbin/jexec " . $out_jail['jailname'] . " /sbin/route add default ".$iproutedef."\n");
 			fwrite ($post_handle, "/usr/sbin/jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");			
 		}					
 		if (isset($out_jail['fdescfs_enable'])) { 
@@ -1029,12 +1028,19 @@ function write_jailcommands ($out_jail) {
 		fwrite ($after_handle, "#!/bin/sh\n#\n");
 		$delete_after=true;
 		if (isset($out_jail['jail_vnet'] )) {
-			$delete_after=false;					 
-			fwrite( $after_handle ,  "/sbin/ifconfig bridge20 deletem epair".$out_jail['jailno']."a\n");
-			fwrite( $after_handle ,  "/sbin/ifconfig epair". $out_jail['jailno']."a destroy\n");
-			fwrite( $after_handle ,  "MEMBERS=`/sbin/ifconfig bridge20 | /usr/bin/grep member | /usr/bin/wc -l`\n");
-			fwrite( $after_handle ,  "if [ \$MEMBERS -lt 2 ]; then \n");
-			fwrite( $after_handle ,  "\t/sbin/ifconfig bridge20 destroy\n");
+			$delete_after=false;
+			fwrite( $after_handle ,  "bridge=`/sbin/ifconfig | /usr/bin/grep -m 1 bridge | /usr/bin/cut -f 1 -d :`\n");
+			fwrite( $after_handle ,  "bridgedefault=\"bridge20\"\n");
+			fwrite( $after_handle ,  "MEMBERS=`/sbin/ifconfig \${bridge} | /usr/bin/grep member | /usr/bin/wc -l`\n");
+			fwrite( $after_handle ,  "if [ \${bridgedefault} == \${bridge} ]; then\n");
+			fwrite( $after_handle ,  "\t/sbin/ifconfig \${bridge} deletem epair".$out_jail['jailno']."a\n");
+			fwrite( $after_handle ,  "\t/sbin/ifconfig epair". $out_jail['jailno']."a destroy\n");
+			fwrite( $after_handle ,  "\tif [ \$MEMBERS -lt 2 ]; then \n");
+			fwrite( $after_handle ,  "\t\t/sbin/ifconfig \${bridge} destroy\n");
+			fwrite( $after_handle ,  "\tfi\n");
+			fwrite( $after_handle ,  "else\n");
+			fwrite( $after_handle ,  "\t/sbin/ifconfig \${bridge} deletem epair".$out_jail['jailno']."a\n");
+			fwrite( $after_handle ,  "\t/sbin/ifconfig epair". $out_jail['jailno']."a destroy\n");
 			fwrite( $after_handle ,  "fi\n");
 		}
 		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
