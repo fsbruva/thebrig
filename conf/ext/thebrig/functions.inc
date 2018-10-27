@@ -895,17 +895,37 @@ function write_jailcommands ($out_jail) {
 			
 			$delete_cmd = false;  
 			fwrite ($cmd_handle, "/sbin/sysctl net.inet.ip.forwarding=1 >/dev/null\n");			
-			fwrite ($cmd_handle, "bridge=`/sbin/ifconfig | /usr/bin/grep -m 1 bridge | /usr/bin/cut -f 1 -d :`\n");			
-			fwrite ($cmd_handle, "if [ -z \${bridge} ]; then\n");
-			
-			fwrite ($cmd_handle, "\tbridge=\"bridge20\"\n");
+			fwrite ($cmd_handle, "glue=\"".$out_jail['if']."\"\n");
+			fwrite ($cmd_handle, "BRIDGES=`/sbin/ifconfig | /usr/bin/grep bridge | grep -v groups | cut -f 1 -d :`\n");
+			fwrite ($cmd_handle, "flag=\"\"\n");
+			fwrite ($cmd_handle, "if [ -z \"\${BRIDGES}\" ]; then\n");			
+			fwrite ($cmd_handle, "\tbridge=\"bridge20\"\n");			
 			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} create > /dev/null 2> /dev/null\n");
 			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} addm " . $out_jail['if']."\n");
 			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
 			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} up\n");
+			fwrite ($cmd_handle, "\t/sbin/ifconfig epair" . $out_jail['jailno']." create up\n");
+			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} addm epair" . $out_jail['jailno']."a\n");
+			fwrite ($cmd_handle, "else\n");
+			fwrite ($cmd_handle, "\tfor BR in \${BRIDGES}; do\n");
+			fwrite ($cmd_handle, "\t\tmembers=`ifconfig \${BR} | grep \${glue}`\n");
+			fwrite ($cmd_handle, "\t\tif [ -z \"\${members}\" ]; then\n");
+			fwrite ($cmd_handle, "\t\t\tflag=\"\"\n");
+			fwrite ($cmd_handle, "\t\telse\n");
+			fwrite ($cmd_handle, "\t\t\tflag=\${BR}\n");
+			fwrite ($cmd_handle, "\t\t\tbreak\n");
+			fwrite ($cmd_handle, "\t\tfi\n");
+			fwrite ($cmd_handle, "\tdone\n");
+			fwrite ($cmd_handle, "\tif [ -z \"\${flag}\" ]; then\n");
+			fwrite ($cmd_handle, "\t\tflag=\"bridge19\"\n");
+			fwrite ($cmd_handle, "\t\t/sbin/ifconfig \${flag} create > /dev/null 2> /dev/null\n");
+			fwrite ($cmd_handle, "\t\t/sbin/ifconfig \${flag} addm \${glue}\n");
+			fwrite ($cmd_handle, "\t\t/sbin/ifconfig \${flag} inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
+			fwrite ($cmd_handle, "\t\t/sbin/ifconfig \${flag} up\n");
+			fwrite ($cmd_handle, "\tfi\n");
+			fwrite ($cmd_handle, "\t/sbin/ifconfig epair" . $out_jail['jailno']." create up\n");
+			fwrite ($cmd_handle, "\t/sbin/ifconfig \${flag} addm epair" . $out_jail['jailno'] . "a\n");
 			fwrite ($cmd_handle, "fi\n");
-			fwrite ($cmd_handle, "/sbin/ifconfig epair" . $out_jail['jailno']." create up\n");
-			fwrite ($cmd_handle, "/sbin/ifconfig \${bridge} addm epair" . $out_jail['jailno']."a\n");
 			}  
 		fclose($cmd_handle);
 		if ( $delete_cmd == true ) { unlink ($commandfile); }
@@ -1029,19 +1049,22 @@ function write_jailcommands ($out_jail) {
 		$delete_after=true;
 		if (isset($out_jail['jail_vnet'] )) {
 			$delete_after=false;
-			fwrite( $after_handle ,  "bridge=`/sbin/ifconfig | /usr/bin/grep -m 1 bridge | /usr/bin/cut -f 1 -d :`\n");
-			fwrite( $after_handle ,  "bridgedefault=\"bridge20\"\n");
-			fwrite( $after_handle ,  "MEMBERS=`/sbin/ifconfig \${bridge} | /usr/bin/grep member | /usr/bin/wc -l`\n");
-			fwrite( $after_handle ,  "if [ \${bridgedefault} == \${bridge} ]; then\n");
-			fwrite( $after_handle ,  "\t/sbin/ifconfig \${bridge} deletem epair".$out_jail['jailno']."a\n");
-			fwrite( $after_handle ,  "\t/sbin/ifconfig epair". $out_jail['jailno']."a destroy\n");
-			fwrite( $after_handle ,  "\tif [ \$MEMBERS -lt 2 ]; then \n");
-			fwrite( $after_handle ,  "\t\t/sbin/ifconfig \${bridge} destroy\n");
+			fwrite( $after_handle ,  "BRIDGES=`/sbin/ifconfig | /usr/bin/grep bridge | grep -v groups | /usr/bin/cut -f 1 -d :`\n");
+			fwrite( $after_handle ,  "interface=\"epair" . $out_jail['jailno'] . "a\"\n");
+			fwrite( $after_handle ,  "for BR in \${BRIDGES}; do\n");
+			fwrite( $after_handle ,  "\tmembers=`ifconfig \${BR} | grep \${interface}`\n");
+			fwrite( $after_handle ,  "\tif [ -z \"\${members}\" ]; then\n");
+			fwrite( $after_handle ,  "\t\tflag=\"\"\n");
+			fwrite( $after_handle ,  "\telse\n");
+			fwrite( $after_handle ,  "\t\tMEMBERS=`/sbin/ifconfig \${BR} | /usr/bin/grep member | /usr/bin/wc -l  | tr -d \" \\t\\n\\r\"`\n");
+			fwrite( $after_handle ,  "\t\t/sbin/ifconfig \${BR} deletem epair".$out_jail['jailno']."a\n");
+			fwrite( $after_handle ,  "\t\t/sbin/ifconfig epair". $out_jail['jailno']."a destroy\n");
+			fwrite( $after_handle ,  "\t\tif [ \"\${MEMBERS}\" -le 2 ]; then\n");
+			fwrite( $after_handle ,  "\t\t\t/sbin/ifconfig \${BR} destroy\n");
+			fwrite( $after_handle ,  "\t\tfi\n");
+			fwrite( $after_handle ,  "\t\tbreak\n");
 			fwrite( $after_handle ,  "\tfi\n");
-			fwrite( $after_handle ,  "else\n");
-			fwrite( $after_handle ,  "\t/sbin/ifconfig \${bridge} deletem epair".$out_jail['jailno']."a\n");
-			fwrite( $after_handle ,  "\t/sbin/ifconfig epair". $out_jail['jailno']."a destroy\n");
-			fwrite( $after_handle ,  "fi\n");
+			fwrite( $after_handle ,  "done\n");
 		}
 		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
 			$delete_after=false;
