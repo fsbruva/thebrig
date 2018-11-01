@@ -1,4 +1,4 @@
-thebrig is a set of PHP pages used to create and manage FreeBSD jails on Nas4Free. 
+thebrig is a set of PHP pages used to create and manage FreeBSD jails on Xigmanas (Nas4Free). 
 
 The main advantage of thebrig is that it leverages the existing webgui control 
 and accounting mechanisms found within Nas4Free, and can be used on an embedded 
