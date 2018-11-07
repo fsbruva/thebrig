@@ -19,11 +19,14 @@
 */
 require("auth.inc");
 require("guiconfig.inc");
+$includepath = $config['thebrig']['rootfolder'];
+require_once($includepath ."conf/ext/thebrig/functions.inc");
+
 ob_start();
 $k=0;
 if ($_GET) {
 unset ($input_errors);
-print_r ($_GET);
+//print_r ($_GET);
 	if ($_GET['act'] == "editor") {
 	$link = $_SERVER['HTTP_REFERER'];
 	$uuid = $_GET['uuid'];
