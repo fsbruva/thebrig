@@ -41,7 +41,7 @@ $loginfo2 = array(
 		"logfile" => $config['thebrig']['rootfolder']."thebrig.log",
 		"filename" => "thebrig.log",
 		"type" => "plain",
-		"pattern" => "/^(\[\S+\s+\S+\s)([a-zA-Z]+\s[a-zA-Z]+.+\!\:)(.+)/",
+		"pattern" => "/^(\[\S+\s+\S+\s)([a-zA-Z]+\s[a-zA-Z]+.+\:)(.+)/",
 		"columns" => array(
 			array("title" => gettext("Date & Time"), "class" => "listlr", "param" => "nowrap=\"nowrap\"", "pmid" => 1),
 			array("title" => gettext("Who"), "class" => "listr", "param" => "nowrap=\"nowrap\"", "pmid" => 2),
