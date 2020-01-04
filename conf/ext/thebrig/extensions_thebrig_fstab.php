@@ -49,8 +49,10 @@ unset ($input_errors);
 				}
 		$fstabfile= "/tmp/fstab.edit";
 		$handle1 = fopen($fstabfile, "wb");
-		foreach ($fstab as $fstab1) {	fwrite ($handle1, $fstab1."\n"); } 
-		fclose($handle1);
+		if (is_array($fstab)) {
+			foreach ($fstab as $fstab1) {	fwrite ($handle1, $fstab1."\n"); } 
+			fclose($handle1);
+		}
 	}
 	if ($_GET['act'] == "tempedit") {
 		$link = $_GET['referer'];
@@ -128,7 +130,12 @@ if(isset($_POST['Submit'])) {
 
 }
 menu:
+
 ?>
+<?php $pgtitle = array("Fstab", "edit"); ?>
+<?php include ("fbegin.inc"); ?>
+
+
 <style>
 
 .formdata input:focus, .formdata input.hilite {
@@ -231,9 +238,7 @@ function ds(f) {
 </script>
 <!----Script from this page, many thanks http://www.manhunter.ru/webmaster/343_kak_otpravit_iz_formi_html_tolko_chast_dannih.html ---->
 
-<?php $pgtitle = array("Fstab", "edit"); ?>
-<?php include ("fbegin.inc"); ?>
-<body>
+
 <table width="100%" border="0" cellpadding="0" cellspacing="0" >
 <tr><td class="tabcont">
 <?php if ($input_errors) print_input_errors($input_errors);?>
@@ -263,7 +268,7 @@ function ds(f) {
 						<td width="10%" class="listr"><input type="text"  size="15" name=<?php echo "option[".$i."]" ?> id=<?php echo "option[".$i."]" ?> value="<?=$fstabelement[$i][3];?>"/></td>
 						<td width="5%" class="listr"><input type="text"  size="2" name= <?php echo "dump[".$i."]" ?> id=<?php echo "dump[".$i."]" ?> value="<?=$fstabelement[$i][4];?>"/></td>
 						<td width="5%" class="listr"><input type="text"  size="2" name= <?php echo "fsck[".$i."]" ?> id=<?php echo "fsck[".$i."]" ?> value="<?=$fstabelement[$i][5];?>"/></td>
-						<td width="5%"><a href="extensions_thebrig_fstab.php?act=delete&amp;uuid=<?=$pconfig['uuid'];?>&amp;line=<?=$i;?>&amp;referer=<?=$link;?>&amp;line=<?=$i;?>&amp;numberline=<?=$countfstabfile;?>" onclick="return confirm('<?=gettext("Do you really want to delete this line? ");?>')"><img src="x.gif" title="<?=gettext("Delete line");?>" border="0" alt="<?=gettext("Delete line");?>" /></a></td>
+						<td width="5%"><a href="extensions_thebrig_fstab.php?act=delete&amp;uuid=<?=$pconfig['uuid'];?>&amp;line=<?=$i;?>&amp;referer=<?=$link;?>&amp;line=<?=$i;?>&amp;numberline=<?=$countfstabfile;?>" onclick="return confirm('<?=gettext("Do you really want to delete this line? ");?>')"><img src="images/delete.png" title="<?=gettext("Delete line");?>" border="0" alt="<?=gettext("Delete line");?>" /></a></td>
 						</tr>	<?php endfor; ?>
 		</table>
 					<input name="act" type="hidden" value="tempedit" />
