@@ -391,7 +391,8 @@ function disable_buttons() {
 								<tr>
 									<td class="<?=$enable?"listr":"listlrd";?>"><?=htmlspecialchars(empty($jail['jailno']) ? "*" : $jail['jailno']);?>&nbsp;</td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars($jail['jailname']);?>&nbsp;</td>
-									<?php if (is_array($jail['allowedip'])) $networks = implode(",", $jail['allowedip']); ?>
+									<?php if (isset ($jail['jail_vnet'])) {$networks = $jail['if'] . "|" . $jail['epair_b_ip'] ."/" . $jail['epair_b_mask']; }
+										else {  $networks = implode(",", $jail['allowedip']);  } ?>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(empty($jail['allowedip']) ? "*" : $networks);?>&nbsp;</td>  
 									<td class="<?=$enable?"listlr":"listlrd";?>"><?=htmlspecialchars(isset($jail['enable']) ? "YES" : "NO");?></td>
 									<td class="<?=$enable?"listr":"listrd";?>"><?=htmlspecialchars(isset($jail['zfs_datasets']) ? "USED" : "NO") ;?>&nbsp;</td>

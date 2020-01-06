@@ -901,8 +901,7 @@ function write_jailcommands ($out_jail) {
 			fwrite ($cmd_handle, "if [ -z \"\${BRIDGES}\" ]; then\n");			
 			fwrite ($cmd_handle, "\tbridge=\"bridge20\"\n");			
 			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} create > /dev/null 2> /dev/null\n");
-			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} addm " . $out_jail['if']."\n");
-			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
+			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} addm \${glue}\n");			
 			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} up\n");
 			fwrite ($cmd_handle, "\t/sbin/ifconfig epair" . $out_jail['jailno']." create up\n");
 			fwrite ($cmd_handle, "\t/sbin/ifconfig \${bridge} addm epair" . $out_jail['jailno']."a\n");
@@ -920,7 +919,6 @@ function write_jailcommands ($out_jail) {
 			fwrite ($cmd_handle, "\t\tflag=\"bridge19\"\n");
 			fwrite ($cmd_handle, "\t\t/sbin/ifconfig \${flag} create > /dev/null 2> /dev/null\n");
 			fwrite ($cmd_handle, "\t\t/sbin/ifconfig \${flag} addm \${glue}\n");
-			fwrite ($cmd_handle, "\t\t/sbin/ifconfig \${flag} inet " . $out_jail['epair_a_ip'] ."/" . $out_jail['epair_a_mask'] ."\n");
 			fwrite ($cmd_handle, "\t\t/sbin/ifconfig \${flag} up\n");
 			fwrite ($cmd_handle, "\tfi\n");
 			fwrite ($cmd_handle, "\t/sbin/ifconfig epair" . $out_jail['jailno']." create up\n");
@@ -946,9 +944,11 @@ function write_jailcommands ($out_jail) {
 			$delete_post = false;
 			fwrite ($post_handle, "/sbin/ifconfig epair".$out_jail['jailno']."b vnet " . $out_jail['jailname']."\n");
 			fwrite ($post_handle, "/usr/sbin/jexec " . $out_jail['jailname'] . " /sbin/ifconfig epair".$out_jail['jailno']."b inet " . $out_jail['epair_b_ip']. "/" .  $out_jail['epair_b_mask'] . " up\n");
-			/* next 2 string calculate default route for vmet enabled jails as side A for first started jail*/
+			if (!empty($out_jail['epair_b_suname'] )) fwrite ($post_handle, "/usr/sbin/jexec " . $out_jail['jailname'] . " /sbin/ifconfig epair".$out_jail['jailno']."b name " . $out_jail['epair_b_suname']."\n");
+			/* next 2 string calculate default route for vnet enabled jails as side A for first started jail*/
 			$iproutedef = get_ipaddr( $out_jail['if'] );
 			fwrite ($post_handle, "/usr/sbin/jexec " . $out_jail['jailname'] . " /sbin/route add default ".$iproutedef."\n");
+			fwrite ($post_handle, "sleep 1\n");
 			fwrite ($post_handle, "/usr/sbin/jexec " . $out_jail['jailname'] . " /bin/sh /etc/rc\n");			
 		}					
 		if (isset($out_jail['fdescfs_enable'])) { 
@@ -1065,7 +1065,7 @@ function write_jailcommands ($out_jail) {
 			fwrite( $after_handle ,  "\t\tbreak\n");
 			fwrite( $after_handle ,  "\tfi\n");
 			fwrite( $after_handle ,  "done\n");
-		}
+			}
 		if (isset($out_jail['zfs_enable']) && !empty($out_jail['zfs_datasets'])&& (FALSE !== brig_zfs_check())) {
 			$delete_after=false;
 			fwrite ($after_handle, "/sbin/zfs mount -a");
@@ -1215,5 +1215,29 @@ function count_safe( $array ) {
 		return 0;
 	}
 }
-
+// function for manipulate /etc/rc.conf per each jail
+// $jailpath - path to jail
+// $rcvar - rc variable
+// $value - value of rcvar
+function thebrig_rconf ($jailpath, $rcvar, $value ) {
+	global $config, $g;
+	$string0 = "/".$rcvar."/i";
+	$rconfig = file ( $jailpath."etc/rc.conf" );
+	for ($i; $i < count( $rconfig ); ){
+		if ( 1 === preg_match($string0, $rconfig[$i])) {
+			unset ($rconfig[$i]);
+			$i--;
+			break;
+		}					
+		$i++;
+		} 
+	$i++;
+	$rconfig[$i] = $rcvar . "=". $rcval ;
+	$handle = fopen( $jailpath."etc/rc.conf", "w");
+	foreach ($rconfig as $line) {
+		fwrite ($handle, $rconfig . "\n"  );
+	}
+	fclose($conf_handle);
+	return 0;
+}	
 ?>

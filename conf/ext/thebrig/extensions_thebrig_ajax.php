@@ -64,7 +64,10 @@ function get_jailinfo() {
 			$tabledata['id'][$i] = $jail_id;
 			if (1 == exec ("jls -j ".$n_jail['jailname']. " vnet") ) { 
 				unset ($result);
-				$cmd = "jexec ".$n_jail['jailname']." ifconfig epair" . $n_jail["jailno"] ."b | grep inet | awk '{ print \$2}'";
+				if (!empty($n_jail['epair_b_suname'] )) {
+					$cmd = "jexec ".$n_jail['jailname']." ifconfig " . $n_jail['epair_b_suname'] ." | grep inet | awk '{ print \$2}'";
+				} else { 
+					$cmd = "jexec ".$n_jail['jailname']." ifconfig epair" . $n_jail["jailno"] ."b | grep inet | awk '{ print \$2}'"; }
 				exec ($cmd, $result); 
 				$tabledata['ip'][$i] = implode(",", $result); } else {
 				$tabledata['ip'][$i] = exec ("jls -j ".$n_jail['jailname']." ip4.addr"); }

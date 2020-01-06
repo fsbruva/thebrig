@@ -35,8 +35,13 @@ $in_jail_allow = array (
 "allow.mount.nullfs",
 "allow.mount.procfs",
 "allow.mount.zfs",
+"allow.mount.fusefs",
+"allow.mount.linprocfs",
+"allow.mount.linsysfs",
+"allow.vmm",
 "allow.quotas",
-"allow.socket_af"
+"allow.socket_af",
+"allow.read_msgbuf" 
 );
 // I'm sorry, but I want next line commented.  I create page trap.php for trap _POST _GET messages, for testing my code.  
 //  include_once ("ext/thebrig/trap.php");
@@ -46,38 +51,7 @@ if (is_file("/tmp/tempjail")){unlink ("/tmp/tempjail");}
 if ( !isset( $config['thebrig']['rootfolder']) || !is_dir( $config['thebrig']['rootfolder']."work" )) {
 	$input_errors[] = _THEBRIG_NOT_CONFIRMED;
 } // end of elseif
-else {
-	$pglocalheader= <<< EOD
-<style type="text/css">
-.modal {
-    display:    none;
-    position:   fixed;
-    z-index:    1000;
-    top:        0;
-    left:       0;
-    height:     100%;
-    width:      100%;
-    background: rgba( 255, 255, 255, .8 ) 
-                url('ext/thebrig/ajax-loader.gif') 
-                50% 50% 
-                no-repeat;
-}
-
-/* When the body has the loading class, we turn
-   the scrollbar off with overflow:hidden */
-body.loading {
-    overflow: hidden;   
-}
-
-/* Anytime the body has the loading class, our
-   modal element will be visible */
-body.loading .modal {
-    display: block;
-}
-</style>
-'<script type="text/javascript" src="ext/thebrig/spin.min.js"></script>'
-EOD;
-}
+else {}
 
 // This determines if the page was arrived at because of an edit (the UUID of the jail)
 // was passed to the page) or for a new creation.
@@ -131,13 +105,12 @@ if (isset($uuid) && (FALSE !== ($cnid = array_search_ex($uuid, $a_jail, "uuid"))
 	$pconfig['zfspool'] = $a_jail[$cnid]['zfspool'];
 	$pconfig['compression'] = $a_jail[$cnid]['compression'];
 	$pconfig['param'] = $a_jail[$cnid]['param'];
-	$pconfig['allowedip'] = $a_jail[$cnid]['allowedip'];  // new entries
+	$pconfig['allowedip'] = $a_jail[$cnid]['allowedip']; 
 	$pconfig['if'] = $a_jail[$cnid]['if'];
 	$pconfig['jail_vnet'] = isset($a_jail[$cnid]['jail_vnet']);
-	$pconfig['epair_a_ip'] = $a_jail[$cnid]['epair_a_ip'];  // new entries = ip for systemside epair interface
-	$pconfig['epair_a_mask'] = $a_jail[$cnid]['epair_a_mask'];  // new entries mask for systemside epair interface
-	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip'];  // new entries = ip for jailside epair interface
-	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask'];  // new entries mask for jailside epair interface
+	$pconfig['epair_b_ip'] = $a_jail[$cnid]['epair_b_ip'];
+	$pconfig['epair_b_mask'] = $a_jail[$cnid]['epair_b_mask']; 
+	$pconfig['epair_b_suname'] = $a_jail[$cnid]['epair_b_suname'];
 	$pconfig['jailpath'] = $a_jail[$cnid]['jailpath'];
 	$pconfig['jail_mount'] = isset($a_jail[$cnid]['jail_mount']);
 	$pconfig['statfs'] = $a_jail[$cnid]['statfs'];
@@ -181,10 +154,9 @@ else {
 	$pconfig['param'] = array("allow.mount", "allow.mount.devfs");
 	unset ($pconfig['allowedip']);
 	unset ($pconfig['jail_vnet']);
-	$pconfig['epair_a_ip'] = "192.168.1.251"; 
-	$pconfig['epair_a_mask'] = "24"; 
 	$pconfig['epair_b_ip'] = "192.168.1.252"; 
-	$pconfig['epair_b_mask'] = "24";	
+	$pconfig['epair_b_mask'] = "24";
+	$pconfig['epair_b_suname'] ="";
 	$pconfig['if'] = "";
 	$pconfig['jailpath']="";
 	$pconfig['jail_mount'] = true;
@@ -224,6 +196,8 @@ if ($_POST) {
 	if (!isset($pconfig['jailname']) || ($pconfig['jailname'] === "")) {
 			$input_errors[] = sprintf( gettext("The attribute '%s' is required."), "Jail name");
 		}
+	// when defined vnet jail need reset standart jail entries
+	if (isset ( $pconfig['jail_vnet'])) unset ($pconfig['allowedip']);
 	/*explode network entries and check IP address.  I check if address, if not more then 1 IP adresses specified, and not more then 1 address in jails set.*/
 	if (is_array( $pconfig['allowedip'] ) && !isset($pconfig['jail_vnet'])) {
 	foreach ($pconfig['allowedip'] as $a_ips ) {
@@ -444,10 +418,9 @@ if ($_POST) {
 		$jail['jailpath'] = $pconfig['jailpath'];		
 		$jail['allowedip'] = $pconfig['allowedip'];		
 		$jail['jail_vnet'] = isset($pconfig['jail_vnet']) ? true : false;
-		$jail['epair_a_ip'] = $pconfig['epair_a_ip'];  
-		$jail['epair_a_mask'] = $pconfig['epair_a_mask'];  
 		$jail['epair_b_ip'] = $pconfig['epair_b_ip']; 
 		$jail['epair_b_mask'] = $pconfig['epair_b_mask'];
+		$jail['epair_b_suname'] = $pconfig['epair_b_suname'];
 		$jail['if'] = $pconfig['if'];
 		$jail['rule'] = $pconfig['rule'];
 		$jail['jail_mount'] = isset($pconfig['jail_mount']) ? true : false;
@@ -626,19 +599,26 @@ $('#jail_vnet').change(function() {
 		switch ($('#jail_vnet').is(':checked')) {
 		case false :
 			$('#allowedip_tr').show(1500);
-			$('#epair_tr').hide(300);
+			$('#epair_b_ip_tr').hide(300);
+			
+			$('#epair_b_suname_tr').hide(300);
 			$('#exec_start_tr').show(300);
 			$('#if_tr').hide(300);
+			$('#type_tr').hide(300);
 			break;
 			
 		case true :	
 			$('#allowedip_tr').hide(300);
-			$('#epair_tr').show(1500);
+			$('#epair_b_ip_tr').show(1500);
+			
+			$('#epair_b_suname_tr').show(1500);
 			$('#exec_start_tr').hide(1500);
 			$('#if_tr').show(1500);
+			$('#type_tr').show(1500);
 			break;
             } 
         });
+			
 $('#zfs_enable').change(function() {
 	switch ($('#zfs_enable').is(':checked')) {
 	case false :
@@ -715,6 +695,7 @@ function jail_mount_enable() {
 			break;
 		}
 }
+
 function helpbox() { alert("Slim - This is a fully functional jail, but when first installed, only occupies about 2 MB in its folder.\n\n full - This is a full sized jail, about 300 MB per jail, and is completely self contained."); }
 function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$pconfig['uuid'];?>&act=editor" }
 //]]>
@@ -781,32 +762,16 @@ function redirect() { window.location = "extensions_thebrig_fstab.php?uuid=<?=$p
 			<?php if ($g['arch'] == 'x64') {
 			html_checkbox("jail_vnet", _THEBRIG_J_VNET, $pconfig['jail_vnet'], _THEBRIG_J_VNET_EXPL
 , "", ""," ");?>
-			<tr id='epair_tr'>
-					<td width='22%' valign='top' class='vncell'><label for='epair'>Epair interface</label></td>
-					<td width='78%' class='vtable'>
+			
+			<?php html_ipv4addrbox("epair_b_ip", "epair_b_mask", gtext("IP Address"), $pconfig['epair_b_ip'], $pconfig['epair_b_mask'], "", true); ?>
+			<?php html_inputbox("epair_b_suname", gtext("Pseudonym"), $pconfig['epair_b_suname'], "You can give nice name for jail network interface, like <b>em0</b>", "", 20); ?>
+			
 					
-						  <table class="formdata" width="100%" border="0">
-							<tr><td width='50%'>Side A (system)</td><td width='50%'>Side B (jail)</td>
-							<tr><td width='50%'>
-								  <input name='epair_a_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_a_ip']?>  />/
-								  <input name='epair_a_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_a_mask']?>  />
-								  <br /><span class='vexpl'>System side of interface, eq: 192.168.1.251/24</span>
-							    </td>
-							    <td width='50%'>
-								    <input name='epair_b_ip' type='text' class='formfld' id='homefolder' size='30' value=<?=$pconfig['epair_b_ip']?>  />/
-								  <input name='epair_b_mask' type='text' class='formfld' id='homefolder' size='3' value=<?=$pconfig['epair_b_mask']?>  />
-								 <br /><span class='vexpl'>Jail side of interface, eq: 192.168.1.252/24</span>
-							 </td></tr>
-						  </table>
-						 
-						<span class='vexpl'><?="All scripts TheBrig create automatically"?></span>
-					</td>
-				</tr>
-						
 			<?php $a_interface = array(get_ifname($config['interfaces']['lan']['if']) => "LAN"); 
 			for ($i = 1; isset($config['interfaces']['opt' . $i]); ++$i) { 
 			$a_interface[$config['interfaces']['opt' . $i]['if']] = $config['interfaces']['opt' . $i]['descr']; }?>
 			<?php html_combobox("if", _THEBRIG_VNET_LAN, $pconfig['if'], $a_interface, _THEBRIG_VNET_LAN_EXPL, true);?>
+			
 			<?php } ?>
 			<?php  html_brig_network_box("allowedip",  _THEBRIG_J_NETWORK, $pconfig['allowedip'], "May be multiple IPs and LANs", false, false) ; ?>
 				
