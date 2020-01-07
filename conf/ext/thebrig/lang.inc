@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-	define("_THEBRIG_VERSION_NBR", 'v1.03');	
+	define("_THEBRIG_VERSION_NBR", 'v1.04');	
 		
 	if ($config['system']['language'] == 'ru') { 
 		include_once "ext/thebrig/ru_lang.inc";

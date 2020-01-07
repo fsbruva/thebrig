@@ -841,7 +841,13 @@ function write_defs_rules() {
 				fwrite($handle, "\n".$ruleset_tag."\n");
 				fwrite($handle, "add include \$devfsrules_hide_all\nadd include \$devfsrules_unhide_basic\nadd include \$devfsrules_unhide_login\n");
 		if (is_array ($out_jail['rule'])) { foreach ($out_jail['rule'] as $rule ) { fwrite($handle, $rule."\n");}
-			  }	  
+		 }
+		if (in_array ("allow.vmm", $out_jail['param'] ) ) {
+			fwrite ($handle, "add path vmm unhide\n");
+			fwrite ($handle, "add path vmm/* unhide\n");
+			fwrite ($handle, "add path nmdm* unhide\n");
+			fwrite ($handle, "add path tap* unhide\n");
+		}
 	 }
 	 fclose($handle);
 	 } else {
