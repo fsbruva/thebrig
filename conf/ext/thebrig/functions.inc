@@ -870,6 +870,12 @@ function write_jailcommands ($out_jail) {
 				}
 			}
 		}
+		//vmm support
+		if (in_array ("allow.vmm", $out_jail['param'] ) ) {
+			fwrite ($cmd_handle, "kldload -n vmm\n");
+			fwrite ($cmd_handle, "kldload -n nmdm\n");
+		}
+		
 		 // zfs prepare 
 			 // check zfs health 
 		if (false === brig_zfs_check()) {  
