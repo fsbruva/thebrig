@@ -121,8 +121,8 @@ if ($_POST) {
 	elseif ( !is_writable( $pconfig['rootfolder'] ) && !isset($pconfig['remove']) ){
 		$input_errors[] = _THEBRIG_NOTWRITABLE_FOLDER;
 	}
-	// We also need to see if there is enough space on the target disk.
-	elseif ( disk_free_space ( $pconfig['rootfolder'] ) < 200000000 && !isset($pconfig['remove']) ) {
+	// We also need to see if there is enough space on the target disk. 1.6Gb for FreeBSD 12.1 based NAS
+	elseif ( disk_free_space ( $pconfig['rootfolder'] ) < 2000000000 && !isset($pconfig['remove']) ) {
 		$input_errors[] = _THEBRIG_NOTENOUGHSPACE;
 	}
 	
